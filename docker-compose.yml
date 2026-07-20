@@ -1,0 +1,24 @@
+services:
+  productos-service:
+    build:
+      context: ./productos-service
+    container_name: productos-service
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+
+  inventario-service:
+    build:
+      context: ./inventario-service
+    container_name: inventario-service
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
