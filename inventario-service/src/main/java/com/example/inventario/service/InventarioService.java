@@ -23,18 +23,18 @@ public class InventarioService {
     }
 
     public List<Map<String, Object>> listarMovimientos() {
-        return jdbc.queryForList("select * from public.fn_mostrar_movimientos_inventario()");
+        return jdbc.queryForList("select * from inventario.fn_mostrar_movimientos_inventario()");
     }
 
     public List<Map<String, Object>> listarSubtipos(Integer tipo) {
-        return jdbc.queryForList("select * from public.fn_subtipos_movimiento(?::integer)", tipo);
+        return jdbc.queryForList("select * from inventario.fn_subtipos_movimiento(?::integer)", tipo);
     }
 
     @Transactional
     public void registrarMovimiento(Object body, String usuario) {
         jdbc.execute((ConnectionCallback<Void>) connection -> {
             try (CallableStatement statement = connection.prepareCall(
-                    "call public.sp_movimiento_inventario_json(?::jsonb, ?)")) {
+                    "call inventario.sp_movimiento_inventario_json(?::jsonb, ?)")) {
                 statement.setString(1, toJson(body));
                 if (usuario == null || usuario.isBlank()) {
                     statement.setNull(2, Types.VARCHAR);

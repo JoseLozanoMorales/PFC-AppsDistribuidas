@@ -48,3 +48,19 @@ services:
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       INVENTARIO_SERVICE_URL: http://inventario-service:8082
+
+  usuarios-service:
+    build:
+      context: ./usuarios
+    container_name: usuarios-service
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+      TT_MAIL_USERNAME: ${TT_MAIL_USERNAME}
+      TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD}
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
