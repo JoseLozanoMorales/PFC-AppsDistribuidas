@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import com.tiendatech.usuarios.dto.ClienteUpdateRequest;
 
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -94,19 +95,17 @@ public class UsuarioController {
         return ResponseEntity.ok(Map.of("success", true, "message", "Cliente actualizado"));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
+        var u = usuarioService.getById(id);
+        return ResponseEntity.ok(usuarioPayload(u));
+    }
+
     @GetMapping("/api/usuarios/me")
     public ResponseEntity<?> me(HttpServletRequest req) {
         Integer userId = resolveUserId(req);               // lee X-User-Id
         var u = usuarioService.getById(userId);            // usa el service
-        var payload = java.util.Map.of(
-            "usuarioId", u.getUsuarioId(),
-            "usuario",   u.getUsuario(),
-            "nombre",    u.getNombre(),
-            "correo",    u.getCorreo(),
-            "telefono",  u.getTelefono(),
-            "id_rol",    u.getIdRol()
-        );
-        return ResponseEntity.ok(java.util.Map.of("data", payload));
+        return ResponseEntity.ok(java.util.Map.of("data", usuarioPayload(u)));
     }
 
     /** Obtiene el userId desde la cabecera X-User-Id (fallback: sesión) */
@@ -163,6 +162,20 @@ public class UsuarioController {
             @RequestParam(value = "limit", defaultValue = "20") int limit
     ) {
         return ResponseEntity.ok(usuarioService.buscarMin(q, rolId, limit));
+    }
+
+    private Map<String, Object> usuarioPayload(Usuario u) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("usuarioId", u.getUsuarioId());
+        payload.put("usuario", u.getUsuario());
+        payload.put("nombre", u.getNombre());
+        payload.put("cedula", u.getCedula());
+        payload.put("correo", u.getCorreo());
+        payload.put("telefono", u.getTelefono());
+        payload.put("id_rol", u.getIdRol());
+        payload.put("avatar_path", u.getAvatarPath());
+        payload.put("avatarPath", u.getAvatarPath());
+        return payload;
     }
 
 }

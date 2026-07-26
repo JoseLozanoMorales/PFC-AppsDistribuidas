@@ -1,0 +1,494 @@
+{
+  "info": {
+    "_postman_id": "d57d09be-1857-44a4-b4fc-7dfaff55dc79",
+    "name": "TiendaTech API Productos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50782291",
+    "_collection_link": "https://go.postman.co/collection/50782291-d57d09be-1857-44a4-b4fc-7dfaff55dc79?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Listar productos",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": [
+        {
+          "name": "Listar productos",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productos?page=0&size=50",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "productos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "key": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "key": "Expires",
+              "value": "0"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 03 Jun 2026 02:31:57 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"content\": [\n        {\n            \"producto_id\": 12,\n            \"nombre\": \"Western Digital WDS100T1R0C SN700\",\n            \"preciounitario\": 179.99,\n            \"enlace\": \"https://documents.westerndigital.com/content/dam/doc-library/en_us/assets/public/western-digital/product/internal-drives/wd-red-ssd/product-brief-western-digital-wd-red-sn700-nvme-ssd.pdf\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 1,\n            \"marca_id\": 13,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 147.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 11,\n            \"nombre\": \"WD_BLACK SN750\",\n            \"preciounitario\": 158,\n            \"enlace\": \"https://documents.westerndigital.com/content/dam/doc-library/es_mx/assets/public/western-digital/product/internal-drives/wd-black-ssd/product-brief-wd-black-sn750-nvme-ssd.pdf\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 350,\n            \"marca_id\": 13,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 127,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 10,\n            \"nombre\": \"Western Digital WDS100T4B0\",\n            \"preciounitario\": 98,\n            \"enlace\": \"https://documents.westerndigital.com/content/dam/doc-library/en_us/assets/public/western-digital/product/internal-drives/wd-blue-nvme-ssd/data-sheet-wd-blue-sn5000-nvme-ssd.pdf\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 0,\n            \"marca_id\": 13,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 78,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 7,\n            \"nombre\": \"Intel® Procesador de escritorio Core™ i5-14600K\",\n            \"preciounitario\": 245,\n            \"enlace\": \"https://www.intel.la/content/www/xl/es/products/sku/236799/intel-core-i5-processor-14600k-24m-cache-up-to-5-30-ghz/specifications.html\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 150,\n            \"marca_id\": 1,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 205,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 15,\n            \"nombre\": \"Intel® Procesador de escritorio Core™ i3-14100\",\n            \"preciounitario\": 129.99,\n            \"enlace\": \"https://www.intel.la/content/www/xl/es/products/sku/236774/intel-core-i3-processor-14100-12m-cache-up-to-4-70-ghz/specifications.html\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 97,\n            \"marca_id\": 1,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 119.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 13,\n            \"nombre\": \"Intel Core i3-10105F Procesador de 10ª generación\",\n            \"preciounitario\": 167,\n            \"enlace\": \"https://www.intel.la/content/www/xl/es/products/sku/203474/intel-core-i310105f-processor-6m-cache-up-to-4-40-ghz/specifications.html\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 0,\n            \"marca_id\": 1,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 145,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 14,\n            \"nombre\": \"Intel® Procesador de escritorio Core™ i3-12100F\",\n            \"preciounitario\": 99.99,\n            \"enlace\": \"https://www.intel.la/content/www/xl/es/products/sku/132223/intel-core-i312100f-processor-12m-cache-up-to-4-30-ghz/specifications.html\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 119,\n            \"marca_id\": 1,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 88,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 16,\n            \"nombre\": \"ASUS ROG RYUO III 360 ARGB All-in-one\",\n            \"preciounitario\": 225,\n            \"enlace\": \"https://rog.asus.com/latin/cooling/cpu-liquid-coolers/rog-ryuo/rog-ryuo-iii-360-argb-model/spec\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 1,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 200,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 17,\n            \"nombre\": \"ASUS ROG RYUJIN III 360 ARGB EXTREME White Edition\",\n            \"preciounitario\": 479.99,\n            \"enlace\": \"https://rog.asus.com/cooling/cpu-liquid-coolers/rog-ryujin/rog-ryujin-iii-360-argb-extreme-white-edition/spec\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 210,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 460,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 18,\n            \"nombre\": \"ASUS ROG RYUO III 360 ARGB White Edition\",\n            \"preciounitario\": 209.99,\n            \"enlace\": \"https://rog.asus.com/cooling/cpu-liquid-coolers/rog-ryuo/rog-ryuo-iii-360-argb-white-edition-model/spec\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 105,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 194.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 19,\n            \"nombre\": \"ASUS Enfriador líquido ROG Strix LC III 360 ARGB LCD\",\n            \"preciounitario\": 299.99,\n            \"enlace\": \"https://rog.asus.com/es/cooling/cpu-liquid-coolers/rog-strix-lc/rog-strix-lc-iii-360-argb-lcd/spec\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 130,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 280,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 36,\n            \"nombre\": \"KF620-DGT - Enfriador de aire de CPU\",\n            \"preciounitario\": 44.99,\n            \"enlace\": null,\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 175,\n            \"marca_id\": 52,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 39.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 37,\n            \"nombre\": \"Jungle Leopard ASTROSHEL LCD 240 ARGB AIO\",\n            \"preciounitario\": 59.99,\n            \"enlace\": null,\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 67,\n            \"marca_id\": 52,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 49.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 38,\n            \"nombre\": \"Jungle Leopard K400 PRO CPU Cooler\",\n            \"preciounitario\": 19.99,\n            \"enlace\": null,\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 89,\n            \"marca_id\": 52,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 9.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 20,\n            \"nombre\": \"MSI MPG GUNGNIR 111R\",\n            \"preciounitario\": 99.99,\n            \"enlace\": \"https://mx.msi.com/PC-Case/MPG-GUNGNIR-111R\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 89,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 89.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 22,\n            \"nombre\": \"MSI MAG Forge 112R\",\n            \"preciounitario\": 79.99,\n            \"enlace\": \"https://es.msi.com/PC-Case/MAG-FORGE-112R\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 60,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 69.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 21,\n            \"nombre\": \"MSI MPG SEKIRA 100R\",\n            \"preciounitario\": 69.99,\n            \"enlace\": \"https://latam.msi.com/PC-Case/MPG-SEKIRA-100R\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 99,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 59.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 23,\n            \"nombre\": \"MSI MPG A1000GS PCIE5\",\n            \"preciounitario\": 199.99,\n            \"enlace\": \"https://www.msi.com/Power-Supply/MPG-A1000GS-PCIE5/Specification\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 140,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 179.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 25,\n            \"nombre\": \"MSI MAG A850GL PCIE5\",\n            \"preciounitario\": 129.99,\n            \"enlace\": \"https://latam.msi.com/Power-Supply/MAG-A850GL-PCIE5/Specification\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 175,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 114.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 24,\n            \"nombre\": \"MSI MAG A650BE\",\n            \"preciounitario\": 74.99,\n            \"enlace\": \"https://www.msi.com/Power-Supply/MAG-A650BE/Specification\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 159,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 64.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 28,\n            \"nombre\": \"ASUS TUF Gaming NVIDIA GeForce RTX 4080 Super OC Edition\",\n            \"preciounitario\": 1129.99,\n            \"enlace\": \"https://www.asus.com/latin/motherboards-components/graphics-cards/tuf-gaming/tuf-rtx4080s-o16g-gaming/techspec\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 120,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 1099.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 27,\n            \"nombre\": \"MSI Gaming GeForce RTX 4060 8GB GDRR6 Extreme Clock\",\n            \"preciounitario\": 279.99,\n            \"enlace\": \"https://latam.msi.com/Graphics-Card/GeForce-RTX-4060-GAMING-X-8G/Specification\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 169,\n            \"marca_id\": 10,\n            \"gama_id\": 2,\n            \"iva_id\": 1,\n            \"costo\": 259.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 26,\n            \"nombre\": \"ASUS Tarjeta gráfica dual NVIDIA GeForce RTX 3050 6GB OC Edition Gaming\",\n            \"preciounitario\": 214.99,\n            \"enlace\": \"https://www.asus.com/motherboards-components/graphics-cards/dual/dual-rtx3050-o6g\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 244,\n            \"marca_id\": 9,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 199.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 34,\n            \"nombre\": \"Tarjeta gráfica GeForce GTX 750 Ti\",\n            \"preciounitario\": 79.99,\n            \"enlace\": \"https://www.nvidia.com/es-la/drivers/geforce-gtx-750-ti/#pdpContent=2\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 74,\n            \"marca_id\": 51,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 69.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 30,\n            \"nombre\": \"CORSAIR VENGEANCE LPX DDR4 RAM 16GB\",\n            \"preciounitario\": 72.99,\n            \"enlace\": \"https://www.corsair.com/es/es/p/memory/cmk16gx4m2b3200c16/vengeancea-lpx-16gb-2-x-8gb-ddr4-dram-3200mhz-c16-memory-kit-black-cmk16gx4m2b3200c16?srsltid=AfmBOoo371qZZCmfRO6hKYCBlky4SEZSAwUcfObQw-w_0KvwjVFNAm4D\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 215,\n            \"marca_id\": 7,\n            \"gama_id\": 2,\n            \"iva_id\": 1,\n            \"costo\": 69.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 31,\n            \"nombre\": \"CORSAIR VENGEANCE RGB DDR5 RAM 32 GB\",\n            \"preciounitario\": 129.99,\n            \"enlace\": \"https://www.corsair.com/es/es/p/memory/cmh32gx5m2x6400c38/vengeance-rgb-32gb-2x16gb-ddr5-dram-6400mhz-c38-memory-kit-black-cmh32gx5m2x6400c38?srsltid=AfmBOoqVeYcUVPIjOUKXXrLx8X58ez46TOBSDE8-Kbs8PVPab96UVn8z\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 125,\n            \"marca_id\": 7,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 114.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 41,\n            \"nombre\": \"CORSAIR Vengeance DDR5 RAM 96 GB\",\n            \"preciounitario\": 0,\n            \"enlace\": null,\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 0,\n            \"marca_id\": 7,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 0,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 29,\n            \"nombre\": \"Corsair Vengeance LPX 8GB\",\n            \"preciounitario\": 34.99,\n            \"enlace\": \"https://www.corsair.com/es/es/p/memory/cmk8gx4m1e3200c16/vengeancea-lpx-8gb-1-x-8gb-ddr4-dram-3200mhz-c16-memory-kit-black-cmk8gx4m1e3200c16?srsltid=AfmBOooFBF-bEjtyimRMRvFrgUJ62ICmwQyIPBIl5W6fG3PasgvJhyzC\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 229,\n            \"marca_id\": 7,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 29.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 1,\n            \"nombre\": \"TUF GAMING X870E-PLUS WIFI7\",\n            \"preciounitario\": 309,\n            \"enlace\": \"https://www.asus.com/motherboards-components/motherboards/tuf-gaming/tuf-gaming-x870e-plus-wifi7/techspec\",\n            \"fecha\": \"2025-09-23\",\n            \"stock\": 300,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 250,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 2,\n            \"nombre\": \"PRIME B650-PLUS WIFI\",\n            \"preciounitario\": 199.99,\n            \"enlace\": \"https://www.asus.com/latin/motherboards-components/motherboards/all-series/prime-b650-plus-wifi/techspec\",\n            \"fecha\": \"2025-09-23\",\n            \"stock\": 320,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 166,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 3,\n            \"nombre\": \"MPG Z790 EDGE WIFI\",\n            \"preciounitario\": 379.99,\n            \"enlace\": \"https://www.msi.com/Motherboard/MPG-Z790-EDGE-WIFI/Specification\",\n            \"fecha\": \"2025-09-23\",\n            \"stock\": 125,\n            \"marca_id\": 10,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 349.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 4,\n            \"nombre\": \"ROG STRIX Z690-E WIFI\",\n            \"preciounitario\": 214.99,\n            \"enlace\": \"https://rog.asus.com/latin/motherboards/rog-strix/rog-strix-z690-e-gaming-wifi-model/spec\",\n            \"fecha\": \"2025-09-23\",\n            \"stock\": 240,\n            \"marca_id\": 9,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 199.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 35,\n            \"nombre\": \"MSI Placa base para juegos A520M-A PRO\",\n            \"preciounitario\": 94.99,\n            \"enlace\": \"https://latam.msi.com/Motherboard/A520M-A-PRO/Specification\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 119,\n            \"marca_id\": 10,\n            \"gama_id\": 3,\n            \"iva_id\": 1,\n            \"costo\": 89.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 6,\n            \"nombre\": \"Logitech - MX Master 3S Mouse inalámbrico ergonómico\",\n            \"preciounitario\": 120,\n            \"enlace\": \"https://www.logitech.com/es-mx/shop/p/mx-master-3s\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 250,\n            \"marca_id\": 14,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 97,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 9,\n            \"nombre\": \"ASUS Monitor VA249HG de 24\",\n            \"preciounitario\": 115,\n            \"enlace\": \"https://www.asus.com/es/displays-desktops/monitors/eye-care/va249hg/techspec\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 175,\n            \"marca_id\": 9,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 90,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 5,\n            \"nombre\": \"Redragon H510 PRO\",\n            \"preciounitario\": 34.99,\n            \"enlace\": \"https://redragon.es/products/best-seller/zeus-pro\",\n            \"fecha\": \"2025-09-23\",\n            \"stock\": 30,\n            \"marca_id\": 18,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 29.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 8,\n            \"nombre\": \"Dell Monitor 27 - SE2725HM\",\n            \"preciounitario\": 159.99,\n            \"enlace\": \"https://www.dell.com/es-es/shop/dell-27-monitor-se2725hm/apd/210-bqzw/monitores-y-accesorios#techspecs_section\",\n            \"fecha\": \"2025-09-25\",\n            \"stock\": 125,\n            \"marca_id\": 19,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 149.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 42,\n            \"nombre\": \"Logitech G 413 SE Teclado mecánico\",\n            \"preciounitario\": 69.99,\n            \"enlace\": \"https://www.logitechg.com/es-ar/products/gaming-keyboards/g413-se-gaming-keyboard.html\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 90,\n            \"marca_id\": 32,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 59.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 44,\n            \"nombre\": \"Logitec Multimedia bocinas Z150\",\n            \"preciounitario\": 29.99,\n            \"enlace\": \"https://www.logitech.com/es-es/shop/p/z150-compact-stereo-speakers\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 75,\n            \"marca_id\": 14,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 19.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 32,\n            \"nombre\": \"HP Ratón inalámbrico X3000 G3\",\n            \"preciounitario\": 19.99,\n            \"enlace\": \"https://www.hp.com/ec-es/products/accessories/product-details/2101267268\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 30,\n            \"marca_id\": 3,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 18.33,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 47,\n            \"nombre\": \"HP EliteDisplay E243\",\n            \"preciounitario\": 139.99,\n            \"enlace\": \"https://support.hp.com/ec-es/product/setup-user-guides/hp-elitedisplay-e243-23.8-inch-monitor-head-only/18102551\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 59,\n            \"marca_id\": 3,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 89.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 33,\n            \"nombre\": \"HP Ratón con cable 100\",\n            \"preciounitario\": 14.99,\n            \"enlace\": \"https://www.hp.com/ec-es/products/accessories/product-details/29363050\",\n            \"fecha\": \"2025-09-26\",\n            \"stock\": 34,\n            \"marca_id\": 3,\n            \"gama_id\": null,\n            \"iva_id\": 1,\n            \"costo\": 9.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 43,\n            \"nombre\": \"Logitech G 213 Prodigy\",\n            \"preciounitario\": 59.99,\n            \"enlace\": \"https://www.logitechg.com/es-ar/products/gaming-keyboards/g213-rgb-gaming-keyboard.920-008084.html\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 79,\n            \"marca_id\": 32,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 49.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 45,\n            \"nombre\": \"Logitech Altavoces USB S150\",\n            \"preciounitario\": 17.99,\n            \"enlace\": \"https://www.logitech.com/es-ar/shop/p/s150-usb-stereo-speakers\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 49,\n            \"marca_id\": 14,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 9.99,\n            \"habilitado\": true\n        },\n        {\n            \"producto_id\": 46,\n            \"nombre\": \"HP EliteDisplay E223\",\n            \"preciounitario\": 64.99,\n            \"enlace\": \"https://support.hp.com/bo-es/product/details/hp-elitedisplay-e223-21.5-inch-monitor/17200083\",\n            \"fecha\": \"2025-09-28\",\n            \"stock\": 69,\n            \"marca_id\": 3,\n            \"gama_id\": 1,\n            \"iva_id\": 1,\n            \"costo\": 59.99,\n            \"habilitado\": true\n        }\n    ],\n    \"pageable\": {\n        \"pageNumber\": 0,\n        \"pageSize\": 50,\n        \"sort\": {\n            \"empty\": true,\n            \"sorted\": false,\n            \"unsorted\": true\n        },\n        \"offset\": 0,\n        \"paged\": true,\n        \"unpaged\": false\n    },\n    \"last\": true,\n    \"totalElements\": 45,\n    \"totalPages\": 1,\n    \"size\": 50,\n    \"number\": 0,\n    \"sort\": {\n        \"empty\": true,\n        \"sorted\": false,\n        \"unsorted\": true\n    },\n    \"first\": true,\n    \"numberOfElements\": 45,\n    \"empty\": false\n}"
+        }
+      ]
+    },
+    {
+      "name": "Detalle producto",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": [
+        {
+          "name": "Detalle producto",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "productos",
+                "1"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "key": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "key": "Expires",
+              "value": "0"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 03 Jun 2026 02:32:09 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"id\": 1,\n    \"nombre\": \"TUF GAMING X870E-PLUS WIFI7\",\n    \"precio\": 309,\n    \"marca\": \"ASUS\",\n    \"imagenId\": 8,\n    \"mimeType\": \"image/jpeg\",\n    \"galeria\": [\n        {\n            \"id\": 8,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": true,\n            \"pos\": 8\n        },\n        {\n            \"id\": 1,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 1\n        },\n        {\n            \"id\": 2,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 2\n        },\n        {\n            \"id\": 3,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 3\n        },\n        {\n            \"id\": 4,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 4\n        },\n        {\n            \"id\": 5,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 5\n        },\n        {\n            \"id\": 6,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 6\n        },\n        {\n            \"id\": 7,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 7\n        },\n        {\n            \"id\": 9,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 9\n        },\n        {\n            \"id\": 10,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 10\n        },\n        {\n            \"id\": 11,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 11\n        },\n        {\n            \"id\": 12,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 12\n        },\n        {\n            \"id\": 13,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 13\n        },\n        {\n            \"id\": 14,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 14\n        },\n        {\n            \"id\": 15,\n            \"mimeType\": \"image/jpeg\",\n            \"portada\": false,\n            \"pos\": 15\n        }\n    ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Por categoría",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": [
+        {
+          "name": "Por categoría",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/productos/por-categoria?categoriaId=1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "productos",
+                "por-categoria"
+              ],
+              "query": [
+                {
+                  "key": "categoriaId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "key": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "key": "Expires",
+              "value": "0"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 03 Jun 2026 02:32:53 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"id\": 11,\n        \"nombre\": \"WD_BLACK SN750\",\n        \"precio\": 158,\n        \"marca\": \"Western Digital\",\n        \"imagenId\": 101,\n        \"mimeType\": \"image/jpeg\"\n    },\n    {\n        \"id\": 12,\n        \"nombre\": \"Western Digital WDS100T1R0C SN700\",\n        \"precio\": 179.99,\n        \"marca\": \"Western Digital\",\n        \"imagenId\": 109,\n        \"mimeType\": \"image/jpeg\"\n    },\n    {\n        \"id\": 10,\n        \"nombre\": \"Western Digital WDS100T4B0\",\n        \"precio\": 98,\n        \"marca\": \"Western Digital\",\n        \"imagenId\": 95,\n        \"mimeType\": \"image/jpeg\"\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": [
+        {
+          "name": "Categorías",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/categorias",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "categorias"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "key": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "key": "Expires",
+              "value": "0"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 03 Jun 2026 02:21:15 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"id\": 1,\n        \"nombre\": \"Almacenamiento\",\n        \"slug\": \"almacenamiento\"\n    },\n    {\n        \"id\": 2,\n        \"nombre\": \"CPU\",\n        \"slug\": \"cpu\"\n    },\n    {\n        \"id\": 3,\n        \"nombre\": \"CPU Cooler\",\n        \"slug\": \"cpu-cooler\"\n    },\n    {\n        \"id\": 4,\n        \"nombre\": \"Cubierta\",\n        \"slug\": \"cubierta\"\n    },\n    {\n        \"id\": 5,\n        \"nombre\": \"Fuente de poder\",\n        \"slug\": \"fuente-de-poder\"\n    },\n    {\n        \"id\": 6,\n        \"nombre\": \"GPU\",\n        \"slug\": \"gpu\"\n    },\n    {\n        \"id\": 7,\n        \"nombre\": \"Memoria RAM\",\n        \"slug\": \"memoria-ram\"\n    },\n    {\n        \"id\": 8,\n        \"nombre\": \"Motherboard\",\n        \"slug\": \"motherboard\"\n    },\n    {\n        \"id\": 9,\n        \"nombre\": \"Periféricos\",\n        \"slug\": \"perifericos\"\n    }\n]"
+        }
+      ]
+    },
+    {
+      "name": "Buscar Producto",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": [
+        {
+          "name": "Buscar Producto",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"texto\": \"asus\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/productos/buscar",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "productos",
+                "buscar"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": null,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "X-Content-Type-Options",
+              "value": "nosniff"
+            },
+            {
+              "key": "X-XSS-Protection",
+              "value": "0"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store, max-age=0, must-revalidate"
+            },
+            {
+              "key": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "key": "Expires",
+              "value": "0"
+            },
+            {
+              "key": "X-Frame-Options",
+              "value": "DENY"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 03 Jun 2026 02:29:55 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "cookie": [],
+          "body": "[\n    {\n        \"producto_id\": 19,\n        \"nombre\": \"ASUS Enfriador líquido ROG Strix LC III 360 ARGB LCD\",\n        \"precio\": 299.99,\n        \"costo\": 280,\n        \"stock\": 130,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 9,\n        \"nombre\": \"ASUS Monitor VA249HG de 24\",\n        \"precio\": 115,\n        \"costo\": 90,\n        \"stock\": 175,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 17,\n        \"nombre\": \"ASUS ROG RYUJIN III 360 ARGB EXTREME White Edition\",\n        \"precio\": 479.99,\n        \"costo\": 460,\n        \"stock\": 210,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 16,\n        \"nombre\": \"ASUS ROG RYUO III 360 ARGB All-in-one\",\n        \"precio\": 225,\n        \"costo\": 200,\n        \"stock\": 1,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 18,\n        \"nombre\": \"ASUS ROG RYUO III 360 ARGB White Edition\",\n        \"precio\": 209.99,\n        \"costo\": 194.99,\n        \"stock\": 105,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 26,\n        \"nombre\": \"ASUS Tarjeta gráfica dual NVIDIA GeForce RTX 3050 6GB OC Edition Gaming\",\n        \"precio\": 214.99,\n        \"costo\": 199.99,\n        \"stock\": 244,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"GPU\"\n    },\n    {\n        \"producto_id\": 28,\n        \"nombre\": \"ASUS TUF Gaming NVIDIA GeForce RTX 4080 Super OC Edition\",\n        \"precio\": 1129.99,\n        \"costo\": 1099.99,\n        \"stock\": 120,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"GPU\"\n    },\n    {\n        \"producto_id\": 41,\n        \"nombre\": \"CORSAIR Vengeance DDR5 RAM 96 GB\",\n        \"precio\": 0,\n        \"costo\": 0,\n        \"stock\": 0,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Memoria RAM\"\n    },\n    {\n        \"producto_id\": 29,\n        \"nombre\": \"Corsair Vengeance LPX 8GB\",\n        \"precio\": 34.99,\n        \"costo\": 29.99,\n        \"stock\": 229,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Memoria RAM\"\n    },\n    {\n        \"producto_id\": 30,\n        \"nombre\": \"CORSAIR VENGEANCE LPX DDR4 RAM 16GB\",\n        \"precio\": 72.99,\n        \"costo\": 69.99,\n        \"stock\": 215,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Memoria RAM\"\n    },\n    {\n        \"producto_id\": 31,\n        \"nombre\": \"CORSAIR VENGEANCE RGB DDR5 RAM 32 GB\",\n        \"precio\": 129.99,\n        \"costo\": 114.99,\n        \"stock\": 125,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Memoria RAM\"\n    },\n    {\n        \"producto_id\": 8,\n        \"nombre\": \"Dell Monitor 27 - SE2725HM\",\n        \"precio\": 159.99,\n        \"costo\": 149.99,\n        \"stock\": 125,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 46,\n        \"nombre\": \"HP EliteDisplay E223\",\n        \"precio\": 64.99,\n        \"costo\": 59.99,\n        \"stock\": 69,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 47,\n        \"nombre\": \"HP EliteDisplay E243\",\n        \"precio\": 139.99,\n        \"costo\": 89.99,\n        \"stock\": 59,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 33,\n        \"nombre\": \"HP Ratón con cable 100\",\n        \"precio\": 14.99,\n        \"costo\": 9.99,\n        \"stock\": 34,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 32,\n        \"nombre\": \"HP Ratón inalámbrico X3000 G3\",\n        \"precio\": 19.99,\n        \"costo\": 18.33,\n        \"stock\": 30,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 13,\n        \"nombre\": \"Intel Core i3-10105F Procesador de 10ª generación\",\n        \"precio\": 167,\n        \"costo\": 145,\n        \"stock\": 0,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU\"\n    },\n    {\n        \"producto_id\": 14,\n        \"nombre\": \"Intel® Procesador de escritorio Core™ i3-12100F\",\n        \"precio\": 99.99,\n        \"costo\": 88,\n        \"stock\": 119,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU\"\n    },\n    {\n        \"producto_id\": 15,\n        \"nombre\": \"Intel® Procesador de escritorio Core™ i3-14100\",\n        \"precio\": 129.99,\n        \"costo\": 119.99,\n        \"stock\": 97,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU\"\n    },\n    {\n        \"producto_id\": 7,\n        \"nombre\": \"Intel® Procesador de escritorio Core™ i5-14600K\",\n        \"precio\": 245,\n        \"costo\": 205,\n        \"stock\": 150,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"CPU\"\n    },\n    {\n        \"producto_id\": 37,\n        \"nombre\": \"Jungle Leopard ASTROSHEL LCD 240 ARGB AIO\",\n        \"precio\": 59.99,\n        \"costo\": 49.99,\n        \"stock\": 67,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 38,\n        \"nombre\": \"Jungle Leopard K400 PRO CPU Cooler\",\n        \"precio\": 19.99,\n        \"costo\": 9.99,\n        \"stock\": 89,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 36,\n        \"nombre\": \"KF620-DGT - Enfriador de aire de CPU\",\n        \"precio\": 44.99,\n        \"costo\": 39.99,\n        \"stock\": 175,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"CPU Cooler\"\n    },\n    {\n        \"producto_id\": 45,\n        \"nombre\": \"Logitech Altavoces USB S150\",\n        \"precio\": 17.99,\n        \"costo\": 9.99,\n        \"stock\": 49,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 43,\n        \"nombre\": \"Logitech G 213 Prodigy\",\n        \"precio\": 59.99,\n        \"costo\": 49.99,\n        \"stock\": 79,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 42,\n        \"nombre\": \"Logitech G 413 SE Teclado mecánico\",\n        \"precio\": 69.99,\n        \"costo\": 59.99,\n        \"stock\": 90,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 6,\n        \"nombre\": \"Logitech - MX Master 3S Mouse inalámbrico ergonómico\",\n        \"precio\": 120,\n        \"costo\": 97,\n        \"stock\": 250,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 44,\n        \"nombre\": \"Logitec Multimedia bocinas Z150\",\n        \"precio\": 29.99,\n        \"costo\": 19.99,\n        \"stock\": 75,\n        \"fecha\": \"2025-09-28\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 3,\n        \"nombre\": \"MPG Z790 EDGE WIFI\",\n        \"precio\": 379.99,\n        \"costo\": 349.99,\n        \"stock\": 125,\n        \"fecha\": \"2025-09-23\",\n        \"categoria\": \"Motherboard\"\n    },\n    {\n        \"producto_id\": 27,\n        \"nombre\": \"MSI Gaming GeForce RTX 4060 8GB GDRR6 Extreme Clock\",\n        \"precio\": 279.99,\n        \"costo\": 259.99,\n        \"stock\": 169,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"GPU\"\n    },\n    {\n        \"producto_id\": 24,\n        \"nombre\": \"MSI MAG A650BE\",\n        \"precio\": 74.99,\n        \"costo\": 64.99,\n        \"stock\": 159,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Fuente de poder\"\n    },\n    {\n        \"producto_id\": 25,\n        \"nombre\": \"MSI MAG A850GL PCIE5\",\n        \"precio\": 129.99,\n        \"costo\": 114.99,\n        \"stock\": 175,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Fuente de poder\"\n    },\n    {\n        \"producto_id\": 22,\n        \"nombre\": \"MSI MAG Forge 112R\",\n        \"precio\": 79.99,\n        \"costo\": 69.99,\n        \"stock\": 60,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Cubierta\"\n    },\n    {\n        \"producto_id\": 23,\n        \"nombre\": \"MSI MPG A1000GS PCIE5\",\n        \"precio\": 199.99,\n        \"costo\": 179.99,\n        \"stock\": 140,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Fuente de poder\"\n    },\n    {\n        \"producto_id\": 20,\n        \"nombre\": \"MSI MPG GUNGNIR 111R\",\n        \"precio\": 99.99,\n        \"costo\": 89.99,\n        \"stock\": 89,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Cubierta\"\n    },\n    {\n        \"producto_id\": 21,\n        \"nombre\": \"MSI MPG SEKIRA 100R\",\n        \"precio\": 69.99,\n        \"costo\": 59.99,\n        \"stock\": 99,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Cubierta\"\n    },\n    {\n        \"producto_id\": 35,\n        \"nombre\": \"MSI Placa base para juegos A520M-A PRO\",\n        \"precio\": 94.99,\n        \"costo\": 89.99,\n        \"stock\": 119,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"Motherboard\"\n    },\n    {\n        \"producto_id\": 2,\n        \"nombre\": \"PRIME B650-PLUS WIFI\",\n        \"precio\": 199.99,\n        \"costo\": 166,\n        \"stock\": 320,\n        \"fecha\": \"2025-09-23\",\n        \"categoria\": \"Motherboard\"\n    },\n    {\n        \"producto_id\": 5,\n        \"nombre\": \"Redragon H510 PRO\",\n        \"precio\": 34.99,\n        \"costo\": 29.99,\n        \"stock\": 30,\n        \"fecha\": \"2025-09-23\",\n        \"categoria\": \"Periféricos\"\n    },\n    {\n        \"producto_id\": 4,\n        \"nombre\": \"ROG STRIX Z690-E WIFI\",\n        \"precio\": 214.99,\n        \"costo\": 199.99,\n        \"stock\": 240,\n        \"fecha\": \"2025-09-23\",\n        \"categoria\": \"Motherboard\"\n    },\n    {\n        \"producto_id\": 34,\n        \"nombre\": \"Tarjeta gráfica GeForce GTX 750 Ti\",\n        \"precio\": 79.99,\n        \"costo\": 69.99,\n        \"stock\": 74,\n        \"fecha\": \"2025-09-26\",\n        \"categoria\": \"GPU\"\n    },\n    {\n        \"producto_id\": 1,\n        \"nombre\": \"TUF GAMING X870E-PLUS WIFI7\",\n        \"precio\": 309,\n        \"costo\": 250,\n        \"stock\": 300,\n        \"fecha\": \"2025-09-23\",\n        \"categoria\": \"Motherboard\"\n    },\n    {\n        \"producto_id\": 11,\n        \"nombre\": \"WD_BLACK SN750\",\n        \"precio\": 158,\n        \"costo\": 127,\n        \"stock\": 350,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Almacenamiento\"\n    },\n    {\n        \"producto_id\": 12,\n        \"nombre\": \"Western Digital WDS100T1R0C SN700\",\n        \"precio\": 179.99,\n        \"costo\": 147.99,\n        \"stock\": 1,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Almacenamiento\"\n    },\n    {\n        \"producto_id\": 10,\n        \"nombre\": \"Western Digital WDS100T4B0\",\n        \"precio\": 98,\n        \"costo\": 78,\n        \"stock\": 0,\n        \"fecha\": \"2025-09-25\",\n        \"categoria\": \"Almacenamiento\"\n    }\n]"
+        }
+      ]
+    }
+  ]
+}

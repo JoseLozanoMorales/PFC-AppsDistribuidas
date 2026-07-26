@@ -1261,7 +1261,7 @@ const API_PROVINCIAS = '/api/provincias';
     const API = {
       buscarMin: (q, rolId, limit = 50) => {
         const p = new URLSearchParams();
-        if (q)      p.set('q', q);
+        p.set('q', q ?? '');
         if (rolId)  p.set('rolId', rolId);
         p.set('limit', String(limit));
         return '/api/usuarios/buscar-min?' + p.toString();
