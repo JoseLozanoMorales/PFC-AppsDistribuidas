@@ -22,3 +22,15 @@ services:
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+
+  pedidos-service:
+    build:
+      context: ./pedidos-service
+    container_name: pedidos-service
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
