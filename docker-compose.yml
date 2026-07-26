@@ -1,4 +1,26 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      USUARIOS_SERVICE_URL: http://usuarios-service:8085
+      PRODUCTOS_SERVICE_URL: http://productos-service:8081
+      INVENTARIO_SERVICE_URL: http://inventario-service:8082
+      PEDIDOS_SERVICE_URL: http://pedidos-service:8083
+      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-service:8084
+      VENTAS_SERVICE_URL: http://ventas-service:8086
+    depends_on:
+      - usuarios-service
+      - productos-service
+      - inventario-service
+      - pedidos-service
+      - ordenes-proveedores-service
+      - ventas-service
+
   productos-service:
     build:
       context: ./productos-service

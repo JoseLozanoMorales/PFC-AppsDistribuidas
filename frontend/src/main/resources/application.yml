@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: frontend
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: usuarios-me
+              uri: ${USUARIOS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/usuarios/me
+              filters:
+                - RewritePath=/api/usuarios/me,/api/usuarios/api/usuarios/me
+
+            - id: usuarios-auth
+              uri: ${USUARIOS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/auth/**
+
+            - id: usuarios-api
+              uri: ${USUARIOS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/login,/api/usuarios/**,/api/otp/**,/api/seguridad/**,/api/provincias/**,/api/ciudades/**,/api/auditoria/**
+
+            - id: productos-api
+              uri: ${PRODUCTOS_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/productos/**,/api/sp/almacenamientos,/api/sp/cpu,/api/sp/cpu-cooler,/api/sp/cubiertas,/api/sp/fuentes,/api/sp/gpu,/api/sp/ram,/api/sp/motherboards,/api/sp/perifericos,/api/sp/productos/**,/api/sp/ivas
+
+            - id: inventario-api
+              uri: ${INVENTARIO_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/movimientos,/api/subtipos-movimiento,/api/sp/movimiento-inventario
+
+            - id: pedidos-api
+              uri: ${PEDIDOS_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/carrito/**,/api/ordenes/**
+
+            - id: ordenes-proveedores-api
+              uri: ${ORDENES_PROVEEDORES_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/proveedores/**,/api/ordenes-compra/**
+
+            - id: ventas-api
+              uri: ${VENTAS_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/facturas/**
