@@ -34,3 +34,17 @@ services:
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+
+
+  ordenes-proveedores-service:
+    build:
+      context: ./ordenes-proveedores-service
+    container_name: ordenes-proveedores-service
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+      INVENTARIO_SERVICE_URL: http://inventario-service:8082
