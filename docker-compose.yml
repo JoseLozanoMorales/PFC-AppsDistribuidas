@@ -64,3 +64,15 @@ services:
       TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+
+  ventas-service:
+    build:
+      context: ./ventas-service
+    container_name: ventas-service
+    ports:
+      - "8086:8086"
+    environment:
+      SERVER_PORT: 8086
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
+      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
