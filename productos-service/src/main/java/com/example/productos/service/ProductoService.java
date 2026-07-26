@@ -26,33 +26,33 @@ public class ProductoService {
         return jdbc.queryForList("""
                 select producto_id, nombre, preciounitario, enlace, fecha, stock,
                        marca_id, gama_id, iva_id, costo, habilitado
-                from public.producto
+                from productos.producto
                 order by producto_id
                 limit ? offset ?
                 """, safeSize, safePage * safeSize);
     }
 
     public List<Map<String, Object>> masVendidos(int limite) {
-        return jdbc.queryForList("select * from public.productos_mas_vendidos_menu(?)", Math.max(limite, 1));
+        return jdbc.queryForList("select * from productos.productos_mas_vendidos_menu(?)", Math.max(limite, 1));
     }
 
     public List<Map<String, Object>> buscar(Map<String, Object> filtros) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(filtros == null ? Map.of() : filtros);
-        return jdbc.queryForList("select * from public.fn_buscar_productos_json(?::jsonb)", json);
+        return jdbc.queryForList("select * from productos.fn_buscar_productos_json(?::jsonb)", json);
     }
 
     public List<Map<String, Object>> porCategoria(Integer categoriaId) {
-        return jdbc.queryForList("select * from public.fn_buscar_productos_por_categoria(?)", categoriaId);
+        return jdbc.queryForList("select * from productos.fn_buscar_productos_por_categoria(?)", categoriaId);
     }
 
     public Map<String, Object> detalle(Integer id) {
-        List<Map<String, Object>> base = jdbc.queryForList("select * from public.fn_producto_detalle(?)", id);
+        List<Map<String, Object>> base = jdbc.queryForList("select * from productos.fn_producto_detalle(?)", id);
         if (base.isEmpty()) {
             throw new IllegalArgumentException("Producto no encontrado");
         }
 
         Map<String, Object> out = new LinkedHashMap<>(base.get(0));
-        out.put("galeria", jdbc.queryForList("select * from public.fn_producto_galeria(?)", id));
+        out.put("galeria", jdbc.queryForList("select * from productos.fn_producto_galeria(?)", id));
         return out;
     }
 
@@ -63,21 +63,21 @@ public class ProductoService {
         if (usuario != null && !usuario.isBlank()) {
             payload.put("usuario", usuario);
         }
-        jdbc.update("call public.sp_agregar_producto_v2_json(?::jsonb, ?)",
+        jdbc.update("call productos.sp_agregar_producto_v2_json(?::jsonb, ?)",
                 objectMapper.writeValueAsString(payload), usuario);
     }
 
     @Transactional
     public void eliminar(Integer productoId, String usuario) {
-        jdbc.update("call public.sp_eliminar_producto_v2(?, ?)", productoId, usuario);
+        jdbc.update("call productos.sp_eliminar_producto_v2(?, ?)", productoId, usuario);
     }
 
     public List<Map<String, Object>> detalleParaEditar(Integer id) {
-        return jdbc.queryForList("select * from public.fn_producto_detalle_actualizar(?)", id);
+        return jdbc.queryForList("select * from productos.fn_producto_detalle_actualizar(?)", id);
     }
 
     public List<Map<String, Object>> listarIvas() {
-        return jdbc.queryForList("select * from public.fn_listar_ivas()");
+        return jdbc.queryForList("select * from productos.fn_listar_ivas()");
     }
 
     @Transactional
@@ -87,7 +87,7 @@ public class ProductoService {
         if (usuario != null && !usuario.isBlank()) {
             payload.put("usuario", usuario);
         }
-        jdbc.update("call public.sp_actualizar_producto_v2_json(?::jsonb, ?)",
+        jdbc.update("call productos.sp_actualizar_producto_v2_json(?::jsonb, ?)",
                 objectMapper.writeValueAsString(payload), usuario);
     }
 }
