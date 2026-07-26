@@ -11,7 +11,7 @@ import org.example.model.OrdenCompra;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
@@ -29,12 +29,13 @@ public class OrdenCompraRepository {
     public OrdenCompraRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
         this.objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
     public Integer crear(Integer proveedorId, Integer usuarioId, LocalDate fechaEsperada,
                          List<DetalleOrdenCompra> detalle) {
-        String sql = "{call ordenes_proveedores.sp_crear_orden_compra_json(?, ?, ?, ?, ?)}";
+        String sql = "call ordenes_proveedores.sp_crear_orden_compra_json(?, ?, ?, ?, ?)";
         try {
             PGobject detalleJson = buildDetalleJson(detalle);
             return jdbcTemplate.execute((Connection con) -> {
@@ -55,7 +56,7 @@ public class OrdenCompraRepository {
 
     public void actualizar(Integer ordenCompraId, Integer proveedorId, LocalDate fechaEsperada,
                            List<DetalleOrdenCompra> detalle) {
-        String sql = "{call ordenes_proveedores.sp_actualizar_orden_compra_json(?, ?, ?, ?)}";
+        String sql = "call ordenes_proveedores.sp_actualizar_orden_compra_json(?, ?, ?, ?)";
         try {
             PGobject detalleJson = buildDetalleJson(detalle);
             jdbcTemplate.execute((Connection con) -> {
@@ -74,11 +75,11 @@ public class OrdenCompraRepository {
     }
 
     public void enviar(Integer ordenCompraId) {
-        llamarProcedimientoSimple("{call ordenes_proveedores.sp_enviar_orden_compra(?)}", ordenCompraId);
+        llamarProcedimientoSimple("call ordenes_proveedores.sp_enviar_orden_compra(?)", ordenCompraId);
     }
 
     public void cancelar(Integer ordenCompraId) {
-        llamarProcedimientoSimple("{call ordenes_proveedores.sp_cancelar_orden_compra(?)}", ordenCompraId);
+        llamarProcedimientoSimple("call ordenes_proveedores.sp_cancelar_orden_compra(?)", ordenCompraId);
     }
 
     // p_recepcion: producto_id -> cantidad que llega ahora (se acumula sobre cantidad_recibida)

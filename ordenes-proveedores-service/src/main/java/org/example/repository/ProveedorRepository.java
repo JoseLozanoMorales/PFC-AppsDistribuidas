@@ -27,7 +27,7 @@ public class ProveedorRepository {
     }
 
     public Integer crear(Proveedor p) {
-        String sql = "{call ordenes_proveedores.sp_crear_proveedor(?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "call ordenes_proveedores.sp_crear_proveedor(?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.execute((Connection con) -> {
             try (CallableStatement cs = con.prepareCall(sql)) {
                 cs.setString(1, p.getNombre());
@@ -44,7 +44,7 @@ public class ProveedorRepository {
     }
 
     public void actualizar(Proveedor p) {
-        String sql = "{call ordenes_proveedores.sp_actualizar_proveedor(?, ?, ?, ?, ?, ?)}";
+        String sql = "call ordenes_proveedores.sp_actualizar_proveedor(?, ?, ?, ?, ?, ?)";
         jdbcTemplate.execute((Connection con) -> {
             try (CallableStatement cs = con.prepareCall(sql)) {
                 cs.setInt(1, p.getProveedorId());
@@ -60,7 +60,7 @@ public class ProveedorRepository {
     }
 
     public void desactivar(Integer proveedorId) {
-        String sql = "{call ordenes_proveedores.sp_desactivar_proveedor(?)}";
+        String sql = "call ordenes_proveedores.sp_desactivar_proveedor(?)";
         jdbcTemplate.execute((Connection con) -> {
             try (CallableStatement cs = con.prepareCall(sql)) {
                 cs.setInt(1, proveedorId);

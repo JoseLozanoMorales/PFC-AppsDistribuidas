@@ -16,9 +16,12 @@ import java.util.Map;
 public class OrdenCompraService {
 
     private final OrdenCompraRepository ordenCompraRepository;
+    private final org.example.client.InventarioClient inventarioClient;
 
-    public OrdenCompraService(OrdenCompraRepository ordenCompraRepository) {
+    public OrdenCompraService(OrdenCompraRepository ordenCompraRepository,
+                              org.example.client.InventarioClient inventarioClient) {
         this.ordenCompraRepository = ordenCompraRepository;
+        this.inventarioClient = inventarioClient;
     }
 
     public Integer crear(Integer proveedorId, Integer usuarioId, LocalDate fechaEsperada,
@@ -43,8 +46,15 @@ public class OrdenCompraService {
     // stock en inventario-service (que tu propio sp_registrar_recepcion_json deja explicita
     // como responsabilidad del backend Java) todavia no esta conectada aca -- la sumamos
     // como paso aparte mas adelante.
-    public void registrarRecepcion(Integer ordenCompraId, Map<Integer, Integer> recepcionPorProducto) {
+    public void registrarRecepcion(Integer ordenCompraId, Map<Integer, Integer> recepcionPorProducto, String usuario) {
         ordenCompraRepository.registrarRecepcion(ordenCompraId, recepcionPorProducto);
+        try {
+            inventarioClient.registrarEntradasPorRecepcion(ordenCompraId, recepcionPorProducto, usuario);
+        } catch (Exception e) {
+            throw new IllegalStateException(
+                    "La recepcion de la orden " + ordenCompraId + " quedo confirmada, pero fallo la "
+                            + "actualizacion de stock en inventario-service. Revisar manualmente.", e);
+        }
     }
 
     public List<OrdenCompra> listarPorEstado(EstadoOrdenCompra estado) {
