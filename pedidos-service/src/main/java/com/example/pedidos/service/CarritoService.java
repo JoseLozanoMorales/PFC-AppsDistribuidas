@@ -57,7 +57,9 @@ public class CarritoService {
 
     public void agregarProducto(Integer carritoId, Integer productoId, Integer cantidad, BigDecimal precioUnitario) {
         String sql = "INSERT INTO pedidos.carrito_detalle (carrito_id, producto_id, cantidad, precio_unitario) " +
-                "VALUES (?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?) " +
+                "ON CONFLICT (carrito_id, producto_id) " +
+                "DO UPDATE SET cantidad = pedidos.carrito_detalle.cantidad + EXCLUDED.cantidad";
         jdbcTemplate.update(sql, carritoId, productoId, cantidad, precioUnitario);
         // El trigger fntg_carrito_detalle_recalc ya actualiza el total automáticamente
     }
