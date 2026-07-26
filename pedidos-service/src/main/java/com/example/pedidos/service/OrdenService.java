@@ -1,5 +1,6 @@
 package com.example.pedidos.service;
 
+import com.example.pedidos.model.DetalleOrden;
 import com.example.pedidos.model.Orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,6 +37,37 @@ public class OrdenService {
                 "FROM pedidos.orden ORDER BY fecha DESC";
         return jdbcTemplate.query(sql, ordenRowMapper);
     }
+
+    // Obtiene una orden específica por su ID
+    public Orden obtenerOrdenPorId(Integer ordenId) {
+        String sql = "SELECT orden_id, usuario_id, direccion_id, metodopago_id, subtotal, total, fecha " +
+                "FROM pedidos.orden WHERE orden_id = ?";
+        List<Orden> resultado = jdbcTemplate.query(sql, ordenRowMapper, ordenId);
+        return resultado.isEmpty() ? null : resultado.get(0);
+    }
+
+    // Lista las órdenes de un usuario específico
+    public List<Orden> listarOrdenesPorUsuario(Integer usuarioId) {
+        String sql = "SELECT orden_id, usuario_id, direccion_id, metodopago_id, subtotal, total, fecha " +
+                "FROM pedidos.orden WHERE usuario_id = ? ORDER BY fecha DESC";
+        return jdbcTemplate.query(sql, ordenRowMapper, usuarioId);
+    }
+
+    // Lista el detalle (items) de una orden específica
+    public List<DetalleOrden> obtenerDetalleOrden(Integer ordenId) {
+        String sql = "SELECT orden_id, producto_id, cantidad, precio_unitario, subtotal, iva, total " +
+                "FROM pedidos.detalle_orden WHERE orden_id = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new DetalleOrden(
+                rs.getInt("orden_id"),
+                rs.getInt("producto_id"),
+                rs.getInt("cantidad"),
+                rs.getBigDecimal("precio_unitario"),
+                rs.getBigDecimal("subtotal"),
+                rs.getBigDecimal("iva"),
+                rs.getBigDecimal("total")
+        ), ordenId);
+    }
+
 
     // Genera la orden a partir del carrito activo del usuario.
     // NO genera factura ni toca inventario -- eso corresponde a otros microservicios.
