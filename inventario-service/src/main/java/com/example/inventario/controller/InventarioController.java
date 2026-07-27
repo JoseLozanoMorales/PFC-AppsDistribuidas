@@ -26,6 +26,16 @@ public class InventarioController {
         return service.listarSubtipos(tipo);
     }
 
+    @GetMapping("/api/stock/{productoId}")
+    public Map<String, Object> obtenerStock(@PathVariable Integer productoId) {
+        return service.obtenerStock(productoId);
+    }
+
+    @PostMapping("/api/stock")
+    public List<Map<String, Object>> listarStock(@RequestBody List<Integer> productoIds) {
+        return service.listarStock(productoIds);
+    }
+
     @PostMapping("/api/sp/movimiento-inventario")
     public ResponseEntity<Void> registrarMovimiento(
             @RequestBody Object body,
