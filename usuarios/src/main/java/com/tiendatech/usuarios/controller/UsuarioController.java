@@ -101,7 +101,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioPayload(u));
     }
 
-    @GetMapping("/api/usuarios/me")
+    @GetMapping("/me")
     public ResponseEntity<?> me(HttpServletRequest req) {
         Integer userId = resolveUserId(req);               // lee X-User-Id
         var u = usuarioService.getById(userId);            // usa el service

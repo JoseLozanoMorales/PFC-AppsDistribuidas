@@ -10,13 +10,6 @@ spring:
       server:
         webmvc:
           routes:
-            - id: usuarios-me
-              uri: ${USUARIOS_SERVICE_URL:http://localhost:8085}
-              predicates:
-                - Path=/api/usuarios/me
-              filters:
-                - RewritePath=/api/usuarios/me,/api/usuarios/api/usuarios/me
-
             - id: usuarios-auth
               uri: ${USUARIOS_SERVICE_URL:http://localhost:8085}
               predicates:

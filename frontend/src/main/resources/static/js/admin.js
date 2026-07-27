@@ -1965,6 +1965,7 @@ function showSection(sectionId, el){
       if (el) el.classList.add('active');
 
       // refrescar tabla al abrir "Movimiento de Inventario"
+      if (sectionId === 'account') { loadAccountProfile?.(); }
       if (sectionId === 'inventory') { loadMovimientos?.(); }
     }
 
@@ -2438,6 +2439,9 @@ function resetMovimientoModal() {
     const item = Array.from(document.querySelectorAll('.sidebar .nav-item'))
             .find(i => i.textContent.trim().toLowerCase()==='cuenta');
     item?.addEventListener('click', () => loadAccountProfile());
+    if (document.getElementById('account')?.classList.contains('active')) {
+      loadAccountProfile();
+    }
   });
 
   /* Helpers de sesión/API */
@@ -2463,7 +2467,7 @@ function resetMovimientoModal() {
       set('acc_telefono', u0.telefono);
       set('acc_cedula',   u0.cedula);
       set('acc_correo',   u0.correo);
-      const nameTag = document.getElementById('adminName');
+      const nameTag = document.getElementById('adminName') || document.querySelector('.user-info');
       if (nameTag) nameTag.textContent = u0.nombre || u0.usuario || 'Admin';
       const a0 = getAvatarUrl(u0); if (a0 && img) img.src = a0 + '?t=' + Date.now();
     }
@@ -2473,13 +2477,14 @@ function resetMovimientoModal() {
     try{
       const r = await fetch('/api/usuarios/me', { credentials:'include' });
       if (r.ok){
-        const me = await r.json();
+        const json = await r.json();
+        const me = json.data || json;
         set('acc_nombre',   me.nombre);
         set('acc_usuario',  me.usuario);
         set('acc_telefono', me.telefono);
         set('acc_cedula',   me.cedula);
         set('acc_correo',   me.correo);
-        const nameTag = document.getElementById('adminName');
+        const nameTag = document.getElementById('adminName') || document.querySelector('.user-info');
         if (nameTag) nameTag.textContent = me.nombre || me.usuario || 'Admin';
         const a1 = getAvatarUrl(me); if (a1 && img) img.src = a1 + '?t=' + Date.now();
       }
