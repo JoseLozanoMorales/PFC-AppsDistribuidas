@@ -96,7 +96,7 @@ services:
       - "8086:8086"
     environment:
       SERVER_PORT: 8086
-      INVENTARIO_SERVICE_URL: http://inventario-service:8082
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+      INVENTARIO_SERVICE_URL: http://inventario-service:8082
