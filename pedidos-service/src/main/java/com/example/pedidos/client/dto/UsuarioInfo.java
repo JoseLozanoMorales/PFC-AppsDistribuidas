@@ -1,6 +1,7 @@
 package com.example.pedidos.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record UsuarioInfo(
@@ -10,7 +11,7 @@ public record UsuarioInfo(
         String correo,
         String telefono,
         String usuario,
-        Integer rolId,
+        @JsonProperty("id_rol") Integer rolId,
         Boolean habilitado
 ) {
 }

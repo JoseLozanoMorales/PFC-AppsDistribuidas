@@ -15,28 +15,18 @@ public class UsuarioClient {
     private final RestClient restClient;
 
     public UsuarioClient(RestClient.Builder restClientBuilder,
-                          @Value("${usuarios.service.base-url}") String usuariosBaseUrl) {
+                         @Value("${usuarios.service.base-url}") String usuariosBaseUrl) {
         this.restClient = restClientBuilder.baseUrl(usuariosBaseUrl).build();
     }
 
     /**
-     * usuarios-service no expone un lookup exacto por id (GET /api/usuarios/{id}).
-     * Se usa /buscar-min?q={id} y se filtra el resultado por usuarioId exacto.
+     * usuarios-service expone GET /api/usuarios/{id} para lookup exacto por ID.
      */
     public UsuarioInfo obtenerUsuario(Integer usuarioId) {
-        List<UsuarioInfo> resultado = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path("/api/usuarios/buscar-min")
-                        .queryParam("q", usuarioId)
-                        .build())
+        return restClient.get()
+                .uri("/api/usuarios/{id}", usuarioId)
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<UsuarioInfo>>() {
-                });
-
-        return (resultado == null ? List.<UsuarioInfo>of() : resultado).stream()
-                .filter(u -> usuarioId.equals(u.usuarioId()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Usuario " + usuarioId + " no encontrado en usuarios-service"));
+                .body(UsuarioInfo.class);
     }
 
     public List<DireccionInfo> obtenerDirecciones(Integer usuarioId) {
