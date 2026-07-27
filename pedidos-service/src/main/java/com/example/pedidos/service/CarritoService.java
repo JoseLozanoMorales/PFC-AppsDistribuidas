@@ -1,5 +1,7 @@
 package com.example.pedidos.service;
 
+import com.example.pedidos.client.ProductoClient;
+import com.example.pedidos.client.dto.ProductoPrecioIva;
 import com.example.pedidos.model.Carrito;
 import com.example.pedidos.model.CarritoDetalle;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,12 @@ import java.util.List;
 public class CarritoService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ProductoClient productoClient;
 
     @Autowired
-    public CarritoService(JdbcTemplate jdbcTemplate) {
+    public CarritoService(JdbcTemplate jdbcTemplate, ProductoClient productoClient) {
         this.jdbcTemplate = jdbcTemplate;
+        this.productoClient = productoClient;
     }
 
     private final RowMapper<Carrito> carritoRowMapper = (rs, rowNum) -> new Carrito(
@@ -55,12 +59,16 @@ public class CarritoService {
         return jdbcTemplate.query(sql, detalleRowMapper, carritoId);
     }
 
-    public void agregarProducto(Integer carritoId, Integer productoId, Integer cantidad, BigDecimal precioUnitario) {
+    // Ahora el precio NO viene del cliente -- se consulta a productos-service
+    // para evitar que alguien manipule el precio desde el frontend.
+    public void agregarProducto(Integer carritoId, Integer productoId, Integer cantidad) {
+        ProductoPrecioIva info = productoClient.obtenerPrecioEIva(productoId);
+
         String sql = "INSERT INTO pedidos.carrito_detalle (carrito_id, producto_id, cantidad, precio_unitario) " +
                 "VALUES (?, ?, ?, ?) " +
                 "ON CONFLICT (carrito_id, producto_id) " +
                 "DO UPDATE SET cantidad = pedidos.carrito_detalle.cantidad + EXCLUDED.cantidad";
-        jdbcTemplate.update(sql, carritoId, productoId, cantidad, precioUnitario);
+        jdbcTemplate.update(sql, carritoId, productoId, cantidad, info.precioUnitario());
         // El trigger fntg_carrito_detalle_recalc ya actualiza el total automáticamente
     }
 

@@ -39,8 +39,7 @@ public class CarritoController {
     public void agregarProducto(@PathVariable Integer carritoId, @RequestBody Map<String, Object> body) {
         Integer productoId = (Integer) body.get("productoId");
         Integer cantidad = (Integer) body.get("cantidad");
-        BigDecimal precioUnitario = new BigDecimal(body.get("precioUnitario").toString());
-        carritoService.agregarProducto(carritoId, productoId, cantidad, precioUnitario);
+        carritoService.agregarProducto(carritoId, productoId, cantidad);
     }
 
     @DeleteMapping("/{carritoId}/quitar/{productoId}")

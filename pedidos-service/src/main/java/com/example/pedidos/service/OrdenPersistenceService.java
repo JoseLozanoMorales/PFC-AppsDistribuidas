@@ -1,5 +1,7 @@
 package com.example.pedidos.service;
 
+import com.example.pedidos.client.ProductoClient;
+import com.example.pedidos.client.dto.ProductoPrecioIva;
 import com.example.pedidos.model.Orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,10 +16,12 @@ import java.util.List;
 public class OrdenPersistenceService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final ProductoClient productoClient;
 
     @Autowired
-    public OrdenPersistenceService(JdbcTemplate jdbcTemplate) {
+    public OrdenPersistenceService(JdbcTemplate jdbcTemplate, ProductoClient productoClient) {
         this.jdbcTemplate = jdbcTemplate;
+        this.productoClient = productoClient;
     }
 
     @Transactional
@@ -33,18 +37,15 @@ public class OrdenPersistenceService {
         }
         Integer carritoId = carritos.get(0);
 
-        String sqlDetalle =
-                "SELECT d.producto_id, d.cantidad, d.precio_unitario, i.porcentaje " +
-                        "FROM pedidos.carrito_detalle d " +
-                        "JOIN productos.producto p ON p.producto_id = d.producto_id " +
-                        "JOIN productos.iva i ON i.iva_id = p.iva_id " +
-                        "WHERE d.carrito_id = ?";
-        List<DetalleCarritoTmp> items = jdbcTemplate.query(sqlDetalle, (rs, rowNum) -> new DetalleCarritoTmp(
-                rs.getInt("producto_id"),
-                rs.getInt("cantidad"),
-                rs.getBigDecimal("precio_unitario"),
-                rs.getBigDecimal("porcentaje")
-        ), carritoId);
+        // Traer solo producto_id y cantidad del carrito -- el precio/IVA real
+        // se consulta a productos-service, no se confía en lo guardado localmente.
+        String sqlDetalle = "SELECT producto_id, cantidad FROM pedidos.carrito_detalle WHERE carrito_id = ?";
+        List<DetalleCarritoTmp> items = jdbcTemplate.query(sqlDetalle, (rs, rowNum) -> {
+            Integer productoId = rs.getInt("producto_id");
+            Integer cantidad = rs.getInt("cantidad");
+            ProductoPrecioIva info = productoClient.obtenerPrecioEIva(productoId);
+            return new DetalleCarritoTmp(productoId, cantidad, info.precioUnitario(), info.porcentajeIva());
+        }, carritoId);
 
         if (items.isEmpty()) {
             throw new IllegalStateException("El carrito " + carritoId + " está vacío");
