@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.CallableStatement;
 import java.sql.Types;
@@ -28,6 +30,39 @@ public class InventarioService {
 
     public List<Map<String, Object>> listarSubtipos(Integer tipo) {
         return jdbc.queryForList("select * from inventario.fn_subtipos_movimiento(?::integer)", tipo);
+    }
+
+    public Map<String, Object> obtenerStock(Integer productoId) {
+        if (productoId == null) {
+            throw new IllegalArgumentException("Falta productoId");
+        }
+
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "select * from inventario.fn_obtener_stock(?::integer)", productoId);
+
+        if (rows.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto " + productoId + " no existe");
+        }
+        return rows.getFirst();
+    }
+
+    public List<Map<String, Object>> listarStock(List<Integer> productoIds) {
+        if (productoIds == null || productoIds.isEmpty()) {
+            throw new IllegalArgumentException("Debe enviar al menos un productoId");
+        }
+
+        List<Integer> ids = productoIds.stream()
+                .filter(id -> id != null)
+                .distinct()
+                .toList();
+
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("Debe enviar al menos un productoId valido");
+        }
+
+        return jdbc.queryForList(
+                "select * from inventario.fn_listar_stock_json(?::jsonb)",
+                toJson(ids));
     }
 
     @Transactional
