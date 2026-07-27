@@ -29,7 +29,7 @@ services:
       - "8081:8081"
     environment:
       SERVER_PORT: 8081
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
 
@@ -41,7 +41,7 @@ services:
       - "8082:8082"
     environment:
       SERVER_PORT: 8082
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
 
@@ -53,7 +53,7 @@ services:
       - "8083:8083"
     environment:
       SERVER_PORT: 8083
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
 
@@ -66,7 +66,7 @@ services:
       - "8084:8084"
     environment:
       SERVER_PORT: 8084
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       INVENTARIO_SERVICE_URL: http://inventario-service:8082
@@ -79,7 +79,7 @@ services:
       - "8085:8085"
     environment:
       SERVER_PORT: 8085
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       TT_MAIL_USERNAME: ${TT_MAIL_USERNAME}
@@ -95,6 +95,6 @@ services:
       - "8086:8086"
     environment:
       SERVER_PORT: 8086
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV18}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}

@@ -20,16 +20,17 @@ public class FacturaController {
         this.facturaService = facturaService;
     }
 
-    // Body: { "ordenId": 5 }
+    
     @PostMapping
-    public ResponseEntity<Map<String, Integer>> generarDesdeOrden(@RequestBody Map<String, Integer> body) {
+    public ResponseEntity<Map<String, Object>> generarDesdeOrden(@RequestBody Map<String, Integer> body) {
         Integer ordenId = body.get("ordenId");
         if (ordenId == null) {
             throw new IllegalArgumentException("Falta ordenId en el body");
         }
         Integer facturaId = facturaService.generarDesdeOrden(ordenId);
+        Factura factura = facturaService.obtenerPorId(facturaId);
         return ResponseEntity.created(URI.create("/api/facturas/" + facturaId))
-                .body(Map.of("facturaId", facturaId));
+                .body(Map.of("facturaId", facturaId, "numero", factura.getNumero(), "total", factura.getTotal()));
     }
 
     @GetMapping
