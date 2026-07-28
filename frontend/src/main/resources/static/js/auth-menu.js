@@ -24,20 +24,21 @@
 
   // parche de fetch
   window.fetch = function(input, init = {}) {
-    // Normaliza a un Request para conservar método, body, etc.
-    const req1 = (input instanceof Request) ? input : new Request(input, init);
-
-    // Clona headers y agrega nuestros custom si no existen
-    const h = new Headers(req1.headers || {});
+    // Conserva input (string o Request) y init por separado: envolver todo en un
+    // nuevo Request aquí rompe el shim de api-client.js, porque Request.url siempre
+    // es absoluta y ese shim decide si intercepta la llamada mirando si la URL
+    // empieza con "/api/" o "/auth/".
+    const opts = { ...init };
+    const baseHeaders = opts.headers || (input instanceof Request ? input.headers : undefined) || {};
+    const h = new Headers(baseHeaders);
     const uname = getLoggedUsername();
     const uid   = getLoggedUserId();
 
     if (uname && !h.has('X-Usuario'))  h.set('X-Usuario', uname);
     if (uid   != null && !h.has('X-User-Id')) h.set('X-User-Id', uid); // opcional, ya lo usas en pagos
 
-    // Crea un nuevo Request con los headers finales (preserva body, método, credenciales, etc.)
-    const req2 = new Request(req1, { headers: h });
-    return origFetch(req2);
+    opts.headers = h;
+    return origFetch(input, opts);
   };
 })();
 
