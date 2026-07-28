@@ -46,4 +46,10 @@ public class CarritoController {
     public void quitarProducto(@PathVariable Integer carritoId, @PathVariable Integer productoId) {
         carritoService.quitarProducto(carritoId, productoId);
     }
+    @PutMapping("/{carritoId}/actualizar/{productoId}")
+    public void actualizarCantidad(@PathVariable Integer carritoId, @PathVariable Integer productoId,
+                                   @RequestBody Map<String, Object> body) {
+        Integer cantidad = (Integer) body.get("cantidad");
+        carritoService.actualizarCantidad(carritoId, productoId, cantidad);
+    }
 }

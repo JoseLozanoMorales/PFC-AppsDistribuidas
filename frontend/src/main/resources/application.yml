@@ -38,7 +38,7 @@ spring:
             - id: pedidos-api
               uri: ${PEDIDOS_SERVICE_URL:http://localhost:8083}
               predicates:
-                - Path=/api/carrito/**,/api/ordenes/**
+                - Path=/api/carrito/**,/api/ordenes/**,/api/metodopago/**
 
             - id: ordenes-proveedores-api
               uri: ${ORDENES_PROVEEDORES_SERVICE_URL:http://localhost:8084}

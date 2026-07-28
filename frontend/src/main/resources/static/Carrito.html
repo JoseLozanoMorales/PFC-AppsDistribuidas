@@ -208,20 +208,39 @@
       const listEl   = document.getElementById('cart-items');
       const emptyEl  = document.getElementById('empty-cart');
       const fmt      = n => `$${Number(n||0).toFixed(2)}`;
-      const ENVIO    = 15.00;
       let ITEMS = [];
+      let CARRITO_ID = null;
+
+      function getUsuarioId(){
+        try{
+          const raw = sessionStorage.getItem('user') || localStorage.getItem('user');
+          const u = raw ? JSON.parse(raw) : null;
+          return u?.usuarioId ?? u?.usuario_id ?? u?.id ?? u?.UsuarioID ?? null;
+        }catch{ return null; }
+      }
+      const USER_ID = getUsuarioId();
 
       async function fetchJSON(url, opt){
         const r = await fetch(url, Object.assign({credentials:'include'}, opt||{}));
         if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
-        return r.json();
+        const ct = r.headers.get('content-type') || '';
+        return ct.includes('application/json') ? r.json() : null;
       }
 
+      // pedidos-service (CarritoController) requiere el carritoId, no hay ruta plana /items:
+      // 1) GET /api/carrito/{usuarioId} resuelve/crea el carrito activo,
+      // 2) GET /api/carrito/{carritoId}/detalle trae las líneas {productoId, cantidad, precioUnitario}.
       async function loadCart(){
+        if (!USER_ID){
+          listEl.innerHTML = '<p>No se pudo identificar al usuario. Inicia sesión de nuevo.</p>';
+          return;
+        }
         try{
-          ITEMS = await fetchJSON('/api/carrito/items');
+          const carrito = await fetchJSON(`/api/carrito/${USER_ID}`);
+          CARRITO_ID = carrito.carritoId;
+          ITEMS = await fetchJSON(`/api/carrito/${CARRITO_ID}/detalle`);
           render(ITEMS);
-          await updateSummary();
+          updateSummary(carrito);
         }catch(err){
           console.error('No se pudo cargar el carrito', err);
           listEl.innerHTML = '<p>Error al cargar el carrito.</p>';
@@ -229,11 +248,6 @@
       }
 
         // ---------- helpers NUEVOS ----------
-        function esc(s){
-            return String(s??'').replace(/[&<>"']/g, m=>({
-                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-            }[m]));
-        }
         function bestImgId(it){
             // planos
             const flat = it || {};
@@ -283,6 +297,34 @@
             imgEl.src = buildImgSrcFromId(id);
         }
 
+        // CarritoDetalle (pedidos-service) solo trae {productoId, cantidad, precioUnitario} --
+        // el nombre y el % de IVA no vienen del carrito, se buscan en productos-service.
+        function bestNombre(p){
+            return p?.nombre ?? p?.producto?.nombre ?? null;
+        }
+        function bestIvaPct(p){
+            const flat = p || {};
+            const vals = [
+                flat.iva_porcentaje, flat.ivaPorcentaje, flat.porcentaje_iva, flat.porcentajeIva,
+                flat.iva, flat.iva_pct,
+                flat.producto?.iva_porcentaje, flat.producto?.ivaPorcentaje
+            ].filter(v => v !== undefined && v !== null);
+            return vals.length ? Number(vals[0]) : 0;
+        }
+        async function hydrateItemInfo(pid, row){
+            const d = await fetchProductAny(pid);
+            if (!d) return;
+            const nombre = bestNombre(d);
+            const ivaPct = bestIvaPct(d);
+            const precio = Number(row.dataset.precio || 0);
+            const nameEl = row.querySelector('.item-nombre');
+            const ivaEl  = row.querySelector('.item-iva');
+            const totalEl = row.querySelector('.item-total-con-iva');
+            if (nameEl && nombre) nameEl.textContent = nombre;
+            if (ivaEl) ivaEl.textContent = `IVA: ${ivaPct.toFixed(2)}%`;
+            if (totalEl) totalEl.textContent = fmt(precio * (1 + ivaPct/100));
+        }
+
         // ---------- REEMPLAZA SOLO ESTA FUNCIÓN render(items) ----------
         function render(items){
             listEl.innerHTML = '';
@@ -297,20 +339,22 @@
             items.forEach(it=>{
                 const row = document.createElement('div');
                 row.className = 'cart-item';
-                const pid = it.producto_id ?? it.productoId ?? it.id;
+                const pid = it.productoId;
+                const precio = Number(it.precioUnitario||0);
                 row.dataset.pid = pid;
+                row.dataset.precio = precio;
 
                 row.innerHTML = `
       <div class="row align-items-center">
         <div class="col-3 col-md-2">
           <div class="product-image-small">
-            <img alt="${esc(it.nombre||'Producto')}" data-pid="${pid}">
+            <img alt="Producto" data-pid="${pid}">
           </div>
         </div>
         <div class="col-6 col-md-5">
-            <h6 class="mb-1">${esc(it.nombre)}</h6>
-            <small class="text-muted d-block">IVA: ${Number(it.iva_porcentaje||0).toFixed(2)}%</small>
-            <small class="text-muted">Precio sin/IVA: $${Number(it.precio||0).toFixed(2)}</small>
+            <h6 class="mb-1 item-nombre">Producto #${pid}</h6>
+            <small class="text-muted d-block item-iva">IVA: —</small>
+            <small class="text-muted">Precio sin IVA: $${precio.toFixed(2)}</small>
         </div>
         <div class="col-3 col-md-2">
           <div class="quantity-controls">
@@ -320,9 +364,7 @@
           </div>
         </div>
         <div class="col-6 col-md-2 mt-2 mt-md-0">
-          <div class="fw-bold">
-            $${(it.precio_con_iva ?? (Number(it.precio||0)*(1+(Number(it.iva_porcentaje||0)/100)))).toFixed(2)}
-          </div>
+          <div class="fw-bold item-total-con-iva">$${precio.toFixed(2)}</div>
         </div>
         <div class="col-6 col-md-1 mt-2 mt-md-0 text-end">
           <i class="bi bi-trash remove-btn"></i>
@@ -340,11 +382,12 @@
                     setQty(pid, Math.max(1, Number(qtyInput.value)||1));
                 row.querySelector('.remove-btn').onclick = () => removeItem(pid);
 
-                // imagen: placeholder inmediato + carga real
+                // imagen y datos (nombre/IVA) del producto: placeholder inmediato + carga real desde productos-service
                 const imgEl = row.querySelector('img[data-pid]');
                 imgEl.src = '/img/placeholder.png';
                 imgEl.addEventListener('error', ()=> { imgEl.src = '/img/placeholder.png'; });
                 hydrateItemImage(pid, it, imgEl);
+                hydrateItemInfo(pid, row);
 
                 listEl.appendChild(row);
             });
@@ -403,9 +446,11 @@
         });
       }*/
 
+      // pedidos-service: PUT /{carritoId}/actualizar/{productoId} setea la cantidad exacta
+      // (si llega a 0 o menos, el backend elimina el producto del carrito).
       async function setQty(productoId, cantidad){
-        await fetchJSON(`/api/carrito/items/${encodeURIComponent(productoId)}`, {
-          method:'PATCH',
+        await fetchJSON(`/api/carrito/${CARRITO_ID}/actualizar/${encodeURIComponent(productoId)}`, {
+          method:'PUT',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({cantidad})
         });
@@ -414,15 +459,18 @@
 
       async function removeItem(productoId){
         if (!confirm('¿Eliminar este producto del carrito?')) return;
-        await fetchJSON(`/api/carrito/items/${encodeURIComponent(productoId)}`, { method:'DELETE' });
+        await fetchJSON(`/api/carrito/${CARRITO_ID}/quitar/${encodeURIComponent(productoId)}`, { method:'DELETE' });
         await loadCart();
       }
 
-      async function updateSummary(){
-        const s = await fetchJSON('/api/carrito/resumen');
-        const sub = Number(s.subtotal||0);
-        const imp = Number(s.impuestos||0);
-        const tot = Number(s.total||0);
+      // No existe endpoint de resumen con desglose de impuestos: el subtotal se calcula
+      // sumando cantidad*precioUnitario de cada línea, y el impuesto se deriva restando
+      // ese subtotal del `total` autoritativo que ya calcula el trigger de BD (incluye IVA),
+      // para que subtotal + impuestos siempre cuadre exacto con el total real.
+      function updateSummary(carrito){
+        const tot = Number(carrito?.total || 0);
+        const sub = (ITEMS||[]).reduce((acc,it)=> acc + Number(it.cantidad||0)*Number(it.precioUnitario||0), 0);
+        const imp = Math.max(0, tot - sub);
 
         const count = (ITEMS||[]).reduce((acc,it)=>acc + Number(it.cantidad||0), 0);
         const subtotalLabel = document.getElementById('subtotal').parentElement.querySelector('span:first-child');
@@ -430,7 +478,6 @@
 
         document.getElementById('subtotal').textContent  = fmt(sub);
         document.getElementById('taxes').textContent     = fmt(imp);
-<!--        document.getElementById('shipping').textContent  = fmt(ENVIO);-->
         document.getElementById('total').textContent     = fmt(tot);
       }
 

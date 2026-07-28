@@ -655,10 +655,10 @@
         }catch{ return null; }
       })();
 
-      // --- Endpoints backend
+      // --- Endpoints backend (pedidos-service: MetodoPagoController -> /api/metodopago)
       const API = {
-        tipos: '/api/tipo_metodopago',
-        base:  '/api/mis-metodos-pago'
+        tipos: '/api/metodopago/tipos',
+        base:  '/api/metodopago'
       };
 
       // --- Elementos UI
@@ -735,36 +735,36 @@
       }
 
       async function apiList(){
-        const r = await fetch(API.base, withAuth());
+        const r = await fetch(`${API.base}/usuario/${USER_ID}`, withAuth());
         if (!r.ok) throw new Error(await r.text());
-        return await r.json(); // List<MetodoPagoDTO>
+        return await r.json(); // List<MetodoPago>: {metodopagoId, numeroMascara, fechaExpiracion, habilitado, tipoId, tipoNombre}
       }
 
       async function apiAdd(payload){
         const r = await fetch(API.base, withAuth({ method:'POST', body:JSON.stringify(payload) }));
         if (!r.ok) throw new Error(await r.text());
-        return await r.json(); // lista actualizada
+        return await apiList(); // el backend no devuelve la lista actualizada; la recargamos
       }
 
       async function apiDelete(id){
-        const r = await fetch(`${API.base}/${id}`, withAuth({ method:'DELETE' }));
-        if (r.status !== 204) throw new Error(await r.text());
+        const r = await fetch(`${API.base}/${id}?usuarioId=${USER_ID}`, withAuth({ method:'DELETE' }));
+        if (!r.ok) throw new Error(await r.text()); // inactivar responde 200 vacío, no 204
       }
 
       // --- Render
       function card(it){
         const vence = toMMYYYY(it.fechaExpiracion);
-        const tipo  = it.nombre || it.tipoId || '—';
+        const tipo  = it.tipoNombre || '—';
         return `
       <div class="col-12 col-md-6 col-lg-4">
         <div class="p-3 border rounded-3 h-100">
           <div class="d-flex justify-content-between align-items-start">
             <div>
-              <div class="fw-semibold">${it.mascara || '****'}</div>
+              <div class="fw-semibold">${it.numeroMascara || '****'}</div>
               <div class="text-muted small">Vence: ${vence || '—'} · Tipo: ${tipo}</div>
               <div class="text-muted small">Estado: ${it.habilitado ? 'Habilitado' : 'Deshabilitado'}</div>
             </div>
-            <button class="btn btn-sm btn-outline-danger" data-act="delete" data-id="${it.metodoId}" title="Eliminar">
+            <button class="btn btn-sm btn-outline-danger" data-act="delete" data-id="${it.metodopagoId}" title="Eliminar">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -805,8 +805,9 @@
         if (!tipoId){ alert('Selecciona un tipo de tarjeta.'); return; }
 
         try{
-          const payload = { numeroTarjeta: rawNum, mesExpiracion: month, tipoId };
-          const lista = await apiAdd(payload); // backend responde lista actualizada
+          // El backend guarda fechaExpiracion como LocalDate (YYYY-MM-DD); usamos el día 1 del mes elegido.
+          const payload = { numeroTarjeta: rawNum, fechaExpiracion: `${month}-01`, tipoId, usuarioId: USER_ID };
+          const lista = await apiAdd(payload);
           render(lista);
           showToast('Método agregado.');
           modal().hide();

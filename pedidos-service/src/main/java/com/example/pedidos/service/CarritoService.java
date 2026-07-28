@@ -77,4 +77,13 @@ public class CarritoService {
         jdbcTemplate.update(sql, carritoId, productoId);
         // El trigger también se dispara en DELETE
     }
+
+    public void actualizarCantidad(Integer carritoId, Integer productoId, Integer cantidad) {
+        if (cantidad <= 0) {
+            quitarProducto(carritoId, productoId);
+            return;
+        }
+        String sql = "UPDATE pedidos.carrito_detalle SET cantidad = ? WHERE carrito_id = ? AND producto_id = ?";
+        jdbcTemplate.update(sql, cantidad, carritoId, productoId);
+    }
 }
