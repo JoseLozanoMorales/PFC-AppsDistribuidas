@@ -198,6 +198,23 @@ services:
     networks: [pfc-net]
     restart: "no"
 
+  crdb-seed:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-seed
+    profiles: ["e3-crdb"]
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        cockroach sql --insecure --host=crdb-1:26257
+        --file=/docs/db/seeds.sql
+    volumes:
+      - ./docs/db/seeds.sql:/docs/db/seeds.sql:ro
+    networks: [pfc-net]
+    restart: "no"
+
 volumes:
   crdb1-data:
   crdb2-data:
