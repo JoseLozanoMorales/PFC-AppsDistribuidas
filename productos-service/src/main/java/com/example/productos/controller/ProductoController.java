@@ -61,6 +61,40 @@ public class ProductoController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/api/galeria/{galeriaId}/media")
+    public ResponseEntity<ByteArrayResource> galeriaMedia(@PathVariable Integer galeriaId) {
+        return galeriaContenido(galeriaId);
+    }
+
+    @GetMapping("/api/galeria/img/{galeriaId}")
+    public ResponseEntity<ByteArrayResource> galeriaImagen(@PathVariable Integer galeriaId) {
+        return galeriaContenido(galeriaId);
+    }
+
+    @GetMapping("/api/galeria_v2/img/{galeriaId}")
+    public ResponseEntity<ByteArrayResource> galeriaV2Imagen(@PathVariable Integer galeriaId) {
+        return galeriaContenido(galeriaId);
+    }
+
+    @RequestMapping(path = "/api/galeria_v2/img/{galeriaId}", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> galeriaV2ImagenHead(@PathVariable Integer galeriaId) {
+        return galeriaContenidoHead(galeriaId);
+    }
+
+    @GetMapping("/api/galeria_v2/producto/{productoId}")
+    public List<Map<String, Object>> galeriaV2Producto(
+            @PathVariable Integer productoId,
+            @RequestParam(required = false) String scope) {
+        return service.galeriaProducto(productoId, scope);
+    }
+
+    @GetMapping("/api/productos/{productoId}/galeria/lista")
+    public List<Map<String, Object>> galeriaProductoCompat(
+            @PathVariable Integer productoId,
+            @RequestParam(defaultValue = "galeria") String vista) {
+        return service.galeriaProducto(productoId, vista);
+    }
+
     @PostMapping("/api/productos/buscar")
     public List<Map<String, Object>> buscar(@RequestBody(required = false) Map<String, Object> filtros)
             throws JsonProcessingException {

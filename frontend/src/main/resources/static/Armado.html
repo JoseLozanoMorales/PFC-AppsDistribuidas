@@ -625,11 +625,11 @@
         // Construye HTML de cada card con acciones
         function render(list, catKey){
             const nodes = list.map(p => {
-                const src = p.imgId ? API.img(p.imgId) : '/img/placeholder.png';
+                const src = p.imgId ? API.img(p.imgId) : '/assets/placeholder.svg';
                 return `
         <div class="selected-item" data-id="${p.id}" data-src="${esc(src)}" data-cat="${esc(catKey)}" title="${esc(p.nombre)}">
           <img src="${src}" class="component-icon" alt="${esc(p.nombre)}"
-               onerror="this.onerror=null;this.src='/img/placeholder.png'">
+               onerror="this.onerror=null;this.src='/assets/placeholder.svg'">
           <div class="buttons-container">
             <button class="info-btn" data-action="info"><span class="info-text">Info</span></button>
             <button class="cart-btn" data-action="cart" title="Agregar al carrito">🛒</button>

@@ -261,14 +261,14 @@
           container.innerHTML = list.map(p => {
             const imgSrc = p.imagenId
               ? `/api/galeria_v2/img/${p.imagenId}`           // 👈 endpoint correcto
-              : '/img/placeholder.png';
+              : '/assets/placeholder.svg';
 
             return `
               <div class="product-card" onclick="viewProduct(${p.id})">
                 <img class="product-image"
                      src="${imgSrc}"
                      alt="${p.nombre}"
-                     onerror="this.onerror=null;this.src='/img/placeholder.png'">
+                     onerror="this.onerror=null;this.src='/assets/placeholder.svg'">
                 <div class="product-details">
                   <div class="product-name">${p.nombre}</div>
                   <div class="product-price">${money(p.precio)}</div>

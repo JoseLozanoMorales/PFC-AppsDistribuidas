@@ -197,7 +197,7 @@
     if (path === '/api/carrito/resumen' && method === 'GET') {
       return jsonResponse(await resumenCarrito());
     }
-    if (/^\/api\/(galeria_v2|busqueda|report|pagos|tipo_metodopago|mis-metodos-pago|encuesta|sugerencias)(\/|$)/.test(path)) {
+    if (/^\/api\/(busqueda|report|pagos|tipo_metodopago|mis-metodos-pago|encuesta|sugerencias)(\/|$)/.test(path)) {
       return pendingResponse(path);
     }
     if (/^\/api\/usuarios\/[^/]+\/(avatar|sugerencias)(\/|$)/.test(path)) {

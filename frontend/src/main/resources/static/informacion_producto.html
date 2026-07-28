@@ -224,12 +224,12 @@
 
       //Convierte el id de la galería en una URL de imagen
       function imgUrl(gid){
-        return gid ? `/api/galeria_v2/img/${gid}` : '/img/placeholder.png';
+        return gid ? `/api/galeria_v2/img/${gid}` : '/assets/placeholder.svg';
       }
 
       function show(i){
         if (!gal.length){
-          mainImg.src = '/img/placeholder.png';
+          mainImg.src = '/assets/placeholder.svg';
           return;
         }
         idx = (i + gal.length) % gal.length;
@@ -395,7 +395,7 @@
           show(0);
 
           // Fallback de imagen principal
-          mainImg.onerror = ()=> { mainImg.onerror=null; mainImg.src='/img/placeholder.png'; };
+          mainImg.onerror = ()=> { mainImg.onerror=null; mainImg.src='/assets/placeholder.svg'; };
 
         }catch(err){
           console.error(err);

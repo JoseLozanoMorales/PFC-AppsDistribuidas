@@ -80,6 +80,26 @@ public class ProductoService {
         return rows.isEmpty() ? null : rows.get(0);
     }
 
+    public List<Map<String, Object>> galeriaProducto(Integer productoId, String scope) {
+        return jdbc.queryForList("""
+                select galeria_id, descripcion, es_portada, para_galeria, para_menu,
+                       posicion_galeria, posicion_menu, mime_type, peso_bytes, ancho, alto, habilitado
+                from public.fn_galeria_v2_listar(?, ?)
+                """, productoId, scope).stream().map(row -> {
+            Map<String, Object> out = new LinkedHashMap<>(row);
+            out.put("id", row.get("galeria_id"));
+            out.put("galeriaId", row.get("galeria_id"));
+            out.put("esPortada", row.get("es_portada"));
+            out.put("paraGaleria", row.get("para_galeria"));
+            out.put("paraMenu", row.get("para_menu"));
+            out.put("posicionGaleria", row.get("posicion_galeria"));
+            out.put("posicionMenu", row.get("posicion_menu"));
+            out.put("mimeType", row.get("mime_type"));
+            out.put("pesoBytes", row.get("peso_bytes"));
+            return out;
+        }).collect(Collectors.toList());
+    }
+
     public List<Map<String, Object>> buscar(Map<String, Object> filtros) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(filtros == null ? Map.of() : filtros);
         return jdbc.queryForList("select * from productos.fn_buscar_productos_json(?::jsonb)", json);
@@ -96,7 +116,9 @@ public class ProductoService {
         }
 
         Map<String, Object> out = new LinkedHashMap<>(base.get(0));
-        out.put("galeria", jdbc.queryForList("select * from productos.fn_producto_galeria(?)", id));
+        out.put("galeria", jdbc.queryForList("select * from productos.fn_producto_galeria(?)", id).stream()
+                .map(this::normalizeGaleriaRow)
+                .collect(Collectors.toList()));
         return out;
     }
 
@@ -138,6 +160,17 @@ public class ProductoService {
     private static String slug(String value) {
         String normalized = Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return normalized.replaceAll("[^\\w]+", "-").toLowerCase().replaceAll("(^-|-$)", "");
+    }
+
+    private Map<String, Object> normalizeGaleriaRow(Map<String, Object> row) {
+        Map<String, Object> out = new LinkedHashMap<>(row);
+        out.put("id", row.get("galeria_id"));
+        out.put("galeriaId", row.get("galeria_id"));
+        out.put("esPortada", row.get("es_portada"));
+        out.put("paraGaleria", row.get("para_galeria"));
+        out.put("posicionGaleria", row.get("posicion_galeria"));
+        out.put("mimeType", row.get("mime_type"));
+        return out;
     }
 
     public record Media(byte[] bytes, String mimeType, Long length) {

@@ -268,7 +268,7 @@
             return nested[0];
         }
         function buildImgSrcFromId(id){
-            return id ? `/api/galeria_v2/img/${id}` : '/img/placeholder.png';
+            return id ? `/api/galeria_v2/img/${id}` : '/assets/placeholder.svg';
         }
         async function fetchProductAny(id){
             const tries = [
@@ -384,8 +384,8 @@
 
                 // imagen y datos (nombre/IVA) del producto: placeholder inmediato + carga real desde productos-service
                 const imgEl = row.querySelector('img[data-pid]');
-                imgEl.src = '/img/placeholder.png';
-                imgEl.addEventListener('error', ()=> { imgEl.src = '/img/placeholder.png'; });
+                imgEl.src = '/assets/placeholder.svg';
+                imgEl.addEventListener('error', ()=> { imgEl.src = '/assets/placeholder.svg'; });
                 hydrateItemImage(pid, it, imgEl);
                 hydrateItemInfo(pid, row);
 
