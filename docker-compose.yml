@@ -230,9 +230,32 @@ services:
       CRDB_DATASOURCE_PASSWORD: ""
       CRDB_RETRY_MAX_ATTEMPTS: 3
       CRDB_RETRY_DELAY_MS: 100
-      VENTAS_SERVICE_URL: http://ventas-service:8086
+      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
       PRODUCTOS_SERVICE_URL: http://productos-service:8081
       USUARIOS_SERVICE_URL: http://usuarios-service:8085
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+      ventas-crdb-service:
+        condition: service_started
+    networks:
+      - default
+      - pfc-net
+
+  ventas-crdb-service:
+    build:
+      context: ./ventas-service
+    container_name: ventas-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "8186:8086"
+    environment:
+      SERVER_PORT: 8086
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+      INVENTARIO_SERVICE_URL: http://inventario-service:8082
     depends_on:
       crdb-init:
         condition: service_completed_successfully

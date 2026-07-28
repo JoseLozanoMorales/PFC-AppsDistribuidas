@@ -114,10 +114,57 @@ Total cardinality: 74
 Exit code: 0
 ```
 
+## Compatibilidad transaccional de extremo a extremo
+
+Se incorporaron al esquema distribuido las tablas de carrito y factura. Para no
+romper el sistema heredado, Facturación selecciona la implementación por perfil:
+
+- perfil normal: conserva los procedimientos almacenados de PostgreSQL;
+- perfil `crdb`: usa SQL portable y transacciones `SERIALIZABLE`.
+
+El dataset analítico ocupa los identificadores de orden `1..500000`. La
+secuencia transaccional se sincroniza idempotentemente con el mayor ID existente
+y reserva como mínimo el rango desde `1000001`, evitando colisiones al reaplicar
+el esquema.
+
+El 2026-07-28 se ejecutó por REST el flujo real:
+
+```text
+GET  /api/carrito/2
+POST /api/carrito/1/agregar        productoId=4, cantidad=1
+POST /api/ordenes/checkout         usuarioId=2, direccionId=8, metodopagoId=1
+```
+
+Resultado devuelto por `pedidos-crdb-service`:
+
+```json
+{
+  "ordenId": 1000002,
+  "usuarioId": 2,
+  "direccionId": 8,
+  "metodopagoId": 1,
+  "subtotal": 214.99,
+  "total": 214.9900,
+  "fecha": "2026-07-28"
+}
+```
+
+Comprobación directa en CockroachDB:
+
+```text
+orden_id  fecha       usuario_id  detalles  factura_id  numero
+1000002   2026-07-28  2           1         2           FAC-E3-1000002
+
+items_carrito_restantes
+0
+```
+
+Esto demuestra que la orden y su detalle se confirmaron en CockroachDB, el
+carrito se vació, Facturación leyó la orden ya confirmada, generó la factura y
+comunicó la salida a Inventario.
+
 ## Alcance pendiente
 
 - Falta provocar una colisión serializable controlada para demostrar el
   incremento de `crdb_transaction_retries_total`.
-- El checkout completo requiere migrar al esquema distribuido las tablas del
-  carrito; la comprobación actual cubre lectura de órdenes y conectividad real.
 - El vídeo de tolerancia a fallos permanece pendiente de grabación.

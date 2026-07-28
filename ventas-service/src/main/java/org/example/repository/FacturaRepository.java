@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.example.model.Factura;
 import org.example.model.FacturaDetalle;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.sql.CallableStatement;
@@ -15,7 +16,8 @@ import java.sql.Types;
 import java.util.List;
 
 @Repository
-public class FacturaRepository {
+@Profile("!crdb")
+public class FacturaRepository implements FacturaStore {
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
