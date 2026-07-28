@@ -749,7 +749,9 @@
 
         try {
             const res  = await fetch('/api/categorias', { credentials:'include' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const cats = await res.json();
+            if (!Array.isArray(cats)) throw new Error('La respuesta de categorias no es una lista');
 
             // Pinta botones <button> por cada categoría
             grid.innerHTML = cats.map(c => `

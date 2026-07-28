@@ -6,9 +6,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductoService {
@@ -34,6 +36,48 @@ public class ProductoService {
 
     public List<Map<String, Object>> masVendidos(int limite) {
         return jdbc.queryForList("select * from productos.productos_mas_vendidos_menu(?)", Math.max(limite, 1));
+    }
+
+    public List<Map<String, Object>> recientesMenu(int limit) {
+        int safeLimit = (limit <= 0 || limit > 10) ? 5 : limit;
+        return jdbc.queryForList("""
+                select producto_id, nombre, precio, fecha, galeria_id, mime_type
+                from public.f_productos_recientes_con_imagen_menu(?)
+                """, safeLimit).stream().map(row -> {
+            Map<String, Object> out = new LinkedHashMap<>();
+            out.put("productoId", row.get("producto_id"));
+            out.put("nombre", row.get("nombre"));
+            out.put("precio", row.get("precio"));
+            out.put("fecha", row.get("fecha"));
+            out.put("galeriaId", row.get("galeria_id"));
+            out.put("mimeType", row.get("mime_type"));
+            return out;
+        }).collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> categorias() {
+        return jdbc.queryForList("select * from public.fn_listar_categorias()").stream().map(row -> {
+            String nombre = String.valueOf(row.get("nombre"));
+            Map<String, Object> out = new LinkedHashMap<>();
+            out.put("id", row.get("id_categoria"));
+            out.put("id_categoria", row.get("id_categoria"));
+            out.put("nombre", nombre);
+            out.put("slug", slug(nombre));
+            return out;
+        }).collect(Collectors.toList());
+    }
+
+    public Media galeriaContenido(Integer galeriaId) {
+        List<Media> rows = jdbc.query(
+                "select contenido, mime_type, peso_bytes from public.galeria_productos_v2 where galeria_id = ?",
+                (rs, i) -> new Media(
+                        rs.getBytes("contenido"),
+                        rs.getString("mime_type"),
+                        rs.getObject("peso_bytes") instanceof Number number ? number.longValue() : null
+                ),
+                galeriaId
+        );
+        return rows.isEmpty() ? null : rows.get(0);
     }
 
     public List<Map<String, Object>> buscar(Map<String, Object> filtros) throws JsonProcessingException {
@@ -89,5 +133,13 @@ public class ProductoService {
         }
         jdbc.update("call productos.sp_actualizar_producto_v2_json(?::jsonb, ?)",
                 objectMapper.writeValueAsString(payload), usuario);
+    }
+
+    private static String slug(String value) {
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return normalized.replaceAll("[^\\w]+", "-").toLowerCase().replaceAll("(^-|-$)", "");
+    }
+
+    public record Media(byte[] bytes, String mimeType, Long length) {
     }
 }

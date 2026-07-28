@@ -2,6 +2,8 @@ package com.example.productos.controller;
 
 import com.example.productos.service.ProductoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,37 @@ public class ProductoController {
     @GetMapping("/api/productos/mas-vendidos")
     public List<Map<String, Object>> masVendidos(@RequestParam(defaultValue = "3") int limite) {
         return service.masVendidos(limite);
+    }
+
+    @GetMapping("/api/productos/recientes-menu")
+    public List<Map<String, Object>> recientesMenu(@RequestParam(defaultValue = "5") int limit) {
+        return service.recientesMenu(limit);
+    }
+
+    @GetMapping("/api/categorias")
+    public List<Map<String, Object>> categorias() {
+        return service.categorias();
+    }
+
+    @GetMapping("/api/galeria/{galeriaId}/contenido")
+    public ResponseEntity<ByteArrayResource> galeriaContenido(@PathVariable Integer galeriaId) {
+        ProductoService.Media media = service.galeriaContenido(galeriaId);
+        if (media == null || media.bytes() == null || media.bytes().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(mediaType(media.mimeType()))
+                .contentLength(media.length() != null ? media.length() : media.bytes().length)
+                .body(new ByteArrayResource(media.bytes()));
+    }
+
+    @RequestMapping(path = "/api/galeria/{galeriaId}/contenido", method = RequestMethod.HEAD)
+    public ResponseEntity<Void> galeriaContenidoHead(@PathVariable Integer galeriaId) {
+        ProductoService.Media media = service.galeriaContenido(galeriaId);
+        if (media == null || media.bytes() == null || media.bytes().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/api/productos/buscar")
@@ -143,5 +176,15 @@ public class ProductoController {
             @RequestHeader(value = "X-Usuario", required = false) String usuario) throws JsonProcessingException {
         service.actualizarBasico(id, body, usuario);
         return ResponseEntity.ok(Map.of("ok", true));
+    }
+
+    private static MediaType mediaType(String value) {
+        try {
+            return value != null && !value.isBlank()
+                    ? MediaType.parseMediaType(value)
+                    : MediaType.APPLICATION_OCTET_STREAM;
+        } catch (Exception ignored) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
     }
 }
