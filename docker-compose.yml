@@ -192,9 +192,9 @@ services:
     command:
       - >
         cockroach init --insecure --host=crdb-1:26257 2>/dev/null || true;
-        cockroach sql --insecure --host=crdb-1:26257 --file=/db/schema.sql
+        cockroach sql --insecure --host=crdb-1:26257 --file=/docs/db/schema.sql
     volumes:
-      - ./db:/db:ro
+      - ./docs/db/schema.sql:/docs/db/schema.sql:ro
     networks: [pfc-net]
     restart: "no"
 
