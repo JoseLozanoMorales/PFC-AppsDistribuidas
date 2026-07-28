@@ -9,6 +9,7 @@ import com.example.pedidos.model.Orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -30,7 +31,7 @@ public class OrdenPersistenceService {
         this.usuarioClient = usuarioClient;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Orden crearOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId) {
 
         // 0) Validar usuario y dirección antes de tocar la base -- evita crear

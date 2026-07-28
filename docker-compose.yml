@@ -215,6 +215,31 @@ services:
     networks: [pfc-net]
     restart: "no"
 
+  pedidos-crdb-service:
+    build:
+      context: ./pedidos-service
+    container_name: pedidos-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "8183:8083"
+    environment:
+      SERVER_PORT: 8083
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+      CRDB_RETRY_MAX_ATTEMPTS: 3
+      CRDB_RETRY_DELAY_MS: 100
+      VENTAS_SERVICE_URL: http://ventas-service:8086
+      PRODUCTOS_SERVICE_URL: http://productos-service:8081
+      USUARIOS_SERVICE_URL: http://usuarios-service:8085
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    networks:
+      - default
+      - pfc-net
+
 volumes:
   crdb1-data:
   crdb2-data:
