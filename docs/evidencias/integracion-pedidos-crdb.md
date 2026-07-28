@@ -165,6 +165,7 @@ comunicó la salida a Inventario.
 
 ## Alcance pendiente
 
-- Falta provocar una colisión serializable controlada para demostrar el
-  incremento de `crdb_transaction_retries_total`.
 - El vídeo de tolerancia a fallos permanece pendiente de grabación.
+
+La colisión serializable y el incremento real del contador quedaron registrados
+en `docs/evidencias/colision-serializable-controlada.md`.

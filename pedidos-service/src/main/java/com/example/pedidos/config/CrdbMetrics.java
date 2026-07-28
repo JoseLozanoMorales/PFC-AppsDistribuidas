@@ -52,4 +52,8 @@ public class CrdbMetrics {
     public void recordRetry() {
         transactionRetries.increment();
     }
+
+    public double retryCount() {
+        return transactionRetries.count();
+    }
 }
