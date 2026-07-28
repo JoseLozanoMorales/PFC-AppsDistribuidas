@@ -33,8 +33,7 @@ public class OrdenPersistenceService {
     @Transactional
     public Orden crearOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId) {
 
-        // 0) Validar usuario y dirección antes de tocar la base -- evita crear
-        //    órdenes con datos inconsistentes o inexistentes.
+        // 0) Validar usuario y dirección
         UsuarioInfo usuario;
         try {
             usuario = usuarioClient.obtenerUsuario(usuarioId);
@@ -49,6 +48,15 @@ public class OrdenPersistenceService {
         if (!direccionValida) {
             throw new IllegalArgumentException(
                     "La direccion " + direccionId + " no pertenece al usuario " + usuarioId + " o está deshabilitada");
+        }
+
+        // 0.1) Validar método de pago
+        String sqlMetodo = "SELECT COUNT(*) FROM pedidos.metodopago " +
+                "WHERE metodopago_id = ? AND usuario_id = ? AND habilitado = true";
+        Integer countMetodo = jdbcTemplate.queryForObject(sqlMetodo, Integer.class, metodopagoId, usuarioId);
+        if (countMetodo == null || countMetodo == 0) {
+            throw new IllegalArgumentException(
+                    "El metodo de pago " + metodopagoId + " no existe, no pertenece al usuario " + usuarioId + " o esta deshabilitado");
         }
 
         // 1) Buscar carrito activo
