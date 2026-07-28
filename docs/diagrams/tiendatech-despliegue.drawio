@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="tiendatech-despliegue" name="Página-1">
+    <mxGraphModel dx="2043" dy="1212" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="rest-5" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c5" value="REST :8084">
+          <mxGeometry relative="1" x="-0.2162" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="440.03" y="390" />
+              <mxPoint x="920.03" y="390" />
+              <mxPoint x="920.03" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-3" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940.03" y="510" />
+              <mxPoint x="940.03" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rest-2" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c2" value="REST :8081">
+          <mxGeometry relative="1" x="-0.7149" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="800" y="320" />
+              <mxPoint x="800" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-0" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="965" y="302.51" />
+              <mxPoint x="965" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="browser" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0DD;strokeColor=#B85C00;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="Navegador&lt;div&gt;Cliente HTTP&lt;/div&gt;" vertex="1">
+          <mxGeometry height="130" width="200" x="10" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="c0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="Frontend&lt;div&gt;Contenedor Docker&lt;/div&gt;&lt;div&gt;Puerto 8080&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="220" x="330" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="ProductosContenedor DockerPuerto 8081" vertex="1">
+          <mxGeometry height="135" width="220" x="681" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="InventarioContenedor DockerPuerto 8082" vertex="1">
+          <mxGeometry height="135" width="220" x="1041" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="Pedidos&lt;div&gt;Contenedor Docker&lt;/div&gt;&lt;div&gt;Puerto 8083&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="220" x="330" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="Órdenes / proveedores&lt;div&gt;Contenedor Docker&lt;/div&gt;&lt;div&gt;Puerto 8084&lt;/div&gt;" vertex="1">
+          <mxGeometry height="135" width="220" x="681" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="UsuariosContenedor DockerPuerto 8085" vertex="1">
+          <mxGeometry height="135" width="220" x="1041" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="VentasContenedor DockerPuerto 8086" vertex="1">
+          <mxGeometry height="135" width="220" x="1160" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="db" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEE5FF;strokeColor=#6A45A5;strokeWidth=2;fontSize=16;fontFamily=Arial;verticalAlign=middle;spacing=8;" value="PostgreSQL 18&lt;div&gt;TiendaTechV19&lt;/div&gt;&lt;div&gt;Host:5432&lt;/div&gt;&lt;div&gt;host.docker.internal&lt;/div&gt;" vertex="1">
+          <mxGeometry height="200" width="285" x="1380" y="317.5" as="geometry" />
+        </mxCell>
+        <mxCell id="web" edge="1" parent="1" source="browser" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c0" value="HTTP :8080">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rest-1" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c1" value="REST :8080">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="630" y="280" />
+              <mxPoint x="630" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rest-3" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c3" value="REST :8082">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rest-4" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c4" value="REST :8083">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480.03" y="400" />
+              <mxPoint x="600.03" y="400" />
+              <mxPoint x="600.03" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rest-6" edge="1" parent="1" source="c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="c6" value="REST :8085">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440.03" y="120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-1" edge="1" parent="1" source="c1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="791" y="417.49" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-2" edge="1" parent="1" source="c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1320.49" y="302.51" />
+              <mxPoint x="1320.49" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-4" edge="1" parent="1" source="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000.03" y="527.49" />
+              <mxPoint x="1000.03" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-5" edge="1" parent="1" source="c5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1320.49" y="527.49" />
+              <mxPoint x="1320.49" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jdbc-6" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=2;fontSize=14;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="db" value="JDBC :5432">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

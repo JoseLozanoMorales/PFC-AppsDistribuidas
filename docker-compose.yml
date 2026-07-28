@@ -29,7 +29,7 @@ services:
       - "8081:8081"
     environment:
       SERVER_PORT: 8081
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
 
@@ -41,7 +41,7 @@ services:
       - "8082:8082"
     environment:
       SERVER_PORT: 8082
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
 
@@ -53,7 +53,7 @@ services:
       - "8083:8083"
     environment:
       SERVER_PORT: 8083
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       VENTAS_SERVICE_URL: http://ventas-service:8086
@@ -69,7 +69,7 @@ services:
       - "8084:8084"
     environment:
       SERVER_PORT: 8084
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       INVENTARIO_SERVICE_URL: http://inventario-service:8082
@@ -82,7 +82,7 @@ services:
       - "8085:8085"
     environment:
       SERVER_PORT: 8085
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       TT_MAIL_USERNAME: ${TT_MAIL_USERNAME}
@@ -98,7 +98,111 @@ services:
       - "8086:8086"
     environment:
       SERVER_PORT: 8086
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV21}
+      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       INVENTARIO_SERVICE_URL: http://inventario-service:8082
+
+  # Entrega 3: cluster de datos distribuido. El perfil evita modificar el
+  # arranque normal de los servicios mientras se completa la migración.
+  crdb-1:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-1
+    profiles: ["e3-crdb"]
+    command:
+      - start
+      - --insecure
+      - --advertise-addr=crdb-1:26257
+      - --listen-addr=0.0.0.0:26257
+      - --http-addr=0.0.0.0:8080
+      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --locality=region=local,zone=z1
+    ports:
+      - "26257:26257"
+      - "8091:8080"
+    volumes:
+      - crdb1-data:/cockroach/cockroach-data
+    networks: [pfc-net]
+    healthcheck:
+      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  crdb-2:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-2
+    profiles: ["e3-crdb"]
+    command:
+      - start
+      - --insecure
+      - --advertise-addr=crdb-2:26257
+      - --listen-addr=0.0.0.0:26257
+      - --http-addr=0.0.0.0:8080
+      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --locality=region=local,zone=z2
+    ports:
+      - "26258:26257"
+      - "8092:8080"
+    volumes:
+      - crdb2-data:/cockroach/cockroach-data
+    networks: [pfc-net]
+    healthcheck:
+      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  crdb-3:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-3
+    profiles: ["e3-crdb"]
+    command:
+      - start
+      - --insecure
+      - --advertise-addr=crdb-3:26257
+      - --listen-addr=0.0.0.0:26257
+      - --http-addr=0.0.0.0:8080
+      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --locality=region=local,zone=z3
+    ports:
+      - "26259:26257"
+      - "8093:8080"
+    volumes:
+      - crdb3-data:/cockroach/cockroach-data
+    networks: [pfc-net]
+    healthcheck:
+      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  crdb-init:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-init
+    profiles: ["e3-crdb"]
+    depends_on:
+      crdb-1:
+        condition: service_started
+      crdb-2:
+        condition: service_started
+      crdb-3:
+        condition: service_started
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        cockroach init --insecure --host=crdb-1:26257 2>/dev/null || true;
+        cockroach sql --insecure --host=crdb-1:26257 --file=/db/schema.sql
+    volumes:
+      - ./db:/db:ro
+    networks: [pfc-net]
+    restart: "no"
+
+volumes:
+  crdb1-data:
+  crdb2-data:
+  crdb3-data:
+
+networks:
+  pfc-net:
+    driver: bridge
