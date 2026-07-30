@@ -20,7 +20,7 @@
 \usepackage{booktabs}
 \usepackage[style=ieee, backend=bibtex]{biblatex}
 \usepackage{csquotes}
-\usepackage{amsmath}
+\usepackage{amsmath,amssymb}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage[T1]{fontenc}
@@ -768,11 +768,9 @@ volumes:
 
     \section{Trabajos relacionados}
 
-    El desarrollo de plataformas modernas de comercio electrónico optimizadas para la configuración de productos complejos ha impulsado una notable evolución en la literatura científica. A continuación, se presenta una síntesis integradora de los enfoques metodológicos actuales, estructurada mediante el mapeo de problemas y tecnologías de vanguardia indexadas entre los años 2020 y 2026.
+    El desarrollo de plataformas modernas de comercio electrónico optimizadas para la configuración de productos complejos ha impulsado una notable evolución en la literatura científica. A continuación, se presenta una síntesis integradora de los enfoques metodológicos actuales, estructurada mediante el mapeo de problemas y tecnologías de vanguardia indexadas entre los años 2020 y 2025.
 
     \subsection{Mapeo de Problemas y Enfoques Metodológicos}
-
-    En la capa de persistencia, la literatura reciente confirma que la estrategia de particionamiento debe responder tanto a la distribución de los datos como al patrón de acceso. \textcite{kang2021jigsaw} proponen particiones irregulares orientadas por la carga para reducir lecturas redundantes, mientras que \textcite{zhou2023grep} automatizan la selección de claves de particionado mediante aprendizaje sobre grafos. Desde la perspectiva de verificación, \textcite{rigger2020querypartitioning} demuestran que la partición equivalente de consultas permite descubrir errores lógicos en gestores como CockroachDB. Estudios aplicados complementarios comparan particionamiento horizontal, vertical, por rango, hash e híbrido en almacenes cloud y lagos de datos, destacando sus efectos sobre latencia, paralelismo y consumo de recursos \cite{anala2024scalable,gundapaneni2025partitioning,katari2023datalakes}.
 
     El primer núcleo problemático identificado en la literatura corresponde a la rigidez y la falta de contextualización en las recomendaciones tradicionales de catálogo. Trabajos como el de \textcite{vinayababu2025revolutionizing} y \textcite{khadka2025review} abordan la transición desde el filtrado colaborativo clásico hacia arquitecturas híbridas distribuidas, demostrando que la diversificación y la escalabilidad del catálogo son críticas para mitigar la sobrecarga de información en entornos transaccionales de alta concurrencia. En este sentido, la optimización matemática de estos catálogos ha sido evaluada empíricamente por \textcite{tokala2025empirical}, quien demuestra que variantes avanzadas de factorización de matrices (como SVD++) minimizan el error cuadrático medio (RMSE) en el backend analítico de las plataformas comerciales.
 
@@ -806,6 +804,75 @@ volumes:
     \subsection{Declaración del Vacío Científico (Gap Statement)}
 
     A pesar de los avances evidenciados en el mapeo previo, la revisión de la literatura expone una desconexión metodológica entre los entornos de asistencia conversacional basados en LLM y los motores de validación por restricciones lógicas. Mientras algunas investigaciones resuelven el procesamiento conversacional de forma aislada \cite{munson2025review}, otras abordan las colisiones de componentes mediante modelos matemáticos confinados a dominios especializados \cite{velten2025solutions}. TiendaTech plantea como evolución futura la integración de ambos enfoques. La Entrega 3 no implementa esta contribución completa: proporciona y valida la infraestructura distribuida transaccional sobre la cual podría incorporarse posteriormente.
+
+    \subsection{Distribución de datos: fragmentación y colocalización}
+
+    El eje revisado en las subsecciones anteriores corresponde al problema heredado de E1 y E2, centrado en la recomendación y la validación de compatibilidad. La Entrega 3 incorpora un segundo eje, propio de esta etapa: la distribución del dominio transaccional y el procesamiento analítico sobre el historial de pedidos. Concretamente, el esquema implementado fragmenta \texttt{pedidos.orden} por trimestres de \texttt{fecha} y favorece el acceso conjunto de \texttt{usuarios.usuario} $\ltimes$ \texttt{pedidos.orden} mediante \texttt{usuario\_id}. Sobre ese historial, el avance ejecuta un análisis top-N trimestral y una segmentación monetaria de clientes; el recomendador colaborativo y la segmentación RFM completa permanecen como extensiones posteriores. Las subsecciones siguientes revisan la literatura indexada del período 2020--2024 para esos frentes.
+
+    \textcite{ozsu2020} establecen el marco con el que se justifica el esquema adoptado: la distinción entre fragmentación horizontal primaria, definida por predicados sobre la propia relación, y derivada, que propaga el predicado mediante la semi-unión, junto con las reglas de corrección que todo particionamiento debe satisfacer. Su tratamiento es analítico y supone conocida la carga de consultas. \textcite{liu2024} recorren el estado del arte del particionamiento de datos y muestran que las propuestas actuales se organizan según el entorno de despliegue y se apoyan en características del esquema, de los datos, de la carga y de métricas de ejecución, con etapas diferenciadas de inicialización y optimización del esquema. \textcite{abdalla2023} avanzan en esa dirección mediante un enfoque basado en agrupamiento jerárquico para el diseño de bases relacionales distribuidas.
+
+    Ambos trabajos recientes apuntan a la generación automática del esquema sobre cargas sintéticas. Ninguno aborda el caso inverso, que es el de este avance: un esquema derivado manualmente desde un conjunto pequeño y fijo de consultas de negocio, cuya validación consiste en comprobar que esas consultas efectivamente descartan particiones al ejecutarse.
+
+    Dos propuestas recientes muestran hasta dónde ha llegado esa automatización. \textcite{kang2021jigsaw} plantean un motor de almacenamiento con particiones irregulares guiadas por la carga, orientado a reducir la lectura de datos no solicitados, y \textcite{zhou2023grep} seleccionan las claves de particionado mediante aprendizaje sobre grafos. Ambas suponen la disponibilidad de trazas de ejecución suficientes para alimentar la decisión, condición que no se cumple en un sistema que todavía no ha entrado en operación. Por esa razón el esquema de este avance se deriva de las consultas de referencia declaradas y no de un histórico observado.
+
+    \subsection{Motores SQL distribuidos}
+
+    \textcite{taft2020} describen un motor que fragmenta las tablas en rangos ordenados por clave, los replica por consenso y designa un \emph{leaseholder} por rango, mientras la capa SQL empuja los operadores hacia los nodos que poseen los datos. El trabajo reporta que los rangos se dividen tanto por tamaño como por carga para reducir puntos calientes, y evalúa el sistema sobre cargas OLTP de tipo industrial y despliegues multirregión.
+
+    Dos aspectos quedan fuera de ese alcance y son los que importan para este avance. Primero, no se examina un esquema particionado por fecha, donde las escrituras se concentran por construcción en el rango más reciente; la división por carga mitiga el desbalance, pero el análisis no cubre ese patrón. Segundo, la evaluación se realiza sobre clústeres de decenas de nodos, de modo que el comportamiento en un despliegue reducido no se deriva de esos resultados y debe medirse de forma independiente.
+
+    En el plano de la verificación, \textcite{rigger2020querypartitioning} muestran que descomponer una consulta en particiones lógicas equivalentes y comparar sus resultados permite detectar errores de correctitud en gestores relacionales, incluido CockroachDB. La técnica pertenece a la prueba de software y no al diseño físico de la distribución, pero resulta pertinente aquí porque advierte que un motor distribuido puede devolver resultados incorrectos sin fallar de forma visible, un riesgo que ninguna medición de latencia detecta.
+
+    \subsection{Analítica paralela sobre el historial transaccional}
+
+    \textcite{ahmed2020} comparan el desempeño de Hadoop y Spark sobre conjuntos de datos de gran escala con la suite HiBench, y fijan el tipo de evidencia experimental que se espera de esta clase de medición: cargas diversas, tamaños crecientes y repeticiones por configuración. El régimen que estudian, sin embargo, es el opuesto al de este avance: allí el cómputo útil domina el tiempo total, mientras que en un historial de pedidos de escala académica el costo fijo de coordinación pesa proporcionalmente mucho más. Esa diferencia no es un detalle de magnitud, sino la condición que determina si el procesamiento se acelera o se degrada al añadir recursos.
+
+    \subsection{Límites del paralelismo}
+
+    \textcite{ahmed2021} constituyen el antecedente más directo para la medición del procesamiento paralelo. Sobre un clúster físico de un nodo maestro y nueve esclavos, muestran que en varias cargas de Spark el tiempo de ejecución \emph{aumenta} al agregar ejecutores, porque la porción serial crece de forma proporcional a la raíz del número de ejecutores. A partir de esa observación proponen el modelo
+
+    \begin{equation}
+        t = \frac{a}{n_{ejec}} + b\sqrt{n_{ejec}}
+        \label{eq:modelo-paralelizacion}
+    \end{equation}
+
+    donde $t$ es el tiempo de ejecución, $n_{ejec}$ el número de ejecutores, y $a$ y $b$ constantes ajustadas empíricamente para un tamaño de problema fijo.
+
+    Al contrastar el ajuste del modelo con las dos cotas clásicas mediante el coeficiente de determinación, la Ecuación \eqref{eq:modelo-paralelizacion} resulta mejor en 25 de 35 curvas, frente a 4 de la formulación de Amdahl \cite{amdahl1967} y 6 de la de Gustafson \cite{gustafson1988}. Dos consecuencias son aplicables a la definición de las métricas de esta entrega. La primera es que las cotas clásicas describen únicamente el caso en que el tiempo desciende hasta converger, y no el caso en que se degrada. La segunda es que con tamaños de problema pequeños los costos generales del clúster llegan a opacar el patrón, lo que obliga a reportar el volumen procesado junto a cualquier medición de aceleración. Por ambas razones, las cotas de Amdahl y Gustafson se adoptan como referencia de contraste del \emph{speedup} observado y no como valor esperado.
+
+    \subsection{Matriz comparativa del eje de distribución y analítica}
+
+    De forma análoga a la Tabla \ref{tab:estado_arte}, la Tabla \ref{tab:estado_arte_distribucion} condensa el aporte de cada fuente de este segundo eje y la limitación que deja abierta respecto del alcance de la Entrega 3.
+
+    \begin{table}[htbp]
+        \centering
+        \caption{Matriz comparativa del eje de distribución de datos y analítica paralela.}
+        \label{tab:estado_arte_distribucion}
+        \small
+        \begin{tabularx}{\textwidth}{p{3cm} X X}
+\toprule
+\textbf{Referencia} & \textbf{Aporte principal} & \textbf{Limitación para este avance} \\
+\midrule
+\textcite{ozsu2020} & Marco formal de fragmentación primaria y derivada. & Supone conocida la carga de consultas. \\
+\textcite{taft2020} & Rangos ordenados, consenso y capa SQL distribuida. & Clústeres de decenas de nodos; sin particionamiento por fecha. \\
+\textcite{ahmed2020} & Comparativa Hadoop--Spark con la suite HiBench. & Volúmenes en los que el cómputo útil domina. \\
+\textcite{rigger2020querypartitioning} & Detección de errores lógicos por partición de consultas. & Técnica de prueba, no de diseño físico. \\
+\textcite{kang2021jigsaw} & Particiones irregulares guiadas por la carga. & Requiere trazas de ejecución previas. \\
+\textcite{ahmed2021} & Modelo de paralelización contrastado contra las cotas clásicas. & Ajustado a cargas HiBench, no de comercio electrónico. \\
+\textcite{zhou2023grep} & Selección de claves mediante aprendizaje sobre grafos. & Requiere histórico de ejecución. \\
+\textcite{abdalla2023} & Diseño de bases distribuidas por agrupamiento jerárquico. & Validado sobre cargas sintéticas. \\
+\textcite{liu2024} & Revisión del estado del arte del particionamiento. & Orientada a la generación automática del esquema. \\
+\bottomrule
+        \end{tabularx}
+    \end{table}
+
+    \subsection{Posición del avance E3 en este eje}
+
+    Los trabajos revisados abordan las piezas por separado y a escalas mayores: el diseño del particionamiento como problema de optimización automática alimentado por trazas de ejecución, el motor distribuido como sistema evaluado en clústeres grandes, y el desempeño del procesamiento paralelo en volúmenes donde la coordinación resulta despreciable. La aportación propia de esta etapa consiste en derivar el esquema de fragmentación y colocalización a partir de un conjunto acotado de consultas de negocio declaradas de antemano, y en medir la aceleración observada en el régimen de datos donde, según la literatura reciente, las cotas teóricas dejan de ser confiables.
+
+    \subsubsection*{Nota sobre las fuentes primarias}
+
+    Las referencias \cite{amdahl1967}, \cite{gustafson1988} y \cite{zhou2008} corresponden a formulaciones anteriores al período de revisión y se conservan porque la atribución de un método exige citar su fuente original: las dos cotas clásicas de aceleración y el algoritmo de mínimos cuadrados alternados sobre el que se construyen los recomendadores colaborativos distribuidos. La discusión del estado del arte de este eje se apoya en las nueve fuentes indexadas del período 2020--2024 recogidas en la Tabla \ref{tab:estado_arte_distribucion}.
 
     \section{Decisiones arquitectónicas y criterios de calidad heredados}
 
