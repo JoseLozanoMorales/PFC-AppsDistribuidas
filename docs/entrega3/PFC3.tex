@@ -206,169 +206,7 @@
 
     \textbf{Keywords:} Microservices, Electronic Commerce, Distributed Systems, REST API, Docker, PostgreSQL.
 
-    \newpage
 
-    \section{Registro de Cambios respecto a la Entrega 2}
-
-    La tercera entrega transforma el diseño arquitectónico de la Entrega 2 en una implementación distribuida verificable. Los cambios incorporados cubren construcción, despliegue, integración entre servicios, persistencia y validación cuantitativa. La Tabla
-    \ref{tab:registro_cambios} resume los cambios más relevantes.
-
-    \begin{table}[H]
-        \centering
-        \caption{Registro de cambios respecto a la Entrega 2}
-        \label{tab:registro_cambios}
-        \small
-        \begin{tabularx}{\textwidth}{p{2.8cm} p{2.8cm} p{3.2cm} X}
-\toprule
-\textbf{Aspecto} & \textbf{Entrega 2} & \textbf{Entrega 3} & \textbf{Evidencia verificable} \\
-\midrule
-
-Arquitectura &
-Microservicios definidos conceptualmente &
-Frontend y seis microservicios implementados &
-Siete imágenes Docker construidas y siete contenedores activos. \\
-\midrule
-
-Comunicación &
-Contratos REST propuestos &
-Clientes REST integrados entre dominios &
-Pedidos consulta usuarios y productos, genera facturas y activa movimientos de inventario. \\
-\midrule
-
-Despliegue &
-Estrategia Docker documentada &
-Docker Compose ejecutable &
-Puertos 8080--8086 y conexión a PostgreSQL mediante \texttt{host.docker.internal}. \\
-\midrule
-
-Persistencia &
-Modelo y rutinas iniciales &
-Esquemas y migraciones alineados con V19 &
-Facturación vinculada con órdenes particionadas y kardex compatible con entradas y salidas. \\
-\midrule
-
-Validación funcional &
-Sin ejecución integral documentada &
-Flujo transaccional completo &
-Orden 19, factura \texttt{FAC-000006} y reducción de stock de 240 a 239. \\
-\midrule
-
-Rendimiento &
-Métricas objetivo definidas &
-Métricas observadas &
-210 solicitudes, 100\,\% de éxito y P95 máximo de 51,94~ms. \\
-\midrule
-
-Alcance &
-Servicios futuros incluidos en el diseño &
-Estado real diferenciado del alcance futuro &
-El motor de compatibilidad y otras capacidades no implementadas se mantienen como trabajo posterior. \\
-
-\bottomrule
-        \end{tabularx}
-    \end{table}
-
-    Estos cambios permiten que la propuesta evolucione desde una arquitectura documentada hacia un sistema distribuido ejecutable. La evidencia de esta entrega se limita a las capacidades comprobadas en el repositorio y distingue explícitamente los componentes implementados de aquellos que permanecen como trabajo futuro.
-
-    \newpage
-
-    \section{Resultados de la Entrega 3}
-
-    \subsection{Entorno verificado}
-
-    La validación se realizó en un entorno local con Docker Compose y PostgreSQL 18. La base de datos utilizada fue \texttt{TiendaTechV19}, accesible desde los contenedores mediante \path{host.docker.internal}. El despliegue estuvo compuesto por un frontend en el puerto 8080 y seis servicios backend en los puertos 8081 a 8086. La Tabla \ref{tab:componentes_e3} resume el inventario comprobado.
-
-    \begin{table}[H]
-        \centering
-        \caption{Componentes desplegados y verificados en la Entrega 3}
-        \label{tab:componentes_e3}
-        \small
-        \begin{tabularx}{\textwidth}{X c X c}
-\toprule
-\textbf{Componente} & \textbf{Puerto} & \textbf{Responsabilidad} & \textbf{Estado} \\
-\midrule
-Frontend & 8080 & Punto de entrada y enrutamiento & Operativo \\
-Productos & 8081 & Catálogo, precio e IVA & Operativo \\
-Inventario & 8082 & Stock y movimientos & Operativo \\
-Pedidos & 8083 & Carrito, orden y checkout & Operativo \\
-Órdenes a proveedores & 8084 & Proveedores y abastecimiento & Operativo \\
-Usuarios & 8085 & Usuarios, autenticación y direcciones & Operativo \\
-Ventas & 8086 & Facturación y coordinación con inventario & Operativo \\
-\bottomrule
-        \end{tabularx}
-    \end{table}
-
-    \subsection{Flujo transaccional comprobado}
-
-    El caso integral validado utilizó el usuario 47, la dirección 10 y el producto 4. El servicio de pedidos obtuvo los datos de usuario y producto mediante REST, creó la orden 19 y solicitó la facturación al servicio de ventas. Como resultado se generó la factura \texttt{FAC-000006}. Posteriormente, ventas solicitó al servicio de inventario un movimiento de salida asociado a la referencia \texttt{FAC-6}, con lo cual el stock disminuyó de 240 a 239 unidades.
-
-    \begin{table}[H]
-        \centering
-        \caption{Trazabilidad del flujo distribuido validado}
-        \label{tab:flujo_validado}
-        \small
-        \begin{tabularx}{\textwidth}{p{3.2cm} X X}
-\toprule
-\textbf{Etapa} & \textbf{Resultado} & \textbf{Evidencia} \\
-\midrule
-Preparación del carrito & Producto 4, cantidad 1 & Precio unitario de 214,99 \\
-Creación de orden & Orden 19 & Total de 214,99 \\
-Facturación & Factura 6 & Número \texttt{FAC-000006} \\
-Movimiento de inventario & Salida por venta & Movimiento 41, referencia \texttt{FAC-6} \\
-Actualización de stock & Descuento de una unidad & Stock de 240 a 239 \\
-\bottomrule
-        \end{tabularx}
-    \end{table}
-
-    \subsection{Pruebas funcionales}
-
-    Se ejecutaron diez casos funcionales sobre construcción, arranque, consulta de datos, checkout, facturación, inventario y búsqueda de usuarios. Los diez casos finalizaron satisfactoriamente, por lo que la tasa funcional observada fue:
-
-    \[
-        \text{Tasa de aprobación} =
-        \frac{10\ \text{casos aprobados}}{10\ \text{casos ejecutados}}
-        \times 100 = 100.
-    \]
-
-    Por tanto, la tasa de aprobación obtenida fue del 100\,\%.
-
-    Esta validación demuestra la operatividad del recorrido seleccionado para E3, pero no sustituye pruebas de estrés, seguridad, recuperación ante fallos o concurrencia, que requieren escenarios y herramientas específicas.
-
-    \subsection{Resultados de rendimiento}
-
-    Se realizaron 30 solicitudes secuenciales de lectura sobre cada uno de los siete componentes, para un total de 210 observaciones. Todas las solicitudes obtuvieron una respuesta HTTP satisfactoria. La Tabla \ref{tab:metricas_e3} presenta los tiempos observados.
-
-    \begin{table}[H]
-        \centering
-        \caption{Tiempos de respuesta observados en 30 repeticiones por componente}
-        \label{tab:metricas_e3}
-        \small
-        \begin{tabular}{lrrrr}
-            \toprule
-            \textbf{Servicio} & \textbf{Éxito} & \textbf{Promedio (ms)} & \textbf{P95 (ms)} & \textbf{Máximo (ms)} \\
-            \midrule
-            Frontend & 100\,\% & 41,46 & 46,22 & 133,04 \\
-            Productos & 100\,\% & 25,34 & 51,94 & 126,83 \\
-            Inventario & 100\,\% & 11,93 & 13,24 & 18,64 \\
-            Pedidos & 100\,\% & 13,21 & 19,01 & 20,81 \\
-            Proveedores & 100\,\% & 13,24 & 16,67 & 17,89 \\
-            Usuarios & 100\,\% & 15,22 & 21,70 & 25,77 \\
-            Ventas & 100\,\% & 12,46 & 16,26 & 18,03 \\
-            \bottomrule
-        \end{tabular}
-    \end{table}
-
-    El mayor P95 correspondió al servicio de productos con 51,94~ms, resultado inferior al umbral de 500~ms definido en la Entrega 2. Debido a que las solicitudes fueron secuenciales y ejecutadas en un entorno local, estos valores caracterizan el escenario de validación, pero no deben interpretarse como capacidad bajo carga concurrente ni como evidencia de disponibilidad en producción.
-
-    \subsection{Hallazgos técnicos y acciones correctivas}
-
-    Durante la integración se identificaron incompatibilidades entre la estructura actual de la base y algunas rutinas. Se alineó el encabezado de factura con la clave compuesta de la tabla particionada de órdenes, se actualizó la restricción del kardex para aceptar los tipos usados por la rutina de movimientos y se habilitó la extensión \texttt{unaccent} requerida por la búsqueda de usuarios. Estas correcciones fueron implementadas como migraciones idempotentes y aplicadas sobre \texttt{TiendaTechV19}.
-
-    \subsection{Limitaciones y trabajo pendiente}
-
-    La implementación actual utiliza una base PostgreSQL compartida entre los servicios, por lo que todavía existe acoplamiento a nivel de persistencia. Asimismo, las mediciones realizadas no incorporan concurrencia, latencia de red externa ni inyección de fallos. El motor de compatibilidad de hardware y otras capacidades descritas en el diseño previo no aparecen como servicios implementados en el despliegue validado; en consecuencia, se mantienen como alcance posterior y no se presentan como resultados de esta entrega.
-
-    \newpage
 
 
     \section{Introducción}
@@ -388,11 +226,7 @@ Actualización de stock & Descuento de una unidad & Stock de 240 a 239 \\
 
     La \textbf{contribución delimitada} de la Entrega 3 comprende el despliegue contenerizado del frontend y seis microservicios, la comunicación REST entre los dominios principales y la validación del flujo carrito--orden--factura--inventario. Todos los servicios utilizan actualmente una base PostgreSQL compartida. Por tanto, el proyecto no declara todavía aislamiento de persistencia, alta disponibilidad productiva, motor de compatibilidad ni asistente inteligente; estas capacidades forman parte de la evolución propuesta.
 
-    \section{Estado del Arte}
-
-    El desarrollo de plataformas modernas de comercio electrónico optimizadas para la configuración de productos complejos ha impulsado una notable evolución en la literatura científica. A continuación, se presenta una síntesis integradora de los enfoques metodológicos actuales, estructurada mediante el mapeo de problemas y tecnologías de vanguardia indexadas entre los años 2020 y 2026.
-
-    \section{Modelado Arquitectónico mediante Diagramas C4}
+    \section{Antecedentes arquitectónicos heredados de las Entregas 1 y 2}
 
     Con el objetivo de representar la estructura general del ecosistema distribuido de \textbf{TiendaTech}, se emplea el modelo arquitectónico C4, el cual permite describir sistemas de software complejos mediante diferentes niveles de abstracción.
 
@@ -932,6 +766,10 @@ volumes:
     \end{lstlisting}
 
 
+    \section{Trabajos relacionados}
+
+    El desarrollo de plataformas modernas de comercio electrónico optimizadas para la configuración de productos complejos ha impulsado una notable evolución en la literatura científica. A continuación, se presenta una síntesis integradora de los enfoques metodológicos actuales, estructurada mediante el mapeo de problemas y tecnologías de vanguardia indexadas entre los años 2020 y 2026.
+
     \subsection{Mapeo de Problemas y Enfoques Metodológicos}
 
     El primer núcleo problemático identificado en la literatura corresponde a la rigidez y la falta de contextualización en las recomendaciones tradicionales de catálogo. Trabajos como el de \textcite{vinayababu2025revolutionizing} y \textcite{khadka2025review} abordan la transición desde el filtrado colaborativo clásico hacia arquitecturas híbridas distribuidas, demostrando que la diversificación y la escalabilidad del catálogo son críticas para mitigar la sobrecarga de información en entornos transaccionales de alta concurrencia. En este sentido, la optimización matemática de estos catálogos ha sido evaluada empíricamente por \textcite{tokala2025empirical}, quien demuestra que variantes avanzadas de factorización de matrices (como SVD++) minimizan el error cuadrático medio (RMSE) en el backend analítico de las plataformas comerciales.
@@ -966,6 +804,8 @@ volumes:
     \subsection{Declaración del Vacío Científico (Gap Statement)}
 
     A pesar de los avances evidenciados en el mapeo previo, la revisión de la literatura expone una desconexión metodológica entre los entornos de asistencia conversacional basados en LLM y los motores de validación por restricciones lógicas. Mientras algunas investigaciones resuelven el procesamiento conversacional de forma aislada \cite{munson2025review}, otras abordan las colisiones de componentes mediante modelos matemáticos confinados a dominios especializados \cite{velten2025solutions}. TiendaTech plantea como evolución futura la integración de ambos enfoques. La Entrega 3 no implementa esta contribución completa: proporciona y valida la infraestructura distribuida transaccional sobre la cual podría incorporarse posteriormente.
+
+    \section{Decisiones arquitectónicas y criterios de calidad heredados}
 
     \subsection{Registros de decisiones arquitectónicas ADR}
 
@@ -1052,6 +892,174 @@ volumes:
     \end{table}
 
     Estas métricas cubren los aspectos más importantes de \textbf{TiendaTech}. En esta fase se priorizan el rendimiento, la disponibilidad, la fiabilidad, la seguridad y la compatibilidad funcional, porque afectan directamente la experiencia del usuario y la correcta validación de los componentes de hardware.
+
+
+    \newpage
+
+    \section{Registro de Cambios respecto a la Entrega 2}
+
+    La tercera entrega transforma el diseño arquitectónico de la Entrega 2 en una implementación distribuida verificable. Los cambios incorporados cubren construcción, despliegue, integración entre servicios, persistencia y validación cuantitativa. La Tabla
+    \ref{tab:registro_cambios} resume los cambios más relevantes.
+
+    \begin{table}[H]
+        \centering
+        \caption{Registro de cambios respecto a la Entrega 2}
+        \label{tab:registro_cambios}
+        \small
+        \begin{tabularx}{\textwidth}{p{2.8cm} p{2.8cm} p{3.2cm} X}
+\toprule
+\textbf{Aspecto} & \textbf{Entrega 2} & \textbf{Entrega 3} & \textbf{Evidencia verificable} \\
+\midrule
+
+Arquitectura &
+Microservicios definidos conceptualmente &
+Frontend y seis microservicios implementados &
+Siete imágenes Docker construidas y siete contenedores activos. \\
+\midrule
+
+Comunicación &
+Contratos REST propuestos &
+Clientes REST integrados entre dominios &
+Pedidos consulta usuarios y productos, genera facturas y activa movimientos de inventario. \\
+\midrule
+
+Despliegue &
+Estrategia Docker documentada &
+Docker Compose ejecutable &
+Puertos 8080--8086 y conexión a PostgreSQL mediante \texttt{host.docker.internal}. \\
+\midrule
+
+Persistencia &
+Modelo y rutinas iniciales &
+Esquemas y migraciones alineados con V19 &
+Facturación vinculada con órdenes particionadas y kardex compatible con entradas y salidas. \\
+\midrule
+
+Validación funcional &
+Sin ejecución integral documentada &
+Flujo transaccional completo &
+Orden 19, factura \texttt{FAC-000006} y reducción de stock de 240 a 239. \\
+\midrule
+
+Rendimiento &
+Métricas objetivo definidas &
+Métricas observadas &
+210 solicitudes, 100\,\% de éxito y P95 máximo de 51,94~ms. \\
+\midrule
+
+Alcance &
+Servicios futuros incluidos en el diseño &
+Estado real diferenciado del alcance futuro &
+El motor de compatibilidad y otras capacidades no implementadas se mantienen como trabajo posterior. \\
+
+\bottomrule
+        \end{tabularx}
+    \end{table}
+
+    Estos cambios permiten que la propuesta evolucione desde una arquitectura documentada hacia un sistema distribuido ejecutable. La evidencia de esta entrega se limita a las capacidades comprobadas en el repositorio y distingue explícitamente los componentes implementados de aquellos que permanecen como trabajo futuro.
+
+    \newpage
+
+    \section{Resultados de la Entrega 3}
+
+    \subsection{Entorno verificado}
+
+    La validación se realizó en un entorno local con Docker Compose y PostgreSQL 18. La base de datos utilizada fue \texttt{TiendaTechV19}, accesible desde los contenedores mediante \path{host.docker.internal}. El despliegue estuvo compuesto por un frontend en el puerto 8080 y seis servicios backend en los puertos 8081 a 8086. La Tabla \ref{tab:componentes_e3} resume el inventario comprobado.
+
+    \begin{table}[H]
+        \centering
+        \caption{Componentes desplegados y verificados en la Entrega 3}
+        \label{tab:componentes_e3}
+        \small
+        \begin{tabularx}{\textwidth}{X c X c}
+\toprule
+\textbf{Componente} & \textbf{Puerto} & \textbf{Responsabilidad} & \textbf{Estado} \\
+\midrule
+Frontend & 8080 & Punto de entrada y enrutamiento & Operativo \\
+Productos & 8081 & Catálogo, precio e IVA & Operativo \\
+Inventario & 8082 & Stock y movimientos & Operativo \\
+Pedidos & 8083 & Carrito, orden y checkout & Operativo \\
+Órdenes a proveedores & 8084 & Proveedores y abastecimiento & Operativo \\
+Usuarios & 8085 & Usuarios, autenticación y direcciones & Operativo \\
+Ventas & 8086 & Facturación y coordinación con inventario & Operativo \\
+\bottomrule
+        \end{tabularx}
+    \end{table}
+
+    \subsection{Flujo transaccional comprobado}
+
+    El caso integral validado utilizó el usuario 47, la dirección 10 y el producto 4. El servicio de pedidos obtuvo los datos de usuario y producto mediante REST, creó la orden 19 y solicitó la facturación al servicio de ventas. Como resultado se generó la factura \texttt{FAC-000006}. Posteriormente, ventas solicitó al servicio de inventario un movimiento de salida asociado a la referencia \texttt{FAC-6}, con lo cual el stock disminuyó de 240 a 239 unidades.
+
+    \begin{table}[H]
+        \centering
+        \caption{Trazabilidad del flujo distribuido validado}
+        \label{tab:flujo_validado}
+        \small
+        \begin{tabularx}{\textwidth}{p{3.2cm} X X}
+\toprule
+\textbf{Etapa} & \textbf{Resultado} & \textbf{Evidencia} \\
+\midrule
+Preparación del carrito & Producto 4, cantidad 1 & Precio unitario de 214,99 \\
+Creación de orden & Orden 19 & Total de 214,99 \\
+Facturación & Factura 6 & Número \texttt{FAC-000006} \\
+Movimiento de inventario & Salida por venta & Movimiento 41, referencia \texttt{FAC-6} \\
+Actualización de stock & Descuento de una unidad & Stock de 240 a 239 \\
+\bottomrule
+        \end{tabularx}
+    \end{table}
+
+    \subsection{Pruebas funcionales}
+
+    Se ejecutaron diez casos funcionales sobre construcción, arranque, consulta de datos, checkout, facturación, inventario y búsqueda de usuarios. Los diez casos finalizaron satisfactoriamente, por lo que la tasa funcional observada fue:
+
+    \[
+        \text{Tasa de aprobación} =
+        \frac{10\ \text{casos aprobados}}{10\ \text{casos ejecutados}}
+        \times 100 = 100.
+    \]
+
+    Por tanto, la tasa de aprobación obtenida fue del 100\,\%.
+
+    Esta validación demuestra la operatividad del recorrido seleccionado para E3, pero no sustituye pruebas de estrés, seguridad, recuperación ante fallos o concurrencia, que requieren escenarios y herramientas específicas.
+
+    \subsection{Resultados de rendimiento}
+
+    Se realizaron 30 solicitudes secuenciales de lectura sobre cada uno de los siete componentes, para un total de 210 observaciones. Todas las solicitudes obtuvieron una respuesta HTTP satisfactoria. La Tabla \ref{tab:metricas_e3} presenta los tiempos observados.
+
+    \begin{table}[H]
+        \centering
+        \caption{Tiempos de respuesta observados en 30 repeticiones por componente}
+        \label{tab:metricas_e3}
+        \small
+        \begin{tabular}{lrrrr}
+            \toprule
+            \textbf{Servicio} & \textbf{Éxito} & \textbf{Promedio (ms)} & \textbf{P95 (ms)} & \textbf{Máximo (ms)} \\
+            \midrule
+            Frontend & 100\,\% & 41,46 & 46,22 & 133,04 \\
+            Productos & 100\,\% & 25,34 & 51,94 & 126,83 \\
+            Inventario & 100\,\% & 11,93 & 13,24 & 18,64 \\
+            Pedidos & 100\,\% & 13,21 & 19,01 & 20,81 \\
+            Proveedores & 100\,\% & 13,24 & 16,67 & 17,89 \\
+            Usuarios & 100\,\% & 15,22 & 21,70 & 25,77 \\
+            Ventas & 100\,\% & 12,46 & 16,26 & 18,03 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    El mayor P95 correspondió al servicio de productos con 51,94~ms, resultado inferior al umbral de 500~ms definido en la Entrega 2. Debido a que las solicitudes fueron secuenciales y ejecutadas en un entorno local, estos valores caracterizan el escenario de validación, pero no deben interpretarse como capacidad bajo carga concurrente ni como evidencia de disponibilidad en producción.
+
+    \subsection{Hallazgos técnicos y acciones correctivas}
+
+    Durante la integración se identificaron incompatibilidades entre la estructura actual de la base y algunas rutinas. Se alineó el encabezado de factura con la clave compuesta de la tabla particionada de órdenes, se actualizó la restricción del kardex para aceptar los tipos usados por la rutina de movimientos y se habilitó la extensión \texttt{unaccent} requerida por la búsqueda de usuarios. Estas correcciones fueron implementadas como migraciones idempotentes y aplicadas sobre \texttt{TiendaTechV19}.
+
+    \subsection{Limitaciones y trabajo pendiente}
+
+    La implementación actual utiliza una base PostgreSQL compartida entre los servicios, por lo que todavía existe acoplamiento a nivel de persistencia. Asimismo, las mediciones realizadas no incorporan concurrencia, latencia de red externa ni inyección de fallos. El motor de compatibilidad de hardware y otras capacidades descritas en el diseño previo no aparecen como servicios implementados en el despliegue validado; en consecuencia, se mantienen como alcance posterior y no se presentan como resultados de esta entrega.
+
+    \newpage
+
+
+
 
     \newpage
     \printbibliography[title={Referencias}]
