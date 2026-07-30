@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS pedidos.orden (
         STORING (estado, total)
 );
 
--- El dataset analitico usa los IDs 1..500000. La secuencia avanza desde el
+-- El dataset analitico usa los IDs 1..600000. La secuencia avanza desde el
 -- mayor ID existente o desde 1000000, sin retroceder al reaplicar el esquema.
 SELECT setval(
     'pedidos.orden_orden_id_seq',

@@ -1,5 +1,5 @@
 -- Dataset determinista de referencia para TiendaTech E3.
--- Cardinalidad objetivo: 10 000 usuarios, 500 000 órdenes y 500 000 detalles.
+-- Cardinalidad objetivo: 10 000 usuarios, 600 000 órdenes y 600 000 detalles.
 -- La ejecución es idempotente gracias a las claves explícitas y ON CONFLICT.
 
 USE tiendatech;
@@ -32,7 +32,7 @@ SELECT
         ELSE 'FACTURADA'
     END,
     (DATE '2026-01-01' + (g % 365)::INT)::TIMESTAMPTZ
-FROM generate_series(1, 500000) AS serie(g)
+FROM generate_series(1, 600000) AS serie(g)
 ON CONFLICT (fecha, orden_id) DO NOTHING;
 
 INSERT INTO pedidos.detalle_orden
@@ -48,7 +48,7 @@ SELECT
     (((g - 1) % 5) + 1) * (((g % 99000) + 1000)::DECIMAL / 100),
     ((((g - 1) % 5) + 1) * (((g % 99000) + 1000)::DECIMAL / 100)) * 0.15,
     ((((g - 1) % 5) + 1) * (((g % 99000) + 1000)::DECIMAL / 100)) * 1.15
-FROM generate_series(1, 500000) AS serie(g)
+FROM generate_series(1, 600000) AS serie(g)
 ON CONFLICT (fecha, detalle_id) DO NOTHING;
 
 -- Verificación reproducible incluida en la salida del cargador.

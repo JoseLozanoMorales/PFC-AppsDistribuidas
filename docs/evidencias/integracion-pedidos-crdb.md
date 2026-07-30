@@ -122,7 +122,7 @@ romper el sistema heredado, Facturación selecciona la implementación por perfi
 - perfil normal: conserva los procedimientos almacenados de PostgreSQL;
 - perfil `crdb`: usa SQL portable y transacciones `SERIALIZABLE`.
 
-El dataset analítico ocupa los identificadores de orden `1..500000`. La
+El dataset analítico ocupa los identificadores de orden `1..600000`. La
 secuencia transaccional se sincroniza idempotentemente con el mayor ID existente
 y reserva como mínimo el rango desde `1000001`, evitando colisiones al reaplicar
 el esquema.
