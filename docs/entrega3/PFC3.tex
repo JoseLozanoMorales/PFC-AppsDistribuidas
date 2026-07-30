@@ -1187,6 +1187,10 @@ Actualización de stock & Descuento de una unidad & Stock de 240 a 239 \\
 
     La implementación actual utiliza una base PostgreSQL compartida entre los servicios, por lo que todavía existe acoplamiento a nivel de persistencia. Asimismo, las mediciones realizadas no incorporan concurrencia, latencia de red externa ni inyección de fallos. El motor de compatibilidad de hardware y otras capacidades descritas en el diseño previo no aparecen como servicios implementados en el despliegue validado; en consecuencia, se mantienen como alcance posterior y no se presentan como resultados de esta entrega.
 
+\section{Conclusiones}
+
+La implementación realizada permitió validar el funcionamiento del sistema distribuido TiendaTech mediante la integración de los microservicios, la comunicación entre ellos y la ejecución satisfactoria del flujo transaccional principal. Las pruebas efectuadas confirmaron el cumplimiento de los objetivos planteados para esta etapa, evidenciando un comportamiento funcional y tiempos de respuesta acordes con los criterios definidos. Como trabajo futuro, se plantea fortalecer la arquitectura mediante mecanismos de persistencia distribuida, pruebas bajo escenarios de mayor concurrencia y la incorporación de capacidades que amplíen la escalabilidad y tolerancia a fallos del sistema.
+
     \newpage
 
 \section*{Declaración de uso de Inteligencia Artificial}
