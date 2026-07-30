@@ -236,7 +236,7 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{diagramas/C4-L1.jpeg}
+        \includegraphics[width=\textwidth]{../diagrams/tiendatech-c4-l1.drawio.png}
         \caption{Diagrama C4-L1 del sistema distribuido TiendaTech.}
         \label{fig:c4l1}
     \end{figure}
@@ -252,7 +252,7 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{../../../docs/diagrams/tiendatech-c4-l2.drawio.png}
+        \includegraphics[width=\textwidth]{../diagrams/tiendatech-c4-l2.drawio.png}
         \caption{Diagrama C4-L2 de la arquitectura distribuida TiendaTech.}
         \label{fig:c4l2}
     \end{figure}
@@ -267,7 +267,7 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{../../../docs/diagrams/tiendatech-c4-l3-checkout.drawio.png}
+        \includegraphics[width=\textwidth]{../diagrams/tiendatech-c4-l3-checkout.drawio.png}
         \caption{Diagrama C4-L3 de los componentes que participan en el checkout.}
         \label{fig:c4-l3-tiendatech}
     \end{figure}
@@ -429,7 +429,7 @@ Contenedor & Puerto interno & Puerto externo \\
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{../../../docs/diagrams/tiendatech-despliegue.drawio.png}
+        \includegraphics[width=\textwidth]{../diagrams/tiendatech-despliegue.drawio.png}
         \caption{Despliegue validado de TiendaTech mediante Docker Compose.}
         \label{fig:despliegue-e3}
     \end{figure}
@@ -771,6 +771,8 @@ volumes:
     El desarrollo de plataformas modernas de comercio electrónico optimizadas para la configuración de productos complejos ha impulsado una notable evolución en la literatura científica. A continuación, se presenta una síntesis integradora de los enfoques metodológicos actuales, estructurada mediante el mapeo de problemas y tecnologías de vanguardia indexadas entre los años 2020 y 2026.
 
     \subsection{Mapeo de Problemas y Enfoques Metodológicos}
+
+    En la capa de persistencia, la literatura reciente confirma que la estrategia de particionamiento debe responder tanto a la distribución de los datos como al patrón de acceso. \textcite{kang2021jigsaw} proponen particiones irregulares orientadas por la carga para reducir lecturas redundantes, mientras que \textcite{zhou2023grep} automatizan la selección de claves de particionado mediante aprendizaje sobre grafos. Desde la perspectiva de verificación, \textcite{rigger2020querypartitioning} demuestran que la partición equivalente de consultas permite descubrir errores lógicos en gestores como CockroachDB. Estudios aplicados complementarios comparan particionamiento horizontal, vertical, por rango, hash e híbrido en almacenes cloud y lagos de datos, destacando sus efectos sobre latencia, paralelismo y consumo de recursos \cite{anala2024scalable,gundapaneni2025partitioning,katari2023datalakes}.
 
     El primer núcleo problemático identificado en la literatura corresponde a la rigidez y la falta de contextualización en las recomendaciones tradicionales de catálogo. Trabajos como el de \textcite{vinayababu2025revolutionizing} y \textcite{khadka2025review} abordan la transición desde el filtrado colaborativo clásico hacia arquitecturas híbridas distribuidas, demostrando que la diversificación y la escalabilidad del catálogo son críticas para mitigar la sobrecarga de información en entornos transaccionales de alta concurrencia. En este sentido, la optimización matemática de estos catálogos ha sido evaluada empíricamente por \textcite{tokala2025empirical}, quien demuestra que variantes avanzadas de factorización de matrices (como SVD++) minimizan el error cuadrático medio (RMSE) en el backend analítico de las plataformas comerciales.
 
