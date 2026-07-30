@@ -874,6 +874,68 @@ volumes:
 
     Las referencias \cite{amdahl1967}, \cite{gustafson1988} y \cite{zhou2008} corresponden a formulaciones anteriores al período de revisión y se conservan porque la atribución de un método exige citar su fuente original: las dos cotas clásicas de aceleración y el algoritmo de mínimos cuadrados alternados sobre el que se construyen los recomendadores colaborativos distribuidos. La discusión del estado del arte de este eje se apoya en las nueve fuentes indexadas del período 2020--2024 recogidas en la Tabla \ref{tab:estado_arte_distribucion}.
 
+ \section{Fundamento teórico}
+    \label{sec:fundamento-teorico}
+
+    Este bloque desarrolla el cuerpo teórico exigido por la guía de la Entrega 3: el modelo de bases de datos distribuidas, el teorema CAP y su extensión PACELC, el algoritmo de consenso Raft, y el modelo de programación paralela que sustenta el pipeline analítico. Cada subsección introduce definiciones formales, notación consistente y una discusión de los principales trade-offs de diseño.
+
+    \subsection{Modelo de bases de datos distribuidas}
+    \label{sec:modelo-bdd}
+
+    Un sistema de base de datos distribuido (SBDD) puede entenderse como un conjunto de bases de datos lógicamente relacionadas entre sí, administradas bajo un mismo sistema de control, pero que se presentan al usuario final como si fueran una única base centralizada \parencite{ozsu2020principles}. El diseño de un SBDD persigue cuatro objetivos principales: transparencia (de fragmentación, de replicación y de ubicación), autonomía local de cada nodo, alta disponibilidad y escalabilidad horizontal. Estos objetivos entran en tensión entre sí de forma recurrente, lo que obliga a los arquitectos de datos a decidir explícitamente qué propiedad se prioriza según el patrón de acceso del dominio \parencite{abdelhafiz2020distributed}.
+
+    La \textbf{fragmentación horizontal} particiona una relación $R$ en un conjunto de fragmentos disjuntos $R_1, R_2, \dots, R_n$, cada uno obtenido mediante un predicado de selección sobre un atributo particionador:
+    \begin{equation}
+        R_i = \sigma_{p_i}(R), \qquad i = 1, \dots, n
+        \label{eq:fragmentacion}
+    \end{equation}
+    donde el conjunto de predicados $\{p_i\}$ debe ser mutuamente excluyente y colectivamente exhaustivo, de modo que cada tupla de $R$ pertenezca exactamente a un fragmento. Elegir el atributo particionador correcto —por ejemplo, una fecha, una categoría o un identificador geográfico— determina en gran medida el rendimiento de las consultas de referencia del sistema, ya que consultas que respetan la clave de partición pueden resolverse dentro de un único nodo, mientras que consultas que la ignoran obligan a un \emph{scatter-gather} costoso entre fragmentos.
+
+    La \textbf{replicación} complementa la fragmentación al mantener copias redundantes de cada fragmento en distintos nodos, con el fin de tolerar la caída de un subconjunto de réplicas sin perder disponibilidad ni durabilidad. Un factor de replicación $f \geq 3$ es la convención mínima aceptada para tolerar la pérdida de un nodo manteniendo quórum mayoritario \parencite{ongaro2014raft, taft2020cockroachdb}. Formalmente, un sistema con factor de replicación $f$ tolera la pérdida simultánea de hasta
+    \begin{equation}
+        \left\lfloor \frac{f-1}{2} \right\rfloor
+        \label{eq:tolerancia}
+    \end{equation}
+    réplicas por rango de datos, siempre que se preserve el quórum de escritura
+    \begin{equation}
+        \left\lceil \frac{f}{2} \right\rceil + 1 .
+        \label{eq:quorum}
+    \end{equation}
+    Estas cantidades no son solo un ejercicio combinatorio: fijan directamente cuántas caídas de nodo puede absorber el clúster antes de perder la capacidad de comprometer nuevas escrituras, y son la base cuantitativa sobre la que se diseña el experimento de tolerancia a fallos de la Entrega 3.
+
+    A nivel de correctitud transaccional, la ejecución concurrente de transacciones sobre fragmentos replicados introduce anomalías clásicas (lecturas sucias, lecturas no repetibles, escrituras perdidas) que un protocolo de control de concurrencia debe prevenir sin degradar excesivamente el rendimiento \parencite{hasan2024concurrency}. Este es precisamente el trade-off que motiva la discusión del teorema CAP en la siguiente subsección.
+
+    \subsection{Teorema CAP y modelo PACELC}
+    \label{sec:cap-pacelc}
+
+    El teorema CAP establece que, ante la presencia de una partición de red, un sistema distribuido no puede garantizar simultáneamente consistencia y disponibilidad; debe sacrificar una de las dos \parencite{brewer2012cap}. Es importante notar que esta es una afirmación condicionada: solo aplica cuando el sistema efectivamente sufre una partición, un evento que en la práctica es poco frecuente frente al régimen normal de operación conectada. Este matiz ha sido señalado como una de las principales fuentes de confusión en la interpretación popular del teorema, ya que muchos diseñadores lo invocan para justificar decisiones de consistencia que en realidad están gobernadas por otro trade-off distinto \parencite{kleppmann2015critique}.
+
+    Precisamente para cubrir ese vacío, el modelo \textbf{PACELC} extiende la discusión de CAP incorporando el comportamiento del sistema \emph{fuera} de una partición: en ausencia de fallos de red, todo sistema distribuido enfrenta igualmente una disyuntiva entre latencia y consistencia (Else Latency-Consistency) \parencite{abadi2012consistency}. En otras palabras, PACELC afirma que un sistema, ante una Partición, debe elegir entre Disponibilidad y Consistencia (P-A-C), y que, en el caso contrario (Else), debe elegir entre Latencia y Consistencia (E-L-C). Esta segunda mitad del acrónimo es la que en la práctica condiciona el diseño cotidiano de la mayoría de los sistemas, puesto que las particiones de red son la excepción y no la norma.
+
+    Bases de datos distribuidas basadas en consenso mayoritario, como CockroachDB, se ubican del lado CP del espectro: ante una partición, priorizan la consistencia serializable por encima de la disponibilidad total, negando servicio a la porción del clúster que no logra alcanzar quórum \parencite{taft2020cockroachdb}. Esta decisión de diseño es consistente con el mecanismo de consenso descrito en la siguiente subsección, que exige la confirmación de una mayoría estricta de réplicas antes de comprometer cualquier escritura.
+
+    \subsection{Consenso distribuido: Raft}
+    \label{sec:raft}
+
+    El algoritmo Raft fue propuesto explícitamente como una alternativa más comprensible a Paxos, sin sacrificar sus garantías de tolerancia a fallos \parencite{ongaro2014raft}. Raft descompone el problema del consenso en tres subproblemas independientes: elección de líder, replicación de registros (\emph{log replication}) y seguridad del estado replicado.
+
+    En su funcionamiento, cada nodo de un grupo Raft se encuentra en uno de tres estados posibles —líder, seguidor o candidato—. Los seguidores esperan mensajes de latido (\emph{heartbeat}) del líder; si ese latido no llega dentro de un intervalo de tiempo aleatorio, el nodo transiciona a candidato e inicia una nueva elección solicitando votos al resto del grupo. Un candidato se convierte en líder únicamente si obtiene el voto de una mayoría estricta de los nodos. Una vez electo, el líder es el único responsable de aceptar nuevas entradas de escritura: las añade a su propio registro y las replica a los seguidores, considerando una entrada \emph{comprometida} (\emph{committed}) solo cuando una mayoría de réplicas confirma haberla recibido. En una arquitectura como la de CockroachDB, cada rango de datos constituye un grupo Raft independiente con su propio líder, lo que permite que distintos rangos progresen de forma concurrente sin coordinación global \parencite{taft2020cockroachdb}.
+
+    Este diseño garantiza tolerancia a fallos por caída (\emph{crash-fault tolerance}) bajo el supuesto de que los nodos, aunque puedan fallar o quedar desconectados, no se comportan de manera maliciosa. Trabajo reciente ha señalado que esta misma suposición de confianza deja al protocolo expuesto a ataques activos —como la reinyección de mensajes previamente capturados o la falsificación de mensajes de votación— que no están contemplados en el diseño original y que pueden comprometer la consistencia del estado replicado si el entorno de despliegue no es enteramente confiable \parencite{afifi2025consensus}. De forma complementaria, otras propuestas han explorado variantes del algoritmo de elección de líder para adaptar Raft a escenarios con requisitos operativos distintos a los de un centro de datos tradicional, como redes industriales con failover priorizado por nodo \parencite{wu2024raft}. Ambas líneas de trabajo confirman que, si bien Raft resuelve de manera elegante el problema del consenso bajo fallos por caída, su aplicación en un contexto productivo exige evaluar explícitamente qué modelo de amenaza y qué patrón de red enfrenta el clúster.
+
+    \subsection{Modelo de programación paralela}
+    \label{sec:programacion-paralela}
+
+    El modelo de \textbf{Resilient Distributed Dataset} (RDD) de Apache Spark abstrae una colección de datos distribuida e inmutable, sobre la cual las transformaciones se registran como un linaje (\emph{lineage}) de operaciones en lugar de ejecutarse de inmediato \parencite{zaharia2012resilient}. Esta evaluación perezosa permite que Spark optimice el plan de ejecución completo antes de materializar resultados, y que, ante la pérdida de una partición de datos, el sistema pueda reconstruirla recomputando únicamente el linaje correspondiente en lugar de replicar físicamente cada partición. Esta misma noción de traducir operaciones expresadas de forma declarativa o iterativa hacia programas de datos distribuidos y paralelos ha sido explorada en otros contextos, como la traducción automática de bucles basados en arreglos hacia frameworks de Big Data \parencite{fegaras2020translation}, lo que confirma que el patrón de linaje-más-recomputo de Spark no es un caso aislado sino un principio de diseño recurrente en los sistemas de procesamiento paralelo modernos \parencite{dai2025state}.
+
+    El límite teórico de la aceleración (\emph{speedup}) alcanzable al paralelizar un programa sobre $N$ procesadores está dado por la Ley de Amdahl:
+    \begin{equation}
+        S(N) = \frac{1}{(1-p) + \dfrac{p}{N}}
+        \label{eq:amdahl}
+    \end{equation}
+    donde $p$ es la fracción del programa que puede paralelizarse y $(1-p)$ es su fracción estrictamente secuencial \parencite{amdahl1967validity}. La Ecuación~\eqref{eq:amdahl} muestra que, sin importar cuántos procesadores se añadan, el speedup está acotado superiormente por $1/(1-p)$: si solo el 80\,\% de un programa es paralelizable ($p = 0.8$), el speedup máximo teórico es de 5$\times$, sin importar si se dispone de 16, 64 o 1000 núcleos.
+
+    Esta formulación asume que el tamaño del problema permanece fijo mientras se añaden procesadores. La reevaluación de Gustafson relaja precisamente ese supuesto: en la práctica, cuando se dispone de más recursos de cómputo, el volumen de trabajo procesado tiende a escalar en la misma proporción, en lugar de mantenerse constante \parencite{gustafson1988reevaluating}. Bajo esta óptica —conocida como \emph{scaled speedup}— el crecimiento del rendimiento no está acotado de la misma manera que en la Ley de Amdahl, lo cual es especialmente relevante para el pipeline analítico de la Entrega 3: al aumentar el número de núcleos disponibles para PySpark, no solo se espera acelerar el procesamiento del mismo volumen de datos, sino que el diseño del protocolo experimental (Sección de Protocolo y Resultados) debe distinguir explícitamente cuál de los dos regímenes —tamaño de problema fijo o tamaño de problema escalado— está siendo medido en cada corrida.
     \section{Decisiones arquitectónicas y criterios de calidad heredados}
 
     \subsection{Registros de decisiones arquitectónicas ADR}
