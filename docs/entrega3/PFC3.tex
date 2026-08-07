@@ -1027,6 +1027,65 @@ volumes:
 
     \newpage
 
+    \section{Diseño del esquema distribuido}
+
+    El agregado de mayor cardinalidad es \texttt{pedidos.orden}, consultado por
+    intervalos temporales y por historial de usuario. El esquema de
+    \path{docs/db/schema.sql} utiliza una clave primaria compuesta por
+    \texttt{(fecha, orden\_id)}, límites trimestrales reproducibles con
+    \texttt{SPLIT AT} e índices por usuario y fecha. ADR-003 justifica esta
+    alternativa a \texttt{PARTITION BY RANGE}, no disponible en la edición
+    comunitaria utilizada. ADR-004 fija factor de replicación tres y quórum
+    mayoritario de dos réplicas.
+
+    \section{Cluster y su verificación}
+
+    El perfil \texttt{e3-crdb} despliega tres nodos CockroachDB 23.2.4,
+    inicialización idempotente, semillas y servicios conectados al clúster. La
+    evidencia conserva el estado inicial, la operación con un nodo detenido, la
+    pérdida esperada de disponibilidad con dos nodos y la recuperación. El vídeo
+    y la bitácora se encuentran en \path{docs/evidencias/}.
+
+    \section{Pipeline paralelo}
+
+    El pipeline PySpark lee 600,000 órdenes y detalles mediante JDBC y ejecuta
+    cinco transformaciones: conversión temporal, filtro, uniones, agregación con
+    ventana y \texttt{Bucketizer}. Las salidas se escriben en Parquet. El
+    baseline pandas reproduce el mismo universo y
+    \path{spark/validar_resultados.py} compara ambas salidas con tolerancia
+    numérica de $10^{-6}$.
+
+    \section{Protocolo y resultados}
+
+    Se ejecutaron diez repeticiones para pandas y PySpark con
+    $N\in\{1,2,4,8\}$ workers, descartando la primera y la última. Las medias
+    PySpark fueron 17,055; 16,771; 17,000 y 17,448 segundos. Ninguna configuración
+    redujo significativamente el tiempo frente a \texttt{local[1]}
+    ($p=0,707$, $p=0,903$ y $p=1,000$), por lo que no se rechazó la hipótesis
+    nula. Pandas obtuvo 2,744 segundos de media y fue significativamente más
+    rápido ($p<0,001$).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.92\textwidth]{../experimentos/resultados/boxplot.png}
+        \caption{Distribución del tiempo total en diez repeticiones por configuración.}
+        \label{fig:boxplot_pipeline}
+    \end{figure}
+
+    Los datos crudos y el resumen se publican en
+    \path{docs/experimentos/resultados/}. La fracción $p=0,8$ usada al explicar
+    Amdahl es ilustrativa; no se estimó desde estas mediciones porque el tiempo
+    no disminuye monótonamente al aumentar los workers.
+
+    \section{Discusión}
+
+    El costo fijo de inicialización, planificación y serialización de Spark
+    domina este experimento en una sola computadora. El resultado no invalida el
+    pipeline, pero impide afirmar una mejora de rendimiento para esta carga. Las
+    amenazas internas principales son las cachés, los procesos del anfitrión y
+    la variación JDBC; las externas son el dataset sintético y el uso de
+    \texttt{local[N]} en lugar de un clúster Spark multinodo.
+
     \section{Registro de Cambios respecto a la Entrega 2}
 
     La tercera entrega transforma el diseño arquitectónico de la Entrega 2 en una implementación distribuida verificable. Los cambios incorporados cubren construcción, despliegue, integración entre servicios, persistencia y validación cuantitativa. La Tabla
@@ -1187,9 +1246,18 @@ Actualización de stock & Descuento de una unidad & Stock de 240 a 239 \\
 
     La implementación actual utiliza una base PostgreSQL compartida entre los servicios, por lo que todavía existe acoplamiento a nivel de persistencia. Asimismo, las mediciones realizadas no incorporan concurrencia, latencia de red externa ni inyección de fallos. El motor de compatibilidad de hardware y otras capacidades descritas en el diseño previo no aparecen como servicios implementados en el despliegue validado; en consecuencia, se mantienen como alcance posterior y no se presentan como resultados de esta entrega.
 
-\section{Conclusiones}
+\section{Conclusiones e integración con E4}
 
-La implementación realizada permitió validar el funcionamiento del sistema distribuido TiendaTech mediante la integración de los microservicios, la comunicación entre ellos y la ejecución satisfactoria del flujo transaccional principal. Las pruebas efectuadas confirmaron el cumplimiento de los objetivos planteados para esta etapa, evidenciando un comportamiento funcional y tiempos de respuesta acordes con los criterios definidos. Como trabajo futuro, se plantea fortalecer la arquitectura mediante mecanismos de persistencia distribuida, pruebas bajo escenarios de mayor concurrencia y la incorporación de capacidades que amplíen la escalabilidad y tolerancia a fallos del sistema.
+La implementación permitió validar el clúster CockroachDB, las transacciones
+serializables, la tolerancia a fallos y un pipeline analítico reproducible. El
+experimento no mostró aceleración de PySpark en modo local y ese resultado se
+reporta como límite empírico, no como evidencia favorable. Para la Entrega 4 se
+reutilizarán el esquema distribuido, los scripts de despliegue, las métricas
+\texttt{crdb\_query\_duration\_seconds},
+\texttt{crdb\_transaction\_retries\_total} y
+\texttt{crdb\_pool\_active\_connections}, así como el protocolo y los datos
+crudos para construir el tablero consolidado y repetir la evaluación bajo una
+carga mayor o en un clúster Spark multinodo.
 
 \section*{Declaración de uso de Inteligencia Artificial}
 
