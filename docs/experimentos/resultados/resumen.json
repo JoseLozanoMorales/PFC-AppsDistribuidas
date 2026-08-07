@@ -1,0 +1,66 @@
+{
+  "criterio_descarte": "primera y \u00faltima repetici\u00f3n de cada configuraci\u00f3n",
+  "resumen": {
+    "local[1]": {
+      "n": 8,
+      "media_segundos": 17.0554,
+      "desviacion_segundos": 0.821902,
+      "ic95_inferior": 16.368272,
+      "ic95_superior": 17.742527
+    },
+    "local[2]": {
+      "n": 8,
+      "media_segundos": 16.771355,
+      "desviacion_segundos": 1.641711,
+      "ic95_inferior": 15.39885,
+      "ic95_superior": 18.14386
+    },
+    "local[4]": {
+      "n": 8,
+      "media_segundos": 16.999947,
+      "desviacion_segundos": 0.624719,
+      "ic95_inferior": 16.477669,
+      "ic95_superior": 17.522226
+    },
+    "local[8]": {
+      "n": 8,
+      "media_segundos": 17.447797,
+      "desviacion_segundos": 1.239264,
+      "ic95_inferior": 16.411746,
+      "ic95_superior": 18.483848
+    },
+    "single-process": {
+      "n": 8,
+      "media_segundos": 2.744206,
+      "desviacion_segundos": 0.157517,
+      "ic95_inferior": 2.612519,
+      "ic95_superior": 2.875893
+    }
+  },
+  "pruebas_pareadas": {
+    "local[1]_vs_local[2]": {
+      "prueba": "t_pareada",
+      "normalidad_shapiro_p": 0.2108849,
+      "estadistico": 0.39109141,
+      "p_valor": 0.70736064
+    },
+    "local[1]_vs_local[4]": {
+      "prueba": "t_pareada",
+      "normalidad_shapiro_p": 0.52105505,
+      "estadistico": 0.12658354,
+      "p_valor": 0.9028293
+    },
+    "local[1]_vs_local[8]": {
+      "prueba": "wilcoxon",
+      "normalidad_shapiro_p": 0.04427321,
+      "estadistico": 18.0,
+      "p_valor": 1.0
+    },
+    "local[1]_vs_single-process": {
+      "prueba": "t_pareada",
+      "normalidad_shapiro_p": 0.85701345,
+      "estadistico": 54.73281155,
+      "p_valor": 0.0
+    }
+  }
+}

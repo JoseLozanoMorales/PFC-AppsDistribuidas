@@ -2,7 +2,7 @@ package org.example.service;
 
 import org.example.model.Factura;
 import org.example.model.FacturaDetalle;
-import org.example.repository.FacturaRepository;
+import org.example.repository.FacturaStore;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,10 +12,10 @@ import java.util.List;
 @Service
 public class FacturaService {
 
-    private final FacturaRepository facturaRepository;
+    private final FacturaStore facturaRepository;
     private final org.example.client.InventarioClient inventarioClient;
 
-    public FacturaService(FacturaRepository facturaRepository,
+    public FacturaService(FacturaStore facturaRepository,
                           org.example.client.InventarioClient inventarioClient) {
         this.facturaRepository = facturaRepository;
         this.inventarioClient = inventarioClient;

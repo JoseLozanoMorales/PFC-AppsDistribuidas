@@ -1,14 +1,18 @@
 package com.example.pedidos.service;
 
 import com.example.pedidos.client.FacturaClient;
+import com.example.pedidos.config.CrdbMetrics;
 import com.example.pedidos.model.DetalleOrden;
 import com.example.pedidos.model.Orden;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class OrdenService {
@@ -16,13 +20,19 @@ public class OrdenService {
     private final JdbcTemplate jdbcTemplate;
     private final FacturaClient facturaClient;
     private final OrdenPersistenceService ordenPersistenceService;
+    private final ObjectProvider<CrdbRetryExecutor> crdbRetryExecutor;
+    private final ObjectProvider<CrdbMetrics> crdbMetrics;
 
     @Autowired
     public OrdenService(JdbcTemplate jdbcTemplate, FacturaClient facturaClient,
-                        OrdenPersistenceService ordenPersistenceService) {
+                        OrdenPersistenceService ordenPersistenceService,
+                        ObjectProvider<CrdbRetryExecutor> crdbRetryExecutor,
+                        ObjectProvider<CrdbMetrics> crdbMetrics) {
         this.jdbcTemplate = jdbcTemplate;
         this.facturaClient = facturaClient;
         this.ordenPersistenceService = ordenPersistenceService;
+        this.crdbRetryExecutor = crdbRetryExecutor;
+        this.crdbMetrics = crdbMetrics;
     }
 
     private final RowMapper<Orden> ordenRowMapper = (rs, rowNum) -> new Orden(
@@ -38,26 +48,27 @@ public class OrdenService {
     public List<Orden> listarOrdenes() {
         String sql = "SELECT orden_id, usuario_id, direccion_id, metodopago_id, subtotal, total, fecha " +
                 "FROM pedidos.orden ORDER BY fecha DESC";
-        return jdbcTemplate.query(sql, ordenRowMapper);
+        return medirConsulta(() -> jdbcTemplate.query(sql, ordenRowMapper));
     }
 
     public Orden obtenerOrdenPorId(Integer ordenId) {
         String sql = "SELECT orden_id, usuario_id, direccion_id, metodopago_id, subtotal, total, fecha " +
                 "FROM pedidos.orden WHERE orden_id = ?";
-        List<Orden> resultado = jdbcTemplate.query(sql, ordenRowMapper, ordenId);
+        List<Orden> resultado = medirConsulta(
+                () -> jdbcTemplate.query(sql, ordenRowMapper, ordenId));
         return resultado.isEmpty() ? null : resultado.get(0);
     }
 
     public List<Orden> listarOrdenesPorUsuario(Integer usuarioId) {
         String sql = "SELECT orden_id, usuario_id, direccion_id, metodopago_id, subtotal, total, fecha " +
                 "FROM pedidos.orden WHERE usuario_id = ? ORDER BY fecha DESC";
-        return jdbcTemplate.query(sql, ordenRowMapper, usuarioId);
+        return medirConsulta(() -> jdbcTemplate.query(sql, ordenRowMapper, usuarioId));
     }
 
     public List<DetalleOrden> obtenerDetalleOrden(Integer ordenId) {
         String sql = "SELECT orden_id, producto_id, cantidad, precio_unitario, subtotal, iva, total " +
                 "FROM pedidos.detalle_orden WHERE orden_id = ?";
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new DetalleOrden(
+        return medirConsulta(() -> jdbcTemplate.query(sql, (rs, rowNum) -> new DetalleOrden(
                 rs.getInt("orden_id"),
                 rs.getInt("producto_id"),
                 rs.getInt("cantidad"),
@@ -65,13 +76,17 @@ public class OrdenService {
                 rs.getBigDecimal("subtotal"),
                 rs.getBigDecimal("iva"),
                 rs.getBigDecimal("total")
-        ), ordenId);
+        ), ordenId));
     }
 
     // Orquesta: 1) crea la orden en una transacción que hace COMMIT antes de seguir,
     // 2) recién después llama a ventas-service (ya puede ver la orden en la BD).
     public Orden generarOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId) {
-        Orden orden = ordenPersistenceService.crearOrdenDesdeCarrito(usuarioId, direccionId, metodopagoId);
+        CrdbRetryExecutor retry = crdbRetryExecutor.getIfAvailable();
+        Orden orden = retry == null
+                ? ordenPersistenceService.crearOrdenDesdeCarrito(usuarioId, direccionId, metodopagoId)
+                : retry.execute(() -> ordenPersistenceService.crearOrdenDesdeCarrito(
+                        usuarioId, direccionId, metodopagoId));
 
         try {
             facturaClient.generarFactura(orden.getOrdenId());
@@ -82,5 +97,19 @@ public class OrdenService {
         }
 
         return orden;
+    }
+
+    private <T> T medirConsulta(Supplier<T> consulta) {
+        CrdbMetrics metrics = crdbMetrics.getIfAvailable();
+        if (metrics == null) {
+            return consulta.get();
+        }
+
+        Timer.Sample sample = metrics.startQuery();
+        try {
+            return consulta.get();
+        } finally {
+            metrics.stopQuery(sample);
+        }
     }
 }

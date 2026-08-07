@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-07-28T06:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="tiendatech-db-e3" name="Esquema distribuido">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="TiendaTech E3 - Esquema distribuido de pedidos" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;fontColor=#172033;" vertex="1" parent="1">
+          <mxGeometry x="55" y="35" width="900" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="Fragmentación temporal trimestral, acceso por usuario y réplica 3 mediante Raft" style="text;html=1;strokeColor=none;fillColor=none;fontSize=17;fontColor=#5B6578;" vertex="1" parent="1">
+          <mxGeometry x="55" y="80" width="1000" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="usuario" value="&lt;b&gt;usuarios.usuario&lt;/b&gt;&lt;br&gt;&lt;br&gt;PK usuario_id&lt;br&gt;nombre&lt;br&gt;correo UNIQUE&lt;br&gt;habilitado&lt;br&gt;creado_en" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEEFF;strokeColor=#1769AA;strokeWidth=3;fontSize=18;align=left;spacingLeft=16;" vertex="1" parent="1">
+          <mxGeometry x="80" y="270" width="260" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="orden" value="&lt;b&gt;pedidos.orden&lt;/b&gt;&lt;br&gt;&lt;br&gt;PK (fecha, orden_id)&lt;br&gt;FK usuario_id&lt;br&gt;direccion_id&lt;br&gt;metodopago_id&lt;br&gt;subtotal, total&lt;br&gt;estado, creado_en&lt;br&gt;&lt;br&gt;IDX (usuario_id, fecha DESC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F4E4;strokeColor=#2E7D32;strokeWidth=3;fontSize=18;align=left;spacingLeft=16;" vertex="1" parent="1">
+          <mxGeometry x="480" y="210" width="310" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="detalle" value="&lt;b&gt;pedidos.detalle_orden&lt;/b&gt;&lt;br&gt;&lt;br&gt;PK (fecha, detalle_id)&lt;br&gt;FK (fecha, orden_id)&lt;br&gt;producto_id&lt;br&gt;cantidad&lt;br&gt;precio_unitario&lt;br&gt;subtotal, iva, total" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0DD;strokeColor=#B85C00;strokeWidth=3;fontSize=18;align=left;spacingLeft=16;" vertex="1" parent="1">
+          <mxGeometry x="930" y="250" width="310" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="rangos" value="&lt;b&gt;Rangos físicos por fecha&lt;/b&gt;&lt;br&gt;&lt;br&gt;Histórico → 2026-01-01&lt;br&gt;2026 Q1&lt;br&gt;2026 Q2&lt;br&gt;2026 Q3&lt;br&gt;2026 Q4&lt;br&gt;2027-01-01 → futuro&lt;br&gt;&lt;br&gt;SPLIT AT + SCATTER" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EEE5FF;strokeColor=#6A45A5;strokeWidth=3;fontSize=18;align=left;spacingLeft=16;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="230" width="250" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="cluster" value="&lt;b&gt;CockroachDB 23.2.4&lt;/b&gt;&lt;br&gt;crdb-1 · zone=z1&lt;br&gt;crdb-2 · zone=z2&lt;br&gt;crdb-3 · zone=z3&lt;br&gt;&lt;br&gt;num_replicas = 3 · quórum = 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7F9FC;strokeColor=#172033;strokeWidth=3;fontSize=18;align=center;" vertex="1" parent="1">
+          <mxGeometry x="480" y="690" width="760" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-usuario-orden" value="1 : N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=ERmany;startArrow=ERone;strokeWidth=3;fontSize=17;" edge="1" parent="1" source="usuario" target="orden">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-orden-detalle" value="1 : N" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=ERmany;startArrow=ERone;strokeWidth=3;fontSize=17;" edge="1" parent="1" source="orden" target="detalle">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-detalle-rangos" value="misma fecha" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;fontSize=17;" edge="1" parent="1" source="detalle" target="rangos">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-orden-cluster" value="rangos replicados" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;fontSize=17;" edge="1" parent="1" source="orden" target="cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e-detalle-cluster" value="Raft" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeWidth=3;fontSize=17;" edge="1" parent="1" source="detalle" target="cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
