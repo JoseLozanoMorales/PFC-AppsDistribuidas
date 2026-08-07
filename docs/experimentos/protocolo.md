@@ -10,6 +10,17 @@ El universo se delimita mediante `orden_id BETWEEN 1 AND 600000`. Las dos órden
 transaccionales creadas durante las pruebas funcionales no forman parte del
 experimento.
 
+## Hipótesis operativas
+
+- **H0 (nula):** para el conjunto fijo de 600 000 órdenes no existe una reducción
+  estadísticamente significativa del tiempo medio total al ejecutar PySpark con
+  `N ∈ {2, 4, 8}` workers frente a `local[1]`.
+- **H1 (alternativa):** al menos una configuración PySpark con `N ∈ {2, 4, 8}`
+  reduce significativamente el tiempo medio total frente a `local[1]`.
+
+La comparación con pandas se reporta como baseline secuencial adicional y no se
+confunde con la prueba de escalabilidad interna de PySpark.
+
 ## Transformaciones
 
 Se aplican exactamente cinco etapas lógicas equivalentes en ambos motores:
@@ -54,6 +65,9 @@ Los resultados se escriben en Parquet:
    si `p ≥ 0.05`, usar t pareada; en caso contrario, Wilcoxon.
 9. Conservar `mediciones.csv`, `resumen.json`, Parquet, versiones del entorno y
    capturas del Administrador de tareas como evidencia.
+10. Ejecutar `python spark/publicar_resultados.py` para publicar únicamente
+    `raw.csv`, `resumen.json` y `boxplot.png` en
+    `docs/experimentos/resultados/`; los Parquet permanecen en `spark/out/`.
 
 Ejemplo desde la raíz del repositorio:
 
@@ -62,7 +76,29 @@ python spark/baseline.py --overwrite
 powershell -ExecutionPolicy Bypass -File spark/ejecutar-pyspark.ps1 -Workers 4 -Salida pyspark
 python spark/validar_resultados.py
 python spark/experimento.py --repeticiones 10 --workers 1 2 4 8 --incluir-pandas
+python spark/publicar_resultados.py
 ```
+
+## Resultados observados
+
+Se realizaron 10 repeticiones por configuración y se descartaron la primera y
+la última antes del análisis. PySpark obtuvo medias de 17,055 s (`local[1]`),
+16,771 s (`local[2]`), 17,000 s (`local[4]`) y 17,448 s (`local[8]`). Las
+comparaciones frente a `local[1]` no fueron significativas: `local[2]`
+(`p = 0,707`), `local[4]` (`p = 0,903`) y `local[8]` (`p = 1,000`). Por tanto,
+no se rechaza H0 para este hardware y este tamaño fijo de datos.
+
+El baseline pandas obtuvo una media de 2,744 s y fue significativamente más
+rápido que PySpark `local[1]` (`p < 0,001`). Este resultado no invalida el
+pipeline: evidencia que, en una sola computadora y para 600 000 registros, el
+costo de inicialización, planificación y serialización de Spark domina cualquier
+beneficio de paralelismo. No se extrapola este resultado a un clúster multinodo
+ni a volúmenes mayores.
+
+La fracción `p = 0,8` usada al explicar la ley de Amdahl en el manuscrito es un
+ejemplo teórico, no una estimación obtenida de estas mediciones. Los resultados
+observados no permiten ajustar una fracción paralelizable positiva fiable porque
+el tiempo no disminuye de forma monótona al aumentar los workers.
 
 ## Amenazas a la validez
 

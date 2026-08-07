@@ -12,5 +12,6 @@ __pycache__/
 
 **/target/
 spark/out/
+docs/entrega3/build/
 
 tmp/
