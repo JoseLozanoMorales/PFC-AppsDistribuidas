@@ -8,6 +8,7 @@
   <!-- Carga utilidades comunes (guards / helpers). Actualiza v= según tu proyecto -->
   <script src="/js/auth-menu.js?v=9" defer></script>
   <script src="/js/admin.js?v=4" defer></script>
+  <script src="/js/admin/proveedores-compras.js" defer></script>
 
   <link id="themeStylesheet" rel="stylesheet"
         href="styleClaro.css" data-light="styleClaro.css"
@@ -31,6 +32,7 @@
     <div class="nav-item active" onclick="showSection('products', this)">Gestión de Productos</div>
       <div class="nav-item" onclick="showSection('suggestions', this)">Sugerencias</div>
       <div class="nav-item" onclick="showSection('users', this)">Gestión de Usuarios</div>
+      <div class="nav-item" onclick="showSection('proveedores', this)">Órdenes y Proveedores</div>
       <div class="nav-item" onclick="showSection('auditoria', this)">Auditoria</div>
         <div class="nav-item" onclick="showSection('inventory', this)">Movimiento de Inventario</div>
       <div class="nav-item" onclick="showSection('delivery', this)">Puntos de Entrega</div>
@@ -114,6 +116,213 @@
       </div>
     </div>
 
+        <!-- ===== Sección: Proveedores y Compras ===== -->
+        <div id="proveedores" class="admin-section">
+            <div class="section-title">🧾 Proveedores y Compras</div>
+
+            <!-- Sub-pestañas simples, mismo patrón que "Sugerencias" -->
+            <div class="toolbar" style="gap:.5rem; display:flex; flex-wrap:wrap;">
+                <button class="btn btn-outline" id="pc_tab_proveedores_btn" onclick="pcShowTab('proveedores')">Proveedores</button>
+                <button class="btn btn-outline" id="pc_tab_compras_btn" onclick="pcShowTab('compras')">Órdenes de Compra</button>
+            </div>
+
+            <!-- Sub-sección: Proveedores -->
+            <div id="pc_proveedores" class="action-grid">
+                <div class="toolbar">
+                    <button class="btn btn-primary" id="btnAgregarProveedor">Agregar proveedor</button>
+                    <button class="btn btn-outline" id="btnRefrescarProveedores">🔄 Refrescar</button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>RUC</th>
+                            <th>Contacto</th>
+                            <th>Teléfono</th>
+                            <th>Correo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbProveedores">
+                        <tr><td colspan="8" class="tt-muted-row">Cargando…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Sub-sección: Órdenes de Compra -->
+            <div id="pc_compras" class="action-grid" style="display:none;">
+                <div class="toolbar" style="display:flex; gap:.5rem; align-items:center;">
+                    <button class="btn btn-primary" id="btnNuevaOrdenCompra">Nueva orden de compra</button>
+                    <div style="flex:1"></div>
+                    <label style="font-weight:bold; margin:0;">Filtrar estado:</label>
+                    <select id="oc_filtro_estado" class="form-control" style="width:180px; margin:0;">
+                        <option value="">TODOS</option>
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="ENVIADA">ENVIADA</option>
+                        <option value="RECIBIDA_PARCIAL">RECIBIDA_PARCIAL</option>
+                        <option value="RECIBIDA">RECIBIDA</option>
+                        <option value="CANCELADA">CANCELADA</option>
+                    </select>
+                    <button class="btn btn-outline" id="btnRefrescarOrdenes">🔄 Refrescar</button>
+                </div>
+
+                <div class="data-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>N° Orden</th>
+                            <th>Proveedor</th>
+                            <th>F. Emisión</th>
+                            <th>F. Esperada</th>
+                            <th>Estado</th>
+                            <th>Total Pedido</th>
+                            <th>Total Recibido</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbOrdenesCompra">
+                        <tr><td colspan="8" class="tt-muted-row">Cargando…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Modal: Agregar / Editar Proveedor ===== -->
+        <div id="modalProveedor" class="modal-backdrop" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mdlProveedorTitle">
+                <div class="modal-header">
+                    <div class="modal-title" id="mdlProveedorTitle">Agregar proveedor</div>
+                    <button class="modal-close" type="button" id="btnCerrarModalProveedor" aria-label="Cerrar">✕</button>
+                </div>
+
+                <form id="formProveedor">
+                    <input type="hidden" id="prov_id" value="" />
+                    <div class="group">
+                        <label>Nombre <span class="tt-req">*</span></label>
+                        <input class="control" id="prov_nombre" placeholder="Razón social del proveedor" required />
+                    </div>
+                    <div class="grid-2">
+                        <div class="group">
+                            <label>RUC <span class="tt-req">*</span></label>
+                            <input class="control" id="prov_ruc" placeholder="1234567890001" required />
+                        </div>
+                        <div class="group">
+                            <label>Contacto</label>
+                            <input class="control" id="prov_contacto" placeholder="Nombre del contacto" />
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="group">
+                            <label>Teléfono</label>
+                            <input class="control" id="prov_telefono" placeholder="09xxxxxxxx" />
+                        </div>
+                        <div class="group">
+                            <label>Correo</label>
+                            <input class="control" type="email" id="prov_correo" placeholder="proveedor@correo.com" />
+                        </div>
+                    </div>
+                    <div class="group">
+                        <label>Dirección</label>
+                        <input class="control" id="prov_direccion" placeholder="Dirección del proveedor" />
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="btnCancelarModalProveedor">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== Modal: Nueva Orden de Compra ===== -->
+        <div id="modalOrdenCompra" class="modal-backdrop" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mdlOrdenTitle">
+                <div class="modal-header">
+                    <div class="modal-title" id="mdlOrdenTitle">Nueva orden de compra</div>
+                    <button class="modal-close" type="button" id="btnCerrarModalOrden" aria-label="Cerrar">✕</button>
+                </div>
+
+                <form id="formOrdenCompra">
+                    <div class="grid-2">
+                        <div class="group">
+                            <label>Proveedor <span class="tt-req">*</span></label>
+                            <select class="control" id="oc_proveedor" required></select>
+                        </div>
+                        <div class="group">
+                            <label>Fecha esperada</label>
+                            <input class="control" type="date" id="oc_fecha_esperada" />
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label>Productos a comprar <span class="tt-req">*</span></label>
+                        <div class="data-table">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th style="width:110px">Cantidad</th>
+                                    <th style="width:130px">Costo unit.</th>
+                                    <th style="width:110px">Subtotal</th>
+                                    <th style="width:40px"></th>
+                                </tr>
+                                </thead>
+                                <tbody id="oc_detalle_body"></tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-outline tt-mt-2" id="btnAgregarLineaOC">+ Agregar producto</button>
+                    </div>
+
+                    <div class="tt-text-end tt-mt-2">
+                        <strong>Total estimado: <span id="oc_total_estimado">$0.00</span></strong>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="btnCancelarModalOrden">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear orden de compra</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== Modal: Registrar Recepción ===== -->
+        <div id="modalRecepcionOC" class="modal-backdrop" hidden>
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mdlRecepcionTitle">
+                <div class="modal-header">
+                    <div class="modal-title" id="mdlRecepcionTitle">Registrar recepción de mercadería</div>
+                    <button class="modal-close" type="button" id="btnCerrarModalRecepcion" aria-label="Cerrar">✕</button>
+                </div>
+
+                <form id="formRecepcionOC">
+                    <input type="hidden" id="rec_orden_id" value="" />
+                    <p class="muted">Ingresa la cantidad que llega <strong>ahora</strong> por cada producto (se acumula sobre lo ya recibido).</p>
+                    <div class="data-table">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Pedida</th>
+                                <th>Recibida</th>
+                                <th style="width:130px">Recibe ahora</th>
+                            </tr>
+                            </thead>
+                            <tbody id="rec_detalle_body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="btnCancelarModalRecepcion">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Confirmar recepción</button>
+                    </div>
+                </form>
+            </div>
+        </div>
       <!-- Sugerencias -->
       <div id="suggestions" class="admin-section">
           <div class="section-title">🧠 Sugerencias</div>

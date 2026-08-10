@@ -2,6 +2,7 @@ package org.example.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public class OrdenCompra {
 
@@ -16,6 +17,10 @@ public class OrdenCompra {
     private BigDecimal subtotal;
     private BigDecimal iva;
     private BigDecimal total;
+    private BigDecimal subtotalPedido;
+    private BigDecimal ivaPedido;
+    private BigDecimal totalPedido;
+    private List<DetalleOrdenCompra> detalle;
 
     public OrdenCompra() {
     }
@@ -106,5 +111,37 @@ public class OrdenCompra {
 
     public void setTotal(BigDecimal total) {
         this.total = total;
+    }
+
+    public BigDecimal getSubtotalPedido() {
+        return subtotalPedido;
+    }
+
+    public void setSubtotalPedido(BigDecimal subtotalPedido) {
+        this.subtotalPedido = subtotalPedido;
+    }
+
+    public BigDecimal getIvaPedido() {
+        return ivaPedido;
+    }
+
+    public void setIvaPedido(BigDecimal ivaPedido) {
+        this.ivaPedido = ivaPedido;
+    }
+
+    public BigDecimal getTotalPedido() {
+        return totalPedido;
+    }
+
+    public void setTotalPedido(BigDecimal totalPedido) {
+        this.totalPedido = totalPedido;
+    }
+
+    public List<DetalleOrdenCompra> getDetalle() {
+        return detalle;
+    }
+
+    public void setDetalle(List<DetalleOrdenCompra> detalle) {
+        this.detalle = detalle;
     }
 }

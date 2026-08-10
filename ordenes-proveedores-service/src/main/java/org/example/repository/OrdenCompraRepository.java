@@ -133,9 +133,24 @@ public class OrdenCompraRepository {
             return null;
         }
         try {
-            return objectMapper.readValue(json, OrdenCompra.class);
+            OrdenCompra orden = objectMapper.readValue(json, OrdenCompra.class);
+            orden.setDetalle(listarDetalle(ordenCompraId));
+            return orden;
         } catch (Exception e) {
             throw new IllegalStateException("Error leyendo respuesta de fn_obtener_orden_compra", e);
+        }
+    }
+
+    public List<DetalleOrdenCompra> listarDetalle(Integer ordenCompraId) {
+        String sql = "SELECT ordenes_proveedores.fn_listar_detalle_orden_compra(?)::text";
+        String json = jdbcTemplate.queryForObject(sql, String.class, ordenCompraId);
+        if (json == null || "null".equals(json)) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(json, new TypeReference<List<DetalleOrdenCompra>>() {});
+        } catch (Exception e) {
+            throw new IllegalStateException("Error leyendo respuesta de fn_listar_detalle_orden_compra", e);
         }
     }
 
