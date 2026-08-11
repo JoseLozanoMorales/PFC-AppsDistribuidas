@@ -1,170 +1,160 @@
 package org.example.repository;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.example.model.DetalleOrdenCompra;
 import org.example.model.EstadoOrdenCompra;
 import org.example.model.OrdenCompra;
-import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.Types;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 @Repository
 public class OrdenCompraRepository {
-
+    private static final BigDecimal IVA = new BigDecimal("15.00");
     private final JdbcTemplate jdbcTemplate;
-    private final ObjectMapper objectMapper;
 
-    public OrdenCompraRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
-        this.objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-    }
+    public OrdenCompraRepository(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
 
+    @Transactional
     public Integer crear(Integer proveedorId, Integer usuarioId, LocalDate fechaEsperada,
                          List<DetalleOrdenCompra> detalle) {
-        String sql = "call ordenes_proveedores.sp_crear_orden_compra_json(?, ?, ?, ?, ?)";
-        try {
-            PGobject detalleJson = buildDetalleJson(detalle);
-            return jdbcTemplate.execute((Connection con) -> {
-                try (CallableStatement cs = con.prepareCall(sql)) {
-                    cs.setInt(1, proveedorId);
-                    cs.setInt(2, usuarioId);
-                    cs.setDate(3, fechaEsperada != null ? Date.valueOf(fechaEsperada) : null);
-                    cs.setObject(4, detalleJson);
-                    cs.registerOutParameter(5, Types.INTEGER);
-                    cs.execute();
-                    return cs.getInt(5);
-                }
-            });
-        } catch (Exception e) {
-            throw new IllegalStateException("Error creando orden de compra", e);
-        }
+        validarDetalle(detalle);
+        Boolean activo = jdbcTemplate.query("SELECT activo FROM ordenes_proveedores.proveedor WHERE proveedor_id=?",
+                (rs, n) -> rs.getBoolean(1), proveedorId).stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Proveedor " + proveedorId + " no existe"));
+        if (!activo) throw new IllegalStateException("El proveedor " + proveedorId + " esta inactivo");
+        Integer id = jdbcTemplate.queryForObject("""
+                INSERT INTO ordenes_proveedores.orden_compra
+                    (proveedor_id, usuario_id, fecha_emision, fecha_esperada, estado)
+                VALUES (?, ?, current_date, ?, 'PENDIENTE') RETURNING orden_compra_id
+                """, Integer.class, proveedorId, usuarioId, fechaEsperada);
+        jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET numero_orden=? WHERE orden_compra_id=?",
+                "OC-%06d".formatted(id), id);
+        insertarDetalle(id, detalle);
+        recalcular(id);
+        return id;
     }
 
-    public void actualizar(Integer ordenCompraId, Integer proveedorId, LocalDate fechaEsperada,
+    @Transactional
+    public void actualizar(Integer id, Integer proveedorId, LocalDate fechaEsperada,
                            List<DetalleOrdenCompra> detalle) {
-        String sql = "call ordenes_proveedores.sp_actualizar_orden_compra_json(?, ?, ?, ?)";
-        try {
-            PGobject detalleJson = buildDetalleJson(detalle);
-            jdbcTemplate.execute((Connection con) -> {
-                try (CallableStatement cs = con.prepareCall(sql)) {
-                    cs.setInt(1, ordenCompraId);
-                    cs.setInt(2, proveedorId);
-                    cs.setDate(3, fechaEsperada != null ? Date.valueOf(fechaEsperada) : null);
-                    cs.setObject(4, detalleJson);
-                    cs.execute();
-                    return null;
-                }
-            });
-        } catch (Exception e) {
-            throw new IllegalStateException("Error actualizando orden de compra " + ordenCompraId, e);
-        }
+        validarDetalle(detalle);
+        exigirEstado(id, EstadoOrdenCompra.PENDIENTE);
+        jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET proveedor_id=?, fecha_esperada=? WHERE orden_compra_id=?",
+                proveedorId, fechaEsperada, id);
+        jdbcTemplate.update("DELETE FROM ordenes_proveedores.detalle_orden_compra WHERE orden_compra_id=?", id);
+        insertarDetalle(id, detalle);
+        recalcular(id);
     }
 
-    public void enviar(Integer ordenCompraId) {
-        llamarProcedimientoSimple("call ordenes_proveedores.sp_enviar_orden_compra(?)", ordenCompraId);
+    @Transactional
+    public void enviar(Integer id) {
+        exigirEstado(id, EstadoOrdenCompra.PENDIENTE);
+        jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET estado='ENVIADA' WHERE orden_compra_id=?", id);
     }
 
-    public void cancelar(Integer ordenCompraId) {
-        llamarProcedimientoSimple("call ordenes_proveedores.sp_cancelar_orden_compra(?)", ordenCompraId);
+    @Transactional
+    public void cancelar(Integer id) {
+        EstadoOrdenCompra estado = estado(id);
+        if (estado != EstadoOrdenCompra.PENDIENTE && estado != EstadoOrdenCompra.ENVIADA)
+            throw new IllegalStateException("No se puede cancelar una orden en estado " + estado);
+        jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET estado='CANCELADA' WHERE orden_compra_id=?", id);
     }
 
-    // p_recepcion: producto_id -> cantidad que llega ahora (se acumula sobre cantidad_recibida)
-    public void registrarRecepcion(Integer ordenCompraId, Map<Integer, Integer> recepcionPorProducto) {
-        String sql = "{call ordenes_proveedores.sp_registrar_recepcion_json(?, ?)}";
-        try {
-            ArrayNode array = objectMapper.createArrayNode();
-            for (Map.Entry<Integer, Integer> entry : recepcionPorProducto.entrySet()) {
-                ObjectNode node = array.addObject();
-                node.put("producto_id", entry.getKey());
-                node.put("cantidad", entry.getValue());
-            }
-            PGobject detalleJson = new PGobject();
-            detalleJson.setType("jsonb");
-            detalleJson.setValue(objectMapper.writeValueAsString(array));
-
-            jdbcTemplate.execute((Connection con) -> {
-                try (CallableStatement cs = con.prepareCall(sql)) {
-                    cs.setInt(1, ordenCompraId);
-                    cs.setObject(2, detalleJson);
-                    cs.execute();
-                    return null;
-                }
-            });
-        } catch (Exception e) {
-            throw new IllegalStateException("Error registrando recepcion de orden " + ordenCompraId, e);
-        }
+    @Transactional
+    public void registrarRecepcion(Integer id, Map<Integer, Integer> recepcion) {
+        EstadoOrdenCompra estado = estado(id);
+        if (estado != EstadoOrdenCompra.ENVIADA && estado != EstadoOrdenCompra.RECIBIDA_PARCIAL)
+            throw new IllegalStateException("Solo se recibe una orden ENVIADA o RECIBIDA_PARCIAL");
+        if (recepcion == null || recepcion.isEmpty()) throw new IllegalArgumentException("La recepcion esta vacia");
+        recepcion.forEach((producto, cantidad) -> {
+            if (cantidad == null || cantidad <= 0) throw new IllegalArgumentException("Cantidad recibida invalida");
+            int changed = jdbcTemplate.update("""
+                    UPDATE ordenes_proveedores.detalle_orden_compra
+                       SET cantidad_recibida=cantidad_recibida+?,
+                           subtotal_linea=(cantidad_recibida+?)*costo_unitario
+                     WHERE orden_compra_id=? AND producto_id=?
+                       AND cantidad_recibida+? <= cantidad_pedida
+                    """, cantidad, cantidad, id, producto, cantidad);
+            if (changed != 1) throw new IllegalArgumentException("Producto ausente o cantidad excedida: " + producto);
+        });
+        Boolean completo = jdbcTemplate.queryForObject("""
+                SELECT bool_and(cantidad_recibida=cantidad_pedida)
+                  FROM ordenes_proveedores.detalle_orden_compra WHERE orden_compra_id=?
+                """, Boolean.class, id);
+        jdbcTemplate.update("""
+                UPDATE ordenes_proveedores.orden_compra
+                   SET estado=?, fecha_recepcion=CASE WHEN ? THEN current_date ELSE fecha_recepcion END
+                 WHERE orden_compra_id=?
+                """, Boolean.TRUE.equals(completo) ? "RECIBIDA" : "RECIBIDA_PARCIAL",
+                Boolean.TRUE.equals(completo), id);
+        recalcular(id);
     }
 
     public List<OrdenCompra> listarPorEstado(EstadoOrdenCompra estado) {
-        String json;
-        if (estado == null) {
-            json = jdbcTemplate.queryForObject(
-                    "SELECT ordenes_proveedores.fn_listar_ordenes_por_estado(NULL)::text", String.class);
-        } else {
-            json = jdbcTemplate.queryForObject(
-                    "SELECT ordenes_proveedores.fn_listar_ordenes_por_estado(?::ordenes_proveedores.estado_orden_compra)::text",
-                    String.class, estado.name());
-        }
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<OrdenCompra>>() {});
-        } catch (Exception e) {
-            throw new IllegalStateException("Error leyendo respuesta de fn_listar_ordenes_por_estado", e);
-        }
+        String sql = "SELECT * FROM ordenes_proveedores.orden_compra" +
+                (estado == null ? "" : " WHERE estado=?") + " ORDER BY fecha_emision DESC, orden_compra_id DESC";
+        return estado == null ? jdbcTemplate.query(sql, this::mapOrden)
+                : jdbcTemplate.query(sql, this::mapOrden, estado.name());
     }
 
-    public OrdenCompra obtenerPorId(Integer ordenCompraId) {
-        String sql = "SELECT ordenes_proveedores.fn_obtener_orden_compra(?)::text";
-        String json = jdbcTemplate.queryForObject(sql, String.class, ordenCompraId);
-        if (json == null || "null".equals(json)) {
-            return null;
-        }
-        try {
-            return objectMapper.readValue(json, OrdenCompra.class);
-        } catch (Exception e) {
-            throw new IllegalStateException("Error leyendo respuesta de fn_obtener_orden_compra", e);
-        }
+    public OrdenCompra obtenerPorId(Integer id) {
+        return jdbcTemplate.query("SELECT * FROM ordenes_proveedores.orden_compra WHERE orden_compra_id=?",
+                this::mapOrden, id).stream().findFirst().orElse(null);
     }
 
-    private void llamarProcedimientoSimple(String sql, Integer ordenCompraId) {
-        jdbcTemplate.execute((Connection con) -> {
-            try (CallableStatement cs = con.prepareCall(sql)) {
-                cs.setInt(1, ordenCompraId);
-                cs.execute();
-                return null;
-            }
-        });
+    private void insertarDetalle(Integer id, List<DetalleOrdenCompra> detalle) {
+        for (DetalleOrdenCompra d : detalle) jdbcTemplate.update("""
+                INSERT INTO ordenes_proveedores.detalle_orden_compra
+                    (orden_compra_id, producto_id, cantidad_pedida, cantidad_recibida, costo_unitario, subtotal_linea)
+                VALUES (?, ?, ?, 0, ?, 0)
+                """, id, d.getProductoId(), d.getCantidadPedida(), d.getCostoUnitario());
     }
 
-    // Claves en snake_case porque asi las lee sp_crear_orden_compra_json / sp_actualizar_orden_compra_json
-    // (v_linea->>'producto_id', etc). Independiente de como se serialice DetalleOrdenCompra hacia afuera.
-    private PGobject buildDetalleJson(List<DetalleOrdenCompra> detalle) throws Exception {
-        if (detalle == null || detalle.isEmpty()) {
-            throw new IllegalArgumentException("La orden de compra debe tener al menos una linea de detalle");
-        }
-        ArrayNode array = objectMapper.createArrayNode();
-        for (DetalleOrdenCompra d : detalle) {
-            ObjectNode node = array.addObject();
-            node.put("producto_id", d.getProductoId());
-            node.put("cantidad_pedida", d.getCantidadPedida());
-            node.put("costo_unitario", d.getCostoUnitario());
-        }
-        PGobject jsonb = new PGobject();
-        jsonb.setType("jsonb");
-        jsonb.setValue(objectMapper.writeValueAsString(array));
-        return jsonb;
+    private void recalcular(Integer id) {
+        BigDecimal subtotal = jdbcTemplate.queryForObject("""
+                SELECT coalesce(sum(subtotal_linea),0) FROM ordenes_proveedores.detalle_orden_compra
+                 WHERE orden_compra_id=?
+                """, BigDecimal.class, id);
+        BigDecimal iva = subtotal.multiply(IVA).divide(new BigDecimal("100")).setScale(2);
+        jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET subtotal=?, iva=?, total=? WHERE orden_compra_id=?",
+                subtotal, iva, subtotal.add(iva), id);
+    }
+
+    private EstadoOrdenCompra estado(Integer id) {
+        return jdbcTemplate.query("SELECT estado FROM ordenes_proveedores.orden_compra WHERE orden_compra_id=?",
+                (rs, n) -> EstadoOrdenCompra.valueOf(rs.getString(1)), id).stream().findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Orden de compra " + id + " no existe"));
+    }
+
+    private void exigirEstado(Integer id, EstadoOrdenCompra esperado) {
+        EstadoOrdenCompra actual = estado(id);
+        if (actual != esperado) throw new IllegalStateException("Estado esperado " + esperado + ", actual " + actual);
+    }
+
+    private void validarDetalle(List<DetalleOrdenCompra> detalle) {
+        if (detalle == null || detalle.isEmpty()) throw new IllegalArgumentException("La orden requiere detalle");
+        for (DetalleOrdenCompra d : detalle)
+            if (d.getProductoId() == null || d.getCantidadPedida() == null || d.getCantidadPedida() <= 0 ||
+                    d.getCostoUnitario() == null || d.getCostoUnitario().signum() < 0)
+                throw new IllegalArgumentException("Linea de detalle invalida");
+    }
+
+    private OrdenCompra mapOrden(ResultSet rs, int row) throws SQLException {
+        OrdenCompra o = new OrdenCompra();
+        o.setOrdenCompraId(rs.getInt("orden_compra_id")); o.setProveedorId(rs.getInt("proveedor_id"));
+        o.setUsuarioId(rs.getInt("usuario_id")); o.setNumeroOrden(rs.getString("numero_orden"));
+        o.setFechaEmision(rs.getObject("fecha_emision", LocalDate.class));
+        o.setFechaEsperada(rs.getObject("fecha_esperada", LocalDate.class));
+        o.setFechaRecepcion(rs.getObject("fecha_recepcion", LocalDate.class));
+        o.setEstado(EstadoOrdenCompra.valueOf(rs.getString("estado")));
+        o.setSubtotal(rs.getBigDecimal("subtotal")); o.setIva(rs.getBigDecimal("iva")); o.setTotal(rs.getBigDecimal("total"));
+        return o;
     }
 }

@@ -384,14 +384,14 @@ const GAL_API = {
 
       await fetch('/auth/logout', { method: 'POST' }).catch(() => {});
     } finally {
-      location.replace('Login.html');
+      location.replace('/app/#/login');
     }
   }
 
   // ===== Guard de ADMIN + nombre en el header =====
   document.addEventListener('DOMContentLoaded', () => {
     const raw = sessionStorage.getItem('user') || localStorage.getItem('user');
-    if (!raw) { location.replace('Login.html?next=' + encodeURIComponent('cuenta%20-%20admin.html')); return; }
+    if (!raw) { location.replace('/app/#/login?next=/admin'); return; }
     let u; try { u = JSON.parse(raw); } catch { u = null; }
     const id = parseInt(u?.id_rol ?? u?.idRol ?? u?.rol_id ?? 0, 10);
     const nm = String(u?.rol ?? u?.role ?? u?.roleName ?? '').toLowerCase();

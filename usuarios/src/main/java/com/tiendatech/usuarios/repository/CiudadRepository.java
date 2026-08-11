@@ -10,24 +10,18 @@ public interface CiudadRepository extends JpaRepository<Ciudad, Short> {
 
     @Modifying @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_ciudades(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','agregar','Nombre', :nombre,'ProvinciaId', :provinciaId))" +
-                    ")", nativeQuery = true)
+            "INSERT INTO usuarios.ciudad (nombre,provincia_id,habilitado) VALUES (:nombre,:provinciaId,true)", nativeQuery = true)
     void agregar(@Param("nombre") String nombre, @Param("provinciaId") Short provinciaId);
 
     @Modifying @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_ciudades(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','editar','CiudadId', :id,'Nombre', :nombre,'ProvinciaId', :provinciaId))" +
-                    ")", nativeQuery = true)
+            "UPDATE usuarios.ciudad SET nombre=coalesce(:nombre,nombre),provincia_id=:provinciaId WHERE ciudad_id=:id", nativeQuery = true)
     void editar(@Param("id") Short id,
                 @Param("nombre") String nombreNullable,   // puede ir null para que el SP haga COALESCE
                 @Param("provinciaId") Short provinciaId); // <-- obligatorio
 
     @Modifying @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_ciudades(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','eliminar','CiudadId', :id))" +
-                    ")", nativeQuery = true)
+            "UPDATE usuarios.ciudad SET habilitado=false WHERE ciudad_id=:id", nativeQuery = true)
     void eliminar(@Param("id") Short id);
 }

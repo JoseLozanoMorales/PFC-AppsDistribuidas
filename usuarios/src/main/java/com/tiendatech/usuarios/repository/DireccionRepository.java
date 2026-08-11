@@ -19,17 +19,8 @@ public interface DireccionRepository extends JpaRepository<Direccion, Short> {
     @Modifying
     @Transactional
     @Query(value = """
-      CALL usuarios.sp_procesar_direcciones(
-        jsonb_build_array(
-          jsonb_build_object(
-            'Accion','agregar',
-            'Calle', :calle,
-            'Referencia', :referencia,
-            'UsuarioId', :usuarioId,
-            'CiudadId', :ciudadId
-          )
-        )
-      )
+      INSERT INTO usuarios.direccion (calle,referencia,usuario_id,ciudad_id,habilitado)
+      VALUES (:calle,:referencia,:usuarioId,:ciudadId,true)
       """, nativeQuery = true)
     void agregar(@Param("usuarioId") Integer usuarioId,
                  @Param("ciudadId")  Short ciudadId,
@@ -39,18 +30,9 @@ public interface DireccionRepository extends JpaRepository<Direccion, Short> {
     @Modifying
     @Transactional
     @Query(value = """
-      CALL usuarios.sp_procesar_direcciones(
-        jsonb_build_array(
-          jsonb_build_object(
-            'Accion','editar',
-            'DireccionId', :id,
-            'Calle', :calle,
-            'Referencia', :referencia,
-            'UsuarioId', :usuarioId,
-            'CiudadId', :ciudadId
-          )
-        )
-      )
+      UPDATE usuarios.direccion SET calle=coalesce(:calle,calle),
+        referencia=coalesce(:referencia,referencia),usuario_id=:usuarioId,
+        ciudad_id=:ciudadId WHERE direccion_id=:id
       """, nativeQuery = true)
     void editar(@Param("id")       Short direccionId,
                 @Param("usuarioId") Integer usuarioId,
@@ -61,14 +43,7 @@ public interface DireccionRepository extends JpaRepository<Direccion, Short> {
     @Modifying
     @Transactional
     @Query(value = """
-      CALL usuarios.sp_procesar_direcciones(
-        jsonb_build_array(
-          jsonb_build_object(
-            'Accion','eliminar',
-            'DireccionId', :id
-          )
-        )
-      )
+      UPDATE usuarios.direccion SET habilitado=false WHERE direccion_id=:id
       """, nativeQuery = true)
     void eliminar(@Param("id") Short direccionId);
 }

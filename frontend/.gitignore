@@ -1,5 +1,9 @@
 HELP.md
 target/
+webapp/node_modules/
+webapp/src/**/*.js
+webapp/tsconfig.app.tsbuildinfo
+src/main/resources/static/app/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

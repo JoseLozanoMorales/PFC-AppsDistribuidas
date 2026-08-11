@@ -1,0 +1,7 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import { api } from '../services/api'
+const correo=ref(''),busy=ref(false),error=ref(''),sent=ref(false)
+async function recover(){busy.value=true;error.value='';try{await api('/api/usuarios/recuperar-password',{method:'POST',body:JSON.stringify({correo:correo.value})});sent.value=true}catch(cause){error.value=cause instanceof Error?cause.message:'No se pudo enviar el correo.'}finally{busy.value=false}}
+</script>
+<template><section class="auth-page"><div class="auth-intro recovery-art"><p class="eyebrow">Recuperación segura</p><h1>Volvamos a poner tu cuenta en marcha.</h1><p>Recibirás una contraseña temporal en tu correo registrado.</p></div><form class="auth-form compact" @submit.prevent="recover"><p class="eyebrow">Acceso</p><h2>Recuperar contraseña</h2><template v-if="!sent"><p>Ingresa el correo asociado a tu cuenta.</p><label>Correo electrónico<input v-model="correo" type="email" required placeholder="nombre@correo.com" /></label><p v-if="error" class="alert">{{error}}</p><button class="button" :disabled="busy">{{busy?'Enviando…':'Enviar contraseña temporal'}}</button></template><div v-else class="success-panel"><span>✓</span><h3>Revisa tu correo</h3><p>Si la dirección está registrada, recibirás instrucciones en unos minutos.</p></div><p class="auth-switch"><RouterLink to="/login">← Volver al inicio de sesión</RouterLink></p></form></section></template>

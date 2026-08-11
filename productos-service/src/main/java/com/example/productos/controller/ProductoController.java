@@ -6,6 +6,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,37 @@ public class ProductoController {
         return service.listar(page, size);
     }
 
+    @PostMapping("/api/productos")
+    public ResponseEntity<Map<String, Object>> crearProducto(@RequestBody Map<String, Object> body,
+                                                              @RequestHeader(value = "X-Usuario", required = false) String usuario)
+            throws JsonProcessingException {
+        Integer categoriaId = Integer.valueOf(String.valueOf(body.get("categoria_id")));
+        Long productoId = service.crear(categoriaId, body, usuario);
+        return ResponseEntity.ok(Map.of("ok", true, "productoId", productoId));
+    }
+
+    @PostMapping(value = "/api/productos/{id}/galeria", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> agregarImagen(@PathVariable Integer id,
+                                                              @RequestPart("file") MultipartFile file,
+                                                              @RequestParam(required = false) String descripcion,
+                                                              @RequestParam(defaultValue = "false") boolean portada) throws Exception {
+        Long galeriaId = service.agregarImagen(id, file, descripcion, portada);
+        return ResponseEntity.ok(Map.of("ok", true, "galeriaId", galeriaId));
+    }
+
+    @DeleteMapping("/api/galeria_v2/{id}")
+    public ResponseEntity<Map<String, Boolean>> quitarImagen(@PathVariable Integer id) {
+        service.quitarImagen(id);
+        return ResponseEntity.ok(Map.of("ok", true));
+    }
+
+    @PatchMapping("/api/productos/{id}/galeria/orden")
+    public ResponseEntity<Map<String, Boolean>> ordenarGaleria(@PathVariable Integer id,
+                                                               @RequestBody Map<String, List<Integer>> body) {
+        service.ordenarGaleria(id, body.getOrDefault("ids", List.of()));
+        return ResponseEntity.ok(Map.of("ok", true));
+    }
+
     @GetMapping("/api/productos/mas-vendidos")
     public List<Map<String, Object>> masVendidos(@RequestParam(defaultValue = "3") int limite) {
         return service.masVendidos(limite);
@@ -38,6 +70,16 @@ public class ProductoController {
     @GetMapping("/api/categorias")
     public List<Map<String, Object>> categorias() {
         return service.categorias();
+    }
+
+    @GetMapping("/api/marcas")
+    public List<Map<String, Object>> marcas() {
+        return service.marcas();
+    }
+
+    @GetMapping("/api/gamas")
+    public List<Map<String, Object>> gamas() {
+        return service.gamas();
     }
 
     @GetMapping("/api/galeria/{galeriaId}/contenido")
@@ -180,6 +222,14 @@ public class ProductoController {
                                                                 @RequestHeader(value = "X-Usuario", required = false) String usuario)
             throws JsonProcessingException {
         service.crear(9, body, usuario);
+        return ResponseEntity.ok(Map.of("ok", true));
+    }
+
+    @PostMapping("/api/sp/accesorios")
+    public ResponseEntity<Map<String, Boolean>> crearAccesorio(@RequestBody Map<String, Object> body,
+                                                               @RequestHeader(value = "X-Usuario", required = false) String usuario)
+            throws JsonProcessingException {
+        service.crear(10, body, usuario);
         return ResponseEntity.ok(Map.of("ok", true));
     }
 

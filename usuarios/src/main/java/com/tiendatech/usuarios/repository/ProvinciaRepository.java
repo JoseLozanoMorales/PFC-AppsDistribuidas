@@ -10,24 +10,18 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, Short> {
     @Modifying
     @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_provincias(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','agregar','Nombre', :nombre))" +
-                    ")", nativeQuery = true)
+            "INSERT INTO usuarios.provincia (nombre,habilitado) VALUES (:nombre,true)", nativeQuery = true)
     void agregar(@Param("nombre") String nombre);
 
     @Modifying
     @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_provincias(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','editar','ProvinciaId', :id, 'Nombre', :nombre))" +
-                    ")", nativeQuery = true)
+            "UPDATE usuarios.provincia SET nombre=coalesce(:nombre,nombre) WHERE provincia_id=:id", nativeQuery = true)
     void editar(@Param("id") Long id, @Param("nombre") String nombreNullable);
 
     @Modifying
     @Transactional
     @Query(value =
-            "CALL usuarios.sp_procesar_provincias(" +
-                    "  jsonb_build_array(jsonb_build_object('Accion','eliminar','ProvinciaId', :id))" +
-                    ")", nativeQuery = true)
+            "UPDATE usuarios.provincia SET habilitado=false WHERE provincia_id=:id", nativeQuery = true)
     void eliminar(@Param("id") Long id);
 }

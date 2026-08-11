@@ -1022,7 +1022,7 @@
           const IDLE_MS = 60 * 1000;   // 1 min
           if (IDLE_MS <= 0) return;
 
-          const REDIRECT = "/index.html";
+          const REDIRECT = "/app/#/login";
           let last = Date.now(), t;
 
           function schedule(){ clearTimeout(t); t = setTimeout(triggerLogout, IDLE_MS); }

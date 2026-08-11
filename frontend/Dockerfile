@@ -1,7 +1,15 @@
+FROM node:22-alpine AS web-build
+WORKDIR /webapp
+COPY webapp/package*.json ./
+RUN npm ci
+COPY webapp ./
+RUN npm run build
+
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
+COPY --from=web-build /src/main/resources/static/app ./src/main/resources/static/app
 RUN mvn -q -DskipTests package
 
 FROM eclipse-temurin:17-jre

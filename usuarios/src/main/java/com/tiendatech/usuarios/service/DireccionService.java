@@ -105,7 +105,13 @@ public class DireccionService {
     }
     @Transactional(readOnly = true)
     public List<DireccionDTO> listarDetallado(Integer usuarioId){
-        final String sql = "SELECT * FROM usuarios.f_mostrar_direccion_usuario_(?)";
+        final String sql = """
+                SELECT d.direccion_id,d.calle,d.referencia,c.nombre AS nombre_de_ciudad,
+                       p.nombre AS nombre_de_provincia
+                  FROM usuarios.direccion d JOIN usuarios.ciudad c ON c.ciudad_id=d.ciudad_id
+                  JOIN usuarios.provincia p ON p.provincia_id=c.provincia_id
+                 WHERE d.usuario_id=? AND d.habilitado=true ORDER BY d.direccion_id
+                """;
         return jdbc.query(sql, (rs, i) -> {
             DireccionDTO dto = new DireccionDTO();
             Number n = (Number) rs.getObject("direccion_id");

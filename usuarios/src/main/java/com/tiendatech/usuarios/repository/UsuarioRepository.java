@@ -22,7 +22,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Modifying
     @Transactional
     @Query(
-    value = "CALL usuarios.registrar_usuario_cliente(:p_nombre, :p_cedula, :p_correo, :p_telefono, :p_usuario, :p_contrasenia)",
+    value = "INSERT INTO usuarios.usuario (nombre,cedula,correo,telefono,usuario,contrasenia,habilitado,rol_id) VALUES (:p_nombre,:p_cedula,:p_correo,:p_telefono,:p_usuario,:p_contrasenia,true,2)",
     nativeQuery = true
     )
     void registrarClienteSP(
@@ -36,7 +36,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
 
     @Modifying @Transactional
-    @Query(value = "CALL usuarios.crear_usuario(:v_nombre, :v_cedula, :v_correo, :v_telefono, :v_contrasenia, :v_usuario, :v_id_metodopago, :v_id_rol)", nativeQuery = true)
+    @Query(value = "INSERT INTO usuarios.usuario (nombre,cedula,correo,telefono,contrasenia,usuario,metodopago_id,rol_id,habilitado) VALUES (:v_nombre,:v_cedula,:v_correo,:v_telefono,:v_contrasenia,:v_usuario,:v_id_metodopago,:v_id_rol,true)", nativeQuery = true)
     void crearUsuarioSP(
             @Param("v_nombre") String nombre,
             @Param("v_cedula") String cedula,
@@ -50,8 +50,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Modifying
     @Transactional
     @Query(value =
-        "CALL usuarios.actualizar_usuario_cliente(" +
-        ":p_usuario_id, :p_nombre, :p_cedula, :p_correo, :p_telefono, :p_usuario, :p_contrasenia)", 
+        "UPDATE usuarios.usuario SET nombre=coalesce(:p_nombre,nombre),cedula=coalesce(:p_cedula,cedula),correo=coalesce(:p_correo,correo),telefono=coalesce(:p_telefono,telefono),usuario=coalesce(:p_usuario,usuario),contrasenia=coalesce(:p_contrasenia,contrasenia) WHERE usuario_id=:p_usuario_id",
         nativeQuery = true)
     void actualizarClienteSP(
         @Param("p_usuario_id") Integer usuarioId,
@@ -65,26 +64,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     // ====== NUEVO (solo admins/trabajadores) ======
 
-    // Si en tu BD es PROCEDURE:
-    @Modifying
-    @jakarta.transaction.Transactional
-    @Query(value = "CALL usuarios.gestionar_admins_json(CAST(?1 AS jsonb))", nativeQuery = true)
-    void gestionarAdminsJsonCall(String payloadJson);
-
-    // Si en tu BD es FUNCTION:
-    @Modifying(clearAutomatically = true)
-    @jakarta.transaction.Transactional
-    @Query(value = "SELECT usuarios.gestionar_admins_json(CAST(?1 AS jsonb))", nativeQuery = true)
-    void gestionarAdminsJsonSelect(String payloadJson);
-
     @Modifying
     @Transactional
     @Query(value =
-            "CALL usuarios.sp_actualizar_contrasenias(" +
-                    "  jsonb_build_array(" +
-                    "    jsonb_build_object('Correo', lower(:correo), 'Contrasenia', :hash)" +
-                    "  )" +
-                    ")", nativeQuery = true)
+            "UPDATE usuarios.usuario SET contrasenia=:hash WHERE lower(correo)=lower(:correo)", nativeQuery = true)
     void actualizarContraseniaPorCorreoCall(@Param("correo") String correo,
                                             @Param("hash") String hash);
     List<Usuario> findTop50ByUsuarioContainingIgnoreCase(String usuario);

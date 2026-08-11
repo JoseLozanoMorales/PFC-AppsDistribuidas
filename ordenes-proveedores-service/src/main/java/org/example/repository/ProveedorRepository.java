@@ -1,95 +1,74 @@
 package org.example.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.example.model.Proveedor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.Types;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
 public class ProveedorRepository {
-
     private final JdbcTemplate jdbcTemplate;
-    private final ObjectMapper objectMapper;
 
     public ProveedorRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.objectMapper = new ObjectMapper();
-        // Las funciones de BD devuelven columnas en snake_case (proveedor_id, contacto_nombre...);
-        // este mapper es solo para leer esas respuestas, no afecta el JSON que expone el controller.
-        this.objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
     }
 
     public Integer crear(Proveedor p) {
-        String sql = "call ordenes_proveedores.sp_crear_proveedor(?, ?, ?, ?, ?, ?, ?)";
-        return jdbcTemplate.execute((Connection con) -> {
-            try (CallableStatement cs = con.prepareCall(sql)) {
-                cs.setString(1, p.getNombre());
-                cs.setString(2, p.getRuc());
-                cs.setString(3, p.getContactoNombre());
-                cs.setString(4, p.getTelefono());
-                cs.setString(5, p.getCorreo());
-                cs.setString(6, p.getDireccion());
-                cs.registerOutParameter(7, Types.INTEGER);
-                cs.execute();
-                return cs.getInt(7);
-            }
-        });
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO ordenes_proveedores.proveedor
+                    (nombre, ruc, contacto_nombre, telefono, correo, direccion, activo)
+                VALUES (?, ?, ?, ?, ?, ?, true)
+                RETURNING proveedor_id
+                """, Integer.class, p.getNombre(), p.getRuc(), p.getContactoNombre(),
+                p.getTelefono(), p.getCorreo(), p.getDireccion());
     }
 
     public void actualizar(Proveedor p) {
-        String sql = "call ordenes_proveedores.sp_actualizar_proveedor(?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.execute((Connection con) -> {
-            try (CallableStatement cs = con.prepareCall(sql)) {
-                cs.setInt(1, p.getProveedorId());
-                cs.setString(2, p.getNombre());
-                cs.setString(3, p.getContactoNombre());
-                cs.setString(4, p.getTelefono());
-                cs.setString(5, p.getCorreo());
-                cs.setString(6, p.getDireccion());
-                cs.execute();
-                return null;
-            }
-        });
+        int changed = jdbcTemplate.update("""
+                UPDATE ordenes_proveedores.proveedor
+                   SET nombre=?, contacto_nombre=?, telefono=?, correo=?, direccion=?
+                 WHERE proveedor_id=?
+                """, p.getNombre(), p.getContactoNombre(), p.getTelefono(), p.getCorreo(),
+                p.getDireccion(), p.getProveedorId());
+        requireOne(changed, p.getProveedorId());
     }
 
     public void desactivar(Integer proveedorId) {
-        String sql = "call ordenes_proveedores.sp_desactivar_proveedor(?)";
-        jdbcTemplate.execute((Connection con) -> {
-            try (CallableStatement cs = con.prepareCall(sql)) {
-                cs.setInt(1, proveedorId);
-                cs.execute();
-                return null;
-            }
-        });
+        requireOne(jdbcTemplate.update("UPDATE ordenes_proveedores.proveedor SET activo=false WHERE proveedor_id=?",
+                proveedorId), proveedorId);
     }
 
     public List<Proveedor> listarActivos() {
-        String sql = "SELECT ordenes_proveedores.fn_listar_proveedores_activos()::text";
-        String json = jdbcTemplate.queryForObject(sql, String.class);
-        try {
-            return objectMapper.readValue(json, new TypeReference<List<Proveedor>>() {});
-        } catch (Exception e) {
-            throw new IllegalStateException("Error leyendo respuesta de fn_listar_proveedores_activos", e);
-        }
+        return jdbcTemplate.query("""
+                SELECT proveedor_id, nombre, ruc, contacto_nombre, telefono, correo, direccion, activo
+                  FROM ordenes_proveedores.proveedor WHERE activo=true ORDER BY nombre
+                """, this::map);
     }
 
     public Proveedor obtenerPorId(Integer proveedorId) {
-        String sql = "SELECT ordenes_proveedores.fn_obtener_proveedor(?)::text";
-        String json = jdbcTemplate.queryForObject(sql, String.class, proveedorId);
-        if (json == null || "null".equals(json)) {
-            return null;
-        }
-        try {
-            return objectMapper.readValue(json, Proveedor.class);
-        } catch (Exception e) {
-            throw new IllegalStateException("Error leyendo respuesta de fn_obtener_proveedor", e);
-        }
+        return jdbcTemplate.query("""
+                SELECT proveedor_id, nombre, ruc, contacto_nombre, telefono, correo, direccion, activo
+                  FROM ordenes_proveedores.proveedor WHERE proveedor_id=?
+                """, this::map, proveedorId).stream().findFirst().orElse(null);
+    }
+
+    private Proveedor map(ResultSet rs, int row) throws SQLException {
+        Proveedor p = new Proveedor();
+        p.setProveedorId(rs.getInt("proveedor_id"));
+        p.setNombre(rs.getString("nombre"));
+        p.setRuc(rs.getString("ruc"));
+        p.setContactoNombre(rs.getString("contacto_nombre"));
+        p.setTelefono(rs.getString("telefono"));
+        p.setCorreo(rs.getString("correo"));
+        p.setDireccion(rs.getString("direccion"));
+        p.setActivo(rs.getBoolean("activo"));
+        return p;
+    }
+
+    private void requireOne(int changed, Integer id) {
+        if (changed != 1) throw new IllegalArgumentException("Proveedor " + id + " no existe");
     }
 }

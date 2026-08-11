@@ -111,20 +111,21 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --insecure
+      - --certs-dir=/cockroach/certs
       - --advertise-addr=crdb-1:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
       - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
       - --locality=region=local,zone=z1
     ports:
-      - "26257:26257"
-      - "8091:8080"
+      - "100.112.52.85:26257:26257"
+      - "127.0.0.1:8091:8080"
     volumes:
       - crdb1-data:/cockroach/cockroach-data
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -135,20 +136,21 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --insecure
+      - --certs-dir=/cockroach/certs
       - --advertise-addr=crdb-2:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
       - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
       - --locality=region=local,zone=z2
     ports:
-      - "26258:26257"
-      - "8092:8080"
+      - "127.0.0.1:26258:26257"
+      - "127.0.0.1:8092:8080"
     volumes:
       - crdb2-data:/cockroach/cockroach-data
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -159,20 +161,21 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --insecure
+      - --certs-dir=/cockroach/certs
       - --advertise-addr=crdb-3:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
       - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
       - --locality=region=local,zone=z3
     ports:
-      - "26259:26257"
-      - "8093:8080"
+      - "127.0.0.1:26259:26257"
+      - "127.0.0.1:8093:8080"
     volumes:
       - crdb3-data:/cockroach/cockroach-data
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --insecure --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -191,10 +194,11 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >
-        cockroach init --insecure --host=crdb-1:26257 2>/dev/null || true;
-        cockroach sql --insecure --host=crdb-1:26257 --file=/docs/db/schema.sql
+        cockroach init --certs-dir=/cockroach/certs --host=crdb-1:26257 2>/dev/null || true;
+        cockroach sql --certs-dir=/cockroach/certs --host=crdb-1:26257 --file=/docs/db/schema.sql
     volumes:
       - ./docs/db/schema.sql:/docs/db/schema.sql:ro
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
@@ -208,10 +212,11 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >
-        cockroach sql --insecure --host=crdb-1:26257
+        cockroach sql --certs-dir=/cockroach/certs --host=crdb-1:26257
         --file=/docs/db/seeds.sql
     volumes:
       - ./docs/db/seeds.sql:/docs/db/seeds.sql:ro
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
@@ -221,23 +226,71 @@ services:
     container_name: pedidos-crdb-service
     profiles: ["e3-crdb"]
     ports:
-      - "8183:8083"
+      - "127.0.0.1:8183:8083"
     environment:
       SERVER_PORT: 8083
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
       CRDB_RETRY_MAX_ATTEMPTS: 3
       CRDB_RETRY_DELAY_MS: 100
       VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
-      PRODUCTOS_SERVICE_URL: http://productos-service:8081
-      USUARIOS_SERVICE_URL: http://usuarios-service:8085
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
     depends_on:
       crdb-init:
         condition: service_completed_successfully
       ventas-crdb-service:
         condition: service_started
+      productos-crdb-service:
+        condition: service_started
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
+    networks:
+      - default
+      - pfc-net
+
+  productos-crdb-service:
+    build:
+      context: ./productos-service
+    container_name: productos-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "127.0.0.1:8181:8081"
+    environment:
+      SERVER_PORT: 8081
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
+    networks:
+      - default
+      - pfc-net
+
+  inventario-crdb-service:
+    build:
+      context: ./inventario-service
+    container_name: inventario-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "127.0.0.1:8182:8082"
+    environment:
+      SERVER_PORT: 8082
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -248,17 +301,104 @@ services:
     container_name: ventas-crdb-service
     profiles: ["e3-crdb"]
     ports:
-      - "8186:8086"
+      - "127.0.0.1:8186:8086"
     environment:
       SERVER_PORT: 8086
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
-      INVENTARIO_SERVICE_URL: http://inventario-service:8082
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
     depends_on:
       crdb-init:
         condition: service_completed_successfully
+      inventario-crdb-service:
+        condition: service_started
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
+    networks:
+      - default
+      - pfc-net
+
+  ordenes-proveedores-crdb-service:
+    build:
+      context: ./ordenes-proveedores-service
+    container_name: ordenes-proveedores-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "127.0.0.1:8184:8084"
+    environment:
+      SERVER_PORT: 8084
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+      inventario-crdb-service:
+        condition: service_started
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
+    networks:
+      - default
+      - pfc-net
+
+  usuarios-crdb-service:
+    build:
+      context: ./usuarios
+    container_name: usuarios-crdb-service
+    profiles: ["e3-crdb"]
+    ports:
+      - "127.0.0.1:8185:8085"
+    environment:
+      SERVER_PORT: 8085
+      SPRING_PROFILES_ACTIVE: crdb
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_USERNAME: root
+      CRDB_DATASOURCE_PASSWORD: ""
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      TT_MAIL_USERNAME: ${TT_MAIL_USERNAME:-}
+      TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD:-}
+      COOKIE_SECURE: "false"
+    depends_on:
+      crdb-init:
+        condition: service_completed_successfully
+    volumes:
+      - ./infra/crdb-certs:/cockroach/certs:ro
+    networks:
+      - default
+      - pfc-net
+
+  frontend-crdb:
+    build:
+      context: ./frontend
+    container_name: frontend-crdb
+    profiles: ["e3-crdb"]
+    ports:
+      - "0.0.0.0:8180:8080"
+    environment:
+      SERVER_PORT: 8080
+      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      PEDIDOS_SERVICE_URL: http://pedidos-crdb-service:8083
+      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-crdb-service:8084
+      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
+    depends_on:
+      usuarios-crdb-service:
+        condition: service_started
+      productos-crdb-service:
+        condition: service_started
+      inventario-crdb-service:
+        condition: service_started
+      pedidos-crdb-service:
+        condition: service_started
+      ordenes-proveedores-crdb-service:
+        condition: service_started
+      ventas-crdb-service:
+        condition: service_started
     networks:
       - default
       - pfc-net

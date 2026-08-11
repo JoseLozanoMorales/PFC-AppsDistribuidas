@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +39,6 @@ public class InventarioClient {
                         "producto_id", entry.getKey(),
                         "subtipo_id", SUBTIPO_COMPRA,
                         "cantidad", entry.getValue(),
-                        "fecha", LocalDate.now().toString(),
                         "referencia", "OC-" + ordenCompraId
                 ))
                 .toList();

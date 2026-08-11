@@ -14,11 +14,18 @@ public class UsuarioQueryRepository {
     private final JdbcTemplate jdbc;
 
     public List<UsuarioMinDTO> buscarMin(String q, Integer rolId, int limit) {
-        String sql = "SELECT * FROM usuarios.f_buscar_usuarios_min(?,?,?)";
+        String sql = """
+                SELECT usuario_id,nombre,cedula,correo,telefono,usuario,rol_id,habilitado
+                  FROM usuarios.usuario
+                 WHERE (coalesce(?, '')='' OR lower(usuario) LIKE '%'||lower(?)||'%' OR lower(nombre) LIKE '%'||lower(?)||'%')
+                   AND (? IS NULL OR rol_id=?) ORDER BY usuario LIMIT ?
+                """;
         return jdbc.query(sql, ps -> {
             ps.setString(1, q == null ? "" : q.trim());
-            if (rolId == null) ps.setNull(2, java.sql.Types.INTEGER); else ps.setInt(2, rolId);
-            ps.setInt(3, limit <= 0 ? 20 : Math.min(limit, 50));
+            ps.setString(2, q == null ? "" : q.trim()); ps.setString(3, q == null ? "" : q.trim());
+            if (rolId == null) { ps.setNull(4, Types.INTEGER); ps.setNull(5, Types.INTEGER); }
+            else { ps.setInt(4, rolId); ps.setInt(5, rolId); }
+            ps.setInt(6, limit <= 0 ? 20 : Math.min(limit, 50));
         }, (rs, i) -> new UsuarioMinDTO(
                 rs.getInt("usuario_id"),
                 rs.getString("nombre"),

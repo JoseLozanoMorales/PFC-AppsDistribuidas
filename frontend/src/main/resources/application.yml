@@ -28,7 +28,7 @@ spring:
             - id: productos-api
               uri: ${PRODUCTOS_SERVICE_URL:http://localhost:8081}
               predicates:
-                - Path=/api/categorias,/api/galeria/**,/api/galeria_v2/**,/api/productos/**,/api/sp/almacenamientos,/api/sp/cpu,/api/sp/cpu-cooler,/api/sp/cubiertas,/api/sp/fuentes,/api/sp/gpu,/api/sp/ram,/api/sp/motherboards,/api/sp/perifericos,/api/sp/productos/**,/api/sp/ivas
+                - Path=/api/categorias,/api/marcas,/api/gamas,/api/galeria/**,/api/galeria_v2/**,/api/productos/**,/api/sp/almacenamientos,/api/sp/cpu,/api/sp/cpu-cooler,/api/sp/cubiertas,/api/sp/fuentes,/api/sp/gpu,/api/sp/ram,/api/sp/motherboards,/api/sp/perifericos,/api/sp/accesorios,/api/sp/productos/**,/api/sp/ivas
 
             - id: inventario-api
               uri: ${INVENTARIO_SERVICE_URL:http://localhost:8082}

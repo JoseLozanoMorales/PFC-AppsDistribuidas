@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.tiendatech.usuarios.repository.UsuarioQueryRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
@@ -41,6 +42,7 @@ public class UsuarioService {
     private final OtpService otpService;
     // NUEVO
     private final UsuarioQueryRepository usuarioQueryRepository;
+    private final JdbcTemplate jdbc;
 
     public com.tiendatech.usuarios.model.Usuario getById(Integer id) {
         return usuarioRepository.findById(id)
@@ -128,11 +130,11 @@ public class UsuarioService {
         }
 
         // 1) Generar y ENVIAR por correo (si falla -> excepción -> NO se registra)
-        String passwordPlano = otpService.generarYEnviarCredenciales(
-                dto.getCorreo(),
-                dto.getUsuario(),
-                12 // longitud sugerida
-        );
+        String passwordPlano = emptyToNull(dto.getContrasena());
+        if (passwordPlano == null) {
+            passwordPlano = otpService.generarYEnviarCredenciales(
+                    dto.getCorreo(), dto.getUsuario(), 12);
+        }
 
         // 2) Hashear para BD
         String hash = passwordEncoder.encode(passwordPlano);
@@ -197,18 +199,13 @@ public class UsuarioService {
      */
     @Transactional
     public void gestionarAdmins(List<UsuarioAdminDTO> items) {
-        try {
-            ObjectMapper mapper = new ObjectMapper()
-                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-            String json = mapper.writeValueAsString(items);
-
-            try {
-                usuarioRepository.gestionarAdminsJsonCall(json);   // PROCEDURE
-            } catch (Exception ignored) {
-                usuarioRepository.gestionarAdminsJsonSelect(json); // FUNCTION
+        for (UsuarioAdminDTO a : items) {
+            switch (a.getAccion().toUpperCase()) {
+                case "AGREGAR" -> jdbc.update("INSERT INTO usuarios.usuario (nombre,cedula,correo,telefono,usuario,contrasenia,rol_id,habilitado) VALUES (?,?,?,?,?,?,?,true)", a.getNombre(),a.getCedula(),a.getCorreo(),a.getTelefono(),a.getUsuario(),a.getContrasenia(),a.getRolId());
+                case "ACTUALIZAR" -> jdbc.update("UPDATE usuarios.usuario SET nombre=coalesce(?,nombre),cedula=coalesce(?,cedula),correo=coalesce(?,correo),telefono=coalesce(?,telefono),usuario=coalesce(?,usuario),contrasenia=coalesce(?,contrasenia),rol_id=coalesce(?,rol_id) WHERE usuario_id=?",a.getNombre(),a.getCedula(),a.getCorreo(),a.getTelefono(),a.getUsuario(),a.getContrasenia(),a.getRolId(),a.getUsuarioId());
+                case "DESHABILITAR" -> jdbc.update("UPDATE usuarios.usuario SET habilitado=false WHERE usuario_id=? AND rol_id=?",a.getUsuarioId(),a.getRolId());
+                default -> throw new IllegalArgumentException("Acción administrativa inválida: " + a.getAccion());
             }
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Payload JSON inválido", e);
         }
     }
 

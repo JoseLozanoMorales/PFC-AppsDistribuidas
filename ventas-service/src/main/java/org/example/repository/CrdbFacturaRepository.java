@@ -33,11 +33,14 @@ public class CrdbFacturaRepository implements FacturaStore {
 
         Integer facturaId = jdbcTemplate.queryForObject("""
                 INSERT INTO ventas.factura_encabezado
-                    (orden_id, fecha_orden, usuario_id, subtotal, total, numero)
-                SELECT orden_id, fecha, usuario_id, subtotal, total,
+                    (orden_id, fecha_orden, usuario_id, nombre, correo,
+                     subtotal, total, numero)
+                SELECT o.orden_id, o.fecha, o.usuario_id, u.nombre, u.correo,
+                       o.subtotal, o.total,
                        concat('FAC-E3-', CAST(orden_id AS STRING))
-                FROM pedidos.orden
-                WHERE orden_id = ?
+                FROM pedidos.orden o
+                JOIN usuarios.usuario u ON u.usuario_id = o.usuario_id
+                WHERE o.orden_id = ?
                 RETURNING factura_id
                 """, Integer.class, ordenId);
 
@@ -58,14 +61,16 @@ public class CrdbFacturaRepository implements FacturaStore {
         try {
             return jdbcTemplate.queryForObject("""
                     SELECT f.factura_id, f.orden_id, f.usuario_id, f.fecha_emision,
-                           f.fecha_orden, u.nombre, u.correo, f.subtotal, f.total, f.numero
+                           f.fecha_orden, f.cedula, f.nombre, f.correo,
+                           f.telefono, f.direccion_entrega,
+                           f.subtotal, f.total, f.numero
                     FROM ventas.factura_encabezado f
-                    JOIN usuarios.usuario u ON u.usuario_id = f.usuario_id
                     WHERE f.factura_id = ?
                     """, (rs, rowNum) -> new Factura(
                     rs.getInt("factura_id"), rs.getInt("orden_id"), rs.getInt("usuario_id"),
                     rs.getDate("fecha_emision").toLocalDate(), rs.getDate("fecha_orden").toLocalDate(),
-                    null, rs.getString("nombre"), rs.getString("correo"), null, null,
+                    rs.getString("cedula"), rs.getString("nombre"), rs.getString("correo"),
+                    rs.getString("telefono"), rs.getString("direccion_entrega"),
                     rs.getBigDecimal("subtotal"), rs.getBigDecimal("total"), rs.getString("numero")
             ), facturaId);
         } catch (EmptyResultDataAccessException e) {
@@ -93,9 +98,10 @@ public class CrdbFacturaRepository implements FacturaStore {
     public List<Factura> listar(Integer usuarioId) {
         String base = """
                 SELECT f.factura_id, f.orden_id, f.usuario_id, f.fecha_emision,
-                       f.fecha_orden, u.nombre, u.correo, f.subtotal, f.total, f.numero
+                       f.fecha_orden, f.cedula, f.nombre, f.correo,
+                       f.telefono, f.direccion_entrega,
+                       f.subtotal, f.total, f.numero
                 FROM ventas.factura_encabezado f
-                JOIN usuarios.usuario u ON u.usuario_id = f.usuario_id
                 """;
         String sql = usuarioId == null
                 ? base + " ORDER BY f.fecha_emision DESC, f.factura_id DESC"
@@ -104,7 +110,8 @@ public class CrdbFacturaRepository implements FacturaStore {
         return jdbcTemplate.query(sql, (rs, rowNum) -> new Factura(
                 rs.getInt("factura_id"), rs.getInt("orden_id"), rs.getInt("usuario_id"),
                 rs.getDate("fecha_emision").toLocalDate(), rs.getDate("fecha_orden").toLocalDate(),
-                null, rs.getString("nombre"), rs.getString("correo"), null, null,
+                rs.getString("cedula"), rs.getString("nombre"), rs.getString("correo"),
+                rs.getString("telefono"), rs.getString("direccion_entrega"),
                 rs.getBigDecimal("subtotal"), rs.getBigDecimal("total"), rs.getString("numero")
         ), args);
     }
