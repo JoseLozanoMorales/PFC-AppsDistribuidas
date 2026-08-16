@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: ./frontend
+      context: Apps/web/frontend
     container_name: frontend
     ports:
       - "8080:8080"
@@ -23,7 +23,7 @@ services:
 
   productos-service:
     build:
-      context: ./productos-service
+      context: services/productos-service
     container_name: productos-service
     ports:
       - "8081:8081"
@@ -35,7 +35,7 @@ services:
 
   inventario-service:
     build:
-      context: ./inventario-service
+      context: services/inventario-service
     container_name: inventario-service
     ports:
       - "8082:8082"
@@ -47,7 +47,7 @@ services:
 
   pedidos-service:
     build:
-      context: ./pedidos-service
+      context: services/pedidos-service
     container_name: pedidos-service
     ports:
       - "8083:8083"
@@ -63,7 +63,7 @@ services:
 
   ordenes-proveedores-service:
     build:
-      context: ./ordenes-proveedores-service
+      context: services/ordenes-proveedores-service
     container_name: ordenes-proveedores-service
     ports:
       - "8084:8084"
@@ -76,7 +76,7 @@ services:
 
   usuarios-service:
     build:
-      context: ./usuarios
+      context: services/usuarios
     container_name: usuarios-service
     ports:
       - "8085:8085"
@@ -92,7 +92,7 @@ services:
 
   ventas-service:
     build:
-      context: ./ventas-service
+      context: services/ventas-service
     container_name: ventas-service
     ports:
       - "8086:8086"
@@ -122,7 +122,7 @@ services:
       - "127.0.0.1:8091:8080"
     volumes:
       - crdb1-data:/cockroach/cockroach-data
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
@@ -147,7 +147,7 @@ services:
       - "127.0.0.1:8092:8080"
     volumes:
       - crdb2-data:/cockroach/cockroach-data
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
@@ -172,7 +172,7 @@ services:
       - "127.0.0.1:8093:8080"
     volumes:
       - crdb3-data:/cockroach/cockroach-data
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
@@ -198,7 +198,7 @@ services:
         cockroach sql --certs-dir=/cockroach/certs --host=crdb-1:26257 --file=/docs/db/schema.sql
     volumes:
       - ./docs/db/schema.sql:/docs/db/schema.sql:ro
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
@@ -216,13 +216,13 @@ services:
         --file=/docs/db/seeds.sql
     volumes:
       - ./docs/db/seeds.sql:/docs/db/seeds.sql:ro
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
   pedidos-crdb-service:
     build:
-      context: ./pedidos-service
+      context: services/pedidos-service
     container_name: pedidos-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -246,14 +246,14 @@ services:
       productos-crdb-service:
         condition: service_started
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   productos-crdb-service:
     build:
-      context: ./productos-service
+      context: services/productos-service
     container_name: productos-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -268,14 +268,14 @@ services:
       crdb-init:
         condition: service_completed_successfully
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   inventario-crdb-service:
     build:
-      context: ./inventario-service
+      context: services/inventario-service
     container_name: inventario-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -290,14 +290,14 @@ services:
       crdb-init:
         condition: service_completed_successfully
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   ventas-crdb-service:
     build:
-      context: ./ventas-service
+      context: services/ventas-service
     container_name: ventas-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -315,14 +315,14 @@ services:
       inventario-crdb-service:
         condition: service_started
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   ordenes-proveedores-crdb-service:
     build:
-      context: ./ordenes-proveedores-service
+      context: services/ordenes-proveedores-service
     container_name: ordenes-proveedores-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -340,14 +340,14 @@ services:
       inventario-crdb-service:
         condition: service_started
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   usuarios-crdb-service:
     build:
-      context: ./usuarios
+      context: services/usuarios
     container_name: usuarios-crdb-service
     profiles: ["e3-crdb"]
     ports:
@@ -366,14 +366,14 @@ services:
       crdb-init:
         condition: service_completed_successfully
     volumes:
-      - ./infra/crdb-certs:/cockroach/certs:ro
+      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
 
   frontend-crdb:
     build:
-      context: ./frontend
+      context: Apps/web/frontend
     container_name: frontend-crdb
     profiles: ["e3-crdb"]
     ports:
