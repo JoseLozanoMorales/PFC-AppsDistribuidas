@@ -1,6 +1,7 @@
 package com.example.inventario.service;
 
 import com.example.inventario.dto.MovimientoInventarioRequest;
+import com.example.inventario.dto.StockProductoResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -55,13 +56,17 @@ public class InventarioService {
                 """, tipo, tipo);
     }
 
-    public Map<String, Object> obtenerStock(Integer productoId) {
+    public StockProductoResponse obtenerStock(Integer productoId) {
         if (productoId == null) {
             throw new IllegalArgumentException("Falta productoId");
         }
 
-        List<Map<String, Object>> rows = jdbc.queryForList(
+        List<StockProductoResponse> rows = jdbc.query(
                 "SELECT producto_id, nombre, stock FROM productos.producto WHERE producto_id = ? AND habilitado",
+                (rs, rowNum) -> new StockProductoResponse(
+                        rs.getLong("producto_id"),
+                        rs.getString("nombre"),
+                        rs.getInt("stock")),
                 productoId);
 
         if (rows.isEmpty()) {
@@ -70,7 +75,7 @@ public class InventarioService {
         return rows.getFirst();
     }
 
-    public List<Map<String, Object>> listarStock(List<Integer> productoIds) {
+    public List<StockProductoResponse> listarStock(List<Integer> productoIds) {
         if (productoIds == null || productoIds.isEmpty()) {
             throw new IllegalArgumentException("Debe enviar al menos un productoId");
         }
@@ -85,10 +90,15 @@ public class InventarioService {
         }
 
         String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
-        return jdbc.queryForList("""
+        return jdbc.query("""
                 SELECT producto_id, nombre, stock FROM productos.producto
                 WHERE habilitado AND producto_id IN (%s) ORDER BY producto_id
-                """.formatted(placeholders), ids.toArray());
+                """.formatted(placeholders),
+                (rs, rowNum) -> new StockProductoResponse(
+                        rs.getLong("producto_id"),
+                        rs.getString("nombre"),
+                        rs.getInt("stock")),
+                ids.toArray());
     }
 
     @Transactional

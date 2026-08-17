@@ -1,6 +1,7 @@
 package com.example.inventario.controller;
 
 import com.example.inventario.service.InventarioService;
+import com.example.inventario.dto.StockProductoResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,12 @@ public class InventarioController {
     }
 
     @GetMapping("/api/stock/{productoId}")
-    public Map<String, Object> obtenerStock(@PathVariable Integer productoId) {
+    public StockProductoResponse obtenerStock(@PathVariable Integer productoId) {
         return service.obtenerStock(productoId);
     }
 
     @PostMapping("/api/stock")
-    public List<Map<String, Object>> listarStock(@RequestBody List<Integer> productoIds) {
+    public List<StockProductoResponse> listarStock(@RequestBody List<Integer> productoIds) {
         return service.listarStock(productoIds);
     }
 
