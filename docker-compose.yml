@@ -13,6 +13,7 @@ services:
       PEDIDOS_SERVICE_URL: http://pedidos-service:8083
       ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-service:8084
       VENTAS_SERVICE_URL: http://ventas-service:8086
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
     depends_on:
       - usuarios-service
       - productos-service
@@ -394,6 +395,7 @@ services:
       PEDIDOS_SERVICE_URL: http://pedidos-crdb-service:8083
       ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-crdb-service:8084
       VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
     depends_on:
       usuarios-crdb-service:
         condition: service_started

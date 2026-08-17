@@ -25,10 +25,10 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-          cache-dependency-path: pedidos-service/pom.xml
+          cache-dependency-path: services/pedidos-service/pom.xml
 
       - name: Run pedidos-service tests with Testcontainers
-        working-directory: pedidos-service
+        working-directory: services/pedidos-service
         run: mvn --batch-mode --no-transfer-progress clean verify
 
       - name: Upload test reports on failure
@@ -36,5 +36,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: crdb-test-reports
-          path: pedidos-service/target/surefire-reports/
+          path: services/pedidos-service/target/surefire-reports/
           if-no-files-found: ignore

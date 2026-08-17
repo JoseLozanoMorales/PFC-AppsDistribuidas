@@ -1,6 +1,29 @@
 server:
   port: ${SERVER_PORT:8080}
 
+tiendatech:
+  security:
+    jwt:
+      # Debe ser el mismo AUTH_JWT_SECRET usado por usuarios-service para firmar tokens.
+      secret: ${AUTH_JWT_SECRET:TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      # Rutas publicas del dominio usuarios: autenticacion, registro, OTP,
+      # recuperacion de clave, catalogos geograficos y recursos estaticos.
+      public-paths:
+        - /api/login
+        - /auth/**
+        - /api/otp/**
+        - /api/usuarios/crear
+        - /api/usuarios/recuperar-password
+        - /api/provincias/**
+        - /api/ciudades/**
+        - /uploads/**
+        - /assets/**
+        - /favicon.ico
+      protected-paths:
+        - /api/usuarios/**
+        - /api/seguridad/**
+        - /api/auditoria/**
+
 spring:
   application:
     name: frontend

@@ -2,9 +2,11 @@
 package com.tiendatech.usuarios.controller;
 
 import com.tiendatech.usuarios.model.Usuario;
+import com.tiendatech.usuarios.security.JwtUtil;
 import com.tiendatech.usuarios.service.UsuarioService;
 import com.tiendatech.usuarios.service.audit.UsuarioAuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -18,6 +20,12 @@ public class LoginController {
 
     @Autowired
     private UsuarioAuditoriaService usuarioAuditoriaService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Value("${auth.access.minutes:10}")
+    private int accessMinutes;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
@@ -42,7 +50,27 @@ public class LoginController {
                 "telefono",  u.getTelefono(),
                 "id_rol",    u.getIdRol()
         );
-        return ResponseEntity.ok(Map.of("success", true, "user", userPayload, "token", "mock"));
+        String accessToken = jwtUtil.generateAccess(
+                u.getUsuarioId(),
+                u.getUsuario(),
+                roleName(rol),
+                accessMinutes
+        );
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "user", userPayload,
+                "token", accessToken,
+                "access", accessToken
+        ));
+    }
+
+    private String roleName(int rol) {
+        return switch (rol) {
+            case 1 -> "ADMIN";
+            case 2 -> "CLIENTE";
+            case 3 -> "TRABAJADOR";
+            default -> "UNKNOWN";
+        };
     }
 
 }
