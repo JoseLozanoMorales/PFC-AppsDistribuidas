@@ -1,5 +1,6 @@
 package com.example.productos.service;
 
+import com.example.productos.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -179,7 +180,7 @@ public class ProductoService {
     public Map<String, Object> detalle(Integer id) {
         List<Map<String, Object>> base = jdbc.queryForList(detalleSql() + " WHERE p.producto_id = ?", id);
         if (base.isEmpty()) {
-            throw new IllegalArgumentException("Producto no encontrado");
+            throw new ResourceNotFoundException("Producto no encontrado");
         }
 
         Map<String, Object> out = new LinkedHashMap<>(base.get(0));
@@ -266,7 +267,7 @@ public class ProductoService {
     @Transactional
     public void eliminar(Integer productoId, String usuario) {
         int actualizados = jdbc.update("UPDATE productos.producto SET habilitado = false WHERE producto_id = ?", productoId);
-        if (actualizados == 0) throw new IllegalArgumentException("Producto no encontrado");
+        if (actualizados == 0) throw new ResourceNotFoundException("Producto no encontrado");
     }
 
     public List<Map<String, Object>> detalleParaEditar(Integer id) {
@@ -295,7 +296,7 @@ public class ProductoService {
                 payload.get("stock"), payload.get("marca_id"), payload.get("gama_id"),
                 payload.get("iva_id"), payload.get("costo"), payload.get("categoria_id"),
                 objectMapper.writeValueAsString(atributos), productoId);
-        if (actualizados == 0) throw new IllegalArgumentException("Producto no encontrado");
+        if (actualizados == 0) throw new ResourceNotFoundException("Producto no encontrado");
     }
 
     private static String detalleSql() {

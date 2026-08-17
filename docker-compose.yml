@@ -32,6 +32,12 @@ services:
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   inventario-service:
     build:
@@ -44,6 +50,12 @@ services:
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
       TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   pedidos-service:
     build:
