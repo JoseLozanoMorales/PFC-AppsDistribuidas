@@ -99,6 +99,11 @@ services:
       TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
       TT_MAIL_USERNAME: ${TT_MAIL_USERNAME}
       TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD}
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
 
@@ -123,21 +128,20 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --certs-dir=/cockroach/certs
+      - --insecure
       - --advertise-addr=crdb-1:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
       - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
       - --locality=region=local,zone=z1
     ports:
-      - "100.112.52.85:26257:26257"
+      - "127.0.0.1:26257:26257"
       - "127.0.0.1:8091:8080"
     volumes:
       - crdb1-data:/cockroach/cockroach-data
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -148,7 +152,7 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --certs-dir=/cockroach/certs
+      - --insecure
       - --advertise-addr=crdb-2:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
@@ -159,10 +163,9 @@ services:
       - "127.0.0.1:8092:8080"
     volumes:
       - crdb2-data:/cockroach/cockroach-data
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -173,7 +176,7 @@ services:
     profiles: ["e3-crdb"]
     command:
       - start
-      - --certs-dir=/cockroach/certs
+      - --insecure
       - --advertise-addr=crdb-3:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
@@ -184,10 +187,9 @@ services:
       - "127.0.0.1:8093:8080"
     volumes:
       - crdb3-data:/cockroach/cockroach-data
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     healthcheck:
-      test: ["CMD-SHELL", "cockroach node status --certs-dir=/cockroach/certs --host=localhost:26257 >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -206,11 +208,13 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >
-        cockroach init --certs-dir=/cockroach/certs --host=crdb-1:26257 2>/dev/null || true;
-        cockroach sql --certs-dir=/cockroach/certs --host=crdb-1:26257 --file=/docs/db/schema.sql
+        until cockroach sql --insecure --host=crdb-1:26257 -e "SELECT 1" >/dev/null 2>&1; do
+          cockroach init --insecure --host=crdb-1:26257 >/dev/null 2>&1 || true;
+          sleep 2;
+        done;
+        cockroach sql --insecure --host=crdb-1:26257 --file=/docs/db/schema.sql
     volumes:
       - ./docs/db/schema.sql:/docs/db/schema.sql:ro
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
@@ -224,11 +228,10 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >
-        cockroach sql --certs-dir=/cockroach/certs --host=crdb-1:26257
+        cockroach sql --insecure --host=crdb-1:26257
         --file=/docs/db/seeds.sql
     volumes:
       - ./docs/db/seeds.sql:/docs/db/seeds.sql:ro
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks: [pfc-net]
     restart: "no"
 
@@ -242,7 +245,7 @@ services:
     environment:
       SERVER_PORT: 8083
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
       CRDB_RETRY_MAX_ATTEMPTS: 3
@@ -257,8 +260,6 @@ services:
         condition: service_started
       productos-crdb-service:
         condition: service_started
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -273,14 +274,12 @@ services:
     environment:
       SERVER_PORT: 8081
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
     depends_on:
       crdb-init:
         condition: service_completed_successfully
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -295,14 +294,12 @@ services:
     environment:
       SERVER_PORT: 8082
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
     depends_on:
       crdb-init:
         condition: service_completed_successfully
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -317,7 +314,7 @@ services:
     environment:
       SERVER_PORT: 8086
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
@@ -326,8 +323,6 @@ services:
         condition: service_completed_successfully
       inventario-crdb-service:
         condition: service_started
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -342,7 +337,7 @@ services:
     environment:
       SERVER_PORT: 8084
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
@@ -351,8 +346,6 @@ services:
         condition: service_completed_successfully
       inventario-crdb-service:
         condition: service_started
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net
@@ -367,18 +360,21 @@ services:
     environment:
       SERVER_PORT: 8085
       SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=verify-full&sslrootcert=/cockroach/certs/ca.crt&sslcert=/cockroach/certs/client.root.crt&sslkey=/cockroach/certs/client.root.key.pk8}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
       CRDB_DATASOURCE_USERNAME: root
       CRDB_DATASOURCE_PASSWORD: ""
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
       TT_MAIL_USERNAME: ${TT_MAIL_USERNAME:-}
       TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD:-}
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       COOKIE_SECURE: "false"
     depends_on:
       crdb-init:
         condition: service_completed_successfully
-    volumes:
-      - ./Apps/web/infra/crdb-certs:/cockroach/certs:ro
     networks:
       - default
       - pfc-net

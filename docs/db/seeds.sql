@@ -15,6 +15,14 @@ SELECT
 FROM generate_series(1, 10000) AS serie(g)
 ON CONFLICT (usuario_id) DO NOTHING;
 
+-- Los usuarios semilla usan IDs explicitos 1..10000. Sin esto, la secuencia
+-- identity queda empezando en 1 y el registro de usuarios nuevos falla con
+-- duplicate key sobre pk_usuario.
+SELECT setval(
+    'usuarios.usuario_usuario_id_seq',
+    coalesce((SELECT max(usuario_id) FROM usuarios.usuario), 0)
+);
+
 INSERT INTO pedidos.orden
     (fecha, orden_id, usuario_id, direccion_id, metodopago_id,
      subtotal, total, estado, creado_en)
