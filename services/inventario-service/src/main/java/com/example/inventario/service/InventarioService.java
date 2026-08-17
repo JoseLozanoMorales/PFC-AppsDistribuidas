@@ -1,6 +1,10 @@
 package com.example.inventario.service;
 
+import com.example.inventario.dto.MovimientoInventarioRequest;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,22 +15,24 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class InventarioService {
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
     private final IdempotencyGuard idempotencyGuard;
+    private final Validator validator;
 
     public InventarioService(JdbcTemplate jdbc, ObjectMapper objectMapper,
-                             IdempotencyGuard idempotencyGuard) {
+                             IdempotencyGuard idempotencyGuard, Validator validator) {
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
         this.idempotencyGuard = idempotencyGuard;
+        this.validator = validator;
     }
 
     public List<Map<String, Object>> listarMovimientos() {
@@ -86,24 +92,21 @@ public class InventarioService {
     }
 
     @Transactional
-    public boolean registrarMovimiento(Object body, String usuario, String idempotencyKey) {
-        List<Map<String, Object>> items = normalizarItems(body);
+    public boolean registrarMovimiento(JsonNode body, String usuario, String idempotencyKey) {
+        List<MovimientoInventarioRequest> items = normalizarItems(body);
         if (idempotencyGuard.isReplay(idempotencyKey, items)) {
             return true;
         }
-        for (Map<String, Object> item : items) {
+        for (MovimientoInventarioRequest item : items) {
             registrarItem(item);
         }
         return false;
     }
 
-    private void registrarItem(Map<String, Object> item) {
-        Integer productoId = entero(item.get("producto_id"));
-        Integer subtipoId = entero(item.get("subtipo_id"));
-        Integer cantidad = entero(item.get("cantidad"));
-        if (productoId == null || subtipoId == null || cantidad == null) {
-            throw new IllegalArgumentException("Faltan producto_id, subtipo_id o cantidad");
-        }
+    private void registrarItem(MovimientoInventarioRequest item) {
+        Integer productoId = item.getProductoId();
+        Integer subtipoId = item.getSubtipoId();
+        Integer cantidad = item.getCantidad();
 
         String tipo = jdbc.queryForObject("""
                 SELECT t.nombre FROM inventario.subtipo_movimiento s
@@ -124,7 +127,7 @@ public class InventarioService {
             throw new IllegalArgumentException("Stock insuficiente para el producto " + productoId);
         }
 
-        BigDecimal costoEntrada = decimalNullable(item.get("costo_unitario"));
+        BigDecimal costoEntrada = item.getCostoUnitario();
         BigDecimal costoEfectivo = "ENTRADA".equalsIgnoreCase(tipo) && costoEntrada != null
                 ? costoEntrada : costoAnterior;
         int stockNuevo = "SALIDA".equalsIgnoreCase(tipo)
@@ -136,15 +139,15 @@ public class InventarioService {
                     .divide(BigDecimal.valueOf(stockNuevo), 2, RoundingMode.HALF_UP);
         }
         BigDecimal total = costoEfectivo.multiply(BigDecimal.valueOf(cantidad)).setScale(2, RoundingMode.HALF_UP);
-        Timestamp fecha = timestamp(item.get("fecha"));
+        Timestamp fecha = timestamp(item.getFecha());
 
         jdbc.update("""
                 INSERT INTO inventario.movimiento_inventario
                     (fecha, cantidad, costo_unitario, costo_total, referencia,
                      observacion, producto_id, subtipo_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, fecha, cantidad, costoEfectivo, total, item.get("referencia"),
-                item.get("observacion"), productoId, subtipoId);
+                """, fecha, cantidad, costoEfectivo, total, item.getReferencia(),
+                item.getObservacion(), productoId, subtipoId);
         jdbc.update("""
                 UPDATE productos.producto SET stock = ?, costo = ?, valor_inventario = ?
                 WHERE producto_id = ?
@@ -175,18 +178,39 @@ public class InventarioService {
                 costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP), productoId);
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Map<String, Object>> normalizarItems(Object body) {
-        if (body instanceof List<?> lista) {
-            List<Map<String, Object>> items = new ArrayList<>();
-            for (Object value : lista) items.add(objectMapper.convertValue(value, LinkedHashMap.class));
-            return items;
+    private List<MovimientoInventarioRequest> normalizarItems(JsonNode body) {
+        if (body == null || body.isNull()) {
+            throw new IllegalArgumentException("El cuerpo de la solicitud es obligatorio");
         }
-        return List.of(objectMapper.convertValue(body, LinkedHashMap.class));
+        List<MovimientoInventarioRequest> items;
+        if (body.isArray()) {
+            items = objectMapper.convertValue(
+                    body,
+                    objectMapper.getTypeFactory().constructCollectionType(
+                            List.class, MovimientoInventarioRequest.class));
+        } else if (body.isObject()) {
+            items = List.of(objectMapper.convertValue(body, MovimientoInventarioRequest.class));
+        } else {
+            throw new IllegalArgumentException("El cuerpo debe ser un movimiento o una lista de movimientos");
+        }
+        if (items.isEmpty()) {
+            throw new IllegalArgumentException("Debe enviar al menos un movimiento");
+        }
+        for (int index = 0; index < items.size(); index++) {
+            validarItem(items.get(index), index);
+        }
+        return items;
     }
 
-    private static Integer entero(Object value) {
-        return value == null ? null : value instanceof Number n ? n.intValue() : Integer.valueOf(value.toString());
+    private void validarItem(MovimientoInventarioRequest item, int index) {
+        Set<ConstraintViolation<MovimientoInventarioRequest>> errors = validator.validate(item);
+        if (!errors.isEmpty()) {
+            String detail = errors.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .sorted()
+                    .collect(Collectors.joining(", "));
+            throw new IllegalArgumentException("Movimiento " + (index + 1) + ": " + detail);
+        }
     }
 
     private static BigDecimal decimal(Object value) {

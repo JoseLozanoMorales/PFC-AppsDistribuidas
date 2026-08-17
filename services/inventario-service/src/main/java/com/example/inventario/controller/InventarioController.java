@@ -1,6 +1,7 @@
 package com.example.inventario.controller;
 
 import com.example.inventario.service.InventarioService;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +39,7 @@ public class InventarioController {
 
     @PostMapping("/api/sp/movimiento-inventario")
     public ResponseEntity<Void> registrarMovimiento(
-            @RequestBody Object body,
+            @RequestBody JsonNode body,
             @RequestParam(value = "usuario", required = false) String usuarioParam,
             @RequestHeader(value = "X-Usuario", required = false) String usuarioHeader,
             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
