@@ -40,9 +40,12 @@ public class InventarioController {
     public ResponseEntity<Void> registrarMovimiento(
             @RequestBody Object body,
             @RequestParam(value = "usuario", required = false) String usuarioParam,
-            @RequestHeader(value = "X-Usuario", required = false) String usuarioHeader) {
+            @RequestHeader(value = "X-Usuario", required = false) String usuarioHeader,
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
         String usuario = usuarioParam != null && !usuarioParam.isBlank() ? usuarioParam : usuarioHeader;
-        service.registrarMovimiento(body, usuario);
-        return ResponseEntity.noContent().build();
+        boolean replayed = service.registrarMovimiento(body, usuario, idempotencyKey);
+        return ResponseEntity.noContent()
+                .header("Idempotency-Replayed", Boolean.toString(replayed))
+                .build();
     }
 }

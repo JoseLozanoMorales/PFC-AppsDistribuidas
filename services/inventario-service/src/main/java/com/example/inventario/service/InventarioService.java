@@ -20,10 +20,13 @@ import java.util.Map;
 public class InventarioService {
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
+    private final IdempotencyGuard idempotencyGuard;
 
-    public InventarioService(JdbcTemplate jdbc, ObjectMapper objectMapper) {
+    public InventarioService(JdbcTemplate jdbc, ObjectMapper objectMapper,
+                             IdempotencyGuard idempotencyGuard) {
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
+        this.idempotencyGuard = idempotencyGuard;
     }
 
     public List<Map<String, Object>> listarMovimientos() {
@@ -83,10 +86,15 @@ public class InventarioService {
     }
 
     @Transactional
-    public void registrarMovimiento(Object body, String usuario) {
-        for (Map<String, Object> item : normalizarItems(body)) {
+    public boolean registrarMovimiento(Object body, String usuario, String idempotencyKey) {
+        List<Map<String, Object>> items = normalizarItems(body);
+        if (idempotencyGuard.isReplay(idempotencyKey, items)) {
+            return true;
+        }
+        for (Map<String, Object> item : items) {
             registrarItem(item);
         }
+        return false;
     }
 
     private void registrarItem(Map<String, Object> item) {
