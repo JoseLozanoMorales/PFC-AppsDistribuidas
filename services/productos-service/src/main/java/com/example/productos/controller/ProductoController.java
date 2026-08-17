@@ -1,5 +1,6 @@
 package com.example.productos.controller;
 
+import com.example.productos.dto.ProductoCreadoResponse;
 import com.example.productos.service.ProductoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.core.io.ByteArrayResource;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -27,12 +29,14 @@ public class ProductoController {
     }
 
     @PostMapping("/api/productos")
-    public ResponseEntity<Map<String, Object>> crearProducto(@RequestBody Map<String, Object> body,
-                                                              @RequestHeader(value = "X-Usuario", required = false) String usuario)
+    public ResponseEntity<ProductoCreadoResponse> crearProducto(
+            @RequestBody Map<String, Object> body,
+            @RequestHeader(value = "X-Usuario", required = false) String usuario)
             throws JsonProcessingException {
         Integer categoriaId = Integer.valueOf(String.valueOf(body.get("categoria_id")));
         Long productoId = service.crear(categoriaId, body, usuario);
-        return ResponseEntity.ok(Map.of("ok", true, "productoId", productoId));
+        return ResponseEntity.created(URI.create("/api/productos/" + productoId))
+                .body(new ProductoCreadoResponse(true, productoId));
     }
 
     @PostMapping(value = "/api/productos/{id}/galeria", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
