@@ -2,6 +2,7 @@ package com.example.productos.controller;
 
 import com.example.productos.dto.ProductoCreadoResponse;
 import com.example.productos.dto.CrearProductoRequest;
+import com.example.productos.dto.ProductoResumenResponse;
 import com.example.productos.service.ProductoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
@@ -24,7 +25,7 @@ public class ProductoController {
     }
 
     @GetMapping("/api/productos")
-    public List<Map<String, Object>> listar(
+    public List<ProductoResumenResponse> listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         return service.listar(page, size);

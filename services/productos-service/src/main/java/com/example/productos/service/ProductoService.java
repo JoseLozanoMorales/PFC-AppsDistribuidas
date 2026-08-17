@@ -1,5 +1,6 @@
 package com.example.productos.service;
 
+import com.example.productos.dto.ProductoResumenResponse;
 import com.example.productos.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,16 +26,29 @@ public class ProductoService {
         this.objectMapper = objectMapper;
     }
 
-    public List<Map<String, Object>> listar(int page, int size) {
+    public List<ProductoResumenResponse> listar(int page, int size) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.min(Math.max(size, 1), 200);
-        return jdbc.queryForList("""
+        return jdbc.query("""
                 select producto_id, nombre, preciounitario, enlace, fecha, stock,
                        marca_id, gama_id, iva_id, costo, habilitado
                 from productos.producto
                 order by producto_id
                 limit ? offset ?
-                """, safeSize, safePage * safeSize);
+                """,
+                (rs, rowNum) -> new ProductoResumenResponse(
+                        rs.getLong("producto_id"),
+                        rs.getString("nombre"),
+                        rs.getBigDecimal("preciounitario"),
+                        rs.getString("enlace"),
+                        rs.getObject("fecha", java.time.LocalDate.class),
+                        rs.getInt("stock"),
+                        nullableLong(rs.getObject("marca_id")),
+                        nullableLong(rs.getObject("gama_id")),
+                        nullableLong(rs.getObject("iva_id")),
+                        rs.getBigDecimal("costo"),
+                        rs.getBoolean("habilitado")),
+                safeSize, safePage * safeSize);
     }
 
     public List<Map<String, Object>> masVendidos(int limite) {
@@ -326,6 +340,10 @@ public class ProductoService {
 
     private static Object valor(Map<String, Object> payload, String clave, Object predeterminado) {
         return payload.get(clave) == null ? predeterminado : payload.get(clave);
+    }
+
+    private static Long nullableLong(Object value) {
+        return value instanceof Number number ? number.longValue() : null;
     }
 
     private static Map<String, Object> extraerAtributos(Map<String, Object> payload) {
