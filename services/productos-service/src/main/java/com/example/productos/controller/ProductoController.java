@@ -1,8 +1,10 @@
 package com.example.productos.controller;
 
 import com.example.productos.dto.ProductoCreadoResponse;
+import com.example.productos.dto.CrearProductoRequest;
 import com.example.productos.service.ProductoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.validation.Valid;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +32,10 @@ public class ProductoController {
 
     @PostMapping("/api/productos")
     public ResponseEntity<ProductoCreadoResponse> crearProducto(
-            @RequestBody Map<String, Object> body,
+            @Valid @RequestBody CrearProductoRequest request,
             @RequestHeader(value = "X-Usuario", required = false) String usuario)
             throws JsonProcessingException {
-        Integer categoriaId = Integer.valueOf(String.valueOf(body.get("categoria_id")));
-        Long productoId = service.crear(categoriaId, body, usuario);
+        Long productoId = service.crear(request.getCategoriaId(), request.toPayload(), usuario);
         return ResponseEntity.created(URI.create("/api/productos/" + productoId))
                 .body(new ProductoCreadoResponse(true, productoId));
     }
