@@ -4,6 +4,8 @@ import com.example.pedidos.client.ProductoClient;
 import com.example.pedidos.client.dto.ProductoPrecioIva;
 import com.example.pedidos.model.Carrito;
 import com.example.pedidos.model.CarritoDetalle;
+import com.example.pedidos.paging.PageResponse;
+import com.example.pedidos.paging.Paginacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -60,10 +62,15 @@ public class CarritoService {
         return new Carrito(nuevoId, usuarioId, BigDecimal.ZERO, true);
     }
 
-    public List<CarritoDetalle> listarDetalle(Integer carritoId) {
+    public PageResponse<CarritoDetalle> listarDetalle(Integer carritoId, Paginacion paginacion) {
         String sql = "SELECT carrito_id, producto_id, cantidad, precio_unitario " +
-                "FROM pedidos.carrito_detalle WHERE carrito_id = ?";
-        return jdbcTemplate.query(sql, detalleRowMapper, carritoId);
+                "FROM pedidos.carrito_detalle WHERE carrito_id = ? " +
+                "ORDER BY producto_id LIMIT ? OFFSET ?";
+        List<CarritoDetalle> contenido = jdbcTemplate.query(
+                sql, detalleRowMapper, carritoId, paginacion.size(), paginacion.offset());
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM pedidos.carrito_detalle WHERE carrito_id = ?", Long.class, carritoId);
+        return PageResponse.of(contenido, paginacion, total == null ? 0 : total);
     }
 
     // Ahora el precio NO viene del cliente -- se consulta a productos-service
