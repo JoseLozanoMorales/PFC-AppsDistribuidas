@@ -3,6 +3,7 @@ package org.example.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -22,8 +23,17 @@ public class InventarioClient {
     private final RestClient restClient;
 
     public InventarioClient(RestClient.Builder restClientBuilder,
-                            @Value("${inventario.service.base-url}") String inventarioBaseUrl) {
-        this.restClient = restClientBuilder.baseUrl(inventarioBaseUrl).build();
+                            @Value("${inventario.service.base-url}") String inventarioBaseUrl,
+                            @Value("${inventario.service.connect-timeout-ms:3000}") int connectTimeoutMs,
+                            @Value("${inventario.service.read-timeout-ms:5000}") int readTimeoutMs) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeoutMs);
+        requestFactory.setReadTimeout(readTimeoutMs);
+
+        this.restClient = restClientBuilder
+                .baseUrl(inventarioBaseUrl)
+                .requestFactory(requestFactory)
+                .build();
     }
 
     /**
