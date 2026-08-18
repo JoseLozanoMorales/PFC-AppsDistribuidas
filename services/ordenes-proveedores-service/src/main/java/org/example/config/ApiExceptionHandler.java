@@ -41,8 +41,18 @@ public class ApiExceptionHandler {
     // Camino "envuelto": crear/actualizar/registrarRecepcion en OrdenCompraRepository
     // atrapan la excepcion y la relanzan como IllegalStateException(mensaje, causaOriginal).
     // La causa real (con el SQLSTATE) sigue viva en getCause(), asi que la desenvolvemos igual.
+    //
+    // Camino "regla de negocio pura": exigirEstado y validaciones de estado en
+    // OrdenCompraRepository lanzan IllegalStateException sin causa (no hay excepcion de
+    // base de datos detras). Ahi no tiene sentido preguntarle a PgErrorMapper -- siempre
+    // devuelve 500 porque no encuentra SQLSTATE. Es un 409: el estado actual del recurso
+    // no permite la operacion pedida.
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, Object>> handleIllegalState(IllegalStateException ex) {
+        if (ex.getCause() == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", ex.getMessage()));
+        }
         HttpStatus status = PgErrorMapper.statusFor(ex);
         return ResponseEntity.status(status)
                 .body(Map.of("error", PgErrorMapper.messageFor(ex)));

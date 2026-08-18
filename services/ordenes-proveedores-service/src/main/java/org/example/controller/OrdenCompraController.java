@@ -3,14 +3,15 @@ package org.example.controller;
 import org.example.dto.ActualizarOrdenCompraRequest;
 import org.example.dto.CrearOrdenCompraRequest;
 import org.example.model.EstadoOrdenCompra;
-import org.example.model.OrdenCompra;
 import org.example.service.OrdenCompraService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.example.dto.OrdenCompraResponseDTO;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/ordenes-compra")
@@ -66,12 +67,14 @@ public class OrdenCompraController {
     }
 
     @GetMapping
-    public List<OrdenCompra> listarPorEstado(@RequestParam(required = false) EstadoOrdenCompra estado) {
-        return ordenCompraService.listarPorEstado(estado);
+    public List<OrdenCompraResponseDTO> listarPorEstado(@RequestParam(required = false) EstadoOrdenCompra estado) {
+        return ordenCompraService.listarPorEstado(estado).stream()
+                .map(OrdenCompraResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public OrdenCompra obtenerPorId(@PathVariable Integer id) {
-        return ordenCompraService.obtenerPorId(id);
+    public OrdenCompraResponseDTO obtenerPorId(@PathVariable Integer id) {
+        return OrdenCompraResponseDTO.from(ordenCompraService.obtenerPorId(id));
     }
 }

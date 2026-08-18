@@ -6,6 +6,7 @@ import org.example.model.OrdenCompra;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -53,13 +54,13 @@ public class OrdenCompraRepository {
         recalcular(id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void enviar(Integer id) {
         exigirEstado(id, EstadoOrdenCompra.PENDIENTE);
         jdbcTemplate.update("UPDATE ordenes_proveedores.orden_compra SET estado='ENVIADA' WHERE orden_compra_id=?", id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void cancelar(Integer id) {
         EstadoOrdenCompra estado = estado(id);
         if (estado != EstadoOrdenCompra.PENDIENTE && estado != EstadoOrdenCompra.ENVIADA)

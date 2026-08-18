@@ -22,6 +22,7 @@ final class PgErrorMapper {
             case "25000" -> HttpStatus.CONFLICT;
             case "23505" -> HttpStatus.CONFLICT;
             case "23503" -> HttpStatus.CONFLICT;
+            case "40001" -> HttpStatus.CONFLICT;
             case "P0001" -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.BAD_REQUEST;
         };

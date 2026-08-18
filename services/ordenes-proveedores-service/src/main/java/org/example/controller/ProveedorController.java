@@ -4,10 +4,12 @@ import org.example.model.Proveedor;
 import org.example.service.ProveedorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.example.dto.ProveedorResponseDTO;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/proveedores")
@@ -41,12 +43,14 @@ public class ProveedorController {
     }
 
     @GetMapping
-    public List<Proveedor> listarActivos() {
-        return proveedorService.listarActivos();
+    public List<ProveedorResponseDTO> listarActivos() {
+        return proveedorService.listarActivos().stream()
+                .map(ProveedorResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Proveedor obtenerPorId(@PathVariable Integer id) {
-        return proveedorService.obtenerPorId(id);
+    public ProveedorResponseDTO obtenerPorId(@PathVariable Integer id) {
+        return ProveedorResponseDTO.from(proveedorService.obtenerPorId(id));
     }
 }
