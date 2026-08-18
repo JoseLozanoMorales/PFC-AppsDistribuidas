@@ -1,6 +1,7 @@
 package com.example.pedidos.controller;
 
-import com.example.pedidos.model.DetalleOrden;
+import com.example.pedidos.dto.DetalleOrdenResponse;
+import com.example.pedidos.dto.OrdenResponse;
 import com.example.pedidos.model.Orden;
 import com.example.pedidos.paging.PageResponse;
 import com.example.pedidos.paging.Paginacion;
@@ -31,26 +32,26 @@ public class OrdenController {
     // Lista TODAS las ordenes de TODOS los usuarios: no es un endpoint de "orden
     // propia", requiere rol administrador.
     @GetMapping
-    public PageResponse<Orden> listarOrdenes(@RequestParam(required = false) Integer page,
+    public PageResponse<OrdenResponse> listarOrdenes(@RequestParam(required = false) Integer page,
                                               @RequestParam(required = false) Integer size,
                                               @AuthUsuario AuthenticatedUser usuario) {
         if (!usuario.esAdmin()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Requiere rol administrador");
         }
-        return ordenService.listarOrdenes(Paginacion.de(page, size));
+        return mapOrdenes(ordenService.listarOrdenes(Paginacion.de(page, size)));
     }
 
     @GetMapping("/{ordenId}")
-    public Orden obtenerOrden(@PathVariable Integer ordenId, @AuthUsuario AuthenticatedUser usuario) {
+    public OrdenResponse obtenerOrden(@PathVariable Integer ordenId, @AuthUsuario AuthenticatedUser usuario) {
         Orden orden = ordenService.obtenerOrdenPorId(ordenId);
         if (orden == null || !orden.getUsuarioId().equals(usuario.userId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden " + ordenId + " no encontrada");
         }
-        return orden;
+        return OrdenResponse.from(orden);
     }
 
     @GetMapping("/{ordenId}/detalle")
-    public PageResponse<DetalleOrden> obtenerDetalleOrden(@PathVariable Integer ordenId,
+    public PageResponse<DetalleOrdenResponse> obtenerDetalleOrden(@PathVariable Integer ordenId,
                                                             @RequestParam(required = false) Integer page,
                                                             @RequestParam(required = false) Integer size,
                                                             @AuthUsuario AuthenticatedUser usuario) {
@@ -58,18 +59,21 @@ public class OrdenController {
         if (orden == null || !orden.getUsuarioId().equals(usuario.userId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden " + ordenId + " no encontrada");
         }
-        return ordenService.obtenerDetalleOrden(ordenId, orden.getFecha(), Paginacion.de(page, size));
+        var pagina = ordenService.obtenerDetalleOrden(ordenId, orden.getFecha(), Paginacion.de(page, size));
+        return new PageResponse<>(
+                pagina.content().stream().map(DetalleOrdenResponse::from).toList(),
+                pagina.page(), pagina.size(), pagina.totalElements(), pagina.totalPages());
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public PageResponse<Orden> obtenerOrdenesPorUsuario(@PathVariable Integer usuarioId,
+    public PageResponse<OrdenResponse> obtenerOrdenesPorUsuario(@PathVariable Integer usuarioId,
                                                           @RequestParam(required = false) Integer page,
                                                           @RequestParam(required = false) Integer size,
                                                           @AuthUsuario AuthenticatedUser usuario) {
         if (!usuarioId.equals(usuario.userId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recurso no encontrado");
         }
-        return ordenService.listarOrdenesPorUsuario(usuarioId, Paginacion.de(page, size));
+        return mapOrdenes(ordenService.listarOrdenesPorUsuario(usuarioId, Paginacion.de(page, size)));
     }
 
     // Idempotency-Key es opcional: sin ella el checkout se comporta exactamente
@@ -77,7 +81,7 @@ public class OrdenController {
     // clave devuelve la orden ya creada en vez de duplicarla (ver
     // docs/idempotencia.sql -- requiere pedidos.idempotencia.enabled=true).
     @PostMapping("/checkout")
-    public ResponseEntity<Orden> checkout(@RequestBody Map<String, Object> body,
+    public ResponseEntity<OrdenResponse> checkout(@RequestBody Map<String, Object> body,
                                            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
                                            @AuthUsuario AuthenticatedUser usuario) {
         Integer direccionId = (Integer) body.get("direccionId");
@@ -87,6 +91,12 @@ public class OrdenController {
                 .path("/api/ordenes/{id}")
                 .buildAndExpand(orden.getOrdenId())
                 .toUri();
-        return ResponseEntity.created(location).body(orden);
+        return ResponseEntity.created(location).body(OrdenResponse.from(orden));
+    }
+
+    private static PageResponse<OrdenResponse> mapOrdenes(PageResponse<Orden> pagina) {
+        return new PageResponse<>(
+                pagina.content().stream().map(OrdenResponse::from).toList(),
+                pagina.page(), pagina.size(), pagina.totalElements(), pagina.totalPages());
     }
 }
