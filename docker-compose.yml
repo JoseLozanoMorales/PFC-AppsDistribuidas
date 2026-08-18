@@ -236,6 +236,7 @@ services:
     container_name: pedidos-crdb-service
     profiles: ["e3-crdb"]
     environment:
+      PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
       SERVER_PORT: 8083
       SPRING_PROFILES_ACTIVE: crdb
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
