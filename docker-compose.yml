@@ -26,8 +26,6 @@ services:
     build:
       context: services/productos-service
     container_name: productos-service
-    ports:
-      - "8081:8081"
     environment:
       SERVER_PORT: 8081
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -44,8 +42,6 @@ services:
     build:
       context: services/inventario-service
     container_name: inventario-service
-    ports:
-      - "8082:8082"
     environment:
       SERVER_PORT: 8082
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -62,8 +58,6 @@ services:
     build:
       context: services/pedidos-service
     container_name: pedidos-service
-    ports:
-      - "8083:8083"
     environment:
       SERVER_PORT: 8083
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -78,8 +72,6 @@ services:
     build:
       context: services/ordenes-proveedores-service
     container_name: ordenes-proveedores-service
-    ports:
-      - "8084:8084"
     environment:
       SERVER_PORT: 8084
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -91,8 +83,6 @@ services:
     build:
       context: services/usuarios
     container_name: usuarios-service
-    ports:
-      - "8085:8085"
     environment:
       SERVER_PORT: 8085
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -112,8 +102,6 @@ services:
     build:
       context: services/ventas-service
     container_name: ventas-service
-    ports:
-      - "8086:8086"
     environment:
       SERVER_PORT: 8086
       TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
@@ -241,8 +229,6 @@ services:
       context: services/pedidos-service
     container_name: pedidos-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8183:8083"
     environment:
       SERVER_PORT: 8083
       SPRING_PROFILES_ACTIVE: crdb
@@ -270,8 +256,6 @@ services:
       context: services/productos-service
     container_name: productos-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8181:8081"
     environment:
       SERVER_PORT: 8081
       SPRING_PROFILES_ACTIVE: crdb
@@ -290,8 +274,6 @@ services:
       context: services/inventario-service
     container_name: inventario-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8182:8082"
     environment:
       SERVER_PORT: 8082
       SPRING_PROFILES_ACTIVE: crdb
@@ -310,8 +292,6 @@ services:
       context: services/ventas-service
     container_name: ventas-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8186:8086"
     environment:
       SERVER_PORT: 8086
       SPRING_PROFILES_ACTIVE: crdb
@@ -333,8 +313,6 @@ services:
       context: services/ordenes-proveedores-service
     container_name: ordenes-proveedores-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8184:8084"
     environment:
       SERVER_PORT: 8084
       SPRING_PROFILES_ACTIVE: crdb
@@ -356,8 +334,6 @@ services:
       context: services/usuarios
     container_name: usuarios-crdb-service
     profiles: ["e3-crdb"]
-    ports:
-      - "127.0.0.1:8185:8085"
     environment:
       SERVER_PORT: 8085
       SPRING_PROFILES_ACTIVE: crdb
