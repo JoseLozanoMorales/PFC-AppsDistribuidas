@@ -2,8 +2,11 @@ package com.example.pedidos.service;
 
 import com.example.pedidos.model.MetodoPago;
 import com.example.pedidos.model.TipoMetodoPago;
+import com.example.pedidos.paging.PageResponse;
+import com.example.pedidos.paging.Paginacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +24,17 @@ public class MetodoPagoService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private final RowMapper<MetodoPago> metodoPagoRowMapper = (rs, rowNum) -> new MetodoPago(
+            rs.getInt("metodopago_id"),
+            enmascarar(rs.getString("numero_tarjeta")),
+            rs.getDate("fecha_expiracion").toLocalDate(),
+            rs.getBoolean("habilitado"),
+            rs.getInt("tipo_id"),
+            rs.getString("tipo_nombre")
+    );
+
     // Lista los metodos de pago enmascarados de un usuario.
-    public List<MetodoPago> listarPorUsuario(Integer usuarioId) {
+    public PageResponse<MetodoPago> listarPorUsuario(Integer usuarioId, Paginacion paginacion) {
         String sql = """
                 SELECT mp.metodopago_id, mp.numero_tarjeta, mp.fecha_expiracion,
                        mp.habilitado, t.tipo_id, t.nombre AS tipo_nombre
@@ -30,15 +42,27 @@ public class MetodoPagoService {
                 JOIN pedidos.tipo_metodopago t ON t.tipo_id = mp.tipo_id
                 WHERE mp.usuario_id = ?
                 ORDER BY mp.metodopago_id DESC
+                LIMIT ? OFFSET ?
                 """;
-        return jdbcTemplate.query(sql, (rs, rowNum) -> new MetodoPago(
-                rs.getInt("metodopago_id"),
-                enmascarar(rs.getString("numero_tarjeta")),
-                rs.getDate("fecha_expiracion").toLocalDate(),
-                rs.getBoolean("habilitado"),
-                rs.getInt("tipo_id"),
-                rs.getString("tipo_nombre")
-        ), usuarioId);
+        List<MetodoPago> contenido = jdbcTemplate.query(
+                sql, metodoPagoRowMapper, usuarioId, paginacion.size(), paginacion.offset());
+        Long total = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM pedidos.metodopago WHERE usuario_id = ?", Long.class, usuarioId);
+        return PageResponse.of(contenido, paginacion, total == null ? 0 : total);
+    }
+
+    // Usado para construir el Location de POST /api/metodopago y para el GET por id;
+    // el filtro por usuario_id en la propia consulta evita exponer metodos de pago ajenos.
+    public MetodoPago obtenerPorIdYUsuario(Integer metodopagoId, Integer usuarioId) {
+        String sql = """
+                SELECT mp.metodopago_id, mp.numero_tarjeta, mp.fecha_expiracion,
+                       mp.habilitado, t.tipo_id, t.nombre AS tipo_nombre
+                FROM pedidos.metodopago mp
+                JOIN pedidos.tipo_metodopago t ON t.tipo_id = mp.tipo_id
+                WHERE mp.metodopago_id = ? AND mp.usuario_id = ?
+                """;
+        List<MetodoPago> resultado = jdbcTemplate.query(sql, metodoPagoRowMapper, metodopagoId, usuarioId);
+        return resultado.isEmpty() ? null : resultado.get(0);
     }
 
     // Lista los tipos de metodo de pago disponibles.
@@ -56,7 +80,7 @@ public class MetodoPagoService {
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void agregar(String numeroTarjeta, LocalDate fechaExpiracion, Integer tipoId, Integer usuarioId) {
+    public Integer agregar(String numeroTarjeta, LocalDate fechaExpiracion, Integer tipoId, Integer usuarioId) {
         validar(numeroTarjeta, fechaExpiracion);
         Integer existentes = jdbcTemplate.queryForObject("""
                 SELECT count(*) FROM pedidos.metodopago
@@ -65,11 +89,12 @@ public class MetodoPagoService {
         if (existentes != null && existentes > 0) {
             throw new IllegalArgumentException("La tarjeta ya existe para el usuario");
         }
-        jdbcTemplate.update("""
+        return jdbcTemplate.queryForObject("""
                 INSERT INTO pedidos.metodopago
                     (numero_tarjeta, fecha_expiracion, tipo_id, usuario_id, habilitado)
                 VALUES (?, ?, ?, ?, true)
-                """, numeroTarjeta, fechaExpiracion, tipoId, usuarioId);
+                RETURNING metodopago_id
+                """, Integer.class, numeroTarjeta, fechaExpiracion, tipoId, usuarioId);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

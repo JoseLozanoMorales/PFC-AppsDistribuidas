@@ -19,10 +19,19 @@ tiendatech:
         - /uploads/**
         - /assets/**
         - /favicon.ico
+      # Solo las lecturas del catalogo son publicas. Las escrituras sobre las
+      # mismas rutas quedan protegidas por /api/**.
+      public-read-paths:
+        - /api/categorias/**
+        - /api/marcas/**
+        - /api/gamas/**
+        - /api/galeria/**
+        - /api/galeria_v2/**
+        - /api/productos/**
+        - /api/provincias/**
+        - /api/ciudades/**
       protected-paths:
-        - /api/usuarios/**
-        - /api/seguridad/**
-        - /api/auditoria/**
+        - /api/**
 
 spring:
   application:
