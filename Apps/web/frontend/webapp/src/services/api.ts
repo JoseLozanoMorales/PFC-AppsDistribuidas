@@ -1,5 +1,18 @@
 import { clearSession, getUser, token } from './session'
 
+// Shape comun de los endpoints de listado paginados (pedidos-service:
+// PageResponse<T> -- content/page/size/totalElements/totalPages). Los
+// servicios que consumen estos endpoints extraen `.content` y siguen
+// devolviendo el array a quien los llama, para no propagar el cambio a
+// todas las vistas.
+export interface PageResponse<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message)
