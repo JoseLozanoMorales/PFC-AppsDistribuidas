@@ -2,7 +2,7 @@
 
 ## Estado
 
-Aceptado.
+Aceptado y ratificado el 17 de agosto de 2026.
 
 ## Contexto
 
@@ -52,6 +52,25 @@ Las rutas protegidas requieren JWT válido. Para incorporar otro microservicio a
 2. Mantener el microservicio sin `ports:` en `docker-compose.yml`.
 3. Reenviar tráfico usando el nombre interno del servicio Docker, por ejemplo `http://productos-service:8081`.
 4. Leer identidad desde `X-User-Id`, `X-Usuario` y `X-User-Role` cuando el endpoint necesite usuario autenticado.
+
+Como regla general, el gateway protege `/api/**`. Las excepciones públicas se
+declaran explícitamente. Para el catálogo se permiten únicamente solicitudes
+`GET` y `HEAD`; usar la misma ruta con `POST`, `PUT`, `PATCH` o `DELETE` exige
+JWT.
+
+## Comunicación entre microservicios
+
+- Los servicios internos no vuelven a validar el JWT: el punto de confianza es
+  el gateway y el aislamiento de la red Docker.
+- Una llamada interna necesaria para completar una operación, por ejemplo
+  `pedidos-service` hacia `ventas-service`, no debe fallar por ausencia de JWT.
+- Si el servicio receptor necesita identidad, el emisor propaga las cabeceras
+  `X-User-*` que recibió del gateway. No acepta valores originados directamente
+  desde un cliente externo.
+- Los endpoints técnicos que deban ser invocados solo entre servicios deben
+  documentarse como tales. Si en el futuro se requiere una frontera de confianza
+  más fuerte, se adoptará autenticación de servicio a servicio en un ADR nuevo,
+  sin mezclarla con el JWT del usuario.
 
 ## Ejemplo de consumo en un controlador Spring
 

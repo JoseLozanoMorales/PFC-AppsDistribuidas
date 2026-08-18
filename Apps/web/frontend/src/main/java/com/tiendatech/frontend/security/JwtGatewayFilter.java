@@ -35,6 +35,7 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final Key signingKey;
     private final List<String> publicPaths;
+    private final List<String> publicReadPaths;
     private final List<String> protectedPaths;
 
     public JwtGatewayFilter(Environment environment) {
@@ -55,14 +56,23 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
                         "/assets/**",
                         "/favicon.ico"
                 ));
+        this.publicReadPaths = configuredOrDefault(
+                environment,
+                "tiendatech.security.jwt.public-read-paths",
+                List.of(
+                        "/api/categorias/**",
+                        "/api/marcas/**",
+                        "/api/gamas/**",
+                        "/api/galeria/**",
+                        "/api/galeria_v2/**",
+                        "/api/productos/**",
+                        "/api/provincias/**",
+                        "/api/ciudades/**"
+                ));
         this.protectedPaths = configuredOrDefault(
                 environment,
                 "tiendatech.security.jwt.protected-paths",
-                List.of(
-                        "/api/usuarios/**",
-                        "/api/seguridad/**",
-                        "/api/auditoria/**"
-                ));
+                List.of("/api/**"));
     }
 
     private List<String> configuredOrDefault(Environment environment, String key, List<String> fallback) {
@@ -110,7 +120,12 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
             return true;
         }
         String path = request.getRequestURI();
-        return publicPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        if (publicPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path))) {
+            return true;
+        }
+        String method = request.getMethod();
+        return ("GET".equalsIgnoreCase(method) || "HEAD".equalsIgnoreCase(method))
+                && publicReadPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
 
     private boolean isProtected(HttpServletRequest request) {
