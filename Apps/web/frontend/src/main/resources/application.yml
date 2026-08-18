@@ -81,3 +81,8 @@ spring:
               uri: ${VENTAS_SERVICE_URL:http://localhost:8086}
               predicates:
                 - Path=/api/facturas/**
+
+            - id: armado-ia-api
+              uri: ${ARMADO_IA_SERVICE_URL:http://localhost:8087}
+              predicates:
+                - Path=/api/armado/**
