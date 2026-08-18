@@ -250,6 +250,12 @@ services:
     networks:
       - default
       - pfc-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   productos-crdb-service:
     build:
