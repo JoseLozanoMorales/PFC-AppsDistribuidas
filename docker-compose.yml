@@ -283,6 +283,37 @@ services:
       - default
       - pfc-net
 
+  # armado-ia-service: sin datasource propio (servicio de calculo puro sobre
+  # el catalogo de productos-crdb-service via HTTP, no persiste nada). Las
+  # credenciales de AWS NUNCA van literales aqui: se pasan desde el .env del
+  # host via ${VAR}; si faltan, el servicio sigue funcionando con el
+  # fallback deterministico de explicacion (ver ExplicacionService).
+  armado-ia-service:
+    build:
+      context: services/armado-ia
+    container_name: armado-ia-service
+    profiles: ["e3-crdb"]
+    environment:
+      SERVER_PORT: 8087
+      SPRING_PROFILES_ACTIVE: crdb
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
+    depends_on:
+      productos-crdb-service:
+        condition: service_started
+    networks:
+      - default
+      - pfc-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8087/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
   inventario-crdb-service:
     build:
       context: services/inventario-service
