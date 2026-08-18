@@ -35,6 +35,15 @@ public class ApiExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(java.util.stream.Collectors.joining("; "));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Datos invalidos", "detail", detail));
+    }
+
     // Cualquier error real de SQL (constraint violado, columna mal escrita, etc.) que no
     // atrapamos antes en el service.
     @ExceptionHandler(DataAccessException.class)

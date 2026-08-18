@@ -1,8 +1,11 @@
 package org.example.client;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 import org.example.model.FacturaDetalle;
 import java.time.LocalDate;
@@ -18,11 +21,22 @@ public class InventarioClient {
     private final RestClient restClient;
 
     public InventarioClient(RestClient.Builder restClientBuilder,
-                            @Value("${inventario.service.base-url}") String inventarioBaseUrl) {
-        this.restClient = restClientBuilder.baseUrl(inventarioBaseUrl).build();
+                            @Value("${inventario.service.base-url}") String inventarioBaseUrl,
+                            @Value("${inventario.service.connect-timeout-ms:3000}") int connectTimeoutMs,
+                            @Value("${inventario.service.read-timeout-ms:5000}") int readTimeoutMs) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeoutMs);
+        requestFactory.setReadTimeout(readTimeoutMs);
+
+        this.restClient = restClientBuilder
+                .baseUrl(inventarioBaseUrl)
+                .requestFactory(requestFactory)
+                .build();
     }
 
     /** Descuenta stock por cada línea de la factura recién generada. */
+    @CircuitBreaker(name = "inventario", fallbackMethod = "registrarSalidasPorFacturaFallback")
+    @Retry(name = "inventario")
     public void registrarSalidasPorFactura(Integer facturaId, List<FacturaDetalle> detalle, String usuario) {
         List<java.util.Map<String, Object>> items = detalle.stream()
                 .map(d -> java.util.Map.<String, Object>of(
@@ -42,5 +56,13 @@ public class InventarioClient {
                 .body(items)
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    /** Se ejecuta cuando el circuito está abierto o se agotaron los reintentos. */
+    private void registrarSalidasPorFacturaFallback(Integer facturaId, List<FacturaDetalle> detalle,
+                                                    String usuario, Throwable t) {
+        throw new IllegalStateException(
+                "inventario-service no disponible (circuito abierto o reintentos agotados) para la factura "
+                        + facturaId, t);
     }
 }

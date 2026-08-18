@@ -13,27 +13,13 @@ import java.util.List;
 public class FacturaService {
 
     private final FacturaStore facturaRepository;
-    private final org.example.client.InventarioClient inventarioClient;
 
-    public FacturaService(FacturaStore facturaRepository,
-                          org.example.client.InventarioClient inventarioClient) {
+    public FacturaService(FacturaStore facturaRepository) {
         this.facturaRepository = facturaRepository;
-        this.inventarioClient = inventarioClient;
     }
 
     public Integer generarDesdeOrden(Integer ordenId) {
-        Integer facturaId = facturaRepository.generarDesdeOrden(ordenId);
-
-        List<FacturaDetalle> detalle = facturaRepository.listarDetalle(facturaId);
-        try {
-            inventarioClient.registrarSalidasPorFactura(facturaId, detalle, null);
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "La factura " + facturaId + " se generó, pero falló el descuento de stock "
-                            + "en inventario-service. Revisar manualmente.", e);
-        }
-
-        return facturaId;
+        return facturaRepository.generarDesdeOrden(ordenId);
     }
 
     public Factura obtenerPorId(Integer facturaId) {

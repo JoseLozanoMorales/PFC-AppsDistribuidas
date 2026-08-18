@@ -53,6 +53,12 @@ public class CrdbFacturaRepository implements FacturaStore {
                 FROM pedidos.detalle_orden
                 WHERE orden_id = ?
                 """, facturaId, ordenId);
+
+        jdbcTemplate.update("""
+                INSERT INTO ventas.factura_outbox (factura_id, estado)
+                VALUES (?, 'PENDIENTE')
+                ON CONFLICT (factura_id) DO NOTHING
+                """, facturaId);
         return facturaId;
     }
 
