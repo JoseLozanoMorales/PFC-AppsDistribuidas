@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,8 @@ public class InventarioClient {
      * @param recepcionPorProducto producto_id -> cantidad recibida AHORA (no acumulada)
      * @param usuario               nombre de usuario para auditoria; puede ser null
      */
+    @CircuitBreaker(name = "inventario", fallbackMethod = "registrarEntradasPorRecepcionFallback")
+    @Retry(name = "inventario")
     public void registrarEntradasPorRecepcion(Integer ordenCompraId,
                                               Map<Integer, Integer> recepcionPorProducto,
                                               String usuario) {
@@ -61,5 +65,14 @@ public class InventarioClient {
                 .body(items)
                 .retrieve()
                 .toBodilessEntity();
+    }
+
+    /** Se ejecuta cuando el circuito está abierto o se agotaron los reintentos. */
+    private void registrarEntradasPorRecepcionFallback(Integer ordenCompraId,
+                                                       Map<Integer, Integer> recepcionPorProducto,
+                                                       String usuario, Throwable t) {
+        throw new IllegalStateException(
+                "inventario-service no disponible (circuito abierto o reintentos agotados) para la orden "
+                        + ordenCompraId, t);
     }
 }
