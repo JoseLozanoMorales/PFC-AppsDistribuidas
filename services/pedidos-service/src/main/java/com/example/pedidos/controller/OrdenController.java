@@ -72,11 +72,17 @@ public class OrdenController {
         return ordenService.listarOrdenesPorUsuario(usuarioId, Paginacion.de(page, size));
     }
 
+    // Idempotency-Key es opcional: sin ella el checkout se comporta exactamente
+    // igual que antes (no rompe al frontend). Con ella, un reintento con la misma
+    // clave devuelve la orden ya creada en vez de duplicarla (ver
+    // docs/idempotencia.sql -- requiere pedidos.idempotencia.enabled=true).
     @PostMapping("/checkout")
-    public ResponseEntity<Orden> checkout(@RequestBody Map<String, Object> body, @AuthUsuario AuthenticatedUser usuario) {
+    public ResponseEntity<Orden> checkout(@RequestBody Map<String, Object> body,
+                                           @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+                                           @AuthUsuario AuthenticatedUser usuario) {
         Integer direccionId = (Integer) body.get("direccionId");
         Integer metodopagoId = (Integer) body.get("metodopagoId");
-        Orden orden = ordenService.generarOrdenDesdeCarrito(usuario.userId(), direccionId, metodopagoId);
+        Orden orden = ordenService.generarOrdenDesdeCarrito(usuario.userId(), direccionId, metodopagoId, idempotencyKey);
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/api/ordenes/{id}")
                 .buildAndExpand(orden.getOrdenId())

@@ -5,16 +5,19 @@ import com.example.pedidos.client.UsuarioClient;
 import com.example.pedidos.client.dto.DireccionInfo;
 import com.example.pedidos.client.dto.ProductoPrecioIva;
 import com.example.pedidos.client.dto.UsuarioInfo;
+import com.example.pedidos.idempotencia.IdempotenciaRepository;
 import com.example.pedidos.model.Orden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrdenPersistenceService {
@@ -22,23 +25,36 @@ public class OrdenPersistenceService {
     private final JdbcTemplate jdbcTemplate;
     private final ProductoClient productoClient;
     private final UsuarioClient usuarioClient;
+    private final Optional<IdempotenciaRepository> idempotenciaRepository;
 
     @Autowired
     public OrdenPersistenceService(JdbcTemplate jdbcTemplate, ProductoClient productoClient,
-                                   UsuarioClient usuarioClient) {
+                                   UsuarioClient usuarioClient,
+                                   Optional<IdempotenciaRepository> idempotenciaRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.productoClient = productoClient;
         this.usuarioClient = usuarioClient;
+        this.idempotenciaRepository = idempotenciaRepository;
     }
 
+    /**
+     * idempotencyKey/payloadHash son null cuando el checkout no envio
+     * Idempotency-Key (o la funcionalidad esta apagada): en ese caso el
+     * comportamiento es identico al de antes de esta funcionalidad.
+     */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Orden crearOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId) {
+    public Orden crearOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId,
+                                         String idempotencyKey, String payloadHash) {
 
         // 0) Validar usuario y dirección
+        // Solo un 404 real de usuarios-service significa "no existe" (400). Cualquier
+        // otra falla (circuit breaker abierto, timeout, 5xx) NO es lo mismo y no debe
+        // camuflarse como error del cliente: se deja propagar para que el handler
+        // correspondiente (503 en ambos casos) lo reporte tal cual es.
         UsuarioInfo usuario;
         try {
             usuario = usuarioClient.obtenerUsuario(usuarioId);
-        } catch (Exception e) {
+        } catch (HttpClientErrorException.NotFound e) {
             throw new IllegalArgumentException("Usuario " + usuarioId + " no existe en usuarios-service", e);
         }
 
@@ -120,6 +136,15 @@ public class OrdenPersistenceService {
         // 6) Vaciar el carrito (el trigger recalcula el total a 0 automáticamente)
         String sqlVaciar = "DELETE FROM pedidos.carrito_detalle WHERE carrito_id = ?";
         jdbcTemplate.update(sqlVaciar, carritoId);
+
+        // 7) Registrar la solicitud idempotente en la MISMA transaccion: si otra
+        // peticion concurrente con la misma clave ya gano la carrera, esto lanza
+        // ClaveIdempotenciaEnConflictoException y hace rollback de todo lo anterior
+        // (orden y detalle incluidos). El llamador (OrdenService) atrapa esa
+        // excepcion y devuelve la orden de la solicitud ganadora en su lugar.
+        if (idempotencyKey != null) {
+            idempotenciaRepository.ifPresent(repo -> repo.registrar(usuarioId, idempotencyKey, payloadHash, ordenId));
+        }
 
         return new Orden(ordenId, usuarioId, direccionId, metodopagoId, subtotal, total, hoy);
     }

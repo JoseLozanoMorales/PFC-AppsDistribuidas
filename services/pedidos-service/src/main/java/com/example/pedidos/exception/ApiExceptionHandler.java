@@ -1,5 +1,6 @@
 package com.example.pedidos.exception;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoHandlerFound(NoHandlerFoundException ex, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, "Recurso no encontrado: " + request.getRequestURI(), request);
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    public ResponseEntity<ErrorResponse> handleCircuitBreakerAbierto(CallNotPermittedException ex, HttpServletRequest request) {
+        return build(HttpStatus.SERVICE_UNAVAILABLE,
+                "Servicio dependiente no disponible temporalmente (circuit breaker abierto)", request);
     }
 
     @ExceptionHandler(DataAccessException.class)
