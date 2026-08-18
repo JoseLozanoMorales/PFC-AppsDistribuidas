@@ -97,6 +97,12 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   ventas-service:
     build:
@@ -355,6 +361,12 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       COOKIE_SECURE: "false"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
     depends_on:
       crdb-init:
         condition: service_completed_successfully

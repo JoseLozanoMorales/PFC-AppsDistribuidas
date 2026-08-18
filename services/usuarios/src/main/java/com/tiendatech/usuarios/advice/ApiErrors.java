@@ -2,6 +2,9 @@ package com.tiendatech.usuarios.advice;
 
 import java.util.Map;
 
+import com.tiendatech.usuarios.exception.BadRequestException;
+import com.tiendatech.usuarios.exception.ConflictException;
+import com.tiendatech.usuarios.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,10 +35,38 @@ public class ApiErrors {
                 .body(Map.of("error", ex.getReason() != null ? ex.getReason() : "error"));
     }
 
+    @ExceptionHandler({BadRequestException.class, IllegalArgumentException.class})
+    public ResponseEntity<Map<String, String>> onBadRequest(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Map<String, String>> onNotFound(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, String>> onConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+    }
+
     // 2) deleteById(...) de algo que no existe -> 404
     @ExceptionHandler(EmptyResultDataAccessException.class)
     public ResponseEntity<Void> onEmpty(EmptyResultDataAccessException ex) {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(BadSqlGrammarException.class)
+    public ResponseEntity<Map<String, String>> onBadSql(BadSqlGrammarException ex, HttpServletRequest req) {
+        String msg = (ex.getMostSpecificCause() != null)
+                ? ex.getMostSpecificCause().getMessage()
+                : ex.getMessage();
+
+        log.warn("[{} {}] BadSqlGrammarException -> {}", req.getMethod(), req.getRequestURI(), msg, ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "error", "Bad SQL grammar",
+                "detail", msg
+        ));
     }
 
     // 3) Integridad: 409 solo en escrituras; en GET usa 500 (o ajusta si prefieres 404/403 según tu caso)

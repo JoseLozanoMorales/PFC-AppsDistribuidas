@@ -67,7 +67,8 @@ public class UsuarioService {
 
 
     // Ya existente: registro público (cliente)
-    public void crearClienteConSP(UsuarioDTO dto) {
+    @Transactional
+    public Usuario crearClienteConSP(UsuarioDTO dto) {
         String raw = dto.getContrasena();
         if (raw == null || raw.isBlank()) {
             throw new IllegalArgumentException("La contraseña es obligatoria");
@@ -82,11 +83,14 @@ public class UsuarioService {
                 dto.getUsuario(),
                 hash                              // <<--- ENVIAR HASH
         );
+        return usuarioRepository.findByUsuario(dto.getUsuario())
+                .orElseThrow(() -> new IllegalStateException("Usuario creado, pero no se pudo resolver su identificador"));
     }
 
 
-    // NUEVO: panel admin — crea cualquier rol con SP crear_usuario
-    public void crearUsuarioConSP(UsuarioDTO dto) {
+    // Panel admin: crea usuarios con cualquier rol permitido.
+    @Transactional
+    public Usuario crearUsuarioConSP(UsuarioDTO dto) {
         Integer idMetodoPago = dto.getIdMetodoPago() != null ? dto.getIdMetodoPago().intValue() : null;
         Integer idRol        = dto.getIdRol() != null        ? dto.getIdRol().intValue()        : 2; // por defecto cliente
 
@@ -100,6 +104,8 @@ public class UsuarioService {
                 idMetodoPago,
                 idRol
         );
+        return usuarioRepository.findByUsuario(dto.getUsuario())
+                .orElseThrow(() -> new IllegalStateException("Usuario creado, pero no se pudo resolver su identificador"));
     }
     public void actualizarCliente(Integer usuarioId, ClienteUpdateRequest req) {
         String nombre    = emptyToNull(req.getNombre());
@@ -121,7 +127,7 @@ public class UsuarioService {
 
     /* ======== NUEVO (admin/trabajador) por JSON con envío de credenciales ======== */
     @Transactional
-    public void crearAdminOTrabajador(UsuarioDTO dto) {
+    public Usuario crearAdminOTrabajador(UsuarioDTO dto) {
         if (dto.getIdRol() == null || (dto.getIdRol() != 1 && dto.getIdRol() != 3)) {
             throw new IllegalArgumentException("idRol debe ser 1 (admin) o 3 (trabajador)");
         }
@@ -153,6 +159,8 @@ public class UsuarioService {
 
         // 4) Enviar al SP (procedure o function con fallback)
         gestionarAdmins(List.of(a));
+        return usuarioRepository.findByUsuario(dto.getUsuario())
+                .orElseThrow(() -> new IllegalStateException("Usuario creado, pero no se pudo resolver su identificador"));
     }
 
     // NUEVO: buscar con la función ligera

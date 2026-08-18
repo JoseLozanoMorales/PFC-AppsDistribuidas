@@ -1,131 +1,68 @@
-// src/main/java/com/example/tienda_tech/controller/UsuarioController.java
 package com.tiendatech.usuarios.controller;
+
+import com.tiendatech.usuarios.dto.ClienteUpdateRequest;
+import com.tiendatech.usuarios.dto.UsuarioDTO;
 import com.tiendatech.usuarios.dto.UsuarioMinDTO;
 import com.tiendatech.usuarios.model.Usuario;
-import jakarta.servlet.http.HttpServletRequest;   // <-- NUEVO (no javax)
-import org.springframework.http.ResponseEntity;
-
-import com.tiendatech.usuarios.dto.UsuarioDTO;
 import com.tiendatech.usuarios.service.UsuarioService;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-// ...los que ya tengas
 import org.springframework.web.bind.annotation.*;
-import com.tiendatech.usuarios.dto.ClienteUpdateRequest;
 
-import java.util.List;
+import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
+    private final UsuarioService usuarioService;
 
-    @Autowired
-    private com.tiendatech.usuarios.service.UsuarioService usuarioService;
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
 
-    /**
-     * Registro público (self-service) de clientes.
-     * Invoca SP: crear_cliente(...)
-     */
     @PostMapping("/crear")
     public ResponseEntity<?> crearCliente(@RequestBody UsuarioDTO dto) {
-        try {
-            usuarioService.crearClienteConSP(dto);
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Cliente creado"
-            ));
-        } catch (DataIntegrityViolationException ex) {
-            // UNIQUE violations (usuario/correo/cedula), FK, etc.
-            return ResponseEntity.status(409).body(Map.of(
-                    "success", false,
-                    "message", "Datos duplicados o inválidos",
-                    "error", ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                    "success", false,
-                    "message", "Error al crear cliente",
-                    "error", e.getMessage()
-            ));
-        }
+        Usuario creado = usuarioService.crearClienteConSP(dto);
+        return createdUsuario(creado, "Cliente creado");
     }
 
-    @PostMapping({"/crear-usuario", "/crear_usuario"})
+    @PostMapping("/crear-usuario")
     public ResponseEntity<?> crearUsuario(@RequestBody UsuarioDTO dto) {
-        try {
-            if (dto.getIdRol() == null) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "success", false,
-                        "message", "idRol es obligatorio para crear usuario"
-                ));
-            }
-            usuarioService.crearUsuarioConSP(dto);
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "message", "Usuario creado"
-            ));
-        } catch (DataIntegrityViolationException ex) {
-            return ResponseEntity.status(409).body(Map.of(
-                    "success", false,
-                    "message", "Datos duplicados o inválidos",
-                    "error", ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage()
-            ));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of(
-                    "success", false,
-                    "message", "Error al crear usuario",
-                    "error", e.getMessage()
-            ));
+        if (dto.getIdRol() == null) {
+            throw new IllegalArgumentException("idRol es obligatorio para crear usuario");
         }
+        Usuario creado = usuarioService.crearUsuarioConSP(dto);
+        return createdUsuario(creado, "Usuario creado");
     }
-
 
     @PutMapping("/cliente/{id}")
-    public ResponseEntity<?> actualizarCliente(
-            @PathVariable Integer id,
-            @RequestBody ClienteUpdateRequest dto) {
+    public ResponseEntity<?> actualizarCliente(@PathVariable Integer id, @RequestBody ClienteUpdateRequest dto) {
         usuarioService.actualizarCliente(id, dto);
         return ResponseEntity.ok(Map.of("success", true, "message", "Cliente actualizado"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
-        var u = usuarioService.getById(id);
-        return ResponseEntity.ok(usuarioPayload(u));
+        Usuario usuario = usuarioService.getById(id);
+        return ResponseEntity.ok(usuarioPayload(usuario));
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpServletRequest req) {
-        Integer userId = resolveUserId(req);               // lee X-User-Id
-        var u = usuarioService.getById(userId);            // usa el service
-        return ResponseEntity.ok(java.util.Map.of("data", usuarioPayload(u)));
+        Integer userId = resolveUserId(req);
+        Usuario usuario = usuarioService.getById(userId);
+        return ResponseEntity.ok(Map.of("data", usuarioPayload(usuario)));
     }
 
-    /** Obtiene el userId desde la cabecera X-User-Id (fallback: sesión) */
-    private Integer resolveUserId(HttpServletRequest req){
-        String hdr = req.getHeader("X-User-Id");
-        if (hdr != null && !hdr.isBlank()) {
-            try { return Integer.valueOf(hdr); } catch (NumberFormatException ignore) {}
-        }
-        var ses = req.getSession(false);
-        Object attr = (ses != null) ? ses.getAttribute("userId") : null;
-        if (attr instanceof Integer i) return i;
-        if (attr instanceof String s)  try { return Integer.valueOf(s); } catch (Exception ignore) {}
-        throw new IllegalArgumentException("No se pudo resolver el usuario actual");
-    }
-
-    /* ===== ADMIN/TRABAJADOR – nuevo flujo JSON ===== */
     @PostMapping("/crear-usuarioAdmin")
-    public ResponseEntity<Void> crearAdminOTrabajador(@Valid @RequestBody UsuarioDTO dto) {
-        usuarioService.crearAdminOTrabajador(dto);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> crearAdminOTrabajador(@Valid @RequestBody UsuarioDTO dto) {
+        Usuario creado = usuarioService.crearAdminOTrabajador(dto);
+        return createdUsuario(creado, "Usuario administrativo creado");
     }
 
     @PutMapping("/admin/{id}")
@@ -138,14 +75,11 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/admin/{id}")
-    public ResponseEntity<Void> deshabilitarAdmin(
-            @PathVariable Integer id,
-            @RequestParam Integer rolId) {
+    public ResponseEntity<Void> deshabilitarAdmin(@PathVariable Integer id, @RequestParam Integer rolId) {
         usuarioService.deshabilitarAdmin(id, rolId);
         return ResponseEntity.ok().build();
     }
 
-    /* ===== Búsqueda (sin searchMin) ===== */
     @GetMapping("/buscar")
     public ResponseEntity<List<Usuario>> buscarPorUsuario(
             @RequestParam("usuario") String usuario,
@@ -154,28 +88,58 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.buscarPorUsuario(usuario, rolId, limit));
     }
 
-    // NUEVO: búsqueda mínima para autocompletar/seleccionar
     @GetMapping("/buscar-min")
     public ResponseEntity<List<UsuarioMinDTO>> buscarMin(
             @RequestParam("q") String q,
             @RequestParam(value = "rolId", required = false) Integer rolId,
-            @RequestParam(value = "limit", defaultValue = "20") int limit
-    ) {
+            @RequestParam(value = "limit", defaultValue = "20") int limit) {
         return ResponseEntity.ok(usuarioService.buscarMin(q, rolId, limit));
     }
 
-    private Map<String, Object> usuarioPayload(Usuario u) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("usuarioId", u.getUsuarioId());
-        payload.put("usuario", u.getUsuario());
-        payload.put("nombre", u.getNombre());
-        payload.put("cedula", u.getCedula());
-        payload.put("correo", u.getCorreo());
-        payload.put("telefono", u.getTelefono());
-        payload.put("id_rol", u.getIdRol());
-        payload.put("avatar_path", u.getAvatarPath());
-        payload.put("avatarPath", u.getAvatarPath());
-        return payload;
+    private Integer resolveUserId(HttpServletRequest req) {
+        String header = req.getHeader("X-User-Id");
+        if (header != null && !header.isBlank()) {
+            try {
+                return Integer.valueOf(header);
+            } catch (NumberFormatException ignored) {
+                // fallback to session
+            }
+        }
+
+        var session = req.getSession(false);
+        Object attr = session != null ? session.getAttribute("userId") : null;
+        if (attr instanceof Integer id) return id;
+        if (attr instanceof String id) {
+            try {
+                return Integer.valueOf(id);
+            } catch (NumberFormatException ignored) {
+                // handled below
+            }
+        }
+
+        throw new IllegalArgumentException("No se pudo resolver el usuario actual");
     }
 
+    private ResponseEntity<Map<String, Object>> createdUsuario(Usuario usuario, String message) {
+        URI location = URI.create("/api/usuarios/" + usuario.getUsuarioId());
+        return ResponseEntity.created(location).body(Map.of(
+                "success", true,
+                "message", message,
+                "data", usuarioPayload(usuario)
+        ));
+    }
+
+    private Map<String, Object> usuarioPayload(Usuario usuario) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("usuarioId", usuario.getUsuarioId());
+        payload.put("usuario", usuario.getUsuario());
+        payload.put("nombre", usuario.getNombre());
+        payload.put("cedula", usuario.getCedula());
+        payload.put("correo", usuario.getCorreo());
+        payload.put("telefono", usuario.getTelefono());
+        payload.put("id_rol", usuario.getIdRol());
+        payload.put("avatar_path", usuario.getAvatarPath());
+        payload.put("avatarPath", usuario.getAvatarPath());
+        return payload;
+    }
 }
