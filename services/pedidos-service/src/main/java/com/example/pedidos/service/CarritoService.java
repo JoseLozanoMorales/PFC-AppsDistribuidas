@@ -46,6 +46,13 @@ public class CarritoService {
         return resultado.isEmpty() ? null : resultado.get(0);
     }
 
+    public Carrito obtenerCarritoPorId(Integer carritoId) {
+        String sql = "SELECT carrito_id, usuario_id, total, habilitado " +
+                "FROM pedidos.carrito_de_compra WHERE carrito_id = ?";
+        List<Carrito> resultado = jdbcTemplate.query(sql, carritoRowMapper, carritoId);
+        return resultado.isEmpty() ? null : resultado.get(0);
+    }
+
     public Carrito crearCarrito(Integer usuarioId) {
         String sql = "INSERT INTO pedidos.carrito_de_compra (usuario_id, total, habilitado) " +
                 "VALUES (?, 0, true) RETURNING carrito_id";
