@@ -38,6 +38,9 @@ public class OtpService {
     @Value("${otp.rate.max-per-15min:3}")
     private int maxPerWindow;
 
+    @Value("${otp.mail-fallback.enabled:${OTP_MAIL_FALLBACK_ENABLED:false}}")
+    private boolean mailFallbackEnabled;
+
     //NUEVO
     @Value("${app.frontend.base-url}")
     private String frontendBaseUrl;
@@ -86,24 +89,34 @@ public class OtpService {
                 Si no solicitaste este código, ignora este correo.
                 """.formatted(code, otpTtlMin));
 
+        boolean mailSent = false;
         try {
             mailSender.send(msg);
+            mailSent = true;
             log.info("OTP enviado a {} txId={}", email, txId);
         } catch (Exception ex) {
             // no dejes un OTP huérfano si el correo falló
-            otpCache.invalidate(cacheKey);
-            log.error("Error enviando OTP a {}: {}", email, ex.getMessage(), ex);
-            // Propaga un error claro (el front ya lo muestra)
-            throw new RuntimeException("MAIL_SEND_FAILED: " + ex.getMessage(), ex);
+            if (!mailFallbackEnabled) {
+                otpCache.invalidate(cacheKey);
+                log.error("Error enviando OTP a {}: {}", email, ex.getMessage(), ex);
+                throw new RuntimeException("MAIL_SEND_FAILED: " + ex.getMessage(), ex);
+            }
+            log.warn("SMTP no disponible. Fallback local activo para OTP. correo={} txId={} otp={}",
+                    email, txId, code, ex);
         }
 
-        return Map.of(
-                "txId", txId,
-                "correo", email,
-                "expiresInMin", otpTtlMin,
-                "resendCooldownSec", resendCooldownSeconds,
-                "now", Instant.now().toString()
-        );
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("txId", txId);
+        response.put("correo", email);
+        response.put("expiresInMin", otpTtlMin);
+        response.put("resendCooldownSec", resendCooldownSeconds);
+        response.put("now", Instant.now().toString());
+        response.put("mailSent", mailSent);
+        if (!mailSent && mailFallbackEnabled) {
+            response.put("devCode", code);
+            response.put("message", "SMTP no disponible; usa devCode solo para pruebas locales.");
+        }
+        return response;
     }
 
     public boolean validar(String email, String code, String txId) {

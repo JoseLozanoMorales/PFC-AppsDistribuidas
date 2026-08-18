@@ -17,9 +17,12 @@ async function requestOtp() {
   if (!/^\d{10}$/.test(form.cedula) || !/^\d{10}$/.test(form.telefono)) { error.value = 'Cédula y teléfono deben tener 10 dígitos.'; return }
   busy.value = true
   try {
-    const result = await api<{txId:string}>('/api/otp',{method:'POST',body:JSON.stringify({accion:'enviar',correo:form.correo,txId:txId.value || undefined})})
+    const result = await api<{txId:string; devCode?:string; mailSent?:boolean}>('/api/otp',{method:'POST',body:JSON.stringify({accion:'enviar',correo:form.correo,txId:txId.value || undefined})})
     txId.value = result.txId
     stage.value = 'otp'
+    if (result.devCode) {
+      error.value = `SMTP bloqueado en esta red. Codigo de prueba: ${result.devCode}`
+    }
   } catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo enviar el código.' }
   finally { busy.value = false }
 }

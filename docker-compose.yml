@@ -97,6 +97,7 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
       interval: 10s
@@ -362,6 +363,7 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
       COOKIE_SECURE: "false"
+      OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
       interval: 10s
