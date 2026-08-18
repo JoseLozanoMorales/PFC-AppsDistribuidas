@@ -238,7 +238,12 @@
         try{
           const carrito = await fetchJSON(`/api/carrito/${USER_ID}`);
           CARRITO_ID = carrito.carritoId;
-          ITEMS = await fetchJSON(`/api/carrito/${CARRITO_ID}/detalle`);
+          const respuesta = await fetchJSON(`/api/carrito/${CARRITO_ID}/detalle`);
+          // pedidos-service pagina este endpoint: {content, page, size,
+          // totalElements, totalPages} en vez de un array plano.
+          if (Array.isArray(respuesta)) ITEMS = respuesta;
+          else if (respuesta && Array.isArray(respuesta.content)) ITEMS = respuesta.content;
+          else throw new Error('Respuesta inesperada del carrito (se esperaba una lista).');
           render(ITEMS);
           updateSummary(carrito);
         }catch(err){

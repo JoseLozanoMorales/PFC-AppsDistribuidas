@@ -737,7 +737,12 @@
       async function apiList(){
         const r = await fetch(`${API.base}/usuario/${USER_ID}`, withAuth());
         if (!r.ok) throw new Error(await r.text());
-        return await r.json(); // List<MetodoPago>: {metodopagoId, numeroMascara, fechaExpiracion, habilitado, tipoId, tipoNombre}
+        const respuesta = await r.json();
+        // pedidos-service pagina este endpoint: {content, page, size,
+        // totalElements, totalPages} en vez de List<MetodoPago> plano.
+        if (Array.isArray(respuesta)) return respuesta;
+        if (respuesta && Array.isArray(respuesta.content)) return respuesta.content;
+        throw new Error('Respuesta inesperada del servidor (se esperaba una lista de métodos de pago).');
       }
 
       async function apiAdd(payload){

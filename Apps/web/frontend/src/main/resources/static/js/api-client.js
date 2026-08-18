@@ -125,8 +125,14 @@
 
   async function detalleCarritoActual() {
     const carrito = await carritoActual();
-    const detalle = await apiJson(`/api/carrito/${encodeURIComponent(carrito.carritoId)}/detalle`);
-    return Array.isArray(detalle) ? detalle : [];
+    const respuesta = await apiJson(`/api/carrito/${encodeURIComponent(carrito.carritoId)}/detalle`);
+    // pedidos-service pagina este endpoint: devuelve {content, page, size,
+    // totalElements, totalPages} en vez de un array plano. Se extrae
+    // .content; si la forma es realmente otra cosa, se avisa en vez de
+    // devolver [] en silencio (eso escondia el problema real).
+    if (Array.isArray(respuesta)) return respuesta;
+    if (respuesta && Array.isArray(respuesta.content)) return respuesta.content;
+    throw new Error('Respuesta inesperada del carrito (se esperaba una lista).');
   }
 
   async function precioProducto(productoId) {

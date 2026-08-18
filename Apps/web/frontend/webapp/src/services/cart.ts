@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api, type PageResponse } from './api'
 import { getUser } from './session'
 
 export interface Cart { carritoId: number; usuarioId?: number; total?: number }
@@ -12,7 +12,8 @@ export async function currentCart(): Promise<Cart> {
 }
 
 export async function cartLines(cartId: number): Promise<CartLine[]> {
-  return api<CartLine[]>(`/api/carrito/${cartId}/detalle`)
+  const page = await api<PageResponse<CartLine>>(`/api/carrito/${cartId}/detalle`)
+  return page.content
 }
 
 export async function addToCart(productId: number, cantidad = 1): Promise<void> {
