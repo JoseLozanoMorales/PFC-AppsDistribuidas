@@ -37,6 +37,26 @@ spring:
   application:
     name: frontend
 
+  http:
+    clients:
+      imperative:
+        # Sin Apache HttpClient5/Jetty/Reactor Netty en el classpath, Boot usa
+        # por defecto el cliente HTTP del JDK (java.net.http.HttpClient), que
+        # negocia HTTP/2 en texto plano (h2c: Connection/Upgrade + HTTP2-Settings)
+        # contra CUALQUIER uri http://. Spring Cloud Gateway Server WebMVC
+        # reusa este mismo RestClient.Builder autoconfigurado para el proxy de
+        # TODAS las rutas (ver RestClientProxyExchange), asi que el intento de
+        # upgrade se manda tambien hacia armado-ia-service (uvicorn/FastAPI,
+        # HTTP/1.1 unicamente), que lo rechaza (400 "Unsupported upgrade
+        # request") y pierde el body en el proceso. No hay forma de
+        # configurar el cliente HTTP por ruta en esta version de Gateway MVC
+        # (GatewayMvcProperties/RouteProperties no lo exponen), asi que se
+        # fuerza aqui, a nivel de aplicacion, el factory "simple"
+        # (HttpURLConnection, HTTP/1.1 puro, sin soporte de h2c). No cambia
+        # nada para las demas rutas: todos los backends del proyecto son
+        # Spring/Tomcat y solo hablan HTTP/1.1.
+        factory: simple
+
   cloud:
     gateway:
       server:
@@ -86,3 +106,8 @@ spring:
               uri: ${ARMADO_IA_SERVICE_URL:http://localhost:8087}
               predicates:
                 - Path=/api/armado/**
+              # El 400 que uvicorn devolvia contra esta ruta se debia al
+              # cliente HTTP saliente de Gateway intentando un upgrade h2c
+              # (ver spring.http.clients.imperative.factory mas arriba), no a
+              # una cabecera copiada de la request entrante. No hace falta
+              # ningun filtro en esta ruta.
