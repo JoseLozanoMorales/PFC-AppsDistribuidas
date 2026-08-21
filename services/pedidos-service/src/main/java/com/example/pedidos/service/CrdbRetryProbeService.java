@@ -1,7 +1,6 @@
 package com.example.pedidos.service;
 
 import com.example.pedidos.config.CrdbMetrics;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-@Profile("crdb")
 public class CrdbRetryProbeService {
 
     private final DataSource dataSource;

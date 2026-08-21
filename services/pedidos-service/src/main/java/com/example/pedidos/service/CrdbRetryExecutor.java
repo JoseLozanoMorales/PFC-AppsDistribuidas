@@ -3,14 +3,12 @@ package com.example.pedidos.service;
 import com.example.pedidos.config.CrdbMetrics;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
 @Component
-@Profile("crdb")
 public class CrdbRetryExecutor {
 
     private static final String SERIALIZATION_FAILURE = "40001";

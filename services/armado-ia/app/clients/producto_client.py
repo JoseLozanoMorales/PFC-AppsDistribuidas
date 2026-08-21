@@ -136,7 +136,7 @@ class ProductoClient:
         # productos-service devuelve la columna JSONB "atributos" tal cual la
         # serializa Jackson sobre el PGobject del driver JDBC, NO como un
         # objeto JSON anidado limpio: {"type":"jsonb","value":"{...}","null":false}.
-        # Verificado en vivo contra productos-crdb-service antes de escribir esto.
+        # Verificado en vivo contra productos-service sobre CockroachDB.
         if not atributos_raw:
             return {}
         if isinstance(atributos_raw, dict):

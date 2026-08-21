@@ -12,7 +12,7 @@
 --      (mismo lugar/estilo que inventario.solicitud_idempotente).
 --   2) Aplicar el schema actualizado contra la base (crdb-init o el flujo que
 --      use el equipo para eso).
---   3) Levantar pedidos-service/pedidos-crdb-service con
+--   3) Levantar pedidos-service con
 --      PEDIDOS_IDEMPOTENCIA_ENABLED=true (o pedidos.idempotencia.enabled=true
 --      en application.properties). Con eso JdbcIdempotenciaRepository se
 --      registra como bean (esta con @ConditionalOnProperty) y el checkout

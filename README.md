@@ -33,7 +33,7 @@ la evidencia encontrada en `docs/evidencias/`, `docs/adr/` y `docs/db/`.
 | A — Esquema distribuido y fragmentación | 1.1, 1.2 | ✅ Completo | `docs/adr/ADR-003-fragmentacion-pedidos.md`, `docs/db/schema.sql`, `docs/evidencias/validacion-esquema-distribuido.md` |
 | B — Clúster CockroachDB de 3 nodos | 2.1 | ✅ Completo | `docs/evidencias/cluster-cockroachdb-3-nodos.md` |
 | C — Tolerancia a fallos | 2.2 | 🟨 Parcial | `docs/evidencias/tolerancia_fallos.md` + `docs/evidencias/resultados-tolerancia/`; falta el vídeo exigido por la guía |
-| D — Integración microservicio↔clúster y métricas | 3.1, 3.2 | 🟨 Parcial | `docs/evidencias/integracion-pedidos-crdb.md`, `docs/evidencias/colision-serializable-controlada.md`; corre bajo el perfil `e3-crdb`, no reemplaza aún el flujo por defecto |
+| D — Integración microservicio↔clúster y métricas | 3.1, 3.2 | ✅ Integrado | `docs/evidencias/integracion-pedidos-crdb.md`, `docs/evidencias/colision-serializable-controlada.md`; CockroachDB es el flujo predeterminado |
 | E — Pipeline analítico paralelo (PySpark) | 4.1 | ✅ Completo | `spark/pipeline.py`, `spark/baseline.py`, `docs/evidencias/resultados-pipeline-analitico.md` |
 | F — Protocolo experimental y comparativa | 4.2, 4.3 | ✅ Completo | `docs/experimentos/protocolo.md`, `docs/evidencias/resultados-pipeline-analitico.md` |
 | G — Documentación, trazabilidad y reproducibilidad | 5.x, 6.x | 🟨 Parcial | `docs/entrega3/PFC3.tex`, este README; ver discrepancia señalada abajo |
@@ -50,23 +50,18 @@ la evidencia encontrada en `docs/evidencias/`, `docs/adr/` y `docs/db/`.
 
 | Servicio | Puerto | Persistencia | Requiere perfil |
 |---|---:|---|---|
-| `frontend` | 8080 | — (enrutador) | No |
-| `productos-service` | 8081 | PostgreSQL mono-nodo (`TiendaTechV19`) | No |
-| `inventario-service` | 8082 | PostgreSQL mono-nodo | No |
-| `pedidos-service` | 8083 | PostgreSQL mono-nodo | No |
-| `ordenes-proveedores-service` | 8084 | PostgreSQL mono-nodo | No |
-| `usuarios-service` | 8085 | PostgreSQL mono-nodo | No |
-| `ventas-service` | 8086 | PostgreSQL mono-nodo | No |
-| `crdb-1` / `crdb-2` / `crdb-3` | SQL 26257 / 26258 / 26259 · consola 8091 / 8092 / 8093 | CockroachDB, `num_replicas = 3` | `e3-crdb` |
-| `pedidos-crdb-service` | 8183 | CockroachDB (clúster anterior) | `e3-crdb` |
-| `ventas-crdb-service` | 8186 | CockroachDB (clúster anterior) | `e3-crdb` |
+| `frontend-crdb` | 8180 | — (enrutador) | No |
+| `productos-crdb-service` | 8081 interno | CockroachDB | No |
+| `inventario-crdb-service` | 8082 interno | CockroachDB | No |
+| `pedidos-crdb-service` | 8083 interno | CockroachDB | No |
+| `ordenes-proveedores-crdb-service` | 8084 interno | CockroachDB | No |
+| `usuarios-crdb-service` | 8085 interno | CockroachDB | No |
+| `ventas-crdb-service` | 8086 interno | CockroachDB | No |
+| `crdb-1` / `crdb-2` / `crdb-3` | SQL 26257 / 26258 / 26259 · consola 8091 / 8092 / 8093 | CockroachDB, `num_replicas = 3` | No |
 
-**Aviso de alcance:** el stack que arranca por defecto (`docker compose up`)
-sigue sobre **PostgreSQL mono-nodo compartido**, tal como lo reconoce el
-propio manuscrito en su sección de limitaciones. El clúster CockroachDB de
-tres nodos y los servicios `pedidos-crdb-service` / `ventas-crdb-service` que
-sí lo usan solo se levantan con el perfil `e3-crdb` y coexisten con el stack
-por defecto sin reemplazarlo todavía.
+El stack predeterminado (`docker compose up`) utiliza exclusivamente el
+clúster CockroachDB de tres nodos. El despliegue PostgreSQL mononodo y el
+perfil Compose `e3-crdb` fueron retirados.
 
 ---
 
@@ -77,7 +72,7 @@ por defecto sin reemplazarlo todavía.
 | Docker | <!-- TODO: verificar — no se encontró una versión mínima documentada; usar una versión reciente con soporte de `profiles` en Compose (2021+). --> |
 | Docker Compose | v2 (sintaxis `profiles` en `docker-compose.yml`) |
 | JDK | 21 (todos los microservicios backend); el módulo `frontend` compila con Java 17 |
-| Maven | 3.9 (usado en las pruebas de integración registradas en `docs/evidencias/integracion-pedidos-crdb.md`); cada módulo incluye su propio `mvnw`/`mvnw.cmd` |
+| Maven | 3.9 dentro de las imágenes de compilación Docker; no se requiere instalación local para el despliegue |
 | Python | 3.x compatible con PySpark 3.5.5 (la imagen `spark/Dockerfile` usa `apache/spark:3.5.5-python3`); ver `spark/requirements.txt` para las versiones exactas de librerías |
 | LaTeX | Distribución con `pdflatex`, `bibtex` y los paquetes `biblatex` (estilo `ieee`, backend `bibtex`), `tikz`, `tabularx`, `booktabs` |
 
@@ -91,48 +86,35 @@ cd PFC-AppsDistribuidas
 git checkout feature/entrega-3
 ```
 
-**Variables de entorno:** el repositorio no incluye un `.env.example`. Existe
-un `.env` en la raíz con credenciales de PostgreSQL y el secreto JWT, pero
-**no está protegido por `.gitignore`** (ver [Pendientes conocidos](#15-pendientes-conocidos)).
-Antes de continuar, cree su propio `.env` en la raíz con, como mínimo:
+Copie `.env.example` a `.env` y complete los secretos locales. `.env` está
+excluido por `.gitignore`. La configuración mínima de persistencia es:
 
 ```dotenv
-TT_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/TiendaTechV19
-TT_DATASOURCE_USERNAME=postgres
-TT_DATASOURCE_PASSWORD=<su_password>
+CRDB_DATASOURCE_URL=jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+CRDB_DATASOURCE_USERNAME=root
+CRDB_DATASOURCE_PASSWORD=
 AUTH_JWT_SECRET=<su_secreto>
 TT_MAIL_USERNAME=<opcional>
 TT_MAIL_PASSWORD=<opcional>
 COOKIE_SECURE=false
 ```
 
-Levantar el stack por defecto (frontend + seis microservicios sobre
-PostgreSQL mono-nodo):
+Levantar el clúster distribuido, el frontend y los seis microservicios:
 
 ```bash
-docker compose up --build
+docker compose up -d --build frontend-crdb
 ```
 
 Comprobación de los servicios:
 
 ```bash
-curl http://localhost:8080/actuator/health   # frontend
-curl http://localhost:8081/actuator/health   # productos-service
-curl http://localhost:8082/actuator/health   # inventario-service
-curl http://localhost:8083/actuator/health   # pedidos-service
-curl http://localhost:8084/actuator/health   # ordenes-proveedores-service
-curl http://localhost:8085/actuator/health   # usuarios-service
-curl http://localhost:8086/actuator/health   # ventas-service
+curl http://localhost:8180/actuator/health   # frontend
 ```
 
-Levantar además el clúster CockroachDB de tres nodos y los servicios que lo
-usan (perfil `e3-crdb`, definido en `docker-compose.yml`):
+Comprobar los tres nodos CockroachDB:
 
 ```bash
-docker compose --profile e3-crdb up -d crdb-1 crdb-2 crdb-3 crdb-init crdb-seed pedidos-crdb-service ventas-crdb-service
 docker exec tiendatech-crdb-1 cockroach node status --insecure --host=localhost:26257
-curl http://localhost:8183/health   # pedidos-crdb-service
-curl http://localhost:8186/health   # ventas-crdb-service
 ```
 
 <!-- TODO: verificar — no se encontró en el repositorio un endpoint /actuator/health explícito confirmado por captura para cada servicio del stack por defecto; se asume por ser Spring Boot con starter-actuator declarado en los pom.xml. Confirmar antes de publicar. -->
@@ -148,8 +130,8 @@ hacia seis microservicios de dominio, cada uno con su propio módulo Maven:
 `ventas-service`. La comunicación entre servicios es REST síncrona (por
 ejemplo, `pedidos-service` consulta `ventas-service`, `productos-service` y
 `usuarios-service`; `ventas-service` consulta `inventario-service`). Todos los
-contenedores comparten la red por defecto de Compose; los servicios del
-perfil `e3-crdb` usan además la red interna `pfc-net`.
+contenedores comparten la red por defecto de Compose y la red interna
+`pfc-net` para conectarse con CockroachDB.
 
 Existe además, en `src/` (raíz del repositorio), un proyecto Spring Boot
 independiente (`com.example.tienda_tech`) con vistas estáticas HTML. No tiene
@@ -169,10 +151,9 @@ parte del despliegue distribuido activo.
 
 ## 5. Capa de datos distribuida
 
-El módulo B (`pedidos-crdb-service`, `ventas-crdb-service`) persiste sobre un
-clúster CockroachDB 23.2.4 de tres nodos (`crdb-1`, `crdb-2`, `crdb-3`,
-perfil `e3-crdb`), inicializado con `docs/db/schema.sql` y poblado con
-`docs/db/seeds.sql`.
+Los seis microservicios persisten sobre un clúster CockroachDB 23.2.4 de tres
+nodos (`crdb-1`, `crdb-2`, `crdb-3`), inicializado con
+`docs/db/schema.sql` y poblado con `docs/db/seeds.sql`.
 
 - **Fragmentación horizontal:** `pedidos.orden` y `pedidos.detalle_orden` se
   fragmentan por rangos trimestrales de `fecha` (equivalente a `fecha_pedido`
@@ -293,12 +274,12 @@ python spark/experimento.py --repeticiones 10 --workers 1 2 4 8 --incluir-pandas
 ├── frontend/                 # Spring Cloud Gateway (puerto 8080)
 ├── inventario-service/       # Puerto 8082
 ├── ordenes-proveedores-service/  # Puerto 8084
-├── pedidos-service/          # Puerto 8083 (también origen de pedidos-crdb-service)
+├── pedidos-service/          # Puerto interno 8083, CockroachDB
 ├── productos-service/        # Puerto 8081
 ├── spark/                    # Pipeline PySpark, baseline pandas, experimento
 ├── src/                      # Proyecto Spring Boot independiente, sin Dockerfile ni referencia en compose (legado, ver §4)
 ├── usuarios/                 # Imagen usuarios-service, puerto 8085
-└── ventas-service/           # Puerto 8086 (también origen de ventas-crdb-service)
+└── ventas-service/           # Puerto interno 8086, CockroachDB
 ```
 
 ---
@@ -350,7 +331,7 @@ generación de README)*
 | 1.2 Diseño de replicación y factor Raft | 8 % | `docs/adr/ADR-004-consenso-raft.md`, `docs/evidencias/cluster-cockroachdb-3-nodos.md` | ✅ Completo |
 | 2.1 Clúster de 3 nodos funcionando | 8 % | `docs/evidencias/cluster-cockroachdb-3-nodos.md` | ✅ Completo |
 | 2.2 Verificación de tolerancia a fallos | 10 % | `docs/evidencias/tolerancia_fallos.md`, `docs/evidencias/resultados-tolerancia/` | 🟨 Parcial — falta vídeo |
-| 3.1 Integración microservicio → clúster | 8 % | `docs/evidencias/integracion-pedidos-crdb.md` | 🟨 Parcial — bajo perfil `e3-crdb`, no reemplaza el stack por defecto |
+| 3.1 Integración microservicio → clúster | 8 % | `docs/evidencias/integracion-pedidos-crdb.md` | ✅ CockroachDB es el stack predeterminado |
 | 3.2 Métricas Prometheus incrementales | 4 % | `docs/evidencias/integracion-pedidos-crdb.md`, `docs/evidencias/colision-serializable-controlada.md` | 🟨 Parcial — contadores validados con `promtool`, sin servidor Prometheus desplegado en `docker-compose.yml` |
 | 4.1 Pipeline PySpark completo | 10 % | `spark/pipeline.py`, `docs/evidencias/resultados-pipeline-analitico.md` | ✅ Completo |
 | 4.2 Baseline pandas y comparativa | 4 % | `spark/baseline.py`, `docs/evidencias/resultados-pipeline-analitico.md` | ✅ Completo |
@@ -423,23 +404,11 @@ rúbrica.
   numeradas 1 y anclajes duplicados en el PDF.
 - Contratos OpenAPI no formalizados (deuda técnica declarada desde la
   Entrega 2).
-- Aislamiento de persistencia por servicio no implementado: el stack por
-  defecto comparte una única base PostgreSQL (`TiendaTechV19`) entre los seis
-  microservicios.
 - La sección "Resultados de la Entrega 3" del manuscrito no refleja todavía
   el trabajo sobre CockroachDB, tolerancia a fallos ni el pipeline PySpark
   (ver discrepancia en §1).
 - Falta grabar el vídeo de la caída controlada de uno y dos nodos, exigido
   por la guía (criterio 2.2); la bitácora y los datos crudos sí existen.
-- No existe `.env.example`; el repositorio contiene un `.env` real con
-  credenciales (`TT_DATASOURCE_PASSWORD`, `AUTH_JWT_SECRET`).
-- El `.gitignore` de la raíz está codificado en UTF-16, que Git no interpreta
-  como lista de patrones válida (`git check-ignore -v .env` no reporta
-  ninguna coincidencia). En la práctica, **`.env` no está ignorado** pese a
-  aparecer listado en el archivo, y quedó como archivo sin seguimiento (`??`)
-  en `git status` en vez de ser excluido. Debe corregirse la codificación del
-  `.gitignore` a UTF-8 antes de que alguien lo agregue por accidente.
-- No existe `.github/workflows/`: no hay integración continua configurada.
 - El servicio `pedidos-crdb-service` expone contadores Prometheus
   incrementales validados con `promtool`, pero no hay un servidor Prometheus
   ni Grafana desplegado en `docker-compose.yml` que los recolecte o

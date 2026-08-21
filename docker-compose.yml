@@ -1,260 +1,25 @@
 services:
-  frontend:
-    build:
-      context: Apps/web/frontend
-    container_name: frontend
-    ports:
-      - "8080:8080"
-    environment:
-      SERVER_PORT: 8080
-      USUARIOS_SERVICE_URL: http://usuarios-service:8085
-      PRODUCTOS_SERVICE_URL: http://productos-service:8081
-      INVENTARIO_SERVICE_URL: http://inventario-service:8082
-      PEDIDOS_SERVICE_URL: http://pedidos-service:8083
-      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-service:8084
-      VENTAS_SERVICE_URL: http://ventas-service:8086
-      ARMADO_IA_SERVICE_URL: http://armado-ia-service:8087
-      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
-    depends_on:
-      - usuarios-service
-      - productos-service
-      - inventario-service
-      - pedidos-service
-      - ordenes-proveedores-service
-      - ventas-service
-
-  productos-service:
-    build:
-      context: services/productos-service
-    container_name: productos-service
-    environment:
-      SERVER_PORT: 8081
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8081/actuator/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 30s
-
-  inventario-service:
-    build:
-      context: services/inventario-service
-    container_name: inventario-service
-    environment:
-      SERVER_PORT: 8082
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8082/actuator/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 30s
-
-  pedidos-service:
-    build:
-      context: services/pedidos-service
-    container_name: pedidos-service
-    environment:
-      SERVER_PORT: 8083
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-      VENTAS_SERVICE_URL: http://ventas-service:8086
-      PRODUCTOS_SERVICE_URL: http://productos-service:8081
-      USUARIOS_SERVICE_URL: http://usuarios-service:8085
-
-
-  ordenes-proveedores-service:
-    build:
-      context: services/ordenes-proveedores-service
-    container_name: ordenes-proveedores-service
-    environment:
-      SERVER_PORT: 8084
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-      INVENTARIO_SERVICE_URL: http://inventario-service:8082
-
-  usuarios-service:
-    build:
-      context: services/usuarios
-    container_name: usuarios-service
-    environment:
-      SERVER_PORT: 8085
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-      TT_MAIL_USERNAME: ${TT_MAIL_USERNAME}
-      TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD}
-      SPRING_MAIL_HOST: smtp.gmail.com
-      SPRING_MAIL_PORT: 587
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
-      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
-      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
-      OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 30s
-
-  ventas-service:
-    build:
-      context: services/ventas-service
-    container_name: ventas-service
-    environment:
-      SERVER_PORT: 8086
-      TT_DATASOURCE_URL: ${TT_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5432/TiendaTechV19}
-      TT_DATASOURCE_USERNAME: ${TT_DATASOURCE_USERNAME:-postgres}
-      TT_DATASOURCE_PASSWORD: ${TT_DATASOURCE_PASSWORD:-postgres}
-      INVENTARIO_SERVICE_URL: http://inventario-service:8082
-
-  # Entrega 3: cluster de datos distribuido. El perfil evita modificar el
-  # arranque normal de los servicios mientras se completa la migración.
-  crdb-1:
-    image: cockroachdb/cockroach:v23.2.4
-    container_name: tiendatech-crdb-1
-    profiles: ["e3-crdb"]
-    command:
-      - start
-      - --insecure
-      - --advertise-addr=crdb-1:26257
-      - --listen-addr=0.0.0.0:26257
-      - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
-      - --locality=region=local,zone=z1
-    ports:
-      - "127.0.0.1:26257:26257"
-      - "127.0.0.1:8091:8080"
-    volumes:
-      - crdb1-data:/cockroach/cockroach-data
-    networks: [pfc-net]
-    healthcheck:
-      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  crdb-2:
-    image: cockroachdb/cockroach:v23.2.4
-    container_name: tiendatech-crdb-2
-    profiles: ["e3-crdb"]
-    command:
-      - start
-      - --insecure
-      - --advertise-addr=crdb-2:26257
-      - --listen-addr=0.0.0.0:26257
-      - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
-      - --locality=region=local,zone=z2
-    ports:
-      - "127.0.0.1:26258:26257"
-      - "127.0.0.1:8092:8080"
-    volumes:
-      - crdb2-data:/cockroach/cockroach-data
-    networks: [pfc-net]
-    healthcheck:
-      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  crdb-3:
-    image: cockroachdb/cockroach:v23.2.4
-    container_name: tiendatech-crdb-3
-    profiles: ["e3-crdb"]
-    command:
-      - start
-      - --insecure
-      - --advertise-addr=crdb-3:26257
-      - --listen-addr=0.0.0.0:26257
-      - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
-      - --locality=region=local,zone=z3
-    ports:
-      - "127.0.0.1:26259:26257"
-      - "127.0.0.1:8093:8080"
-    volumes:
-      - crdb3-data:/cockroach/cockroach-data
-    networks: [pfc-net]
-    healthcheck:
-      test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  crdb-init:
-    image: cockroachdb/cockroach:v23.2.4
-    container_name: tiendatech-crdb-init
-    profiles: ["e3-crdb"]
-    depends_on:
-      crdb-1:
-        condition: service_started
-      crdb-2:
-        condition: service_started
-      crdb-3:
-        condition: service_started
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - >
-        until cockroach sql --insecure --host=crdb-1:26257 -e "SELECT 1" >/dev/null 2>&1; do
-          cockroach init --insecure --host=crdb-1:26257 >/dev/null 2>&1 || true;
-          sleep 2;
-        done;
-        cockroach sql --insecure --host=crdb-1:26257 --file=/docs/db/schema.sql
-    volumes:
-      - ./docs/db/schema.sql:/docs/db/schema.sql:ro
-    networks: [pfc-net]
-    restart: "no"
-
-  crdb-seed:
-    image: cockroachdb/cockroach:v23.2.4
-    container_name: tiendatech-crdb-seed
-    profiles: ["e3-crdb"]
-    depends_on:
-      crdb-init:
-        condition: service_completed_successfully
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - >
-        cockroach sql --insecure --host=crdb-1:26257
-        --file=/docs/db/seeds.sql
-    volumes:
-      - ./docs/db/seeds.sql:/docs/db/seeds.sql:ro
-    networks: [pfc-net]
-    restart: "no"
-
   pedidos-crdb-service:
     build:
       context: services/pedidos-service
     container_name: pedidos-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
       SERVER_PORT: 8083
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       CRDB_RETRY_MAX_ATTEMPTS: 3
       CRDB_RETRY_DELAY_MS: 100
       VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
       PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
       USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
     depends_on:
-      crdb-init:
-        condition: service_completed_successfully
       ventas-crdb-service:
         condition: service_started
       productos-crdb-service:
+        condition: service_started
+      usuarios-crdb-service:
         condition: service_started
     networks:
       - default
@@ -270,16 +35,11 @@ services:
     build:
       context: services/productos-service
     container_name: productos-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8081
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
-    depends_on:
-      crdb-init:
-        condition: service_completed_successfully
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
       - pfc-net
@@ -293,10 +53,8 @@ services:
     build:
       context: services/armado-ia
     container_name: armado-ia-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8087
-      SPRING_PROFILES_ACTIVE: crdb
       PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
@@ -319,16 +77,11 @@ services:
     build:
       context: services/inventario-service
     container_name: inventario-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8082
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
-    depends_on:
-      crdb-init:
-        condition: service_completed_successfully
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
       - pfc-net
@@ -337,17 +90,13 @@ services:
     build:
       context: services/ventas-service
     container_name: ventas-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8086
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
     depends_on:
-      crdb-init:
-        condition: service_completed_successfully
       inventario-crdb-service:
         condition: service_started
     networks:
@@ -358,17 +107,13 @@ services:
     build:
       context: services/ordenes-proveedores-service
     container_name: ordenes-proveedores-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8084
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
     depends_on:
-      crdb-init:
-        condition: service_completed_successfully
       inventario-crdb-service:
         condition: service_started
     networks:
@@ -379,13 +124,11 @@ services:
     build:
       context: services/usuarios
     container_name: usuarios-crdb-service
-    profiles: ["e3-crdb"]
     environment:
       SERVER_PORT: 8085
-      SPRING_PROFILES_ACTIVE: crdb
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable}"
-      CRDB_DATASOURCE_USERNAME: root
-      CRDB_DATASOURCE_PASSWORD: ""
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
+      CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
       TT_MAIL_USERNAME: ${TT_MAIL_USERNAME:-}
       TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD:-}
@@ -394,6 +137,9 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT: ${MAIL_CONNECTION_TIMEOUT_MS:-5000}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT: ${MAIL_READ_TIMEOUT_MS:-5000}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT: ${MAIL_WRITE_TIMEOUT_MS:-5000}
       COOKIE_SECURE: "false"
       OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
     healthcheck:
@@ -402,9 +148,6 @@ services:
       timeout: 3s
       retries: 5
       start_period: 30s
-    depends_on:
-      crdb-init:
-        condition: service_completed_successfully
     networks:
       - default
       - pfc-net
@@ -413,7 +156,6 @@ services:
     build:
       context: Apps/web/frontend
     container_name: frontend-crdb
-    profiles: ["e3-crdb"]
     ports:
       - "0.0.0.0:8180:8080"
     environment:
@@ -439,14 +181,11 @@ services:
         condition: service_started
       ventas-crdb-service:
         condition: service_started
+      armado-ia-service:
+        condition: service_started
     networks:
       - default
       - pfc-net
-
-volumes:
-  crdb1-data:
-  crdb2-data:
-  crdb3-data:
 
 networks:
   pfc-net:

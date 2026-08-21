@@ -4,14 +4,12 @@ import org.example.client.InventarioClient;
 import org.example.model.FacturaDetalle;
 import org.example.repository.FacturaOutboxRepository;
 import org.example.repository.FacturaStore;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-@Profile("crdb")
 public class InventarioOutboxProcessor {
 
     private static final int MAX_INTENTOS = 5;

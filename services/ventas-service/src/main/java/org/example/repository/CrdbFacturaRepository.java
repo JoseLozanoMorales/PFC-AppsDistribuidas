@@ -2,7 +2,6 @@ package org.example.repository;
 
 import org.example.model.Factura;
 import org.example.model.FacturaDetalle;
-import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Repository
-@Profile("crdb")
 public class CrdbFacturaRepository implements FacturaStore {
 
     private final JdbcTemplate jdbcTemplate;
