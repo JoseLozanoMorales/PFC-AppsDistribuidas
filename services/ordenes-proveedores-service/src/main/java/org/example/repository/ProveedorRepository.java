@@ -41,10 +41,13 @@ public class ProveedorRepository {
                 proveedorId), proveedorId);
     }
 
-    public List<Proveedor> listarActivos() {
+    // Devuelve todos los proveedores (activos e inactivos): la lista de administracion
+    // de proveedores debe seguir mostrando los desactivados, solo que marcados como
+    // "Inactivo". El filtro a solo-activos se hace en el select de creacion de ordenes.
+    public List<Proveedor> listarTodos() {
         return jdbcTemplate.query("""
                 SELECT proveedor_id, nombre, ruc, contacto_nombre, telefono, correo, direccion, activo
-                  FROM ordenes_proveedores.proveedor WHERE activo=true ORDER BY nombre
+                  FROM ordenes_proveedores.proveedor ORDER BY nombre
                 """, this::map);
     }
 

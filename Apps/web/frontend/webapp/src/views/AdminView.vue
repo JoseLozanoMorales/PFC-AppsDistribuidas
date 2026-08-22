@@ -4,7 +4,7 @@ import { api } from '../services/api'
 import { getUser } from '../services/session'
 
 type Row = Record<string, unknown>
-type Section = 'resumen' | 'usuarios' | 'productos' | 'sistema'
+type Section = 'resumen' | 'usuarios' | 'productos' | 'ventas' | 'proveedores' | 'ordenes' | 'sistema'
 
 const section = ref<Section>('resumen')
 const currentUser = getUser()
@@ -32,6 +32,41 @@ const imageDropIndex = ref<number | null>(null)
 
 const userForm = reactive({ nombre: '', cedula: '', correo: '', telefono: '', usuario: '', contrasena: '', idRol: 2 })
 const productForm = reactive({ nombre: '', categoriaId: 0, marcaId: 0, gamaId: 1, ivaId: 1, precio: 0, costo: 0, stock: 0, enlace: '', atributos: '{}' })
+const invoices = ref<Row[]>([])
+const providers = ref<Row[]>([])
+const purchaseOrders = ref<Row[]>([])
+const purchaseOrderStates = [
+  { id: '', label: 'Todas' }, { id: 'PENDIENTE', label: 'Pendiente' }, { id: 'ENVIADA', label: 'Enviada' },
+  { id: 'RECIBIDA_PARCIAL', label: 'Recibida parcial' }, { id: 'RECIBIDA', label: 'Recibida' }, { id: 'CANCELADA', label: 'Cancelada' },
+]
+const purchaseOrderFilter = ref('')
+const showProviderForm = ref(false)
+const editingProviderId = ref<number | null>(null)
+const providerForm = reactive({ nombre: '', ruc: '', contactoNombre: '', telefono: '', correo: '', direccion: '' })
+const rucHint = ref('')
+const telefonoHint = ref('')
+const confirmDialog = reactive<{ show: boolean; message: string; action: (() => void) | null }>({ show: false, message: '', action: null })
+function askConfirm(message: string, action: () => void) {
+  confirmDialog.message = message
+  confirmDialog.action = action
+  confirmDialog.show = true
+}
+function confirmYes() {
+  const action = confirmDialog.action
+  confirmDialog.show = false
+  confirmDialog.action = null
+  if (action) action()
+}
+function confirmNo() {
+  confirmDialog.show = false
+  confirmDialog.action = null
+}
+const showOrderForm = ref(false)
+const showReceiveForm = ref<number | null>(null)
+const orderForm = reactive({ proveedorId: 0, fechaEsperada: '', detalle: [] as { productoId: number; cantidadPedida: number; costoUnitario: number }[] })
+const orderLineDraft = reactive({ productoId: 0, cantidadPedida: 1, costoUnitario: 0 })
+const receiveDraft = reactive({ productoId: 0, cantidad: 1 })
+const receiveLines = ref<{ productoId: number; cantidad: number }[]>([])
 const productAttributes = reactive<Record<string, string | number>>({})
 const categoryFields: Record<number, { name: string; label: string; type: 'text' | 'number'; placeholder?: string }[]> = {
   1: [{ name: 'capacidad', label: 'Capacidad (GB)', type: 'number', placeholder: 'Ej. 1000' }, { name: 'tipo', label: 'Tipo de almacenamiento', type: 'text', placeholder: 'NVMe, SATA, HDD…' }],
@@ -54,6 +89,9 @@ const filteredUsers = computed(() => {
   const query = userQuery.value.trim().toLowerCase()
   return activeUsers.value.filter((row) => !query || ['usuario', 'nombre', 'correo', 'cedula'].some((key) => String(row[key] || '').toLowerCase().includes(query)))
 })
+// La lista de proveedores conserva los inactivos (para mostrarlos en el panel),
+// pero al crear una orden de compra solo deben poder elegirse proveedores activos.
+const activeProviders = computed(() => providers.value.filter((row) => field(row, 'activo') !== false))
 
 async function safeList(path: string): Promise<Row[]> {
   try { const data = await api<Row[]>(path); return Array.isArray(data) ? data : [] } catch { return [] }
@@ -62,14 +100,18 @@ async function safeList(path: string): Promise<Row[]> {
 async function load() {
   loading.value = true
   error.value = ''
-  const [productRows, categoryRows, brandRows, rangeRows, taxRows, admins, clients, workers] = await Promise.all([
+  const orderPath = `/api/ordenes-compra${purchaseOrderFilter.value ? `?estado=${purchaseOrderFilter.value}` : ''}`
+  const [productRows, categoryRows, brandRows, rangeRows, taxRows, admins, clients, workers, invoiceRows, providerRows, orderRows] = await Promise.all([
     safeList('/api/productos?size=200'), safeList('/api/categorias'), safeList('/api/marcas'), safeList('/api/gamas'), safeList('/api/sp/ivas'),
     safeList('/api/usuarios/buscar-min?q=&rolId=1&limit=200'), safeList('/api/usuarios/buscar-min?q=&rolId=2&limit=200'), safeList('/api/usuarios/buscar-min?q=&rolId=3&limit=200'),
+    safeList('/api/facturas'), safeList('/api/proveedores'), safeList(orderPath),
   ])
   products.value = productRows; categories.value = categoryRows; brands.value = brandRows; ranges.value = rangeRows; taxes.value = taxRows
   users[1] = admins; users[2] = clients; users[3] = workers
+  invoices.value = invoiceRows; providers.value = providerRows; purchaseOrders.value = orderRows
   loading.value = false
 }
+async function filterOrders() { purchaseOrders.value = await safeList(`/api/ordenes-compra${purchaseOrderFilter.value ? `?estado=${purchaseOrderFilter.value}` : ''}`) }
 
 function clearMessages() { error.value = ''; notice.value = '' }
 function resetUserForm() {
@@ -99,7 +141,9 @@ async function saveUser() {
   finally { saving.value = false }
 }
 async function disableUser(row: Row) {
-  if (!confirm(`¿Deshabilitar a ${field(row, 'usuario') || 'este usuario'}?`)) return
+  askConfirm(`¿Deshabilitar a ${field(row, 'usuario') || 'este usuario'}?`, () => doDisableUser(row))
+}
+async function doDisableUser(row: Row) {
   clearMessages()
   try { await api(`/api/usuarios/admin/${rowId(row, 'usuarioId', 'usuario_id', 'id')}?rolId=${userRole.value}`, { method: 'DELETE' }); notice.value = 'Usuario deshabilitado.'; await load() }
   catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo deshabilitar.' }
@@ -133,7 +177,9 @@ async function openEditProduct(row: Row) {
 function selectImages(event: Event) { productImages.value = Array.from((event.target as HTMLInputElement).files || []) }
 async function removeImage(row: Row) {
   const id = rowId(row, 'galeriaId', 'galeria_id', 'id')
-  if (!confirm('¿Quitar esta imagen del producto?')) return
+  askConfirm('¿Quitar esta imagen del producto?', () => doRemoveImage(id))
+}
+async function doRemoveImage(id: number) {
   await api(`/api/galeria_v2/${id}`, { method: 'DELETE' })
   existingGallery.value = existingGallery.value.filter((item) => rowId(item, 'galeriaId', 'galeria_id', 'id') !== id)
   galleryOrderDirty.value = true
@@ -187,10 +233,123 @@ async function saveProduct() {
   finally { saving.value = false }
 }
 async function disableProduct(row: Row) {
-  if (!confirm(`¿Deshabilitar ${field(row, 'nombre') || 'este producto'}?`)) return
+  askConfirm(`¿Deshabilitar ${field(row, 'nombre') || 'este producto'}?`, () => doDisableProduct(row))
+}
+async function doDisableProduct(row: Row) {
   clearMessages()
   try { await api(`/api/sp/productos/${rowId(row, 'producto_id', 'productoId', 'id')}`, { method: 'DELETE' }); notice.value = 'Producto deshabilitado.'; await load() }
   catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo deshabilitar.' }
+}
+
+function resetProviderForm() {
+  Object.assign(providerForm, { nombre: '', ruc: '', contactoNombre: '', telefono: '', correo: '', direccion: '' })
+  editingProviderId.value = null
+  rucHint.value = ''
+  telefonoHint.value = ''
+}
+function onRucInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const raw = (target.value || '').replace(/\D/g, '')
+  rucHint.value = raw.length > 13 ? 'Solo se permiten 13 dígitos' : ''
+  providerForm.ruc = raw.slice(0, 13)
+  target.value = providerForm.ruc
+}
+function onTelefonoInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const raw = (target.value || '').replace(/\D/g, '')
+  telefonoHint.value = raw.length > 10 ? 'Solo se permiten 10 dígitos' : ''
+  providerForm.telefono = raw.slice(0, 10)
+  target.value = providerForm.telefono
+}
+function openNewProvider() { clearMessages(); resetProviderForm(); showProviderForm.value = true }
+function openEditProvider(row: Row) {
+  clearMessages(); editingProviderId.value = rowId(row, 'proveedorId', 'proveedor_id', 'id')
+  Object.assign(providerForm, {
+    nombre: field(row, 'nombre') || '', ruc: field(row, 'ruc') || '',
+    contactoNombre: field(row, 'contactoNombre', 'contacto_nombre') || '', telefono: field(row, 'telefono') || '',
+    correo: field(row, 'correo') || '', direccion: field(row, 'direccion') || '',
+  })
+  showProviderForm.value = true
+}
+async function saveProvider() {
+  clearMessages(); saving.value = true
+  try {
+    const body = { ...providerForm }
+    if (editingProviderId.value) await api(`/api/proveedores/${editingProviderId.value}`, { method: 'PUT', body: JSON.stringify(body) })
+    else await api('/api/proveedores', { method: 'POST', body: JSON.stringify(body) })
+    notice.value = editingProviderId.value ? 'Proveedor actualizado.' : 'Proveedor creado correctamente.'
+    showProviderForm.value = false; await load()
+  } catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo guardar el proveedor.' }
+  finally { saving.value = false }
+}
+async function disableProvider(row: Row) {
+  askConfirm(`¿Desactivar a ${field(row, 'nombre') || 'este proveedor'}?`, () => doDisableProvider(row))
+}
+async function doDisableProvider(row: Row) {
+  clearMessages()
+  try { await api(`/api/proveedores/${rowId(row, 'proveedorId', 'proveedor_id', 'id')}`, { method: 'DELETE' }); notice.value = 'Proveedor desactivado.'; await load() }
+  catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo desactivar.' }
+}
+
+function resetOrderForm() {
+  Object.assign(orderForm, { proveedorId: Number(field(activeProviders.value[0] || {}, 'proveedorId', 'proveedor_id') || 0), fechaEsperada: '', detalle: [] })
+  Object.assign(orderLineDraft, { productoId: 0, cantidadPedida: 1, costoUnitario: 0 })
+}
+function openNewOrder() { clearMessages(); resetOrderForm(); showOrderForm.value = true }
+function addOrderLine() {
+  if (!orderLineDraft.productoId || orderLineDraft.cantidadPedida <= 0) return
+  orderForm.detalle.push({ productoId: Number(orderLineDraft.productoId), cantidadPedida: Number(orderLineDraft.cantidadPedida), costoUnitario: Number(orderLineDraft.costoUnitario) })
+  Object.assign(orderLineDraft, { productoId: 0, cantidadPedida: 1, costoUnitario: 0 })
+}
+function removeOrderLine(index: number) { orderForm.detalle.splice(index, 1) }
+async function saveOrder() {
+  clearMessages()
+  if (!orderForm.detalle.length) { error.value = 'Agrega al menos un producto a la orden.'; return }
+  saving.value = true
+  try {
+    const body = { proveedorId: Number(orderForm.proveedorId), fechaEsperada: orderForm.fechaEsperada || null, detalle: orderForm.detalle }
+    await api('/api/ordenes-compra', { method: 'POST', body: JSON.stringify(body) })
+    notice.value = 'Orden de compra creada.'
+    showOrderForm.value = false; await load()
+  } catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo crear la orden.' }
+  finally { saving.value = false }
+}
+async function sendOrder(row: Row) {
+  askConfirm('¿Enviar esta orden de compra al proveedor?', () => doSendOrder(row))
+}
+async function doSendOrder(row: Row) {
+  clearMessages()
+  try { await api(`/api/ordenes-compra/${rowId(row, 'ordenCompraId', 'orden_compra_id', 'id')}/enviar`, { method: 'POST' }); notice.value = 'Orden enviada.'; await load() }
+  catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo enviar la orden.' }
+}
+async function cancelOrder(row: Row) {
+  askConfirm('¿Cancelar esta orden de compra?', () => doCancelOrder(row))
+}
+async function doCancelOrder(row: Row) {
+  clearMessages()
+  try { await api(`/api/ordenes-compra/${rowId(row, 'ordenCompraId', 'orden_compra_id', 'id')}/cancelar`, { method: 'POST' }); notice.value = 'Orden cancelada.'; await load() }
+  catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo cancelar la orden.' }
+}
+function openReceive(row: Row) {
+  clearMessages(); showReceiveForm.value = rowId(row, 'ordenCompraId', 'orden_compra_id', 'id')
+  receiveLines.value = []; Object.assign(receiveDraft, { productoId: 0, cantidad: 1 })
+}
+function addReceiveLine() {
+  if (!receiveDraft.productoId || receiveDraft.cantidad <= 0) return
+  receiveLines.value.push({ productoId: Number(receiveDraft.productoId), cantidad: Number(receiveDraft.cantidad) })
+  Object.assign(receiveDraft, { productoId: 0, cantidad: 1 })
+}
+async function saveReceive() {
+  if (!showReceiveForm.value || !receiveLines.value.length) return
+  clearMessages(); saving.value = true
+  try {
+    const body: Record<number, number> = {}
+    receiveLines.value.forEach((line) => { body[line.productoId] = line.cantidad })
+    await api(`/api/ordenes-compra/${showReceiveForm.value}/recepcion`, { method: 'POST', body: JSON.stringify(body) })
+    notice.value = 'Recepción registrada.'
+    showReceiveForm.value = null; await load()
+  } catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo registrar la recepción.' }
+  finally { saving.value = false }
 }
 
 onMounted(load)
@@ -200,11 +359,11 @@ onMounted(load)
   <section class="admin-shell">
     <aside class="admin-sidebar">
       <div><p class="eyebrow">Administración</p><h1>TiendaTech</h1><p class="admin-user">{{ currentUser?.nombre }}<small>{{ currentUser?.usuario }}</small></p></div>
-      <nav><button :class="{active:section==='resumen'}" @click="section='resumen'">◈ Resumen</button><button :class="{active:section==='usuarios'}" @click="section='usuarios'">♙ Usuarios</button><button :class="{active:section==='productos'}" @click="section='productos'">◇ Productos</button><button :class="{active:section==='sistema'}" @click="section='sistema'">◎ Sistema CRDB</button></nav>
+      <nav><button :class="{active:section==='resumen'}" @click="section='resumen'">◈ Resumen</button><button :class="{active:section==='usuarios'}" @click="section='usuarios'">♙ Usuarios</button><button :class="{active:section==='productos'}" @click="section='productos'">◇ Productos</button><button :class="{active:section==='ventas'}" @click="section='ventas'">✦ Ventas</button><button :class="{active:section==='proveedores'}" @click="section='proveedores'">⚑ Proveedores</button><button :class="{active:section==='ordenes'}" @click="section='ordenes'">⇄ Órdenes a proveedores</button><button :class="{active:section==='sistema'}" @click="section='sistema'">◎ Sistema CRDB</button></nav>
       <RouterLink class="legacy-link" to="/">Volver a la tienda</RouterLink>
     </aside>
     <div class="admin-content">
-      <header class="admin-heading"><div><p class="eyebrow">Panel administrativo</p><h2>{{ section==='resumen'?'Vista general':section==='usuarios'?'Gestión de usuarios':section==='productos'?'Gestión de productos':'Entorno distribuido' }}</h2></div><button class="refresh" :disabled="loading" @click="load">↻ Actualizar</button></header>
+      <header class="admin-heading"><div><p class="eyebrow">Panel administrativo</p><h2>{{ section==='resumen'?'Vista general':section==='usuarios'?'Gestión de usuarios':section==='productos'?'Gestión de productos':section==='ventas'?'Facturación':section==='proveedores'?'Gestión de proveedores':section==='ordenes'?'Órdenes a proveedores':'Entorno distribuido' }}</h2></div><button class="refresh" :disabled="loading" @click="load">↻ Actualizar</button></header>
       <p v-if="error" class="alert">{{ error }}</p><p v-if="notice" class="admin-success">{{ notice }}</p><p v-if="loading" class="status">Consultando servicios CRDB…</p>
 
       <template v-else-if="section==='resumen'">
@@ -240,7 +399,36 @@ onMounted(load)
         <div class="admin-table-wrap"><table><thead><tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in products" :key="rowId(row,'producto_id','productoId','id')"><td>{{rowId(row,'producto_id','productoId','id')}}</td><td><strong>{{field(row,'nombre')}}</strong></td><td>${{Number(field(row,'preciounitario','precio')||0).toFixed(2)}}</td><td>{{field(row,'stock')??'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'habilitado')!==false}">{{field(row,'habilitado')===false?'Deshabilitado':'Activo'}}</span></td><td class="table-actions"><button @click="openEditProduct(row)">Editar</button><button class="danger" @click="disableProduct(row)">Deshabilitar</button></td></tr><tr v-if="!products.length"><td colspan="6" class="empty-cell">El catálogo está vacío. Puedes crear el primer producto.</td></tr></tbody></table></div>
       </template>
 
+      <template v-else-if="section==='ventas'">
+        <div class="admin-toolbar"><p>{{invoices.length}} facturas emitidas</p></div>
+        <div class="admin-table-wrap"><table><thead><tr><th>Número</th><th>Cliente</th><th>Fecha emisión</th><th>Total</th><th>Comprobante</th></tr></thead><tbody><tr v-for="row in invoices" :key="rowId(row,'facturaId','factura_id','id')"><td><strong>{{field(row,'numero')||'—'}}</strong></td><td>{{field(row,'nombre')||'—'}}</td><td>{{field(row,'fechaEmision','fecha_emision')||'—'}}</td><td>${{Number(field(row,'total')||0).toFixed(2)}}</td><td class="table-actions"><a :href="`/api/facturas/${rowId(row,'facturaId','factura_id','id')}/pdf`" target="_blank">Ver PDF</a></td></tr><tr v-if="!invoices.length"><td colspan="5" class="empty-cell">Aún no se han generado facturas.</td></tr></tbody></table></div>
+      </template>
+
+      <template v-else-if="section==='proveedores'">
+        <div class="admin-toolbar"><p>{{providers.length}} proveedores registrados</p><div class="toolbar-actions"><button class="button small" @click="openNewProvider">+ Crear proveedor</button></div></div>
+        <form v-if="showProviderForm" class="admin-editor" @submit.prevent="saveProvider"><header><div><p class="eyebrow">{{editingProviderId?'Editar':'Nuevo'}} proveedor</p><h3>{{editingProviderId?'Actualizar proveedor':'Crear proveedor'}}</h3></div><button type="button" class="icon-close" @click="showProviderForm=false">×</button></header><div class="admin-form-grid"><label>Nombre<input v-model="providerForm.nombre" required></label><label>RUC<small v-if="rucHint" style="color:#dc2626;font-weight:600;display:block;">{{rucHint}}</small><input :value="providerForm.ruc" @input="onRucInput" @blur="rucHint=''" inputmode="numeric" required></label><label>Contacto<input v-model="providerForm.contactoNombre"></label><label>Teléfono<small v-if="telefonoHint" style="color:#dc2626;font-weight:600;display:block;">{{telefonoHint}}</small><input :value="providerForm.telefono" @input="onTelefonoInput" @blur="telefonoHint=''" inputmode="numeric"></label><label>Correo<input v-model="providerForm.correo" type="email"></label><label class="wide">Dirección<input v-model="providerForm.direccion"></label></div><div class="editor-actions"><button type="button" class="secondary-button" @click="showProviderForm=false">Cancelar</button><button class="button small" :disabled="saving">{{saving?'Guardando…':'Guardar proveedor'}}</button></div></form>
+        <div class="admin-table-wrap"><table><thead><tr><th>Nombre</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in providers" :key="rowId(row,'proveedorId','proveedor_id','id')"><td><strong>{{field(row,'nombre')}}</strong></td><td>{{field(row,'ruc')||'—'}}</td><td>{{field(row,'contactoNombre','contacto_nombre')||'—'}}</td><td>{{field(row,'telefono')||'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'activo')!==false}">{{field(row,'activo')===false?'Inactivo':'Activo'}}</span></td><td class="table-actions"><button @click="openEditProvider(row)">Editar</button><button v-if="field(row,'activo')!==false" class="danger" @click="disableProvider(row)">Desactivar</button></td></tr><tr v-if="!providers.length"><td colspan="6" class="empty-cell">No hay proveedores registrados.</td></tr></tbody></table></div>
+      </template>
+
+      <template v-else-if="section==='ordenes'">
+        <div class="admin-toolbar"><div class="segmented"><button v-for="o in purchaseOrderStates" :key="o.id" :class="{active:purchaseOrderFilter===o.id}" @click="purchaseOrderFilter=o.id;filterOrders()">{{o.label}}</button></div><div class="toolbar-actions"><button class="button small" :disabled="!activeProviders.length" @click="openNewOrder">+ Crear orden</button></div></div>
+        <p v-if="!activeProviders.length" class="alert">Registra al menos un proveedor activo antes de crear órdenes de compra.</p>
+        <form v-if="showOrderForm" class="admin-editor" @submit.prevent="saveOrder"><header><div><p class="eyebrow">Nueva orden</p><h3>Crear orden de compra</h3></div><button type="button" class="icon-close" @click="showOrderForm=false">×</button></header><div class="admin-form-grid"><label>Proveedor<select v-model.number="orderForm.proveedorId"><option v-for="row in activeProviders" :key="rowId(row,'proveedorId','proveedor_id')" :value="rowId(row,'proveedorId','proveedor_id')">{{field(row,'nombre')}}</option></select></label><label>Fecha esperada<input v-model="orderForm.fechaEsperada" type="date"></label><fieldset class="wide"><legend>Productos</legend><div class="admin-form-grid"><label>Producto<select v-model.number="orderLineDraft.productoId"><option :value="0">Selecciona…</option><option v-for="row in products" :key="rowId(row,'producto_id','productoId','id')" :value="rowId(row,'producto_id','productoId','id')">{{field(row,'nombre')}}</option></select></label><label>Cantidad<input v-model.number="orderLineDraft.cantidadPedida" type="number" min="1"></label><label>Costo unitario<input v-model.number="orderLineDraft.costoUnitario" type="number" min="0" step="0.01"></label><button type="button" class="secondary-button" @click="addOrderLine">+ Agregar línea</button></div><table v-if="orderForm.detalle.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th><th>Costo</th><th></th></tr></thead><tbody><tr v-for="(line,index) in orderForm.detalle" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidadPedida}}</td><td>${{line.costoUnitario.toFixed(2)}}</td><td><button type="button" class="danger" @click="removeOrderLine(index)">Quitar</button></td></tr></tbody></table></fieldset></div><div class="editor-actions"><button type="button" class="secondary-button" @click="showOrderForm=false">Cancelar</button><button class="button small" :disabled="saving">{{saving?'Guardando…':'Crear orden'}}</button></div></form>
+        <div class="admin-table-wrap"><table><thead><tr><th>Número</th><th>Proveedor</th><th>Fecha esperada</th><th>Estado</th><th>Total</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in purchaseOrders" :key="rowId(row,'ordenCompraId','orden_compra_id','id')"><td><strong>{{field(row,'numeroOrden','numero_orden')||'—'}}</strong></td><td>{{field(providers.find(p=>rowId(p,'proveedorId','proveedor_id')===rowId(row,'proveedorId','proveedor_id'))||{},'nombre')||row.proveedorId}}</td><td>{{field(row,'fechaEsperada','fecha_esperada')||'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'estado')==='RECIBIDA'}">{{field(row,'estado')}}</span></td><td>${{Number(field(row,'total')||0).toFixed(2)}}</td><td class="table-actions"><button v-if="field(row,'estado')==='PENDIENTE'" @click="sendOrder(row)">Enviar</button><button v-if="['PENDIENTE','ENVIADA'].includes(String(field(row,'estado')))" class="danger" @click="cancelOrder(row)">Cancelar</button><button v-if="field(row,'estado')==='ENVIADA'" @click="openReceive(row)">Recibir</button></td></tr><tr v-if="!purchaseOrders.length"><td colspan="6" class="empty-cell">No hay órdenes de compra en este estado.</td></tr></tbody></table></div>
+        <form v-if="showReceiveForm" class="admin-editor" @submit.prevent="saveReceive"><header><div><p class="eyebrow">Orden #{{showReceiveForm}}</p><h3>Registrar recepción</h3></div><button type="button" class="icon-close" @click="showReceiveForm=null">×</button></header><div class="admin-form-grid"><label>Producto<select v-model.number="receiveDraft.productoId"><option :value="0">Selecciona…</option><option v-for="row in products" :key="rowId(row,'producto_id','productoId','id')" :value="rowId(row,'producto_id','productoId','id')">{{field(row,'nombre')}}</option></select></label><label>Cantidad recibida<input v-model.number="receiveDraft.cantidad" type="number" min="1"></label><button type="button" class="secondary-button" @click="addReceiveLine">+ Agregar</button></div><table v-if="receiveLines.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th></tr></thead><tbody><tr v-for="(line,index) in receiveLines" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidad}}</td></tr></tbody></table><div class="editor-actions"><button type="button" class="secondary-button" @click="showReceiveForm=null">Cancelar</button><button class="button small" :disabled="saving||!receiveLines.length">{{saving?'Guardando…':'Confirmar recepción'}}</button></div></form>
+      </template>
+
       <template v-else><div class="node-grid"><article v-for="node in [{name:'Nodo 1',port:8091},{name:'Nodo 2',port:8092},{name:'Nodo 3',port:8093}]" :key="node.port" class="admin-card"><span class="node-dot"></span><h3>{{node.name}}</h3><p>CockroachDB · Puerto {{node.port}}</p><a :href="`https://localhost:${node.port}`" target="_blank">Abrir consola ↗</a></article></div></template>
+    </div>
+
+    <div v-if="confirmDialog.show" @click.self="confirmNo" style="position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
+      <div style="background:#fff;border-radius:10px;padding:20px 22px;max-width:340px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,.25);">
+        <p style="margin:0 0 16px;font-size:.95rem;color:#1f2937;">{{confirmDialog.message}}</p>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" @click="confirmNo" style="padding:6px 14px;border-radius:6px;border:1px solid #d1d5db;background:#fff;cursor:pointer;">Cancelar</button>
+          <button type="button" @click="confirmYes" style="padding:6px 14px;border-radius:6px;border:none;background:#dc2626;color:#fff;cursor:pointer;">Confirmar</button>
+        </div>
+      </div>
     </div>
   </section>
 </template>

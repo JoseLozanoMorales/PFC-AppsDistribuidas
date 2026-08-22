@@ -5,6 +5,7 @@ import org.example.service.ProveedorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.dto.ProveedorResponseDTO;
+import jakarta.validation.Valid;
 
 import java.net.URI;
 import java.util.List;
@@ -22,14 +23,14 @@ public class ProveedorController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Integer>> crear(@RequestBody Proveedor proveedor) {
+    public ResponseEntity<Map<String, Integer>> crear(@Valid @RequestBody Proveedor proveedor) {
         Integer proveedorId = proveedorService.crear(proveedor);
         return ResponseEntity.created(URI.create("/api/proveedores/" + proveedorId))
                 .body(Map.of("proveedorId", proveedorId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> actualizar(@PathVariable Integer id, @RequestBody Proveedor proveedor) {
+    public ResponseEntity<Void> actualizar(@PathVariable Integer id, @Valid @RequestBody Proveedor proveedor) {
         proveedorService.actualizar(id, proveedor);
         return ResponseEntity.noContent().build();
     }
@@ -42,9 +43,12 @@ public class ProveedorController {
         return ResponseEntity.noContent().build();
     }
 
+    // Incluye inactivos: el panel de administracion necesita seguir listandolos
+    // (marcados como "Inactivo"), y el frontend filtra por "activo" donde corresponda
+    // (p.ej. al elegir proveedor para una nueva orden de compra).
     @GetMapping
-    public List<ProveedorResponseDTO> listarActivos() {
-        return proveedorService.listarActivos().stream()
+    public List<ProveedorResponseDTO> listarTodos() {
+        return proveedorService.listarTodos().stream()
                 .map(ProveedorResponseDTO::from)
                 .collect(Collectors.toList());
     }

@@ -4,10 +4,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -56,6 +58,18 @@ public class ApiExceptionHandler {
         HttpStatus status = PgErrorMapper.statusFor(ex);
         return ResponseEntity.status(status)
                 .body(Map.of("error", PgErrorMapper.messageFor(ex)));
+    }
+
+    // @Valid en el controller (Bean Validation sobre el body, ej. Proveedor.ruc).
+    // Debe ir explicito por la misma razon que ResponseStatusException: si no,
+    // el handler generico de Exception la convertiria en 500.
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        Map<String, String> campos = new LinkedHashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(err ->
+                campos.put(err.getField(), err.getDefaultMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Datos invalidos", "campos", campos));
     }
 
     // Validaciones hechas en Java (service/DTO), no en la BD.

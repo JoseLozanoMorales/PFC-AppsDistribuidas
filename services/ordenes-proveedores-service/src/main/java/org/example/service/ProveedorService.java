@@ -30,8 +30,8 @@ public class ProveedorService {
         proveedorRepository.desactivar(proveedorId);
     }
 
-    public List<Proveedor> listarActivos() {
-        return proveedorRepository.listarActivos();
+    public List<Proveedor> listarTodos() {
+        return proveedorRepository.listarTodos();
     }
 
     public Proveedor obtenerPorId(Integer proveedorId) {
