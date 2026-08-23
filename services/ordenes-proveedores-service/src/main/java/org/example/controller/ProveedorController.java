@@ -35,11 +35,17 @@ public class ProveedorController {
         return ResponseEntity.noContent().build();
     }
 
-    // Soft delete: sp_desactivar_proveedor solo pone activo = FALSE, no borra la fila
+    // Soft delete: solo pone activo = FALSE, no borra la fila
     // (las FK de orden_compra.proveedor_id la referencian).
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desactivar(@PathVariable Integer id) {
         proveedorService.desactivar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/activar")
+    public ResponseEntity<Void> activar(@PathVariable Integer id) {
+        proveedorService.activar(id);
         return ResponseEntity.noContent().build();
     }
 

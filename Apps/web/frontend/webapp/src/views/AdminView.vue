@@ -45,6 +45,13 @@ const editingProviderId = ref<number | null>(null)
 const providerForm = reactive({ nombre: '', ruc: '', contactoNombre: '', telefono: '', correo: '', direccion: '' })
 const rucHint = ref('')
 const telefonoHint = ref('')
+const showProviderPicker = ref(false)
+const providerPickerPage = ref(1)
+const providerPickerPageSize = 10
+const showProductPicker = ref(false)
+const productPickerPage = ref(1)
+const productPickerPageSize = 10
+const productPickerTarget = ref<'order' | 'receive'>('order')
 const confirmDialog = reactive<{ show: boolean; message: string; action: (() => void) | null }>({ show: false, message: '', action: null })
 function askConfirm(message: string, action: () => void) {
   confirmDialog.message = message
@@ -92,6 +99,34 @@ const filteredUsers = computed(() => {
 // La lista de proveedores conserva los inactivos (para mostrarlos en el panel),
 // pero al crear una orden de compra solo deben poder elegirse proveedores activos.
 const activeProviders = computed(() => providers.value.filter((row) => field(row, 'activo') !== false))
+const providerPickerPageCount = computed(() => Math.max(1, Math.ceil(activeProviders.value.length / providerPickerPageSize)))
+const providerPickerItems = computed(() => {
+  const start = (providerPickerPage.value - 1) * providerPickerPageSize
+  return activeProviders.value.slice(start, start + providerPickerPageSize)
+})
+const selectedProviderName = computed(() => field(providers.value.find((row) => rowId(row, 'proveedorId', 'proveedor_id') === orderForm.proveedorId) || {}, 'nombre'))
+function openProviderPicker() { providerPickerPage.value = 1; showProviderPicker.value = true }
+function pickProvider(row: Row) { orderForm.proveedorId = rowId(row, 'proveedorId', 'proveedor_id'); showProviderPicker.value = false }
+function providerPickerPrev() { if (providerPickerPage.value > 1) providerPickerPage.value-- }
+function providerPickerNext() { if (providerPickerPage.value < providerPickerPageCount.value) providerPickerPage.value++ }
+
+const productPickerPageCount = computed(() => Math.max(1, Math.ceil(products.value.length / productPickerPageSize)))
+const productPickerItems = computed(() => {
+  const start = (productPickerPage.value - 1) * productPickerPageSize
+  return products.value.slice(start, start + productPickerPageSize)
+})
+function selectedProductName(productoId: number) {
+  return field(products.value.find((row) => rowId(row, 'producto_id', 'productoId', 'id') === productoId) || {}, 'nombre')
+}
+function openProductPicker(target: 'order' | 'receive') { productPickerTarget.value = target; productPickerPage.value = 1; showProductPicker.value = true }
+function pickProduct(row: Row) {
+  const id = rowId(row, 'producto_id', 'productoId', 'id')
+  if (productPickerTarget.value === 'order') orderLineDraft.productoId = id
+  else receiveDraft.productoId = id
+  showProductPicker.value = false
+}
+function productPickerPrev() { if (productPickerPage.value > 1) productPickerPage.value-- }
+function productPickerNext() { if (productPickerPage.value < productPickerPageCount.value) productPickerPage.value++ }
 
 async function safeList(path: string): Promise<Row[]> {
   try { const data = await api<Row[]>(path); return Array.isArray(data) ? data : [] } catch { return [] }
@@ -290,6 +325,11 @@ async function doDisableProvider(row: Row) {
   try { await api(`/api/proveedores/${rowId(row, 'proveedorId', 'proveedor_id', 'id')}`, { method: 'DELETE' }); notice.value = 'Proveedor desactivado.'; await load() }
   catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo desactivar.' }
 }
+async function activateProvider(row: Row) {
+  clearMessages()
+  try { await api(`/api/proveedores/${rowId(row, 'proveedorId', 'proveedor_id', 'id')}/activar`, { method: 'PUT' }); notice.value = 'Proveedor activado.'; await load() }
+  catch (cause) { error.value = cause instanceof Error ? cause.message : 'No se pudo activar.' }
+}
 
 function resetOrderForm() {
   Object.assign(orderForm, { proveedorId: Number(field(activeProviders.value[0] || {}, 'proveedorId', 'proveedor_id') || 0), fechaEsperada: '', detalle: [] })
@@ -407,15 +447,15 @@ onMounted(load)
       <template v-else-if="section==='proveedores'">
         <div class="admin-toolbar"><p>{{providers.length}} proveedores registrados</p><div class="toolbar-actions"><button class="button small" @click="openNewProvider">+ Crear proveedor</button></div></div>
         <form v-if="showProviderForm" class="admin-editor" @submit.prevent="saveProvider"><header><div><p class="eyebrow">{{editingProviderId?'Editar':'Nuevo'}} proveedor</p><h3>{{editingProviderId?'Actualizar proveedor':'Crear proveedor'}}</h3></div><button type="button" class="icon-close" @click="showProviderForm=false">×</button></header><div class="admin-form-grid"><label>Nombre<input v-model="providerForm.nombre" required></label><label>RUC<small v-if="rucHint" style="color:#dc2626;font-weight:600;display:block;">{{rucHint}}</small><input :value="providerForm.ruc" @input="onRucInput" @blur="rucHint=''" inputmode="numeric" required></label><label>Contacto<input v-model="providerForm.contactoNombre"></label><label>Teléfono<small v-if="telefonoHint" style="color:#dc2626;font-weight:600;display:block;">{{telefonoHint}}</small><input :value="providerForm.telefono" @input="onTelefonoInput" @blur="telefonoHint=''" inputmode="numeric"></label><label>Correo<input v-model="providerForm.correo" type="email"></label><label class="wide">Dirección<input v-model="providerForm.direccion"></label></div><div class="editor-actions"><button type="button" class="secondary-button" @click="showProviderForm=false">Cancelar</button><button class="button small" :disabled="saving">{{saving?'Guardando…':'Guardar proveedor'}}</button></div></form>
-        <div class="admin-table-wrap"><table><thead><tr><th>Nombre</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in providers" :key="rowId(row,'proveedorId','proveedor_id','id')"><td><strong>{{field(row,'nombre')}}</strong></td><td>{{field(row,'ruc')||'—'}}</td><td>{{field(row,'contactoNombre','contacto_nombre')||'—'}}</td><td>{{field(row,'telefono')||'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'activo')!==false}">{{field(row,'activo')===false?'Inactivo':'Activo'}}</span></td><td class="table-actions"><button @click="openEditProvider(row)">Editar</button><button v-if="field(row,'activo')!==false" class="danger" @click="disableProvider(row)">Desactivar</button></td></tr><tr v-if="!providers.length"><td colspan="6" class="empty-cell">No hay proveedores registrados.</td></tr></tbody></table></div>
+        <div class="admin-table-wrap"><table><thead><tr><th>Nombre</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in providers" :key="rowId(row,'proveedorId','proveedor_id','id')"><td><strong>{{field(row,'nombre')}}</strong></td><td>{{field(row,'ruc')||'—'}}</td><td>{{field(row,'contactoNombre','contacto_nombre')||'—'}}</td><td>{{field(row,'telefono')||'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'activo')!==false}">{{field(row,'activo')===false?'Inactivo':'Activo'}}</span></td><td class="table-actions"><button @click="openEditProvider(row)">Editar</button><button v-if="field(row,'activo')!==false" class="danger" @click="disableProvider(row)">Desactivar</button><button v-else @click="activateProvider(row)">Activar</button></td></tr><tr v-if="!providers.length"><td colspan="6" class="empty-cell">No hay proveedores registrados.</td></tr></tbody></table></div>
       </template>
 
       <template v-else-if="section==='ordenes'">
         <div class="admin-toolbar"><div class="segmented"><button v-for="o in purchaseOrderStates" :key="o.id" :class="{active:purchaseOrderFilter===o.id}" @click="purchaseOrderFilter=o.id;filterOrders()">{{o.label}}</button></div><div class="toolbar-actions"><button class="button small" :disabled="!activeProviders.length" @click="openNewOrder">+ Crear orden</button></div></div>
         <p v-if="!activeProviders.length" class="alert">Registra al menos un proveedor activo antes de crear órdenes de compra.</p>
-        <form v-if="showOrderForm" class="admin-editor" @submit.prevent="saveOrder"><header><div><p class="eyebrow">Nueva orden</p><h3>Crear orden de compra</h3></div><button type="button" class="icon-close" @click="showOrderForm=false">×</button></header><div class="admin-form-grid"><label>Proveedor<select v-model.number="orderForm.proveedorId"><option v-for="row in activeProviders" :key="rowId(row,'proveedorId','proveedor_id')" :value="rowId(row,'proveedorId','proveedor_id')">{{field(row,'nombre')}}</option></select></label><label>Fecha esperada<input v-model="orderForm.fechaEsperada" type="date"></label><fieldset class="wide"><legend>Productos</legend><div class="admin-form-grid"><label>Producto<select v-model.number="orderLineDraft.productoId"><option :value="0">Selecciona…</option><option v-for="row in products" :key="rowId(row,'producto_id','productoId','id')" :value="rowId(row,'producto_id','productoId','id')">{{field(row,'nombre')}}</option></select></label><label>Cantidad<input v-model.number="orderLineDraft.cantidadPedida" type="number" min="1"></label><label>Costo unitario<input v-model.number="orderLineDraft.costoUnitario" type="number" min="0" step="0.01"></label><button type="button" class="secondary-button" @click="addOrderLine">+ Agregar línea</button></div><table v-if="orderForm.detalle.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th><th>Costo</th><th></th></tr></thead><tbody><tr v-for="(line,index) in orderForm.detalle" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidadPedida}}</td><td>${{line.costoUnitario.toFixed(2)}}</td><td><button type="button" class="danger" @click="removeOrderLine(index)">Quitar</button></td></tr></tbody></table></fieldset></div><div class="editor-actions"><button type="button" class="secondary-button" @click="showOrderForm=false">Cancelar</button><button class="button small" :disabled="saving">{{saving?'Guardando…':'Crear orden'}}</button></div></form>
+        <form v-if="showOrderForm" class="admin-editor" @submit.prevent="saveOrder"><header><div><p class="eyebrow">Nueva orden</p><h3>Crear orden de compra</h3></div><button type="button" class="icon-close" @click="showOrderForm=false">×</button></header><div class="admin-form-grid"><label>Proveedor<button type="button" class="secondary-button" style="display:block;width:100%;text-align:left;" @click="openProviderPicker">{{selectedProviderName || 'Selecciona un proveedor…'}}</button></label><label>Fecha esperada<input v-model="orderForm.fechaEsperada" type="date"></label><fieldset class="wide"><legend>Productos</legend><div class="admin-form-grid"><label>Producto<button type="button" class="secondary-button" style="display:block;width:100%;text-align:left;" @click="openProductPicker('order')">{{selectedProductName(orderLineDraft.productoId) || 'Selecciona un producto…'}}</button></label><label>Cantidad<input v-model.number="orderLineDraft.cantidadPedida" type="number" min="1"></label><label>Costo unitario<input v-model.number="orderLineDraft.costoUnitario" type="number" min="0" step="0.01"></label><button type="button" class="secondary-button" @click="addOrderLine">+ Agregar línea</button></div><table v-if="orderForm.detalle.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th><th>Costo</th><th></th></tr></thead><tbody><tr v-for="(line,index) in orderForm.detalle" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidadPedida}}</td><td>${{line.costoUnitario.toFixed(2)}}</td><td><button type="button" class="danger" @click="removeOrderLine(index)">Quitar</button></td></tr></tbody></table></fieldset></div><div class="editor-actions"><button type="button" class="secondary-button" @click="showOrderForm=false">Cancelar</button><button class="button small" :disabled="saving">{{saving?'Guardando…':'Crear orden'}}</button></div></form>
         <div class="admin-table-wrap"><table><thead><tr><th>Número</th><th>Proveedor</th><th>Fecha esperada</th><th>Estado</th><th>Total</th><th>Acciones</th></tr></thead><tbody><tr v-for="row in purchaseOrders" :key="rowId(row,'ordenCompraId','orden_compra_id','id')"><td><strong>{{field(row,'numeroOrden','numero_orden')||'—'}}</strong></td><td>{{field(providers.find(p=>rowId(p,'proveedorId','proveedor_id')===rowId(row,'proveedorId','proveedor_id'))||{},'nombre')||row.proveedorId}}</td><td>{{field(row,'fechaEsperada','fecha_esperada')||'—'}}</td><td><span class="state-pill" :class="{ok:field(row,'estado')==='RECIBIDA'}">{{field(row,'estado')}}</span></td><td>${{Number(field(row,'total')||0).toFixed(2)}}</td><td class="table-actions"><button v-if="field(row,'estado')==='PENDIENTE'" @click="sendOrder(row)">Enviar</button><button v-if="['PENDIENTE','ENVIADA'].includes(String(field(row,'estado')))" class="danger" @click="cancelOrder(row)">Cancelar</button><button v-if="field(row,'estado')==='ENVIADA'" @click="openReceive(row)">Recibir</button></td></tr><tr v-if="!purchaseOrders.length"><td colspan="6" class="empty-cell">No hay órdenes de compra en este estado.</td></tr></tbody></table></div>
-        <form v-if="showReceiveForm" class="admin-editor" @submit.prevent="saveReceive"><header><div><p class="eyebrow">Orden #{{showReceiveForm}}</p><h3>Registrar recepción</h3></div><button type="button" class="icon-close" @click="showReceiveForm=null">×</button></header><div class="admin-form-grid"><label>Producto<select v-model.number="receiveDraft.productoId"><option :value="0">Selecciona…</option><option v-for="row in products" :key="rowId(row,'producto_id','productoId','id')" :value="rowId(row,'producto_id','productoId','id')">{{field(row,'nombre')}}</option></select></label><label>Cantidad recibida<input v-model.number="receiveDraft.cantidad" type="number" min="1"></label><button type="button" class="secondary-button" @click="addReceiveLine">+ Agregar</button></div><table v-if="receiveLines.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th></tr></thead><tbody><tr v-for="(line,index) in receiveLines" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidad}}</td></tr></tbody></table><div class="editor-actions"><button type="button" class="secondary-button" @click="showReceiveForm=null">Cancelar</button><button class="button small" :disabled="saving||!receiveLines.length">{{saving?'Guardando…':'Confirmar recepción'}}</button></div></form>
+        <form v-if="showReceiveForm" class="admin-editor" @submit.prevent="saveReceive"><header><div><p class="eyebrow">Orden #{{showReceiveForm}}</p><h3>Registrar recepción</h3></div><button type="button" class="icon-close" @click="showReceiveForm=null">×</button></header><div class="admin-form-grid"><label>Producto<button type="button" class="secondary-button" style="display:block;width:100%;text-align:left;" @click="openProductPicker('receive')">{{selectedProductName(receiveDraft.productoId) || 'Selecciona un producto…'}}</button></label><label>Cantidad recibida<input v-model.number="receiveDraft.cantidad" type="number" min="1"></label><button type="button" class="secondary-button" @click="addReceiveLine">+ Agregar</button></div><table v-if="receiveLines.length" class="wide"><thead><tr><th>Producto</th><th>Cantidad</th></tr></thead><tbody><tr v-for="(line,index) in receiveLines" :key="index"><td>{{field(products.find(p=>rowId(p,'producto_id','productoId','id')===line.productoId)||{},'nombre')||line.productoId}}</td><td>{{line.cantidad}}</td></tr></tbody></table><div class="editor-actions"><button type="button" class="secondary-button" @click="showReceiveForm=null">Cancelar</button><button class="button small" :disabled="saving||!receiveLines.length">{{saving?'Guardando…':'Confirmar recepción'}}</button></div></form>
       </template>
 
       <template v-else><div class="node-grid"><article v-for="node in [{name:'Nodo 1',port:8091},{name:'Nodo 2',port:8092},{name:'Nodo 3',port:8093}]" :key="node.port" class="admin-card"><span class="node-dot"></span><h3>{{node.name}}</h3><p>CockroachDB · Puerto {{node.port}}</p><a :href="`https://localhost:${node.port}`" target="_blank">Abrir consola ↗</a></article></div></template>
@@ -427,6 +467,82 @@ onMounted(load)
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" @click="confirmNo" style="padding:6px 14px;border-radius:6px;border:1px solid #d1d5db;background:#fff;cursor:pointer;">Cancelar</button>
           <button type="button" @click="confirmYes" style="padding:6px 14px;border-radius:6px;border:none;background:#dc2626;color:#fff;cursor:pointer;">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showProviderPicker" @click.self="showProviderPicker=false" style="position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
+      <div style="background:#fff;border-radius:10px;padding:20px 22px;max-width:560px;width:90%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.25);">
+        <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;font-size:1.05rem;">Selecciona un proveedor</h3>
+          <button type="button" class="icon-close" @click="showProviderPicker=false">×</button>
+        </header>
+        <div style="overflow-y:auto;flex:1;">
+          <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:.85rem;">
+            <colgroup><col style="width:26%"><col style="width:16%"><col style="width:20%"><col style="width:22%"><col style="width:16%"></colgroup>
+            <thead>
+              <tr style="border-bottom:2px solid #e5e7eb;text-align:left;font-size:.78rem;color:#6b7280;">
+                <th style="padding:6px 4px;">Nombre</th>
+                <th style="padding:6px 4px;">RUC</th>
+                <th style="padding:6px 4px;">Contacto</th>
+                <th style="padding:6px 4px;">Dirección</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in providerPickerItems" :key="rowId(row,'proveedorId','proveedor_id')" style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:8px 4px;word-break:break-word;">{{field(row,'nombre')}}</td>
+                <td style="padding:8px 4px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{field(row,'ruc')||'—'}}</td>
+                <td style="padding:8px 4px;color:#6b7280;word-break:break-word;">{{field(row,'contactoNombre','contacto_nombre')||'—'}}</td>
+                <td style="padding:8px 4px;color:#6b7280;word-break:break-word;">{{field(row,'direccion')||'—'}}</td>
+                <td style="padding:8px 4px;text-align:right;"><button type="button" class="button small" style="font-size:.8rem;padding:4px 8px;white-space:nowrap;" @click="pickProvider(row)">Elegir</button></td>
+              </tr>
+              <tr v-if="!providerPickerItems.length"><td colspan="5" class="empty-cell" style="padding:16px 4px;">No hay proveedores activos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="activeProviders.length > providerPickerPageSize" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px;">
+          <button type="button" class="secondary-button" :disabled="providerPickerPage===1" @click="providerPickerPrev">‹ Anterior</button>
+          <span style="font-size:.9rem;color:#6b7280;">Página {{providerPickerPage}} de {{providerPickerPageCount}}</span>
+          <button type="button" class="secondary-button" :disabled="providerPickerPage===providerPickerPageCount" @click="providerPickerNext">Siguiente ›</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showProductPicker" @click.self="showProductPicker=false" style="position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
+      <div style="background:#fff;border-radius:10px;padding:20px 22px;max-width:560px;width:90%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,.25);">
+        <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;font-size:1.05rem;">Selecciona un producto</h3>
+          <button type="button" class="icon-close" @click="showProductPicker=false">×</button>
+        </header>
+        <div style="overflow-y:auto;flex:1;">
+          <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:.85rem;">
+            <colgroup><col style="width:40%"><col style="width:16%"><col style="width:16%"><col style="width:12%"><col style="width:16%"></colgroup>
+            <thead>
+              <tr style="border-bottom:2px solid #e5e7eb;text-align:left;font-size:.78rem;color:#6b7280;">
+                <th style="padding:6px 4px;">Nombre</th>
+                <th style="padding:6px 4px;">Precio</th>
+                <th style="padding:6px 4px;">Costo</th>
+                <th style="padding:6px 4px;">Stock</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in productPickerItems" :key="rowId(row,'producto_id','productoId','id')" style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:8px 4px;word-break:break-word;">{{field(row,'nombre')}}</td>
+                <td style="padding:8px 4px;color:#6b7280;white-space:nowrap;">${{Number(field(row,'preciounitario','precio')||0).toFixed(2)}}</td>
+                <td style="padding:8px 4px;color:#6b7280;white-space:nowrap;">${{Number(field(row,'costo')||0).toFixed(2)}}</td>
+                <td style="padding:8px 4px;color:#6b7280;">{{field(row,'stock')??'—'}}</td>
+                <td style="padding:8px 4px;text-align:right;"><button type="button" class="button small" style="font-size:.8rem;padding:4px 8px;white-space:nowrap;" @click="pickProduct(row)">Elegir</button></td>
+              </tr>
+              <tr v-if="!productPickerItems.length"><td colspan="5" class="empty-cell" style="padding:16px 4px;">No hay productos.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-if="products.length > productPickerPageSize" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px;">
+          <button type="button" class="secondary-button" :disabled="productPickerPage===1" @click="productPickerPrev">‹ Anterior</button>
+          <span style="font-size:.9rem;color:#6b7280;">Página {{productPickerPage}} de {{productPickerPageCount}}</span>
+          <button type="button" class="secondary-button" :disabled="productPickerPage===productPickerPageCount" @click="productPickerNext">Siguiente ›</button>
         </div>
       </div>
     </div>

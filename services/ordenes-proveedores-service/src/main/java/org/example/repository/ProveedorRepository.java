@@ -41,6 +41,11 @@ public class ProveedorRepository {
                 proveedorId), proveedorId);
     }
 
+    public void activar(Integer proveedorId) {
+        requireOne(jdbcTemplate.update("UPDATE ordenes_proveedores.proveedor SET activo=true WHERE proveedor_id=?",
+                proveedorId), proveedorId);
+    }
+
     // Devuelve todos los proveedores (activos e inactivos): la lista de administracion
     // de proveedores debe seguir mostrando los desactivados, solo que marcados como
     // "Inactivo". El filtro a solo-activos se hace en el select de creacion de ordenes.
