@@ -31,9 +31,27 @@ public final class PgErrorMapper {
     public static String messageFor(Throwable ex) {
         PSQLException pg = findPsqlException(ex);
         if (pg != null && pg.getServerErrorMessage() != null) {
+            String sqlState = pg.getServerErrorMessage().getSQLState();
+            if ("23505".equals(sqlState)) {
+                return friendlyDuplicateMessage(pg.getServerErrorMessage().getConstraint());
+            }
             return pg.getServerErrorMessage().getMessage();
         }
         return ex.getMessage();
+    }
+
+    // 23505 = unique_violation. El mensaje crudo de Postgres/CockroachDB expone el nombre
+    // de la constraint y detalles internos de la tabla -- no es apto para mostrarlo tal cual
+    // en la UI. Lo traducimos segun la constraint que fallo.
+    private static String friendlyDuplicateMessage(String constraint) {
+        if (constraint == null) {
+            return "Ya existe un registro con esos datos.";
+        }
+        return switch (constraint) {
+            case "uq_proveedor_ruc" -> "Ya existe un proveedor registrado con ese RUC.";
+            case "uq_proveedor_nombre" -> "Ya existe un proveedor registrado con ese nombre.";
+            default -> "Ya existe un registro con esos datos.";
+        };
     }
 
     private static PSQLException findPsqlException(Throwable ex) {
