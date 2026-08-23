@@ -26,7 +26,8 @@ class ProductoResumenResponseTest {
                 3L,
                 4L,
                 new BigDecimal("90.00"),
-                true);
+                true,
+                27L);
 
         JsonNode json = objectMapper.valueToTree(response);
 
@@ -35,6 +36,7 @@ class ProductoResumenResponseTest {
         assertThat(json.get("iva_id").asLong()).isEqualTo(4L);
         assertThat(json.get("stock").asInt()).isEqualTo(8);
         assertThat(json.get("habilitado").asBoolean()).isTrue();
+        assertThat(json.get("galeria_id").asLong()).isEqualTo(27L);
         assertThat(json.has("productoId")).isFalse();
     }
 }

@@ -1,6 +1,6 @@
 # TiendaTech Webapp
 
-Nueva interfaz de TiendaTech construida con Vue 3, TypeScript y Vite. Convive con las páginas HTML existentes y se publica bajo `/app/`.
+Nueva interfaz de TiendaTech construida con React 18, TypeScript y Vite. Convive con las páginas HTML existentes y se publica bajo `/app/`.
 
 ## Desarrollo
 
@@ -19,4 +19,4 @@ Vite abre la aplicación en `http://localhost:5173` y redirige las solicitudes `
 npm run build
 ```
 
-El contenedor del módulo `frontend` ejecuta este paso automáticamente y empaqueta el resultado en la aplicación Spring Boot. La interfaz queda disponible en `http://localhost:8080/app/`.
+Los contenedores `frontend` y `frontend-crdb` ejecutan este paso automáticamente y empaquetan el resultado en la aplicación Spring Boot. En el entorno distribuido la interfaz queda disponible en `http://localhost:8180/app/`.

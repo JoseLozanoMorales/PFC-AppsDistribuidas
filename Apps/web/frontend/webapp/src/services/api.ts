@@ -1,4 +1,4 @@
-import { clearSession, getUser, token } from './session'
+import { clearSession, getUser, saveToken, token } from './session'
 
 // Shape comun de los endpoints de listado paginados (pedidos-service:
 // PageResponse<T> -- content/page/size/totalElements/totalPages). Los
@@ -17,6 +17,23 @@ export class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message)
   }
+}
+
+let refreshInFlight: Promise<string> | null = null
+
+async function renewAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = fetch('/auth/refresh', { method: 'POST', credentials: 'include' })
+      .then(async (response) => {
+        if (!response.ok) throw new ApiError('La sesión expiró.', response.status)
+        const data = await response.json() as { access?: string }
+        if (!data.access) throw new ApiError('No se recibió un nuevo token.', 401)
+        saveToken(data.access)
+        return data.access
+      })
+      .finally(() => { refreshInFlight = null })
+  }
+  return refreshInFlight
 }
 
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -40,6 +57,15 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     throw new ApiError('No se pudo conectar con el servidor.', 0)
   }
 
+  if (response.status === 401 && path !== '/api/login' && path !== '/auth/refresh') {
+    try {
+      const renewedToken = await renewAccessToken()
+      headers.set('Authorization', `Bearer ${renewedToken}`)
+      response = await fetch(path, { ...options, headers, credentials: 'include' })
+    } catch {
+      clearSession()
+    }
+  }
   if (response.status === 401) clearSession()
   const text = await response.text()
   let body: unknown = null

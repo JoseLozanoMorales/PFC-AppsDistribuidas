@@ -10,6 +10,8 @@ export interface SessionUser {
 }
 
 const USER_KEYS = ['tt_user', 'user', 'usuario', 'currentUser']
+const LAST_ACTIVITY_KEY = 'tt_last_activity'
+export const SESSION_CLEARED_EVENT = 'tt-session-cleared'
 
 export function getUser(): SessionUser | null {
   for (const key of USER_KEYS) {
@@ -28,7 +30,13 @@ export function getUser(): SessionUser | null {
 export function saveSession(user: SessionUser, token?: string): void {
   sessionStorage.setItem('user', JSON.stringify(user))
   sessionStorage.setItem('tt_user', JSON.stringify(user))
-  if (token) localStorage.setItem('token', token)
+  if (token) saveToken(token)
+  markSessionActivity()
+}
+
+export function saveToken(value: string): void {
+  localStorage.setItem('token', value)
+  localStorage.setItem('access', value)
 }
 
 export function clearSession(): void {
@@ -40,6 +48,16 @@ export function clearSession(): void {
     sessionStorage.removeItem(key)
     localStorage.removeItem(key)
   })
+  localStorage.removeItem(LAST_ACTIVITY_KEY)
+  window.dispatchEvent(new Event(SESSION_CLEARED_EVENT))
+}
+
+export function markSessionActivity(): void {
+  localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()))
+}
+
+export function lastSessionActivity(): number {
+  return Number(localStorage.getItem(LAST_ACTIVITY_KEY)) || Date.now()
 }
 
 export function token(): string {

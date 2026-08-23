@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.Normalizer;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,8 +32,12 @@ public class ProductoService {
         int safeSize = Math.min(Math.max(size, 1), 200);
         return jdbc.query("""
                 select producto_id, nombre, preciounitario, enlace, fecha, stock,
-                       marca_id, gama_id, iva_id, costo, habilitado
-                from productos.producto
+                       marca_id, gama_id, iva_id, costo, habilitado,
+                       (SELECT g.galeria_id FROM productos.galeria_productos_v2 g
+                        WHERE g.producto_id = p.producto_id AND g.habilitado
+                        ORDER BY g.es_portada DESC, g.para_menu DESC,
+                                 g.posicion_galeria, g.galeria_id LIMIT 1) AS galeria_id
+                from productos.producto p
                 order by producto_id
                 limit ? offset ?
                 """,
@@ -47,7 +52,8 @@ public class ProductoService {
                         nullableLong(rs.getObject("gama_id")),
                         nullableLong(rs.getObject("iva_id")),
                         rs.getBigDecimal("costo"),
-                        rs.getBoolean("habilitado")),
+                        rs.getBoolean("habilitado"),
+                        nullableLong(rs.getObject("galeria_id"))),
                 safeSize, safePage * safeSize);
     }
 
@@ -232,16 +238,31 @@ public class ProductoService {
         String mime = file.getContentType() == null ? "application/octet-stream" : file.getContentType();
         if (!mime.startsWith("image/")) throw new IllegalArgumentException("Solo se permiten imágenes");
         if (file.getSize() > 8L * 1024 * 1024) throw new IllegalArgumentException("La imagen supera 8 MB");
+        byte[] content = file.getBytes();
+        byte[] hash = MessageDigest.getInstance("SHA-256").digest(content);
+        List<Long> existing = jdbc.queryForList("""
+                SELECT galeria_id FROM productos.galeria_productos_v2
+                WHERE producto_id=? AND habilitado AND (hash_sha256=? OR contenido=?)
+                ORDER BY galeria_id LIMIT 1
+                """, Long.class, productoId, hash, content);
+        if (!existing.isEmpty()) {
+            Long existingId = existing.get(0);
+            if (portada) {
+                jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false, para_menu=false WHERE producto_id=?", productoId);
+                jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=true, para_menu=true WHERE galeria_id=?", existingId);
+            }
+            return existingId;
+        }
         if (portada) jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false WHERE producto_id=?", productoId);
         return jdbc.queryForObject("""
                 INSERT INTO productos.galeria_productos_v2
                     (producto_id, descripcion, habilitado, es_portada, para_galeria, para_menu,
-                     posicion_galeria, mime_type, peso_bytes, contenido)
+                     posicion_galeria, mime_type, peso_bytes, hash_sha256, contenido)
                 VALUES (?, ?, true, ?, true, ?,
                         COALESCE((SELECT max(posicion_galeria) + 1 FROM productos.galeria_productos_v2 WHERE producto_id=?), 1),
-                        ?, ?, ?) RETURNING galeria_id
+                        ?, ?, ?, ?) RETURNING galeria_id
                 """, Long.class, productoId, descripcion, portada, portada, productoId,
-                mime, file.getSize(), file.getBytes());
+                mime, file.getSize(), hash, content);
     }
 
     @Transactional
@@ -320,7 +341,11 @@ public class ProductoService {
                        p.fecha, p.stock, p.marca_id, m.nombre AS marca,
                        p.gama_id, g.tipo_gama AS gama, p.iva_id, i.porcentaje AS iva,
                        p.costo, p.habilitado, p.categoria_id,
-                       c.nombre AS categoria, p.valor_inventario, p.atributos
+                       c.nombre AS categoria, p.valor_inventario, p.atributos,
+                       (SELECT image.galeria_id FROM productos.galeria_productos_v2 image
+                        WHERE image.producto_id = p.producto_id AND image.habilitado
+                        ORDER BY image.es_portada DESC, image.para_menu DESC,
+                                 image.posicion_galeria, image.galeria_id LIMIT 1) AS galeria_id
                 FROM productos.producto p
                 JOIN productos.marca m ON m.marca_id = p.marca_id
                 LEFT JOIN productos.gama g ON g.gama_id = p.gama_id

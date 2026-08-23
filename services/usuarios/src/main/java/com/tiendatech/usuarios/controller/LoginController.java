@@ -2,13 +2,18 @@
 package com.tiendatech.usuarios.controller;
 
 import com.tiendatech.usuarios.model.Usuario;
-import com.tiendatech.usuarios.security.JwtUtil;
 import com.tiendatech.usuarios.service.UsuarioService;
+import com.tiendatech.usuarios.service.auth.RefreshTokenService;
 import com.tiendatech.usuarios.service.audit.UsuarioAuditoriaService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 @RestController
@@ -22,13 +27,14 @@ public class LoginController {
     private UsuarioAuditoriaService usuarioAuditoriaService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private RefreshTokenService refreshTokenService;
 
-    @Value("${auth.access.minutes:10}")
-    private int accessMinutes;
+    @Value("${auth.cookie.domain:}") private String cookieDomain;
+    @Value("${auth.cookie.secure:false}") private boolean cookieSecure;
+    @Value("${auth.cookie.samesite:Lax}") private String cookieSameSite;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body, HttpServletResponse response) {
         String usuario = body.get("usuario");
         String contrasenia = body.get("contrasena");
 
@@ -50,18 +56,31 @@ public class LoginController {
                 "telefono",  u.getTelefono(),
                 "id_rol",    u.getIdRol()
         );
-        String accessToken = jwtUtil.generateAccess(
+        var tokens = refreshTokenService.issueOnLogin(
                 u.getUsuarioId(),
                 u.getUsuario(),
-                roleName(rol),
-                accessMinutes
+                roleName(rol)
         );
+        writeRefreshCookie(response, tokens.refreshJwt(), tokens.absExp());
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "user", userPayload,
-                "token", accessToken,
-                "access", accessToken
+                "token", tokens.access(),
+                "access", tokens.access()
         ));
+    }
+
+    private void writeRefreshCookie(HttpServletResponse response, String jwt, Instant absoluteExpiration) {
+        ResponseCookie.ResponseCookieBuilder cookie = ResponseCookie.from("refresh", jwt)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite(cookieSameSite)
+                .path("/")
+                .maxAge(Duration.between(Instant.now(), absoluteExpiration));
+        if (cookieDomain != null && !cookieDomain.isBlank()) {
+            cookie.domain(cookieDomain);
+        }
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.build().toString());
     }
 
     private String roleName(int rol) {

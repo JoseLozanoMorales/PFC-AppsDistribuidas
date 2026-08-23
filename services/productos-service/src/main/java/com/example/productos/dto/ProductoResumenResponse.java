@@ -16,5 +16,6 @@ public record ProductoResumenResponse(
         @JsonProperty("gama_id") Long gamaId,
         @JsonProperty("iva_id") Long ivaId,
         BigDecimal costo,
-        Boolean habilitado) {
+        Boolean habilitado,
+        @JsonProperty("galeria_id") Long galeriaId) {
 }

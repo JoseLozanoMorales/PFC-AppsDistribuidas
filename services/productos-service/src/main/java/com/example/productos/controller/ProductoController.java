@@ -56,7 +56,7 @@ public class ProductoController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
-    @PatchMapping("/api/productos/{id}/galeria/orden")
+    @RequestMapping(path = "/api/productos/{id}/galeria/orden", method = {RequestMethod.PATCH, RequestMethod.POST})
     public ResponseEntity<Map<String, Boolean>> ordenarGaleria(@PathVariable Integer id,
                                                                @RequestBody Map<String, List<Integer>> body) {
         service.ordenarGaleria(id, body.getOrDefault("ids", List.of()));
