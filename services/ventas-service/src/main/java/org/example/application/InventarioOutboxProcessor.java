@@ -2,8 +2,8 @@ package org.example.application;
 
 import org.example.domain.FacturaDetalle;
 import org.example.domain.FacturaStore;
-import org.example.infrastructure.client.InventarioClient;
-import org.example.infrastructure.persistence.FacturaOutboxRepository;
+import org.example.domain.FacturaOutboxStore;
+import org.example.domain.InventarioPort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +15,13 @@ public class InventarioOutboxProcessor {
     private static final int MAX_INTENTOS = 5;
     private static final int LOTE = 20;
 
-    private final FacturaOutboxRepository outboxRepository;
+    private final FacturaOutboxStore outboxRepository;
     private final FacturaStore facturaRepository;
-    private final InventarioClient inventarioClient;
+    private final InventarioPort inventarioClient;
 
-    public InventarioOutboxProcessor(FacturaOutboxRepository outboxRepository,
+    public InventarioOutboxProcessor(FacturaOutboxStore outboxRepository,
                                      FacturaStore facturaRepository,
-                                     InventarioClient inventarioClient) {
+                                     InventarioPort inventarioClient) {
         this.outboxRepository = outboxRepository;
         this.facturaRepository = facturaRepository;
         this.inventarioClient = inventarioClient;

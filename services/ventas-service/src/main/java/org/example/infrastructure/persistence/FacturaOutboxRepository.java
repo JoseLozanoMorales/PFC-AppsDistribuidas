@@ -1,12 +1,13 @@
 package org.example.infrastructure.persistence;
 
+import org.example.domain.FacturaOutboxStore;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class FacturaOutboxRepository {
+public class FacturaOutboxRepository implements FacturaOutboxStore {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -15,6 +16,7 @@ public class FacturaOutboxRepository {
     }
 
     /** IDs de facturas con evento pendiente, listas para reintentar. */
+    @Override
     public List<Integer> facturasPendientes(int maxIntentos, int limite) {
         return jdbcTemplate.query("""
                 SELECT factura_id
@@ -26,6 +28,7 @@ public class FacturaOutboxRepository {
     }
 
     /** Se llama solo después de que inventario confirmó el descuento de stock. */
+    @Override
     public void marcarProcesado(Integer facturaId) {
         jdbcTemplate.update("""
                 UPDATE ventas.factura_outbox
@@ -35,6 +38,7 @@ public class FacturaOutboxRepository {
     }
 
     /** Incrementa el contador de intentos; pasa a FALLIDO si se agota el máximo. */
+    @Override
     public void registrarFallo(Integer facturaId, String error, int maxIntentos) {
         jdbcTemplate.update("""
                 UPDATE ventas.factura_outbox

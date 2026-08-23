@@ -1,7 +1,8 @@
 package org.example.infrastructure.client;
 
-import org.example.infrastructure.client.dto.DireccionInfo;
-import org.example.infrastructure.client.dto.UsuarioInfo;
+import org.example.domain.DireccionInfo;
+import org.example.domain.UsuarioInfo;
+import org.example.domain.UsuarioPort;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.retry.Retry;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Component
-public class UsuarioClient {
+public class UsuarioClient implements UsuarioPort {
 
     private final RestClient restClient;
     private final CircuitBreaker circuitBreaker;
@@ -33,22 +34,30 @@ public class UsuarioClient {
     /**
      * usuarios-service expone GET /api/usuarios/{id} para lookup exacto por ID.
      */
+    @Override
     public UsuarioInfo obtenerUsuario(Integer usuarioId) {
-        return lectura(() -> restClient.get()
+        UsuarioResponse response = lectura(() -> restClient.get()
                 .uri("/api/usuarios/{id}", usuarioId)
                 .retrieve()
-                .body(UsuarioInfo.class));
+                .body(UsuarioResponse.class));
+        return response == null ? null : new UsuarioInfo(response.usuarioId(), response.nombre(),
+                response.cedula(), response.correo(), response.telefono(), response.usuario(),
+                response.rolId(), response.habilitado());
     }
 
+    @Override
     public List<DireccionInfo> obtenerDirecciones(Integer usuarioId) {
-        List<DireccionInfo> direcciones = lectura(() -> restClient.get()
+        List<DireccionResponse> direcciones = lectura(() -> restClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/usuarios/{usuarioId}/direcciones")
                         .queryParam("view", "full")
                         .build(usuarioId))
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<DireccionInfo>>() {
+                .body(new ParameterizedTypeReference<List<DireccionResponse>>() {
                 }));
-        return direcciones == null ? List.of() : direcciones;
+        return direcciones == null ? List.of() : direcciones.stream()
+                .map(d -> new DireccionInfo(d.direccionId(), d.usuarioId(), d.calle(), d.referencia(),
+                        d.ciudadId(), d.ciudadNombre(), d.provinciaNombre(), d.habilitado()))
+                .toList();
     }
 
     // Lectura (GET), idempotente por naturaleza: circuit breaker + reintento.
@@ -57,4 +66,15 @@ public class UsuarioClient {
         Supplier<T> conReintento = Retry.decorateSupplier(retry, conCircuitBreaker);
         return conReintento.get();
     }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    private record UsuarioResponse(Integer usuarioId, String nombre, String cedula, String correo,
+                                   String telefono, String usuario,
+                                   @com.fasterxml.jackson.annotation.JsonProperty("id_rol") Integer rolId,
+                                   Boolean habilitado) { }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    private record DireccionResponse(Integer direccionId, Integer usuarioId, String calle,
+                                     String referencia, Integer ciudadId, String ciudadNombre,
+                                     String provinciaNombre, Boolean habilitado) { }
 }

@@ -4,7 +4,7 @@ import org.example.domain.DetalleOrdenCompra;
 import org.example.domain.EstadoOrdenCompra;
 import org.example.domain.OrdenCompra;
 import org.example.domain.OrdenCompraRepository;
-import org.example.infrastructure.client.InventarioClient;
+import org.example.domain.InventarioPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,10 +17,10 @@ import java.util.Map;
 public class OrdenCompraService {
 
     private final OrdenCompraRepository ordenCompraRepository;
-    private final InventarioClient inventarioClient;
+    private final InventarioPort inventarioClient;
 
     public OrdenCompraService(OrdenCompraRepository ordenCompraRepository,
-                              InventarioClient inventarioClient) {
+                              InventarioPort inventarioClient) {
         this.ordenCompraRepository = ordenCompraRepository;
         this.inventarioClient = inventarioClient;
     }

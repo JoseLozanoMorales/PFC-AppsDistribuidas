@@ -1,5 +1,6 @@
 package org.example.infrastructure.config;
 
+import org.example.domain.CrdbRetryPort;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,7 @@ import java.sql.SQLException;
 import java.util.function.Supplier;
 
 @Component
-public class CrdbRetryExecutor {
+public class CrdbRetryExecutor implements CrdbRetryPort {
 
     private static final String SERIALIZATION_FAILURE = "40001";
 
@@ -25,6 +26,7 @@ public class CrdbRetryExecutor {
         this.metrics = metrics;
     }
 
+    @Override
     public <T> T execute(Supplier<T> operation) {
         Timer.Sample sample = metrics.startQuery();
         try {

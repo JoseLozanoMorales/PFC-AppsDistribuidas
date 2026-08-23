@@ -1,5 +1,6 @@
 package org.example.infrastructure.client;
 
+import org.example.domain.InventarioPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -18,7 +19,7 @@ import java.util.Optional;
  * inventario.subtipo_movimiento).
  */
 @Component
-public class InventarioClient {
+public class InventarioClient implements InventarioPort {
 
     private static final int SUBTIPO_COMPRA = 1;
 
@@ -45,6 +46,7 @@ public class InventarioClient {
      */
     @CircuitBreaker(name = "inventario", fallbackMethod = "registrarEntradasPorRecepcionFallback")
     @Retry(name = "inventario")
+    @Override
     public void registrarEntradasPorRecepcion(Integer ordenCompraId,
                                               Map<Integer, Integer> recepcionPorProducto,
                                               String usuario) {

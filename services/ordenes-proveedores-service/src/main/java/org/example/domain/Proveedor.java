@@ -1,26 +1,16 @@
 package org.example.domain;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-
 public class Proveedor {
 
     private Integer proveedorId;
 
-    @NotBlank(message = "El nombre es obligatorio")
-    @Pattern(regexp = "^(?=.*[\\p{L}0-9]).+$", message = "El nombre no puede contener solo simbolos")
     private String nombre;
 
-    @NotBlank(message = "El RUC es obligatorio")
-    @Pattern(regexp = "\\d{13}", message = "El RUC debe tener exactamente 13 digitos numericos")
     private String ruc;
     private String contactoNombre;
 
-    @Pattern(regexp = "^$|\\d{7,10}", message = "El telefono debe tener entre 7 y 10 digitos numericos")
     private String telefono;
 
-    @Email(message = "El correo no tiene un formato valido")
     private String correo;
     private String direccion;
     private Boolean activo;

@@ -1,14 +1,10 @@
 package org.example.application;
 
-import org.example.infrastructure.config.CrdbMetrics;
-import org.example.infrastructure.config.CrdbRetryExecutor;
+import org.example.domain.CrdbMetricsPort;
+import org.example.domain.CrdbProbePort;
+import org.example.domain.CrdbRetryPort;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -20,13 +16,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class CrdbRetryProbeService {
 
-    private final DataSource dataSource;
-    private final CrdbRetryExecutor retryExecutor;
-    private final CrdbMetrics metrics;
+    private final CrdbProbePort probe;
+    private final CrdbRetryPort retryExecutor;
+    private final CrdbMetricsPort metrics;
 
-    public CrdbRetryProbeService(DataSource dataSource, CrdbRetryExecutor retryExecutor,
-                                 CrdbMetrics metrics) {
-        this.dataSource = dataSource;
+    public CrdbRetryProbeService(CrdbProbePort probe, CrdbRetryPort retryExecutor,
+                                 CrdbMetricsPort metrics) {
+        this.probe = probe;
         this.retryExecutor = retryExecutor;
         this.metrics = metrics;
     }
@@ -40,11 +36,11 @@ public class CrdbRetryProbeService {
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
         try {
-            var competidor = executor.submit(() -> ejecutarCompetidor(
+            var competidor = executor.submit(() -> probe.ejecutarCompetidor(
                     competidorListo, sondaLeida, competidorConfirmado));
 
             await(competidorListo, "El competidor no alcanzo el punto de lectura");
-            long valorFinal = retryExecutor.execute(() -> ejecutarSonda(
+            long valorFinal = retryExecutor.execute(() -> probe.ejecutarSonda(
                     intentos.incrementAndGet(), sondaLeida, competidorConfirmado));
             competidor.get(10, TimeUnit.SECONDS);
 
@@ -59,65 +55,6 @@ public class CrdbRetryProbeService {
             throw new IllegalStateException("No se pudo completar la colision controlada", e);
         } finally {
             executor.shutdownNow();
-        }
-    }
-
-    private void ejecutarCompetidor(CountDownLatch listo, CountDownLatch sondaLeida,
-                                    CountDownLatch confirmado) {
-        try (Connection connection = nuevaTransaccion()) {
-            leerValor(connection);
-            listo.countDown();
-            await(sondaLeida, "La sonda no alcanzo el punto de lectura");
-            incrementar(connection);
-            connection.commit();
-            confirmado.countDown();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Fallo la transaccion competidora", e);
-        }
-    }
-
-    private long ejecutarSonda(int intento, CountDownLatch sondaLeida,
-                               CountDownLatch competidorConfirmado) {
-        try (Connection connection = nuevaTransaccion()) {
-            leerValor(connection);
-            if (intento == 1) {
-                sondaLeida.countDown();
-                await(competidorConfirmado, "El competidor no confirmo su escritura");
-            }
-            incrementar(connection);
-            connection.commit();
-            return leerValorConfirmado();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Fallo serializable de la sonda", e);
-        }
-    }
-
-    private Connection nuevaTransaccion() throws SQLException {
-        Connection connection = dataSource.getConnection();
-        connection.setAutoCommit(false);
-        connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-        return connection;
-    }
-
-    private long leerValor(Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT valor FROM pedidos.retry_probe WHERE probe_id = 1");
-             ResultSet result = statement.executeQuery()) {
-            result.next();
-            return result.getLong(1);
-        }
-    }
-
-    private void incrementar(Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "UPDATE pedidos.retry_probe SET valor = valor + 1 WHERE probe_id = 1")) {
-            statement.executeUpdate();
-        }
-    }
-
-    private long leerValorConfirmado() throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            return leerValor(connection);
         }
     }
 

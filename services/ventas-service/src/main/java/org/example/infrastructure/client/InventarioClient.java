@@ -8,12 +8,13 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 
 import org.example.domain.FacturaDetalle;
+import org.example.domain.InventarioPort;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Component
-public class InventarioClient {
+public class InventarioClient implements InventarioPort {
 
     // subtipo_id  en la BD
     private static final int SUBTIPO_VENTA = 4;
@@ -37,6 +38,7 @@ public class InventarioClient {
     /** Descuenta stock por cada línea de la factura recién generada. */
     @CircuitBreaker(name = "inventario", fallbackMethod = "registrarSalidasPorFacturaFallback")
     @Retry(name = "inventario")
+    @Override
     public void registrarSalidasPorFactura(Integer facturaId, List<FacturaDetalle> detalle, String usuario) {
         List<java.util.Map<String, Object>> items = detalle.stream()
                 .map(d -> java.util.Map.<String, Object>of(

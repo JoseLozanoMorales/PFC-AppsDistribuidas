@@ -1,6 +1,7 @@
 package org.example.infrastructure.client;
 
-import org.example.infrastructure.client.dto.ProductoPrecioIva;
+import org.example.domain.ProductoInfo;
+import org.example.domain.ProductoPort;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Component
-public class ProductoClient {
+public class ProductoClient implements ProductoPort {
 
     private final RestClient restClient;
     private final CircuitBreaker circuitBreaker;
@@ -36,7 +37,8 @@ public class ProductoClient {
      * Combina GET /api/productos (precio + iva_id) con GET /api/sp/ivas (iva_id -> porcentaje)
      * para devolver precio y porcentaje de IVA de un producto.
      */
-    public ProductoPrecioIva obtenerPrecioEIva(Integer productoId) {
+    @Override
+    public ProductoInfo obtenerPrecioEIva(Integer productoId) {
         List<ProductoListItem> productos = lectura(() -> restClient.get()
                 .uri("/api/productos?page=0&size=1000")
                 .retrieve()
@@ -62,7 +64,7 @@ public class ProductoClient {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "IVA " + producto.ivaId() + " no encontrado en productos-service"));
 
-        return new ProductoPrecioIva(producto.productoId(), producto.precioUnitario(), producto.ivaId(), porcentajeIva);
+        return new ProductoInfo(producto.productoId(), producto.precioUnitario(), producto.ivaId(), porcentajeIva);
     }
 
     // Lectura (GET), idempotente por naturaleza: circuit breaker + reintento.

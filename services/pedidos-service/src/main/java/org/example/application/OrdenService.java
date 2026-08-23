@@ -8,8 +8,8 @@ import org.example.domain.OrdenRepository;
 import org.example.domain.PageResponse;
 import org.example.domain.Paginacion;
 import org.example.domain.SolicitudIdempotente;
-import org.example.infrastructure.client.FacturaClient;
-import org.example.infrastructure.config.CrdbRetryExecutor;
+import org.example.domain.FacturaPort;
+import org.example.domain.CrdbRetryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -31,13 +31,13 @@ public class OrdenService {
     private static final Logger log = LoggerFactory.getLogger(OrdenService.class);
 
     private final OrdenRepository ordenRepository;
-    private final FacturaClient facturaClient;
-    private final ObjectProvider<CrdbRetryExecutor> crdbRetryExecutor;
+    private final FacturaPort facturaClient;
+    private final ObjectProvider<CrdbRetryPort> crdbRetryExecutor;
     private final Optional<IdempotenciaRepository> idempotenciaRepository;
 
     @Autowired
-    public OrdenService(OrdenRepository ordenRepository, FacturaClient facturaClient,
-                        ObjectProvider<CrdbRetryExecutor> crdbRetryExecutor,
+    public OrdenService(OrdenRepository ordenRepository, FacturaPort facturaClient,
+                        ObjectProvider<CrdbRetryPort> crdbRetryExecutor,
                         Optional<IdempotenciaRepository> idempotenciaRepository) {
         this.ordenRepository = ordenRepository;
         this.facturaClient = facturaClient;
@@ -87,7 +87,7 @@ public class OrdenService {
             }
         }
 
-        CrdbRetryExecutor retry = crdbRetryExecutor.getIfAvailable();
+        CrdbRetryPort retry = crdbRetryExecutor.getIfAvailable();
         String claveParaPersistencia = repo != null ? idempotencyKey : null;
         Orden orden;
         try {

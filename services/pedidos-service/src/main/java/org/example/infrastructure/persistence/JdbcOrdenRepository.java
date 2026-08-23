@@ -6,11 +6,11 @@ import org.example.domain.Orden;
 import org.example.domain.OrdenRepository;
 import org.example.domain.PageResponse;
 import org.example.domain.Paginacion;
-import org.example.infrastructure.client.ProductoClient;
-import org.example.infrastructure.client.UsuarioClient;
-import org.example.infrastructure.client.dto.DireccionInfo;
-import org.example.infrastructure.client.dto.ProductoPrecioIva;
-import org.example.infrastructure.client.dto.UsuarioInfo;
+import org.example.domain.ProductoPort;
+import org.example.domain.UsuarioPort;
+import org.example.domain.DireccionInfo;
+import org.example.domain.ProductoInfo;
+import org.example.domain.UsuarioInfo;
 import org.example.infrastructure.config.CrdbMetrics;
 import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.ObjectProvider;
@@ -37,13 +37,13 @@ import java.util.function.Supplier;
 public class JdbcOrdenRepository implements OrdenRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final ProductoClient productoClient;
-    private final UsuarioClient usuarioClient;
+    private final ProductoPort productoClient;
+    private final UsuarioPort usuarioClient;
     private final Optional<IdempotenciaRepository> idempotenciaRepository;
     private final ObjectProvider<CrdbMetrics> crdbMetrics;
 
-    public JdbcOrdenRepository(JdbcTemplate jdbcTemplate, ProductoClient productoClient,
-                               UsuarioClient usuarioClient,
+    public JdbcOrdenRepository(JdbcTemplate jdbcTemplate, ProductoPort productoClient,
+                               UsuarioPort usuarioClient,
                                Optional<IdempotenciaRepository> idempotenciaRepository,
                                ObjectProvider<CrdbMetrics> crdbMetrics) {
         this.jdbcTemplate = jdbcTemplate;
@@ -181,7 +181,7 @@ public class JdbcOrdenRepository implements OrdenRepository {
         List<DetalleCarritoTmp> items = jdbcTemplate.query(sqlDetalle, (rs, rowNum) -> {
             Integer productoId = rs.getInt("producto_id");
             Integer cantidad = rs.getInt("cantidad");
-            ProductoPrecioIva info = productoClient.obtenerPrecioEIva(productoId);
+            ProductoInfo info = productoClient.obtenerPrecioEIva(productoId);
             return new DetalleCarritoTmp(productoId, cantidad, info.precioUnitario(), info.porcentajeIva());
         }, carritoId);
 

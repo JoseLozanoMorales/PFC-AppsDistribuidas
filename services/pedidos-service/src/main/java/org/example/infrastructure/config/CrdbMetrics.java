@@ -1,5 +1,6 @@
 package org.example.infrastructure.config;
 
+import org.example.domain.CrdbMetricsPort;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import io.micrometer.core.instrument.Counter;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 
 @Component
-public class CrdbMetrics {
+public class CrdbMetrics implements CrdbMetricsPort {
 
     private final MeterRegistry registry;
     private final Counter transactionRetries;
@@ -51,6 +52,7 @@ public class CrdbMetrics {
         transactionRetries.increment();
     }
 
+    @Override
     public double retryCount() {
         return transactionRetries.count();
     }

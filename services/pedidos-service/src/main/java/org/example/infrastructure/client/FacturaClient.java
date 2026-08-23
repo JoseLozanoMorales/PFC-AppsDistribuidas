@@ -1,5 +1,6 @@
 package org.example.infrastructure.client;
 
+import org.example.domain.FacturaPort;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +11,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
-public class FacturaClient {
+public class FacturaClient implements FacturaPort {
 
     private final RestClient restClient;
     private final CircuitBreaker circuitBreaker;
@@ -28,6 +29,7 @@ public class FacturaClient {
     // duplicar la factura de la misma orden. El llamador (OrdenService) ya
     // convierte cualquier fallo aqui en un mensaje explicito: la orden quedo
     // creada pero la facturacion fallo, en vez de fingir exito o reintentar solo.
+    @Override
     public Integer generarFactura(Integer ordenId) {
         Supplier<Map> llamada = () -> restClient.post()
                 .uri("/api/facturas")

@@ -1,19 +1,17 @@
 package com.tiendatech.usuarios.application.service.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.tiendatech.usuarios.domain.port.out.OnlineUserPort;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserOnlineService {
-    @Autowired(required = false) private SessionRegistry sessionRegistry;
+    private final OnlineUserPort onlineUserPort;
+
+    public UserOnlineService(OnlineUserPort onlineUserPort) {
+        this.onlineUserPort = onlineUserPort;
+    }
 
     public boolean isOnline(String username){
-        if (username == null || username.isBlank() || sessionRegistry == null) return false;
-        return sessionRegistry.getAllPrincipals().stream().anyMatch(p ->
-                (p instanceof UserDetails ud && ud.getUsername().equalsIgnoreCase(username)) ||
-                        (!(p instanceof UserDetails) && p.toString().equalsIgnoreCase(username))
-        );
+        return onlineUserPort.isOnline(username);
     }
 }

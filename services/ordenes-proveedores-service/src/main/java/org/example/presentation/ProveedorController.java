@@ -5,6 +5,7 @@ import org.example.application.ProveedorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.presentation.dto.ProveedorResponseDTO;
+import org.example.presentation.dto.ProveedorRequest;
 import jakarta.validation.Valid;
 
 import java.net.URI;
@@ -23,15 +24,15 @@ public class ProveedorController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Integer>> crear(@Valid @RequestBody Proveedor proveedor) {
-        Integer proveedorId = proveedorService.crear(proveedor);
+    public ResponseEntity<Map<String, Integer>> crear(@Valid @RequestBody ProveedorRequest request) {
+        Integer proveedorId = proveedorService.crear(request.toDomain());
         return ResponseEntity.created(URI.create("/api/proveedores/" + proveedorId))
                 .body(Map.of("proveedorId", proveedorId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> actualizar(@PathVariable Integer id, @Valid @RequestBody Proveedor proveedor) {
-        proveedorService.actualizar(id, proveedor);
+    public ResponseEntity<Void> actualizar(@PathVariable Integer id, @Valid @RequestBody ProveedorRequest request) {
+        proveedorService.actualizar(id, request.toDomain());
         return ResponseEntity.noContent().build();
     }
 

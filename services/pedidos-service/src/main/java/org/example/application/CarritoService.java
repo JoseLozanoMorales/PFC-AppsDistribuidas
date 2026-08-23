@@ -5,8 +5,8 @@ import org.example.domain.CarritoDetalle;
 import org.example.domain.CarritoRepository;
 import org.example.domain.PageResponse;
 import org.example.domain.Paginacion;
-import org.example.infrastructure.client.ProductoClient;
-import org.example.infrastructure.client.dto.ProductoPrecioIva;
+import org.example.domain.ProductoPort;
+import org.example.domain.ProductoInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 public class CarritoService {
 
     private final CarritoRepository carritoRepository;
-    private final ProductoClient productoClient;
+    private final ProductoPort productoClient;
 
     @Autowired
-    public CarritoService(CarritoRepository carritoRepository, ProductoClient productoClient) {
+    public CarritoService(CarritoRepository carritoRepository, ProductoPort productoClient) {
         this.carritoRepository = carritoRepository;
         this.productoClient = productoClient;
     }
@@ -41,7 +41,7 @@ public class CarritoService {
     // Ahora el precio NO viene del cliente -- se consulta a productos-service
     // para evitar que alguien manipule el precio desde el frontend.
     public void agregarProducto(Integer carritoId, Integer productoId, Integer cantidad) {
-        ProductoPrecioIva info = productoClient.obtenerPrecioEIva(productoId);
+        ProductoInfo info = productoClient.obtenerPrecioEIva(productoId);
         carritoRepository.agregarProducto(carritoId, productoId, cantidad, info.precioUnitario());
     }
 

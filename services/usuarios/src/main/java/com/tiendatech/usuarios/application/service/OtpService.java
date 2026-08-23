@@ -1,13 +1,10 @@
 package com.tiendatech.usuarios.application.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import jakarta.transaction.Transactional;
+import com.tiendatech.usuarios.domain.port.out.EmailPort;
+import com.tiendatech.usuarios.domain.port.out.OtpStorePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +19,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OtpService {
 
-    private final JavaMailSender mailSender;
-    private final @Qualifier("otpCache") Cache<String, String> otpCache;           // key: email:txId -> hash
-    private final @Qualifier("attemptsCache") Cache<String, Integer> attemptsCache; // key: rate:email -> count
+    private final EmailPort emailPort;
+    private final OtpStorePort otpStore;
 
     @Value("${otp.ttl-minutes:10}")
     private int otpTtlMin;
@@ -59,10 +55,10 @@ public class OtpService {
 
     private boolean canSendForEmail(String email) {
         String k = rateKey(email);
-        Integer current = attemptsCache.getIfPresent(k);
+        Integer current = otpStore.findAttemptCount(k);
         if (current == null) current = 0;
         if (current >= maxPerWindow) return false;
-        attemptsCache.put(k, current + 1);
+        otpStore.saveAttemptCount(k, current + 1);
         return true;
     }
 
@@ -77,27 +73,24 @@ public class OtpService {
 
         String hash = BCrypt.hashpw(code, BCrypt.gensalt());
         String cacheKey = key(email, txId);
-        otpCache.put(cacheKey, hash);
+        otpStore.saveOtpHash(cacheKey, hash);
 
         // Email
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(email);
-        msg.setSubject("Código de verificación - TiendaTech");
-        msg.setText("""
+        String body = """
                 Tu código de verificación es: %s
                 Expira en %d minutos.
                 Si no solicitaste este código, ignora este correo.
-                """.formatted(code, otpTtlMin));
+                """.formatted(code, otpTtlMin);
 
         boolean mailSent = false;
         try {
-            mailSender.send(msg);
+            emailPort.send(email, "Código de verificación - TiendaTech", body);
             mailSent = true;
             log.info("OTP enviado a {} txId={}", email, txId);
         } catch (Exception ex) {
             // no dejes un OTP huérfano si el correo falló
             if (!mailFallbackEnabled) {
-                otpCache.invalidate(cacheKey);
+                otpStore.removeOtp(cacheKey);
                 log.error("Error enviando OTP a {}: {}", email, ex.getMessage(), ex);
                 throw new RuntimeException("MAIL_SEND_FAILED: " + ex.getMessage(), ex);
             }
@@ -121,11 +114,11 @@ public class OtpService {
 
     public boolean validar(String email, String code, String txId) {
         String cacheKey = key(email, txId);
-        String hash = otpCache.getIfPresent(cacheKey);
+        String hash = otpStore.findOtpHash(cacheKey);
         if (hash == null) return false; // expirado / inexistente
         boolean ok = BCrypt.checkpw(code, hash);
         if (ok) {
-            otpCache.invalidate(cacheKey);
+            otpStore.removeOtp(cacheKey);
         }
         return ok;
     }
@@ -177,10 +170,7 @@ public class OtpService {
         String token = emitirTokenCambioPassword(correo);
         String urlCambio = buildPasswordChangeUrl() + "?t=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(correo);
-        msg.setSubject("Tus credenciales de acceso - TiendaTech");
-        msg.setText("""
+        String body = """
         ¡Hola!
 
         Se ha creado tu cuenta en TiendaTech.
@@ -199,9 +189,9 @@ public class OtpService {
                 (usuario == null || usuario.isBlank()) ? "(asignado por sistema)" : usuario,
                 passwordPlano,
                 urlCambio
-        ));
+        );
 
-        mailSender.send(msg); // si falla, lanzará una excepción  buildPasswordChangeUrl()
+        emailPort.send(correo, "Tus credenciales de acceso - TiendaTech", body);
     }
 
     /*Genera una contraseña legible y la envía por correo. */
@@ -219,10 +209,7 @@ public class OtpService {
         String token = emitirTokenCambioPassword(correo);
         String urlCambio = buildPasswordChangeUrl() + "?t=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
 
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(correo);
-        msg.setSubject("Recuperación de contraseña - TiendaTech");
-        msg.setText("""
+        String body = """
             ¡Hola %s!
 
             Generamos una contraseña temporal para que puedas ingresar:
@@ -239,24 +226,21 @@ public class OtpService {
                 (usuario == null || usuario.isBlank()) ? "usuario" : usuario,
                 passwordPlano,
                 urlCambio
-        ));
-        mailSender.send(msg);
+        );
+        emailPort.send(correo, "Recuperación de contraseña - TiendaTech", body);
     }
-
-    // inyecta el cache:
-    private final @Qualifier("pwdChangeCache") Cache<String, String> pwdChangeCache;
 
     // emitir/consumir
     public String emitirTokenCambioPassword(String correo) {
         String token = java.util.UUID.randomUUID().toString().replace("-", "");
-        pwdChangeCache.put(token, correo.toLowerCase());
+        otpStore.savePasswordChangeToken(token, correo.toLowerCase());
         return token;
     }
 
     public String peekTokenCambioPassword(String token) {
-        return pwdChangeCache.getIfPresent(token); // NO invalida
+        return otpStore.findPasswordChangeEmail(token); // NO invalida
     }
     public void invalidateTokenCambioPassword(String token) {
-        pwdChangeCache.invalidate(token);
+        otpStore.removePasswordChangeToken(token);
     }
 }
