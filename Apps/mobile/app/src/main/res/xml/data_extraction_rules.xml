@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Exclude sensitive data from cloud backup -->
+        <exclude domain="sharedpref" path="auth_prefs.xml" />
+        <exclude domain="database" path="tiendatech_cache.db" />
+        <exclude domain="database" path="tiendatech_cache.db-shm" />
+        <exclude domain="database" path="tiendatech_cache.db-wal" />
+    </cloud-backup>
+    <device-transfer>
+        <!-- Exclude sensitive data from device-to-device transfer -->
+        <exclude domain="sharedpref" path="auth_prefs.xml" />
+        <exclude domain="database" path="tiendatech_cache.db" />
+        <exclude domain="database" path="tiendatech_cache.db-shm" />
+        <exclude domain="database" path="tiendatech_cache.db-wal" />
+    </device-transfer>
+</data-extraction-rules>
