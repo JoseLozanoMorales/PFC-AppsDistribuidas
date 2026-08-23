@@ -28,8 +28,7 @@ export default function App() {
   const toggleTheme = () => setDark((value) => { localStorage.setItem('tt-theme', value ? 'light' : 'dark'); return !value })
   const logout = () => { clearSession(); setUser(null); navigate('/login') }
   useEffect(() => {
-    const roleId = Number(user?.id_rol ?? user?.idRol ?? 0)
-    if (!user || (roleId !== 1 && roleId !== 3)) return
+    if (!user) return
     const idleLimitMs = 30 * 60 * 1000
     let timer = 0
     let lastRecorded = 0
@@ -53,19 +52,13 @@ export default function App() {
       }
     }
     const sessionCleared = () => { setUser(null); navigate('/login', { replace: true }) }
-    const storageChanged = (event: StorageEvent) => {
-      if ((event.key === 'token' || event.key === 'access') && event.newValue === null) sessionCleared()
-      else schedule()
-    }
     const events: (keyof WindowEventMap)[] = ['pointerdown', 'keydown', 'scroll', 'touchstart']
     events.forEach(event => window.addEventListener(event, activity, { passive: true }))
-    window.addEventListener('storage', storageChanged)
     window.addEventListener(SESSION_CLEARED_EVENT, sessionCleared)
     schedule()
     return () => {
       window.clearTimeout(timer)
       events.forEach(event => window.removeEventListener(event, activity))
-      window.removeEventListener('storage', storageChanged)
       window.removeEventListener(SESSION_CLEARED_EVENT, sessionCleared)
     }
   }, [user, navigate])

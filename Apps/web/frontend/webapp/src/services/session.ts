@@ -11,11 +11,17 @@ export interface SessionUser {
 
 const USER_KEYS = ['tt_user', 'user', 'usuario', 'currentUser']
 const LAST_ACTIVITY_KEY = 'tt_last_activity'
+const TOKEN_KEYS = ['access', 'token', 'refreshToken']
 export const SESSION_CLEARED_EVENT = 'tt-session-cleared'
+
+// Elimina credenciales persistentes creadas por versiones anteriores. Los
+// tokens de autenticacion nunca deben sobrevivir al cierre de la pestana.
+;[...USER_KEYS, ...TOKEN_KEYS, 'usuarioId'].forEach((key) => localStorage.removeItem(key))
+localStorage.removeItem(LAST_ACTIVITY_KEY)
 
 export function getUser(): SessionUser | null {
   for (const key of USER_KEYS) {
-    const raw = sessionStorage.getItem(key) || localStorage.getItem(key)
+    const raw = sessionStorage.getItem(key)
     if (!raw) continue
     try {
       const parsed = JSON.parse(raw)
@@ -35,8 +41,10 @@ export function saveSession(user: SessionUser, token?: string): void {
 }
 
 export function saveToken(value: string): void {
-  localStorage.setItem('token', value)
-  localStorage.setItem('access', value)
+  sessionStorage.setItem('token', value)
+  sessionStorage.setItem('access', value)
+  localStorage.removeItem('token')
+  localStorage.removeItem('access')
 }
 
 export function clearSession(): void {
@@ -44,23 +52,23 @@ export function clearSession(): void {
     sessionStorage.removeItem(key)
     localStorage.removeItem(key)
   })
-  ;['access', 'token', 'refreshToken', 'usuarioId', 'usuario'].forEach((key) => {
+  ;[...TOKEN_KEYS, 'usuarioId', 'usuario'].forEach((key) => {
     sessionStorage.removeItem(key)
     localStorage.removeItem(key)
   })
+  sessionStorage.removeItem(LAST_ACTIVITY_KEY)
   localStorage.removeItem(LAST_ACTIVITY_KEY)
   window.dispatchEvent(new Event(SESSION_CLEARED_EVENT))
 }
 
 export function markSessionActivity(): void {
-  localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()))
+  sessionStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()))
 }
 
 export function lastSessionActivity(): number {
-  return Number(localStorage.getItem(LAST_ACTIVITY_KEY)) || Date.now()
+  return Number(sessionStorage.getItem(LAST_ACTIVITY_KEY)) || Date.now()
 }
 
 export function token(): string {
-  return sessionStorage.getItem('access') || localStorage.getItem('access') ||
-    sessionStorage.getItem('token') || localStorage.getItem('token') || ''
+  return sessionStorage.getItem('access') || sessionStorage.getItem('token') || ''
 }
