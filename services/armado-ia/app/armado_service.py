@@ -1,6 +1,7 @@
 """Orquestador. Puerto 1:1 de ArmadoService.java."""
 import logging
 
+from app import metrics
 from app.clients.producto_client import producto_client
 from app.domain import advertencias as advertencias_tecnicas
 from app.domain import bottleneck, recomendador
@@ -20,6 +21,17 @@ log = logging.getLogger("armado_ia.armado_service")
 
 def analizar(request: AnalizarRequest, identidad: IdentidadOpcional,
              explicacion_service: ExplicacionService) -> AnalizarResponse:
+    try:
+        respuesta = _analizar(request, identidad, explicacion_service)
+    except Exception:
+        metrics.registrar_analisis_fallido()
+        raise
+    metrics.registrar_analisis_completado()
+    return respuesta
+
+
+def _analizar(request: AnalizarRequest, identidad: IdentidadOpcional,
+              explicacion_service: ExplicacionService) -> AnalizarResponse:
     ids_solicitados = request.componentes or {}
     if ids_solicitados.get("cpu") is None:
         raise BadRequestError("El componente 'cpu' es obligatorio para el analisis")

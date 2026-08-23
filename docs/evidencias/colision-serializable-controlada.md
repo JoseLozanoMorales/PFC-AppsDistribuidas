@@ -65,6 +65,6 @@ se aplicó.
 Para una captura compacta, mostrar simultáneamente:
 
 1. la respuesta JSON del `POST /api/crdb/retry-probe`;
-2. la línea `crdb_transaction_retries_total 1.0` de `/metrics`;
+2. la línea `crdb_transaction_retries_total 1.0` de `/actuator/prometheus`;
 3. opcionalmente, la consulta de CockroachDB que devuelve `probe_id=1, valor=2`.
 

@@ -1,5 +1,6 @@
 package org.example.application;
 
+import org.example.domain.BusinessMetricsPort;
 import org.example.domain.FacturaPort;
 import org.example.domain.IdempotenciaRepository;
 import org.example.domain.Orden;
@@ -57,6 +58,8 @@ class OrdenServiceTest {
     private ObjectProvider<CrdbRetryPort> crdbRetryExecutor;
     @Mock
     private IdempotenciaRepository idempotenciaRepository;
+    @Mock
+    private BusinessMetricsPort businessMetrics;
 
     private static final Integer USUARIO_ID = 8;
     private static final Integer DIRECCION_ID = 3;
@@ -64,7 +67,7 @@ class OrdenServiceTest {
 
     private OrdenService servicioConIdempotencia(boolean habilitada) {
         Optional<IdempotenciaRepository> repo = habilitada ? Optional.of(idempotenciaRepository) : Optional.empty();
-        return new OrdenService(ordenRepository, facturaClient, crdbRetryExecutor, repo);
+        return new OrdenService(ordenRepository, facturaClient, crdbRetryExecutor, repo, businessMetrics);
     }
 
     private static Orden ordenDe(Integer ordenId, BigDecimal subtotal, BigDecimal total) {
@@ -101,6 +104,8 @@ class OrdenServiceTest {
         assertThat(resultado).isSameAs(creada);
         verify(ordenRepository).crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null);
         verify(facturaClient).generarFactura(55);
+        verify(businessMetrics).registrarCheckoutCompletado();
+        verify(businessMetrics, never()).registrarCheckoutFallido(any());
     }
 
     @Test
@@ -140,6 +145,25 @@ class OrdenServiceTest {
                 .hasMessageContaining("vacío");
 
         verify(facturaClient, never()).generarFactura(any());
+        verify(businessMetrics).registrarCheckoutFallido("carrito_vacio");
+        verify(businessMetrics, never()).registrarCheckoutCompletado();
+    }
+
+    @Test
+    void checkout_datosInvalidos_propagaLaFallaConMotivoValidacion() {
+        // Usuario/direccion/metodo de pago invalidos tambien se validan dentro
+        // de JdbcOrdenRepository.crear() (IllegalArgumentException). Motivo
+        // distinto a "carrito_vacio" para no mezclar ambas causas en Grafana.
+        when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
+        when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null))
+                .thenThrow(new IllegalArgumentException("La direccion 3 no pertenece al usuario 8"));
+
+        assertThatThrownBy(() -> servicioConIdempotencia(false)
+                .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(facturaClient, never()).generarFactura(any());
+        verify(businessMetrics).registrarCheckoutFallido("validacion");
     }
 
     // ------------------------------------------------------------------
@@ -162,6 +186,10 @@ class OrdenServiceTest {
         assertThat(resultado).isSameAs(existente);
         verify(ordenRepository, never()).crear(any(), any(), any(), any(), any());
         verify(facturaClient, never()).generarFactura(any());
+        // Replay idempotente: no es un checkout NUEVO, no debe sumar ni a
+        // completado ni a fallido -- ver nota de diseño en el mensaje al usuario.
+        verify(businessMetrics, never()).registrarCheckoutCompletado();
+        verify(businessMetrics, never()).registrarCheckoutFallido(any());
     }
 
     @Test
@@ -180,6 +208,7 @@ class OrdenServiceTest {
 
         verify(ordenRepository, never()).crear(any(), any(), any(), any(), any());
         verify(facturaClient, never()).generarFactura(any());
+        verify(businessMetrics).registrarCheckoutFallido("idempotencia_conflicto");
     }
 
     @Test
@@ -201,6 +230,7 @@ class OrdenServiceTest {
         // repositorio: exactamente como si nunca hubiera existido el header.
         verify(ordenRepository).crear(eq(USUARIO_ID), eq(DIRECCION_ID), eq(METODOPAGO_ID), isNull(), isNull());
         verify(idempotenciaRepository, never()).buscarPorUsuarioYClave(any(), any());
+        verify(businessMetrics).registrarCheckoutCompletado();
     }
 
     @Test
@@ -223,6 +253,7 @@ class OrdenServiceTest {
         assertThat(resultado).isSameAs(creada);
         verify(ordenRepository).crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, clave, hashEsperado);
         verify(facturaClient).generarFactura(56);
+        verify(businessMetrics).registrarCheckoutCompletado();
     }
 
     @Test
@@ -237,6 +268,7 @@ class OrdenServiceTest {
 
         verify(ordenRepository).crear(eq(USUARIO_ID), eq(DIRECCION_ID), eq(METODOPAGO_ID), isNull(), isNull());
         verify(idempotenciaRepository, never()).buscarPorUsuarioYClave(any(), any());
+        verify(businessMetrics).registrarCheckoutCompletado();
     }
 
     @Test
@@ -251,6 +283,9 @@ class OrdenServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("55")
                 .hasMessageContaining("facturación");
+
+        verify(businessMetrics).registrarCheckoutFallido("facturacion");
+        verify(businessMetrics, never()).registrarCheckoutCompletado();
     }
 
     // ------------------------------------------------------------------
@@ -275,5 +310,6 @@ class OrdenServiceTest {
 
         assertThat(resultado).isSameAs(creada);
         verify(ordenRepository).crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null);
+        verify(businessMetrics).registrarCheckoutCompletado();
     }
 }

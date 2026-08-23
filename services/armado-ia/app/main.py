@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import Depends, FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app import armado_service
 from app.clients.producto_client import estado_circuit_breaker
@@ -17,6 +18,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 
 app = FastAPI(title="armado-ia-service")
 registrar_exception_handlers(app)
+
+# D6.1: expone /metrics con http_requests_total y http_request_duration_seconds
+# (nombres literales, sin traducir -- a diferencia del lado Java con Micrometer,
+# esta libreria ya usa exactamente los nombres que pide la rubrica). Metricas
+# de negocio propias en app/metrics.py, registradas en el mismo REGISTRY global.
+Instrumentator().instrument(app).expose(app)
 
 
 def _crear_explicacion_client() -> ExplicacionClient | None:

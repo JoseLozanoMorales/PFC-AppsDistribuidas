@@ -8,6 +8,7 @@ una explicacion sosa que una que miente.
 """
 import logging
 
+from app import metrics
 from app.explicacion.client import ContextoExplicacion, ExplicacionClient
 from app.explicacion.fallback_client import DeterministicExplicacionClient
 from app.explicacion.validation import (
@@ -31,6 +32,7 @@ class ExplicacionService:
     def generar(self, contexto: ContextoExplicacion) -> str:
         if self._cliente is None:
             log.info("Sin ExplicacionClient activo (ver settings.explicacion.proveedor); usando fallback deterministico")
+            metrics.registrar_explicacion_fallback()
             return self._fallback.explicar(contexto)
         try:
             texto = self._cliente.explicar(contexto)
@@ -41,8 +43,11 @@ class ExplicacionService:
                     issue.code,
                     issue.detail,
                 )
+                metrics.registrar_explicacion_fallback()
                 return self._fallback.explicar(contexto)
+            metrics.registrar_explicacion_bedrock()
             return texto.strip()
         except Exception as exc:  # noqa: BLE001 -- el LLM nunca debe tumbar la respuesta
             log.warning("Fallo la explicacion via LLM (%s), usando fallback deterministico", exc)
+            metrics.registrar_explicacion_fallback()
             return self._fallback.explicar(contexto)

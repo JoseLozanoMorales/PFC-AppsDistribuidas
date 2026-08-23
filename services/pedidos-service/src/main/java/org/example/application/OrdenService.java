@@ -1,5 +1,6 @@
 package org.example.application;
 
+import org.example.domain.BusinessMetricsPort;
 import org.example.domain.ClaveIdempotenciaEnConflictoException;
 import org.example.domain.DetalleOrden;
 import org.example.domain.IdempotenciaRepository;
@@ -34,15 +35,18 @@ public class OrdenService {
     private final FacturaPort facturaClient;
     private final ObjectProvider<CrdbRetryPort> crdbRetryExecutor;
     private final Optional<IdempotenciaRepository> idempotenciaRepository;
+    private final BusinessMetricsPort businessMetrics;
 
     @Autowired
     public OrdenService(OrdenRepository ordenRepository, FacturaPort facturaClient,
                         ObjectProvider<CrdbRetryPort> crdbRetryExecutor,
-                        Optional<IdempotenciaRepository> idempotenciaRepository) {
+                        Optional<IdempotenciaRepository> idempotenciaRepository,
+                        BusinessMetricsPort businessMetrics) {
         this.ordenRepository = ordenRepository;
         this.facturaClient = facturaClient;
         this.crdbRetryExecutor = crdbRetryExecutor;
         this.idempotenciaRepository = idempotenciaRepository;
+        this.businessMetrics = businessMetrics;
     }
 
     public PageResponse<Orden> listarOrdenes(Paginacion paginacion) {
@@ -100,9 +104,17 @@ public class OrdenService {
                     .map(s -> obtenerOrdenPorId(s.ordenId()))
                     .orElse(null);
             if (ordenGanadora == null) {
+                businessMetrics.registrarCheckoutFallido("idempotencia_carrera");
                 throw conflicto;
             }
             return ordenGanadora;
+        } catch (RuntimeException e) {
+            // Cubre, entre otras, las validaciones de JdbcOrdenRepository.crear()
+            // (carrito vacío, usuario/dirección/método de pago inválidos): no se
+            // capturaban antes de D6.1, solo se instrumenta aquí para métricas,
+            // el comportamiento (propagar tal cual) no cambia.
+            businessMetrics.registrarCheckoutFallido(motivoDeFallo(e));
+            throw e;
         }
 
         try {
@@ -110,10 +122,27 @@ public class OrdenService {
         } catch (Exception e) {
             // La orden YA está confirmada en la BD (commit hecho). Decide con el equipo:
             // reintento, marcar "pendiente_facturacion", o solo log + seguir.
+            businessMetrics.registrarCheckoutFallido("facturacion");
             throw new IllegalStateException("Orden " + orden.getOrdenId() + " creada pero falló la facturación", e);
         }
 
+        businessMetrics.registrarCheckoutCompletado();
         return orden;
+    }
+
+    // Vocabulario fijo y pequeño a propósito (ver BusinessMetricsPort): nunca el
+    // mensaje crudo de la excepción, que tendría cardinalidad no acotada.
+    private static String motivoDeFallo(RuntimeException e) {
+        if (e instanceof IllegalArgumentException) {
+            return "validacion";
+        }
+        if (e instanceof IllegalStateException && e.getMessage() != null && e.getMessage().contains("vacío")) {
+            return "carrito_vacio";
+        }
+        if (e instanceof IllegalStateException) {
+            return "estado_invalido";
+        }
+        return "desconocido";
     }
 
     private IdempotenciaRepository resolverRepositorioIdempotencia(String idempotencyKey) {
@@ -134,6 +163,7 @@ public class OrdenService {
             return null;
         }
         if (!existente.get().payloadHash().equals(payloadHash)) {
+            businessMetrics.registrarCheckoutFallido("idempotencia_conflicto");
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "La clave de idempotencia " + idempotencyKey + " ya se uso con una petición distinta");
         }

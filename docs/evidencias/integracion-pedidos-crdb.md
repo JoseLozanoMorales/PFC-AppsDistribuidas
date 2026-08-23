@@ -86,7 +86,7 @@ El controlador PostgreSQL identifica a CockroachDB por el protocolo compatible.
 
 ## Métricas Prometheus
 
-El endpoint `GET /metrics` expone únicamente los instrumentos incrementales
+El endpoint `GET /actuator/prometheus` expone únicamente los instrumentos incrementales
 exigidos para CockroachDB:
 
 ```text
