@@ -1,8 +1,10 @@
 -- Idempotencia de POST /api/ordenes/checkout (pedidos-service)
 -- =============================================================
 --
--- ESTADO: el codigo (com.example.pedidos.idempotencia.*, OrdenService,
--- OrdenPersistenceService, OrdenController) ya implementa el soporte de
+-- ESTADO: el codigo (org.example.domain.IdempotenciaRepository y su
+-- implementacion, org.example.application.OrdenService,
+-- org.example.infrastructure.persistence.JdbcOrdenRepository,
+-- org.example.presentation.OrdenController) ya implementa el soporte de
 -- Idempotency-Key completo, pero esta APAGADO por defecto
 -- (pedidos.idempotencia.enabled=false) porque la tabla de abajo NO existe en
 -- docs/db/schema.sql (archivo compartido del equipo, fuera de esta carpeta).
