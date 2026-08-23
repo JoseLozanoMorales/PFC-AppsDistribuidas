@@ -28,9 +28,9 @@ deliberadamente fuera de este alcance.
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from app.clients.producto_client import producto_client
 from app.config import settings
 from app.domain import bottleneck
+from app.domain.catalogo_provider import CatalogoProvider
 from app.domain.models import ProductoCatalogo
 
 
@@ -68,7 +68,7 @@ def _sin_advertencias() -> list[str]:
 
 
 def recomendar(presupuesto_maximo: Decimal, cpu_original: ProductoCatalogo,
-                gpu_original: ProductoCatalogo | None) -> ResultadoRecomendacion:
+                gpu_original: ProductoCatalogo | None, catalogo: CatalogoProvider) -> ResultadoRecomendacion:
     advertencias: list[str] = []
     descartable: list[str] = []
 
@@ -77,7 +77,7 @@ def recomendar(presupuesto_maximo: Decimal, cpu_original: ProductoCatalogo,
     score_gpu_original = bottleneck.score_gpu(gpu_original, descartable) if requiere_gpu else None
     piso_original = min(score_cpu_original, score_gpu_original) if requiere_gpu else score_cpu_original
 
-    categoria_id_por_key = _resolver_categoria_ids(advertencias)
+    categoria_id_por_key = _resolver_categoria_ids(advertencias, catalogo)
     pesos = _normalizar_pesos(categoria_id_por_key, advertencias)
     sub_presupuestos = _sub_presupuestos(presupuesto_maximo, pesos)
 
@@ -89,15 +89,15 @@ def recomendar(presupuesto_maximo: Decimal, cpu_original: ProductoCatalogo,
         + sub_presupuestos.get("mobo", Decimal(0))
         + (sub_presupuestos.get("gpu", Decimal(0)) if requiere_gpu else Decimal(0))
     )
-    _resolver_cpu_mobo_gpu(categoria_id_por_key, presupuesto_conjunto_cpu, piso_original, requiere_gpu, elegidos)
+    _resolver_cpu_mobo_gpu(categoria_id_por_key, presupuesto_conjunto_cpu, piso_original, requiere_gpu, elegidos, catalogo)
     if not requiere_gpu:
-        _resolver_gpu(categoria_id_por_key, sub_presupuestos.get("gpu"), elegidos)
-    _resolver_ram(categoria_id_por_key, sub_presupuestos.get("ram"), elegidos)
-    _resolver_almacenamiento(categoria_id_por_key, sub_presupuestos.get("storage"), elegidos)
-    _resolver_por_precio("case", categoria_id_por_key, sub_presupuestos.get("case"), elegidos)
-    _resolver_por_precio("cooling", categoria_id_por_key, sub_presupuestos.get("cooling"), elegidos)
-    _resolver_por_precio("periferico", categoria_id_por_key, sub_presupuestos.get("periferico"), elegidos)
-    _resolver_psu(categoria_id_por_key, sub_presupuestos.get("psu"), elegidos, advertencias)
+        _resolver_gpu(categoria_id_por_key, sub_presupuestos.get("gpu"), elegidos, catalogo)
+    _resolver_ram(categoria_id_por_key, sub_presupuestos.get("ram"), elegidos, catalogo)
+    _resolver_almacenamiento(categoria_id_por_key, sub_presupuestos.get("storage"), elegidos, catalogo)
+    _resolver_por_precio("case", categoria_id_por_key, sub_presupuestos.get("case"), elegidos, catalogo)
+    _resolver_por_precio("cooling", categoria_id_por_key, sub_presupuestos.get("cooling"), elegidos, catalogo)
+    _resolver_por_precio("periferico", categoria_id_por_key, sub_presupuestos.get("periferico"), elegidos, catalogo)
+    _resolver_psu(categoria_id_por_key, sub_presupuestos.get("psu"), elegidos, advertencias, catalogo)
 
     # ---- Pasada 2: redistribuir el sobrante entre categorias pendientes ----
     pendientes: set[str] = {key for key in categoria_id_por_key if key not in elegidos}
@@ -109,20 +109,20 @@ def recomendar(presupuesto_maximo: Decimal, cpu_original: ProductoCatalogo,
             if sobrante <= 0 or key not in pendientes:
                 continue
             if key in ("cpu", "mobo"):
-                resuelto = _resolver_cpu_mobo_gpu(categoria_id_por_key, sobrante, piso_original, requiere_gpu, elegidos)
+                resuelto = _resolver_cpu_mobo_gpu(categoria_id_por_key, sobrante, piso_original, requiere_gpu, elegidos, catalogo)
             elif key == "gpu":
                 if requiere_gpu:
-                    resuelto = _resolver_cpu_mobo_gpu(categoria_id_por_key, sobrante, piso_original, True, elegidos)
+                    resuelto = _resolver_cpu_mobo_gpu(categoria_id_por_key, sobrante, piso_original, True, elegidos, catalogo)
                 else:
-                    resuelto = _resolver_gpu(categoria_id_por_key, sobrante, elegidos)
+                    resuelto = _resolver_gpu(categoria_id_por_key, sobrante, elegidos, catalogo)
             elif key == "ram":
-                resuelto = _resolver_ram(categoria_id_por_key, sobrante, elegidos)
+                resuelto = _resolver_ram(categoria_id_por_key, sobrante, elegidos, catalogo)
             elif key == "storage":
-                resuelto = _resolver_almacenamiento(categoria_id_por_key, sobrante, elegidos)
+                resuelto = _resolver_almacenamiento(categoria_id_por_key, sobrante, elegidos, catalogo)
             elif key == "psu":
-                resuelto = _resolver_psu(categoria_id_por_key, sobrante, elegidos, advertencias)
+                resuelto = _resolver_psu(categoria_id_por_key, sobrante, elegidos, advertencias, catalogo)
             else:
-                resuelto = _resolver_por_precio(key, categoria_id_por_key, sobrante, elegidos)
+                resuelto = _resolver_por_precio(key, categoria_id_por_key, sobrante, elegidos, catalogo)
 
             if resuelto:
                 pendientes.discard("cpu")
@@ -166,8 +166,8 @@ def recomendar(presupuesto_maximo: Decimal, cpu_original: ProductoCatalogo,
     return ResultadoRecomendacion(total, elegidos, porcentaje, nivel, limitante, advertencias)
 
 
-def _resolver_categoria_ids(advertencias: list[str]) -> dict[str, int]:
-    categorias_reales = producto_client.listar_categorias()
+def _resolver_categoria_ids(advertencias: list[str], catalogo: CatalogoProvider) -> dict[str, int]:
+    categorias_reales = catalogo.listar_categorias()
     resultado: dict[str, int] = {}
     for key, cfg in settings.categorias.items():
         encontrada = next((c for c in categorias_reales if c.nombre.lower() == cfg.nombre.lower()), None)
@@ -193,11 +193,12 @@ def _sub_presupuestos(presupuesto_maximo: Decimal, pesos: dict[str, float]) -> d
     return {key: presupuesto_maximo * Decimal(str(peso)) for key, peso in pesos.items()}
 
 
-def _candidatos_dentro_de_presupuesto(categoria_id: int | None, presupuesto: Decimal | None) -> list[ProductoCatalogo]:
+def _candidatos_dentro_de_presupuesto(categoria_id: int | None, presupuesto: Decimal | None,
+                                       catalogo: CatalogoProvider) -> list[ProductoCatalogo]:
     if categoria_id is None or presupuesto is None or presupuesto <= 0:
         return []
     return [
-        p for p in producto_client.listar_por_categoria(categoria_id)
+        p for p in catalogo.listar_por_categoria(categoria_id)
         if p.habilitado and p.precio <= presupuesto
     ]
 
@@ -215,14 +216,15 @@ def _candidatos_dentro_de_presupuesto(categoria_id: int | None, presupuesto: Dec
 # por precio acumulado" que resuelve la compatibilidad de socket en O(1) por
 # CPU bajaria esto a O((C+G) log(C+G)) si hiciera falta.
 def _resolver_cpu_mobo_gpu(categoria_id_por_key: dict[str, int], presupuesto_conjunto: Decimal,
-                            piso_minimo: float, requiere_gpu: bool, elegidos: dict[str, ProductoCatalogo]) -> bool:
+                            piso_minimo: float, requiere_gpu: bool, elegidos: dict[str, ProductoCatalogo],
+                            catalogo: CatalogoProvider) -> bool:
     if "cpu" in elegidos:
         return False
     if "cpu" not in categoria_id_por_key or "mobo" not in categoria_id_por_key:
         return False
 
-    todos_cpu = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("cpu"), presupuesto_conjunto)
-    todos_mobo = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("mobo"), presupuesto_conjunto)
+    todos_cpu = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("cpu"), presupuesto_conjunto, catalogo)
+    todos_mobo = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("mobo"), presupuesto_conjunto, catalogo)
 
     motherboards_por_socket: dict[str, list[ProductoCatalogo]] = {}
     for mobo in todos_mobo:
@@ -256,7 +258,7 @@ def _resolver_cpu_mobo_gpu(categoria_id_por_key: dict[str, int], presupuesto_con
         elegidos["mobo"] = mejor.mobo
         return True
 
-    todos_gpu = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("gpu"), presupuesto_conjunto)
+    todos_gpu = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("gpu"), presupuesto_conjunto, catalogo)
     opciones_gpu = [_OpcionGpu(gpu, bottleneck.score_gpu(gpu, descartable)) for gpu in todos_gpu]
 
     mejor_cpu: _OpcionCpu | None = None
@@ -289,10 +291,10 @@ def _resolver_cpu_mobo_gpu(categoria_id_por_key: dict[str, int], presupuesto_con
 
 
 def _resolver_gpu(categoria_id_por_key: dict[str, int], presupuesto: Decimal | None,
-                   elegidos: dict[str, ProductoCatalogo]) -> bool:
+                   elegidos: dict[str, ProductoCatalogo], catalogo: CatalogoProvider) -> bool:
     if "gpu" in elegidos or "gpu" not in categoria_id_por_key or presupuesto is None:
         return False
-    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("gpu"), presupuesto)
+    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("gpu"), presupuesto, catalogo)
     if not candidatos:
         return False
     descartable: list[str] = []
@@ -302,10 +304,10 @@ def _resolver_gpu(categoria_id_por_key: dict[str, int], presupuesto: Decimal | N
 
 
 def _resolver_ram(categoria_id_por_key: dict[str, int], presupuesto: Decimal | None,
-                   elegidos: dict[str, ProductoCatalogo]) -> bool:
+                   elegidos: dict[str, ProductoCatalogo], catalogo: CatalogoProvider) -> bool:
     if "ram" in elegidos:
         return False
-    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("ram"), presupuesto)
+    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("ram"), presupuesto, catalogo)
     return _seleccionar_mejor(
         candidatos, "ram", elegidos,
         lambda p: (p.atributo_numerico("capacidad_gb") or 0.0, p.atributo_numerico("velocidad_mhz") or 0.0),
@@ -313,10 +315,10 @@ def _resolver_ram(categoria_id_por_key: dict[str, int], presupuesto: Decimal | N
 
 
 def _resolver_almacenamiento(categoria_id_por_key: dict[str, int], presupuesto: Decimal | None,
-                              elegidos: dict[str, ProductoCatalogo]) -> bool:
+                              elegidos: dict[str, ProductoCatalogo], catalogo: CatalogoProvider) -> bool:
     if "storage" in elegidos:
         return False
-    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("storage"), presupuesto)
+    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("storage"), presupuesto, catalogo)
     return _seleccionar_mejor(
         candidatos, "storage", elegidos,
         lambda p: (_rank_tipo_almacenamiento(p.atributo_texto("tipo") or ""), p.atributo_numerico("capacidad_gb") or 0.0),
@@ -335,10 +337,11 @@ def _rank_tipo_almacenamiento(tipo: str) -> int:
 # La PSU se resuelve DESPUES de CPU/GPU a proposito: valida watts contra el
 # TDP combinado de lo que realmente se eligio, no de forma aislada.
 def _resolver_psu(categoria_id_por_key: dict[str, int], presupuesto: Decimal | None,
-                   elegidos: dict[str, ProductoCatalogo], advertencias: list[str]) -> bool:
+                   elegidos: dict[str, ProductoCatalogo], advertencias: list[str],
+                   catalogo: CatalogoProvider) -> bool:
     if "psu" in elegidos:
         return False
-    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("psu"), presupuesto)
+    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get("psu"), presupuesto, catalogo)
     if not candidatos:
         return False
 
@@ -370,10 +373,10 @@ def _resolver_psu(categoria_id_por_key: dict[str, int], presupuesto: Decimal | N
 # mas precio suele correlacionar con mejores materiales/calidad). Heuristica
 # declarada, no una medicion real.
 def _resolver_por_precio(categoria_key: str, categoria_id_por_key: dict[str, int], presupuesto: Decimal | None,
-                          elegidos: dict[str, ProductoCatalogo]) -> bool:
+                          elegidos: dict[str, ProductoCatalogo], catalogo: CatalogoProvider) -> bool:
     if categoria_key in elegidos:
         return False
-    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get(categoria_key), presupuesto)
+    candidatos = _candidatos_dentro_de_presupuesto(categoria_id_por_key.get(categoria_key), presupuesto, catalogo)
     return _seleccionar_mejor(candidatos, categoria_key, elegidos, lambda p: p.precio)
 
 

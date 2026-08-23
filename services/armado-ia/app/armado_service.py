@@ -35,7 +35,7 @@ def analizar(request: AnalizarRequest, identidad: IdentidadOpcional,
     recomendacion: RecomendacionResponse | None = None
     if pide_recomendacion:
         resultado_recomendacion = recomendador.recomendar(
-            request.presupuesto_maximo, componentes["cpu"], componentes.get("gpu")
+            request.presupuesto_maximo, componentes["cpu"], componentes.get("gpu"), producto_client
         )
         componentes_recomendados = {
             key: ComponenteResponse(id=producto.id, nombre=producto.nombre, precio=float(producto.precio))
