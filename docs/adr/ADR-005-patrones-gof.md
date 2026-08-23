@@ -22,17 +22,12 @@ de Fowler, no GoF), o un builder/decorador de una librería de terceros
 (`RestClient.builder()`, `Jwts.builder()`, `CircuitBreaker.decorateSupplier`
 de resilience4j).
 
-Se encontraron **cuatro** patrones GoF con evidencia real (tres sólidos y uno
-parcial, apoyado en infraestructura de framework). Para llegar al mínimo
-exigido sin forzar ni inventar patrones donde no los hay, se decidió hacer un
-cambio de código mínimo y legítimo en `services/armado-ia`: extraer el
-fallback determinista de `ExplicacionService` a una clase propia que
-implementa el mismo `Protocol` que el cliente de Bedrock. Esto convierte un
-Strategy incompleto (una sola implementación real) en un Strategy real (dos
-estrategias intercambiables), y de paso mejora el diseño: antes el fallback
-era un método privado mezclado con la lógica de selección y validación
-anti-alucinación; ahora es una responsabilidad separada y testeable por sí
-sola.
+Se encontraron tres patrones sólidos y una aplicación parcial apoyada en el
+framework. Para completar el mínimo sin etiquetar falsamente Repository o DI
+como GoF, se refactorizaron dos necesidades reales de `services/armado-ia`:
+las estrategias intercambiables de explicación y las reglas de validación
+anti-alucinación. Estas últimas forman una cadena propia de handlers y
+comparten un algoritmo común con hooks especializados.
 
 No se tocó ningún otro servicio para completar la cuota. Donde el framework ya
 resuelve el problema sin necesitar un patrón GoF propio, se documenta así
@@ -106,31 +101,45 @@ por el gateway (ver ADR-007) a los microservicios internos, envolviendo la
 petición en vez de mutarla o crear un tipo paralelo — el resto del pipeline
 sigue viendo un `HttpServletRequest` normal.
 
-### 4. Chain of Responsibility (comportamiento) — aplicación parcial
+### 4. Chain of Responsibility (comportamiento)
 
 **Propósito canónico (GoF):** evitar acoplar el emisor de una petición a su
 receptor, dando a más de un objeto la oportunidad de manejarla. Se encadenan
 los objetos receptores y la petición pasa por la cadena hasta que alguno la
 maneja.
 
-**Ubicación:** `Apps/web/frontend/.../security/JwtGatewayFilter.java`,
-`JwtGatewayFilter extends OncePerRequestFilter`, método `doFilterInternal(request, response, filterChain)`:
-decide entre tres salidas — dejar pasar la petición sin tocar, dejarla pasar
-envuelta en `TrustedUserHeaderRequest`, o cortar con 401 — delegando al
-siguiente eslabón vía `filterChain.doFilter(...)`.
+**Ubicación:**
+- Handler abstracto: `services/armado-ia/app/explicacion/validation.py`,
+  `ExplanationValidationHandler`.
+- Enlace de handlers: `set_next()` y delegación desde `validate()`.
+- Handlers concretos: `NonEmptyExplanationHandler` y
+  `VerifiedHardwareTokenHandler`.
+- Construcción de la cadena: `build_explanation_validation_chain()`.
+- Cliente: `ExplicacionService.generar()` ejecuta la cadena antes de aceptar
+  una respuesta del LLM.
 
-**Aclaración importante:** esta es la cadena de responsabilidad del Servlet
-API / Spring Boot, infraestructura de terceros que el proyecto **usa**, no
-construye desde cero. El proyecto añade un único eslabón propio
-(`JwtGatewayFilter`) sobre esa cadena; no hay una jerarquía de *handlers*
-propios encadenados entre sí con `setNext()`. Se documenta como aplicación
-parcial y no como una implementación GoF completa, para no sobrevender el
-diseño.
+**Problema que resuelve en este proyecto:** cada guardrail examina la
+respuesta y puede detenerla con un `ValidationIssue`; si la regla pasa,
+delega al siguiente handler. Se pueden agregar nuevas reglas de longitud,
+contenido sensible o consistencia sin convertir `ExplicacionService` en una
+secuencia creciente de condicionales.
 
-**Problema que resuelve en este proyecto:** decidir en un único punto
-reutilizable del pipeline HTTP si una petición sigue hacia el microservicio
-interno, sigue con identidad enriquecida, o se corta antes de llegar a los
-controladores — sin duplicar esa decisión en cada endpoint.
+### 5. Template Method (comportamiento)
+
+**Propósito canónico (GoF):** definir el esqueleto de un algoritmo en una
+operación base, delegando pasos variables a las subclases sin permitir que
+cambien la secuencia general.
+
+**Ubicación:** `ExplanationValidationHandler.validate()` en
+`services/armado-ia/app/explicacion/validation.py` fija el algoritmo:
+(1) ejecutar la regla actual mediante `_validate_current()`, (2) devolver el
+problema si existe y (3) delegar al siguiente handler si la regla pasó.
+`_validate_current()` es el hook abstracto implementado de forma distinta por
+`NonEmptyExplanationHandler` y `VerifiedHardwareTokenHandler`.
+
+**Problema que resuelve en este proyecto:** garantiza que todas las reglas
+respeten el mismo contrato de parada/delegación y evita duplicar ese control
+en cada validador. Una regla nueva solo implementa su comprobación local.
 
 ## Patrones evaluados y descartados explícitamente
 
@@ -190,18 +199,14 @@ pertenecen al catálogo GoF**; se listan por separado para no mezclarlos:
    para sembrar patrones adicionales: se descartó por alcance — esos servicios
    no son responsabilidad de quien redactó este ADR y no se justifica tocar
    código ajeno solo para cumplir una cuota.
-4. **Elegida:** un único cambio mínimo y legítimo en `armado-ia` (extraer el
-   fallback a una segunda estrategia real), documentando el resto tal como
-   está, con una sección aparte para no-GoF.
+4. **Elegida:** cambios acotados y legítimos en `armado-ia`: extraer el
+   fallback a una segunda estrategia real y convertir los guardrails ya
+   existentes en una cadena de validadores con flujo común.
 
 ## Consecuencias
 
-- El backend documenta honestamente **4 patrones GoF** (3 sólidos: Strategy,
-  Adapter, Decorator; 1 parcial: Chain of Responsibility apoyado en Servlet
-  API), no 5 forzados. Si la rúbrica exige estrictamente 5 patrones GoF
-  distintos sin excepción, esto debe discutirse con la cátedra antes de la
-  entrega; forzar un quinto patrón inexistente no es una opción preferida por
-  el equipo.
+- El backend documenta **5 patrones GoF con código real**: Strategy, Adapter,
+  Decorator, Chain of Responsibility y Template Method.
 - El cambio en `services/armado-ia/app/explicacion/` es funcional, no
   cosmético: `ExplicacionService` ya no mezcla selección de estrategia con la
   lógica de redacción del fallback, y `DeterministicExplicacionClient` puede
@@ -209,3 +214,5 @@ pertenecen al catálogo GoF**; se listan por separado para no mezclarlos:
 - La mayoría del backend seguirá sin patrones GoF explícitos, lo cual es
   correcto para su tamaño y problema: forzar patrones donde el framework
   (Spring DI, Repository) ya resuelve el problema habría sido sobre-ingeniería.
+- Las reglas anti-alucinación pueden probarse y extenderse aisladamente; el
+  costo es una jerarquía pequeña de handlers adicional.
