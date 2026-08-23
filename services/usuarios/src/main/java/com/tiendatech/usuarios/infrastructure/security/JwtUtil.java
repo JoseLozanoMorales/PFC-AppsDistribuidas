@@ -1,19 +1,18 @@
 package com.tiendatech.usuarios.infrastructure.security;
 
+import com.tiendatech.usuarios.domain.model.auth.AccessClaims;
 import com.tiendatech.usuarios.domain.model.auth.RefreshClaims;
 import com.tiendatech.usuarios.domain.port.out.TokenPort;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import java.security.Key;
-import java.time.Instant;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+
+import java.security.Key;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
 
 public class JwtUtil implements TokenPort {
     private final Key key;
@@ -47,6 +46,20 @@ public class JwtUtil implements TokenPort {
     }
 
     public Jws<Claims> parse(String jwt){ return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt); }
+
+    @Override
+    public AccessClaims parseAccess(String jwt) {
+        Claims claims = parse(jwt).getBody();
+        Object username = claims.get("username");
+        if (username == null || claims.get("family_id") != null || claims.getId() != null) {
+            throw new IllegalArgumentException("El token presentado no es un access token");
+        }
+        return new AccessClaims(
+                Integer.valueOf(claims.getSubject()),
+                String.valueOf(username),
+                String.valueOf(claims.get("role"))
+        );
+    }
 
     @Override
     public RefreshClaims parseRefresh(String jwt) {

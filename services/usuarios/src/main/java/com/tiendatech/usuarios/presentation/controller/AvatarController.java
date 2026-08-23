@@ -1,5 +1,6 @@
 package com.tiendatech.usuarios.presentation.controller;
 
+import com.tiendatech.usuarios.presentation.support.UserAccessGuard;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +34,11 @@ public class AvatarController {
     private String uploadRoot;
 
     private final JdbcTemplate jdbc;
+    private final UserAccessGuard accessGuard;
 
-    public AvatarController(JdbcTemplate jdbc) {
+    public AvatarController(JdbcTemplate jdbc, UserAccessGuard accessGuard) {
         this.jdbc = jdbc;
+        this.accessGuard = accessGuard;
     }
 
     private static final long MAX_BYTES = DataSize.ofMegabytes(5).toBytes();
@@ -44,6 +47,7 @@ public class AvatarController {
     @PostMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadAvatar(@PathVariable Integer id,
                                           @RequestPart("file") MultipartFile file) throws Exception {
+        accessGuard.requireOwnerOrAdmin(id);
         if (file.isEmpty()) return bad("Archivo vacio");
         if (file.getSize() > MAX_BYTES) return bad("Archivo supera el limite");
 
@@ -77,6 +81,7 @@ public class AvatarController {
 
     @DeleteMapping("/{id}/avatar")
     public ResponseEntity<?> removeAvatar(@PathVariable Integer id) {
+        accessGuard.requireOwnerOrAdmin(id);
         jdbc.update("UPDATE usuarios.usuario SET avatar_path = NULL WHERE usuario_id = ?", id);
 
         Path out = Paths.get(uploadRoot, "avatars", id.toString(), "avatar.png");

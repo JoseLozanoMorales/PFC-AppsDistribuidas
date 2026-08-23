@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
 import com.tiendatech.usuarios.domain.port.out.TokenPort;
 import com.tiendatech.usuarios.application.service.auth.RefreshTokenService;
 
@@ -30,35 +29,18 @@ public class AuthController {
         res.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    // Ejemplo: tu LoginController ya valida credenciales; aquí solo muestro el contrato
-    @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody Map<String,String> body, HttpServletResponse res){
-        // ... validar user & role desde tu UsuarioService ...
-        Integer userId = /*...*/ 1;
-        String username = /*...*/ "demo";
-        String role = /*...*/ "TRABAJADOR";
-
-        var out = svc.issueOnLogin(userId, username, role);
-        writeRefreshCookie(res, out.refreshJwt(), out.absExp());
-
-        return ResponseEntity.ok(Map.of(
-                "access", out.access(),
-                "user", Map.of("usuario_id", userId, "usuario", username, "rol", role)
-        ));
-    }
-
     @PostMapping("/auth/refresh")
     public ResponseEntity<?> refresh(@CookieValue("refresh") String refresh, HttpServletResponse res){
         var r = svc.refresh(refresh);
         writeRefreshCookie(res, r.refreshJwt(), Instant.now().plusSeconds(3600*8)); // abs exp ya está dentro; maxAge lo recalcula
-        return ResponseEntity.ok(Map.of("access", r.access(), "meta", r.meta()));
+        return ResponseEntity.ok(java.util.Map.of("access", r.access(), "meta", r.meta()));
     }
 
     @PostMapping("/auth/keepalive")
     public ResponseEntity<?> keepalive(@CookieValue("refresh") String refresh, HttpServletResponse res){
         var r = svc.refresh(refresh); // misma lógica que refresh
         writeRefreshCookie(res, r.refreshJwt(), Instant.now().plusSeconds(3600*8));
-        return ResponseEntity.ok(Map.of("access", r.access(), "meta", r.meta()));
+        return ResponseEntity.ok(java.util.Map.of("access", r.access(), "meta", r.meta()));
     }
 
     @PostMapping("/auth/logout")
@@ -71,6 +53,6 @@ public class AuthController {
         ResponseCookie gone = ResponseCookie.from("refresh", "")
                 .path("/").maxAge(0).httpOnly(true).secure(cookieSecure).domain(cookieDomain).sameSite(cookieSameSite).build();
         res.addHeader(HttpHeaders.SET_COOKIE, gone.toString());
-        return ResponseEntity.ok(Map.of("ok", true));
+        return ResponseEntity.ok(java.util.Map.of("ok", true));
     }
 }

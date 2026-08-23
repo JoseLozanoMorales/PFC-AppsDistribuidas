@@ -5,7 +5,7 @@ import com.tiendatech.usuarios.application.dto.UsuarioDTO;
 import com.tiendatech.usuarios.application.dto.UsuarioMinDTO;
 import com.tiendatech.usuarios.domain.model.Usuario;
 import com.tiendatech.usuarios.application.service.UsuarioService;
-import jakarta.servlet.http.HttpServletRequest;
+import com.tiendatech.usuarios.presentation.support.UserAccessGuard;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +20,11 @@ import java.util.Map;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final UserAccessGuard accessGuard;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UserAccessGuard accessGuard) {
         this.usuarioService = usuarioService;
+        this.accessGuard = accessGuard;
     }
 
     @PostMapping("/crear")
@@ -42,19 +44,21 @@ public class UsuarioController {
 
     @PutMapping("/cliente/{id}")
     public ResponseEntity<?> actualizarCliente(@PathVariable Integer id, @RequestBody ClienteUpdateRequest dto) {
+        accessGuard.requireOwnerOrAdmin(id);
         usuarioService.actualizarCliente(id, dto);
         return ResponseEntity.ok(Map.of("success", true, "message", "Cliente actualizado"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
+        accessGuard.requireOwnerOrAdmin(id);
         Usuario usuario = usuarioService.getById(id);
         return ResponseEntity.ok(usuarioPayload(usuario));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpServletRequest req) {
-        Integer userId = resolveUserId(req);
+    public ResponseEntity<?> me() {
+        Integer userId = accessGuard.currentUserId();
         Usuario usuario = usuarioService.getById(userId);
         return ResponseEntity.ok(Map.of("data", usuarioPayload(usuario)));
     }
@@ -94,30 +98,6 @@ public class UsuarioController {
             @RequestParam(value = "rolId", required = false) Integer rolId,
             @RequestParam(value = "limit", defaultValue = "20") int limit) {
         return ResponseEntity.ok(usuarioService.buscarMin(q, rolId, limit));
-    }
-
-    private Integer resolveUserId(HttpServletRequest req) {
-        String header = req.getHeader("X-User-Id");
-        if (header != null && !header.isBlank()) {
-            try {
-                return Integer.valueOf(header);
-            } catch (NumberFormatException ignored) {
-                // fallback to session
-            }
-        }
-
-        var session = req.getSession(false);
-        Object attr = session != null ? session.getAttribute("userId") : null;
-        if (attr instanceof Integer id) return id;
-        if (attr instanceof String id) {
-            try {
-                return Integer.valueOf(id);
-            } catch (NumberFormatException ignored) {
-                // handled below
-            }
-        }
-
-        throw new IllegalArgumentException("No se pudo resolver el usuario actual");
     }
 
     private ResponseEntity<Map<String, Object>> createdUsuario(Usuario usuario, String message) {
