@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -171,11 +172,22 @@ public class JdbcInventarioRepository implements InventarioRepository {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, fecha, cantidad, costoEfectivo, total, item.getReferencia(),
                 item.getObservacion(), productoId, subtipoId);
-        jdbc.update("""
-                UPDATE productos.producto SET stock = ?, costo = ?, valor_inventario = ?
-                WHERE producto_id = ?
-                """, stockNuevo, costoNuevo,
-                costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP), productoId);
+        // productos.producto tiene un CHECK (preciounitario >= costo): si esta entrada sube
+        // el costo promedio ponderado por encima del precio de venta actual, la actualizacion
+        // falla aqui a proposito -- es la decision de negocio: bloquear la recepcion hasta que
+        // el precio se reajuste manualmente, en vez de dejar el producto vendiendose bajo costo.
+        try {
+            jdbc.update("""
+                    UPDATE productos.producto SET stock = ?, costo = ?, valor_inventario = ?
+                    WHERE producto_id = ?
+                    """, stockNuevo, costoNuevo,
+                    costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP), productoId);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException(
+                    "El producto " + productoId + " quedaria con un costo de $" + costoNuevo
+                            + " por encima de su precio de venta actual. Actualiza el precio del "
+                            + "producto antes de confirmar este movimiento.", ex);
+        }
         jdbc.update("""
                 UPSERT INTO inventario.inventario_producto
                     (producto_id, stock, stock_minimo, valor_inventario, actualizado_en)

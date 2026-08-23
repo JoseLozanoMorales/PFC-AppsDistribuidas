@@ -4,12 +4,17 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+// Un producto nace con stock=0 y costo=0: el stock solo sube al recibir una orden de compra
+// (ordenes-proveedores-service -> inventario-service) y el costo se recalcula ahi mismo como
+// promedio ponderado. Por eso este DTO ya no acepta "stock" ni "costo" -- si el cliente los
+// manda igual, se ignoran (ver JdbcProductoRepository.crear).
 public class CrearProductoRequest {
     @NotBlank(message = "nombre es obligatorio")
     private String nombre;
@@ -19,9 +24,10 @@ public class CrearProductoRequest {
     @JsonProperty("categoria_id")
     private Integer categoriaId;
 
+    @NotNull(message = "preciounitario es obligatorio")
+    @PositiveOrZero(message = "preciounitario debe ser mayor o igual a 0")
     private BigDecimal preciounitario;
-    private BigDecimal costo;
-    private Integer stock;
+
     private String enlace;
 
     @JsonProperty("marca_id")
@@ -32,9 +38,6 @@ public class CrearProductoRequest {
 
     @JsonProperty("iva_id")
     private Integer ivaId;
-
-    @JsonProperty("valor_inventario")
-    private BigDecimal valorInventario;
 
     private final Map<String, Object> atributos = new LinkedHashMap<>();
 
@@ -48,13 +51,10 @@ public class CrearProductoRequest {
         putIfNotNull(payload, "nombre", nombre);
         putIfNotNull(payload, "categoria_id", categoriaId);
         putIfNotNull(payload, "preciounitario", preciounitario);
-        putIfNotNull(payload, "costo", costo);
-        putIfNotNull(payload, "stock", stock);
         putIfNotNull(payload, "enlace", enlace);
         putIfNotNull(payload, "marca_id", marcaId);
         putIfNotNull(payload, "gama_id", gamaId);
         putIfNotNull(payload, "iva_id", ivaId);
-        putIfNotNull(payload, "valor_inventario", valorInventario);
         return payload;
     }
 
@@ -88,22 +88,6 @@ public class CrearProductoRequest {
         this.preciounitario = preciounitario;
     }
 
-    public BigDecimal getCosto() {
-        return costo;
-    }
-
-    public void setCosto(BigDecimal costo) {
-        this.costo = costo;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
     public String getEnlace() {
         return enlace;
     }
@@ -134,13 +118,5 @@ public class CrearProductoRequest {
 
     public void setIvaId(Integer ivaId) {
         this.ivaId = ivaId;
-    }
-
-    public BigDecimal getValorInventario() {
-        return valorInventario;
-    }
-
-    public void setValorInventario(BigDecimal valorInventario) {
-        this.valorInventario = valorInventario;
     }
 }

@@ -21,7 +21,7 @@ class CrearProductoRequestTest {
 
         assertThat(validator.validate(request))
                 .extracting(error -> error.getPropertyPath().toString())
-                .containsExactlyInAnyOrder("nombre", "categoriaId");
+                .containsExactlyInAnyOrder("nombre", "categoriaId", "preciounitario");
     }
 
     @Test

@@ -80,7 +80,7 @@ public class JdbcOrdenCompraRepository implements OrdenCompraRepository {
 
     @Override
     @Transactional
-    public void registrarRecepcion(Integer id, Map<Integer, Integer> recepcion) {
+    public Map<Integer, BigDecimal> registrarRecepcion(Integer id, Map<Integer, Integer> recepcion) {
         EstadoOrdenCompra estado = estado(id);
         if (estado != EstadoOrdenCompra.ENVIADA && estado != EstadoOrdenCompra.RECIBIDA_PARCIAL)
             throw new IllegalStateException("Solo se recibe una orden ENVIADA o RECIBIDA_PARCIAL");
@@ -107,6 +107,25 @@ public class JdbcOrdenCompraRepository implements OrdenCompraRepository {
                 """, Boolean.TRUE.equals(completo) ? "RECIBIDA" : "RECIBIDA_PARCIAL",
                 Boolean.TRUE.equals(completo), id);
         recalcular(id);
+        return costosPorProducto(id, recepcion.keySet());
+    }
+
+    // El costo_unitario negociado ya vive en detalle_orden_compra (se fija al crear la
+    // orden). Antes se perdia aca: registrarEntradasPorRecepcion solo mandaba producto_id
+    // y cantidad a inventario-service, asi que el kardex nunca recalculaba el costo
+    // promedio ponderado con el costo real de compra. Este metodo cierra ese hueco.
+    private Map<Integer, BigDecimal> costosPorProducto(Integer ordenCompraId, java.util.Set<Integer> productoIds) {
+        Map<Integer, BigDecimal> costos = new java.util.HashMap<>();
+        jdbcTemplate.query("""
+                SELECT producto_id, costo_unitario FROM ordenes_proveedores.detalle_orden_compra
+                 WHERE orden_compra_id=?
+                """, rs -> {
+            Integer productoId = rs.getInt("producto_id");
+            if (productoIds.contains(productoId)) {
+                costos.put(productoId, rs.getBigDecimal("costo_unitario"));
+            }
+        }, ordenCompraId);
+        return costos;
     }
 
     @Override
@@ -121,6 +140,26 @@ public class JdbcOrdenCompraRepository implements OrdenCompraRepository {
     public OrdenCompra obtenerPorId(Integer id) {
         return jdbcTemplate.query("SELECT * FROM ordenes_proveedores.orden_compra WHERE orden_compra_id=?",
                 this::mapOrden, id).stream().findFirst().orElse(null);
+    }
+
+    @Override
+    public List<DetalleOrdenCompra> listarDetalle(Integer ordenCompraId) {
+        return jdbcTemplate.query("""
+                SELECT * FROM ordenes_proveedores.detalle_orden_compra
+                 WHERE orden_compra_id=? ORDER BY detalle_id
+                """, this::mapDetalle, ordenCompraId);
+    }
+
+    private DetalleOrdenCompra mapDetalle(ResultSet rs, int row) throws SQLException {
+        DetalleOrdenCompra d = new DetalleOrdenCompra();
+        d.setDetalleId(rs.getInt("detalle_id"));
+        d.setOrdenCompraId(rs.getInt("orden_compra_id"));
+        d.setProductoId(rs.getInt("producto_id"));
+        d.setCantidadPedida(rs.getInt("cantidad_pedida"));
+        d.setCantidadRecibida(rs.getInt("cantidad_recibida"));
+        d.setCostoUnitario(rs.getBigDecimal("costo_unitario"));
+        d.setSubtotalLinea(rs.getBigDecimal("subtotal_linea"));
+        return d;
     }
 
     private void insertarDetalle(Integer id, List<DetalleOrdenCompra> detalle) {

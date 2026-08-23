@@ -1,5 +1,6 @@
 package org.example.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,14 @@ public interface OrdenCompraRepository {
 
     void cancelar(Integer id);
 
-    void registrarRecepcion(Integer id, Map<Integer, Integer> recepcion);
+    // Devuelve el costo_unitario negociado (de detalle_orden_compra) por cada producto
+    // recibido, para que quien llama pueda pasarselo a inventario-service y el kardex
+    // recalcule el costo promedio ponderado con el costo real de compra.
+    Map<Integer, BigDecimal> registrarRecepcion(Integer id, Map<Integer, Integer> recepcion);
 
     List<OrdenCompra> listarPorEstado(EstadoOrdenCompra estado);
 
     OrdenCompra obtenerPorId(Integer id);
+
+    List<DetalleOrdenCompra> listarDetalle(Integer ordenCompraId);
 }

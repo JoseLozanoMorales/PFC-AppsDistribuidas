@@ -7,6 +7,7 @@ import com.example.productos.domain.ProductoResumen;
 import com.example.productos.domain.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -218,6 +219,10 @@ public class JdbcProductoRepository implements ProductoRepository {
         return out;
     }
 
+    // Un producto nace sin existencias y sin costo: el stock solo lo mueve una recepcion de
+    // orden de compra y el costo lo recalcula inventario-service (promedio ponderado) a partir
+    // de ahi. Por eso "stock", "costo" y "valor_inventario" del payload se ignoran a proposito
+    // aca (incluso si algun endpoint legado los manda) -- nacen siempre en 0.
     @Transactional
     public Long crear(Integer categoriaId, Map<String, Object> body, String usuario) {
         Map<String, Object> payload = new LinkedHashMap<>(body == null ? Map.of() : body);
@@ -226,13 +231,12 @@ public class JdbcProductoRepository implements ProductoRepository {
                 INSERT INTO productos.producto
                     (nombre, preciounitario, enlace, fecha, stock, marca_id,
                      gama_id, iva_id, costo, habilitado, categoria_id, valor_inventario, atributos)
-                VALUES (?, ?, ?, current_date(), ?, ?, ?, ?, ?, true, ?, ?, CAST(? AS JSONB))
+                VALUES (?, ?, ?, current_date(), 0, ?, ?, ?, 0, true, ?, 0, CAST(? AS JSONB))
                 RETURNING producto_id
                 """, Long.class,
                 payload.get("nombre"), payload.get("preciounitario"), payload.get("enlace"),
-                valor(payload, "stock", 0), payload.get("marca_id"), payload.get("gama_id"),
-                payload.get("iva_id"), valor(payload, "costo", 0), categoriaId,
-                valor(payload, "valor_inventario", 0), json(atributos));
+                payload.get("marca_id"), payload.get("gama_id"),
+                payload.get("iva_id"), categoriaId, json(atributos));
     }
 
     @Transactional
@@ -321,24 +325,33 @@ public class JdbcProductoRepository implements ProductoRepository {
         return jdbc.queryForList("SELECT iva_id, porcentaje, habilitado FROM productos.iva WHERE habilitado ORDER BY porcentaje");
     }
 
+    // "stock" y "costo" quedaron fuera a proposito: ya no son editables a mano desde aca,
+    // solo cambian via movimientos de inventario (ver inventario-service). Si el precio se
+    // intenta dejar por debajo del costo actual, el CHECK ck_producto_precio_mayor_costo de
+    // la base lo rechaza y lo traducimos a un mensaje claro mas abajo.
     @Transactional
     public void actualizarBasico(Integer productoId, Map<String, Object> body, String usuario) {
         Map<String, Object> payload = new LinkedHashMap<>(body == null ? Map.of() : body);
         Map<String, Object> atributos = extraerAtributos(payload);
-        int actualizados = jdbc.update("""
-                UPDATE productos.producto SET
-                    nombre = COALESCE(?, nombre),
-                    preciounitario = COALESCE(?, preciounitario),
-                    enlace = COALESCE(?, enlace), stock = COALESCE(?, stock),
-                    marca_id = COALESCE(?, marca_id), gama_id = COALESCE(?, gama_id),
-                    iva_id = COALESCE(?, iva_id), costo = COALESCE(?, costo),
-                    categoria_id = COALESCE(?, categoria_id),
-                    atributos = atributos || CAST(? AS JSONB)
-                WHERE producto_id = ?
-                """, payload.get("nombre"), payload.get("preciounitario"), payload.get("enlace"),
-                payload.get("stock"), payload.get("marca_id"), payload.get("gama_id"),
-                payload.get("iva_id"), payload.get("costo"), payload.get("categoria_id"),
-                json(atributos), productoId);
+        int actualizados;
+        try {
+            actualizados = jdbc.update("""
+                    UPDATE productos.producto SET
+                        nombre = COALESCE(?, nombre),
+                        preciounitario = COALESCE(?, preciounitario),
+                        enlace = COALESCE(?, enlace),
+                        marca_id = COALESCE(?, marca_id), gama_id = COALESCE(?, gama_id),
+                        iva_id = COALESCE(?, iva_id),
+                        categoria_id = COALESCE(?, categoria_id),
+                        atributos = atributos || CAST(? AS JSONB)
+                    WHERE producto_id = ?
+                    """, payload.get("nombre"), payload.get("preciounitario"), payload.get("enlace"),
+                    payload.get("marca_id"), payload.get("gama_id"),
+                    payload.get("iva_id"), payload.get("categoria_id"),
+                    json(atributos), productoId);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("El precio no puede ser menor al costo actual del producto.", ex);
+        }
         if (actualizados == 0) throw new ResourceNotFoundException("Producto no encontrado");
     }
 
@@ -369,10 +382,6 @@ public class JdbcProductoRepository implements ProductoRepository {
             sql.append(clausula);
             args.add(valor);
         }
-    }
-
-    private static Object valor(Map<String, Object> payload, String clave, Object predeterminado) {
-        return payload.get(clave) == null ? predeterminado : payload.get(clave);
     }
 
     private static Long nullableLong(Object value) {

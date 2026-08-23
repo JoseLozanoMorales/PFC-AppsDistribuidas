@@ -77,4 +77,11 @@ public class OrdenCompraController {
     public OrdenCompraResponseDTO obtenerPorId(@PathVariable Integer id) {
         return OrdenCompraResponseDTO.from(ordenCompraService.obtenerPorId(id));
     }
+
+    @GetMapping("/{id}/detalle")
+    public List<org.example.presentation.dto.DetalleOrdenCompraResponseDTO> listarDetalle(@PathVariable Integer id) {
+        return ordenCompraService.listarDetalle(id).stream()
+                .map(org.example.presentation.dto.DetalleOrdenCompraResponseDTO::from)
+                .collect(Collectors.toList());
+    }
 }

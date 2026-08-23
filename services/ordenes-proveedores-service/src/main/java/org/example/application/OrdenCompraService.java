@@ -7,8 +7,10 @@ import org.example.domain.OrdenCompraRepository;
 import org.example.domain.InventarioPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -43,19 +45,35 @@ public class OrdenCompraService {
         ordenCompraRepository.cancelar(ordenCompraId);
     }
 
-    // NOTA: esto solo confirma la recepcion en ordenes_proveedores. La actualizacion de
-    // stock en inventario-service (que tu propio sp_registrar_recepcion_json deja explicita
-    // como responsabilidad del backend Java) todavia no esta conectada aca -- la sumamos
-    // como paso aparte mas adelante.
     public void registrarRecepcion(Integer ordenCompraId, Map<Integer, Integer> recepcionPorProducto, String usuario) {
-        ordenCompraRepository.registrarRecepcion(ordenCompraId, recepcionPorProducto);
+        Map<Integer, BigDecimal> costosPorProducto = ordenCompraRepository.registrarRecepcion(ordenCompraId, recepcionPorProducto);
         try {
-            inventarioClient.registrarEntradasPorRecepcion(ordenCompraId, recepcionPorProducto, usuario);
+            inventarioClient.registrarEntradasPorRecepcion(ordenCompraId, recepcionPorProducto, costosPorProducto, usuario);
         } catch (Exception e) {
             throw new IllegalStateException(
                     "La recepcion de la orden " + ordenCompraId + " quedo confirmada, pero fallo la "
-                            + "actualizacion de stock en inventario-service. Revisar manualmente.", e);
+                            + "actualizacion de stock en inventario-service: " + mensajeInventario(e)
+                            + " Revisar manualmente.", e);
         }
+    }
+
+    // Intenta rescatar el mensaje de error real que devolvio inventario-service (por ejemplo,
+    // "el precio quedaria por debajo del costo") en vez de mostrar solo la excepcion generica.
+    private String mensajeInventario(Exception e) {
+        if (e instanceof RestClientResponseException rce) {
+            String body = rce.getResponseBodyAsString();
+            if (body != null && !body.isBlank()) {
+                try {
+                    com.fasterxml.jackson.databind.JsonNode node =
+                            new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+                    if (node.hasNonNull("error")) return node.get("error").asText();
+                } catch (Exception ignored) {
+                    // el body no era JSON valido; caemos al texto crudo mas abajo
+                }
+                return body;
+            }
+        }
+        return e.getMessage() != null ? e.getMessage() : "error desconocido";
     }
 
     public List<OrdenCompra> listarPorEstado(EstadoOrdenCompra estado) {
@@ -68,5 +86,10 @@ public class OrdenCompraService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orden de compra " + ordenCompraId + " no existe");
         }
         return orden;
+    }
+
+    public List<DetalleOrdenCompra> listarDetalle(Integer ordenCompraId) {
+        obtenerPorId(ordenCompraId);
+        return ordenCompraRepository.listarDetalle(ordenCompraId);
     }
 }
