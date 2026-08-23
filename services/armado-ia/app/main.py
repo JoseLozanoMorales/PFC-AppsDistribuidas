@@ -8,6 +8,7 @@ from app.config import settings
 from app.errors import registrar_exception_handlers
 from app.explicacion.bedrock_client import BedrockExplicacionClient
 from app.explicacion.client import ExplicacionClient
+from app.explicacion.fallback_client import DeterministicExplicacionClient
 from app.explicacion.service import ExplicacionService
 from app.schemas import AnalizarRequest, AnalizarResponse
 from app.security import IdentidadOpcional, identidad_opcional
@@ -24,7 +25,7 @@ def _crear_explicacion_client() -> ExplicacionClient | None:
     return None
 
 
-explicacion_service = ExplicacionService(_crear_explicacion_client())
+explicacion_service = ExplicacionService(_crear_explicacion_client(), DeterministicExplicacionClient())
 
 
 @app.get("/actuator/health")

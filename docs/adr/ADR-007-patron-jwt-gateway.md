@@ -1,4 +1,4 @@
-# ADR-005: Patrón reutilizable de validación JWT en el gateway
+# ADR-007: Patrón reutilizable de validación JWT en el gateway
 
 ## Estado
 

@@ -1,5 +1,5 @@
 """
-Identidad tomada de X-User-Id/X-Usuario/X-User-Role (ADR-005) cuando este
+Identidad tomada de X-User-Id/X-Usuario/X-User-Role (ADR-007) cuando este
 servicio no necesita bloquear al llamador si faltan: el gateway ya protege
 /api/** asi que en la practica siempre llegan, pero este endpoint no persiste
 nada por usuario y no tiene motivo para exigirlas. Si vienen, se usan solo

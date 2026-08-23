@@ -11,6 +11,7 @@ import re
 
 from app.config import settings
 from app.explicacion.client import ContextoExplicacion, ExplicacionClient
+from app.explicacion.fallback_client import DeterministicExplicacionClient
 
 log = logging.getLogger("armado_ia.explicacion")
 
@@ -33,13 +34,14 @@ def _normalizar(texto: str) -> str:
 
 
 class ExplicacionService:
-    def __init__(self, cliente: ExplicacionClient | None):
+    def __init__(self, cliente: ExplicacionClient | None, fallback: ExplicacionClient | None = None):
         self._cliente = cliente
+        self._fallback: ExplicacionClient = fallback if fallback is not None else DeterministicExplicacionClient()
 
     def generar(self, contexto: ContextoExplicacion) -> str:
         if self._cliente is None:
             log.info("Sin ExplicacionClient activo (ver settings.explicacion.proveedor); usando fallback deterministico")
-            return self._explicacion_fallback(contexto)
+            return self._fallback.explicar(contexto)
         try:
             texto = self._cliente.explicar(contexto)
             if not texto or not texto.strip():
@@ -51,11 +53,11 @@ class ExplicacionService:
                     "Explicacion del LLM descartada: menciona '%s', que no aparece en los datos de entrada "
                     "(posible alucinacion). Usando fallback deterministico.", token_no_verificado
                 )
-                return self._explicacion_fallback(contexto)
+                return self._fallback.explicar(contexto)
             return texto
         except Exception as exc:  # noqa: BLE001 -- el LLM nunca debe tumbar la respuesta
             log.warning("Fallo la explicacion via LLM (%s), usando fallback deterministico", exc)
-            return self._explicacion_fallback(contexto)
+            return self._fallback.explicar(contexto)
 
     def _token_no_verificado(self, texto: str, contexto: ContextoExplicacion) -> str | None:
         vocabulario = _normalizar(self._construir_vocabulario_permitido(contexto))
@@ -75,37 +77,3 @@ class ExplicacionService:
             partes.extend(comp.nombre for comp in r.componentes.values())
             partes.extend(r.advertencias)
         return " ".join(partes)
-
-    def _explicacion_fallback(self, c: ContextoExplicacion) -> str:
-        partes: list[str] = []
-        if c.nivel == "N/A":
-            partes.append(
-                "Esta configuracion no incluye una GPU dedicada, por lo que no aplica el calculo de "
-                "cuello de botella CPU-GPU."
-            )
-        else:
-            partes.append(
-                f"Se detecto un cuello de botella del {c.porcentaje_bottleneck}% (nivel {c.nivel}), "
-                f"limitado principalmente por {c.componente_limitante}."
-            )
-        if c.advertencias:
-            partes.append(" Puntos a revisar: " + " ".join(c.advertencias))
-
-        r = c.recomendacion
-        if r is not None:
-            if not r.componentes:
-                partes.append(" No se encontro ninguna recomendacion dentro del presupuesto indicado.")
-            elif "cpu" not in r.componentes and "gpu" not in r.componentes:
-                partes.append(
-                    " La recomendacion mantiene tu CPU y GPU actuales (no se encontro una alternativa que "
-                    "mejore el rendimiento dentro del presupuesto) y ajusta: " + self._resumen_componentes(r) + "."
-                )
-            else:
-                partes.append(" La recomendacion sugiere: " + self._resumen_componentes(r) + ".")
-                if r.porcentaje_cuello_botella is not None:
-                    partes.append(f" Cuello de botella resultante: {r.porcentaje_cuello_botella}%.")
-        return "".join(partes)
-
-    @staticmethod
-    def _resumen_componentes(r) -> str:
-        return ", ".join(f"{key}={comp.nombre}" for key, comp in r.componentes.items())

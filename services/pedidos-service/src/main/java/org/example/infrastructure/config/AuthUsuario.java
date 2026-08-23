@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Resuelve la identidad confiable propagada por el gateway (ADR-005) desde las
+ * Resuelve la identidad confiable propagada por el gateway (ADR-007) desde las
  * cabeceras X-User-Id / X-Usuario / X-User-Role hacia un {@link AuthenticatedUser}.
  */
 @Target(ElementType.PARAMETER)
