@@ -3,12 +3,16 @@ import logging
 
 from app.clients.producto_client import producto_client
 from app.domain import advertencias as advertencias_tecnicas
-from app.domain import bottleneck
-from app.domain import recomendador
+from app.domain import bottleneck, recomendador
 from app.errors import BadRequestError
 from app.explicacion.client import ContextoExplicacion
 from app.explicacion.service import ExplicacionService
-from app.schemas import AnalizarRequest, AnalizarResponse, ComponenteResponse, RecomendacionResponse
+from app.schemas import (
+    AnalizarRequest,
+    AnalizarResponse,
+    ComponenteResponse,
+    RecomendacionResponse,
+)
 from app.security import IdentidadOpcional
 
 log = logging.getLogger("armado_ia.armado_service")

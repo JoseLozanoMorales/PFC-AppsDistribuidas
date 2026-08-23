@@ -1,0 +1,11 @@
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# B008: ruff marca Depends(...) en un default de argumento como "llamada en
+# default" porque en general eso solo se evalua una vez, en tiempo de
+# definicion. Es un falso positivo conocido para FastAPI: Depends(...) en el
+# default es exactamente como FastAPI implementa su sistema de inyeccion de
+# dependencias (ver identidad_opcional en app/main.py) -- ignorarlo es la
+# practica estandar en cualquier proyecto FastAPI+ruff.
+ignore = ["B008", "EXE002"]

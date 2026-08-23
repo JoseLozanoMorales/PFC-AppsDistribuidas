@@ -12,7 +12,6 @@ from dataclasses import dataclass
 
 from app.explicacion.client import ContextoExplicacion
 
-
 _PATRONES_MODELO_HARDWARE = (
     re.compile(r"\bRTX\s?\d{3,4}(\s?Ti)?\b", re.IGNORECASE),
     re.compile(r"\bGTX\s?\d{3,4}(\s?Ti)?\b", re.IGNORECASE),

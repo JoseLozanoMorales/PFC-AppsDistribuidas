@@ -25,7 +25,7 @@ No se hace una tercera pasada ni se re-optimizan categorias YA cubiertas con
 el sobrante restante (ej. mejorar la GPU elegida si algo queda sin usar) --
 deliberadamente fuera de este alcance.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from decimal import Decimal
 
 from app.config import settings

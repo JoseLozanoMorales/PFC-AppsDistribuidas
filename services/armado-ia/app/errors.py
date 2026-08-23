@@ -4,7 +4,7 @@ ErrorResponse que usaba la version Java (timestamp, status, error, message,
 path) para no romper a ningun consumidor del contrato de error.
 """
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pybreaker
 from fastapi import FastAPI, Request
@@ -39,8 +39,8 @@ class NotFoundError(DominioError):
 def _now_iso_millis() -> str:
     # Mismo formato que Instant.now() serializado por Jackson en la version
     # Java: ISO-8601 con milisegundos y sufijo 'Z' (no +00:00, no microsegundos).
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") \
-        + f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.") \
+        + f"{datetime.now(UTC).microsecond // 1000:03d}Z"
 
 
 def _build_response(status_code: int, message: str, path: str) -> JSONResponse:

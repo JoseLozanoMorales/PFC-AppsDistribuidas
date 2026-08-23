@@ -1,0 +1,5 @@
+# Dependencias solo para desarrollo/CI (tests + lint). NO se instalan en la
+# imagen de produccion: el Dockerfile solo usa requirements.txt.
+-r requirements.txt
+pytest==9.1.1
+ruff==0.16.4
