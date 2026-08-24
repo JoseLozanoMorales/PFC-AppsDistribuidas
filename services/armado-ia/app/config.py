@@ -69,7 +69,7 @@ class CategoriaConfig(BaseModel):
     HTTP todavia (GET /api/categorias solo da id/nombre/slug). El
     emparejamiento con el catalogo real es por 'nombre' exacto (sin acentos a
     proposito, ver docs/seed-catalogo.sql). Las claves (cpu, mobo, ram, ...)
-    coinciden con las que usa Apps/web/frontend/webapp/src/views/BuilderView.vue.
+    coinciden con las que usa Apps/web/frontend/webapp/src/views/BuilderView.tsx.
     """
     nombre: str
     obligatoria: bool

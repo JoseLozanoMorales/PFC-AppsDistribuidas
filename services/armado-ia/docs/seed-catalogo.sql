@@ -53,7 +53,7 @@ ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------
 -- Categorias: IDs EXPLICITOS para que coincidan con los que ya hardcodea
--- Apps/web/frontend/webapp/src/views/BuilderView.vue (cpu=2, mobo=8, ram=7,
+-- Apps/web/frontend/webapp/src/views/BuilderView.tsx (cpu=2, mobo=8, ram=7,
 -- storage=1, gpu=6, psu=5, case=4, cooling=3, periferico=9).
 -- obligatoria_pc / peso_presupuesto reflejan lo mismo que
 -- armado.categorias.* en application.properties de armado-ia.
