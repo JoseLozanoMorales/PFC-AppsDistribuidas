@@ -1,0 +1,306 @@
+\PassOptionsToPackage{table}{xcolor}
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+\usepackage{eso-pic}
+\usepackage{float}
+\usepackage{transparent}
+\usepackage{tikz}
+\usepackage[nottoc]{tocbibind}
+\usepackage{booktabs}
+\usepackage[style=ieee, backend=bibtex]{biblatex}
+\usepackage{csquotes}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage[most]{tcolorbox}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+\usepackage{titlesec}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}
+{\theparagraph}
+{1em}
+{}
+
+\titlespacing*{\paragraph}
+{0pt}
+{1.5ex plus 1ex minus .2ex}
+{1ex}
+
+\usetikzlibrary{arrows.meta,positioning}
+
+\geometry{margin=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.8em}
+\renewcommand{\arraystretch}{1.25}
+
+\definecolor{verdeEncabezado}{HTML}{70AD47}
+\definecolor{verdeClaro}{HTML}{E2F0D9}
+\definecolor{amarilloEncabezado}{HTML}{FFC000}
+\definecolor{amarilloClaro}{HTML}{FFF2CC}
+\definecolor{codigoFondo}{HTML}{F7F7F7}
+
+\lstdefinestyle{yamlStyle}{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    tabsize=2,
+    showstringspaces=false,
+    captionpos=b,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black}\itshape,
+    stringstyle=\color{red},
+    morekeywords={
+        openapi,info,title,version,description,servers,url,paths,get,post,put,delete,
+        summary,tags,parameters,name,in,required,schema,type,responses,content,
+        application/json,requestBody,components,schemas,items,properties,format,ref
+    },
+    sensitive=false
+}
+
+\lstdefinestyle{codigo}{
+    backgroundcolor=\color{codigoFondo},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    breakatwhitespace=false,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    frame=single,
+    rulecolor=\color{black!30},
+    xleftmargin=1em,
+    xrightmargin=1em
+}
+
+\lstdefinelanguage{Dockerfile}{
+    keywords={FROM,RUN,COPY,WORKDIR,ENV,EXPOSE,CMD,AS},
+    keywordstyle=\color{blue!70!black}\bfseries,
+    basicstyle=\ttfamily\small,
+    sensitive=true,
+    comment=[l]{\#},
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red!60!black},
+    morestring=[b]",
+}
+
+\lstdefinelanguage{yaml}{
+    keywords={true,false,null,y,n},
+    keywordstyle=\color{blue!70!black}\bfseries,
+    basicstyle=\ttfamily\small,
+    sensitive=false,
+    comment=[l]{\#},
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red!60!black},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+% NOTA DE EQUIPO: se reutiliza el archivo de referencias de la Entrega 3 para
+% no perder la bibliografia ya citada (E1-E3). Las citas nuevas que requiera
+% cada seccion de la Entrega 4 (observabilidad, pruebas, ISO 25010, Pact,
+% etica en ingenieria de software) se agregan a ese mismo .bib compartido.
+\addbibresource{../entrega3/referenciasPFC.bib}
+
+\begin{document}
+
+    \begin{titlepage}
+        \AddToShipoutPicture* {
+            \AtPageCenter{%
+                \makebox(0,0){%
+                    \begin{tikzpicture}[remember picture,overlay]
+                    \IfFileExists{UteqLogo.png}{
+                        \node[opacity=0.08] at (current page.center) {
+                            \includegraphics[width=9cm]{UteqLogo.png}
+                        };
+                    }{}
+                    \end{tikzpicture}
+                }%
+            }
+        }
+
+        \centering
+        {\scshape\large Universidad Técnica Estatal de Quevedo \par}
+        {\scshape\large Facultad de Ciencias de la Computación \par}
+        \vspace{0.8cm}
+
+        {\large\textbf{PROYECTO FIN DE CURSO (PFC) --- ENTREGA 4}\par}
+        \vspace{0.8cm}
+
+        {\large\textbf{PROYECTO:}\par}
+        \vspace{0.2cm}
+        {\Large\textbf{TIENDATECH: CALIDAD, OBSERVABILIDAD Y EVALUACIÓN EXPERIMENTAL DEL SISTEMA DISTRIBUIDO}\par}
+        \vspace{0.7cm}
+
+        {\large\textbf{MATERIA:}\par}
+        \vspace{0.2cm}
+        {\large APLICACIONES DISTRIBUIDAS \par}
+        \vspace{0.7cm}
+
+        {\large\textbf{DOCENTE:}\par}
+        \vspace{0.2cm}
+        {\large ING. GUERRERO ULLOA GLEISTON CICERON \par}
+        \vspace{0.7cm}
+
+        {\large\textbf{CURSO / PERÍODO ACADÉMICO:}\par}
+        \vspace{0.2cm}
+        {\large 7mo A --- PERÍODO ACADÉMICO 2026 \par}
+
+        \vspace{1.0cm}
+
+        {\large\textbf{INTEGRANTES:}\par}
+        \vspace{0.25cm}
+        {\normalsize
+        Jhinson Stalyn Aucatoma Celorio \\
+        Jeremy Ruperto Gaibor Rodriguez \\
+        Andy Paul Sanchez Pilaloa \\
+        José Alejandro Lozano Morales \par}
+        \vspace{0.7cm}
+
+        {\large\textbf{FECHA DE ENTREGA:}\par}
+        \vspace{0.2cm}
+        {\large PENDIENTE \par}
+    \end{titlepage}
+
+    \tableofcontents
+    \newpage
+
+    % ============================================================
+    % RESUMEN / ABSTRACT
+    % ============================================================
+    \section*{Resumen}
+    \addcontentsline{toc}{section}{Resumen}
+
+    \vspace{1cm}
+    \textbf{Palabras clave:} PENDIENTE.
+
+    \newpage
+
+    \section*{Abstract}
+    \addcontentsline{toc}{section}{Abstract}
+    % TODO: version en ingles del Resumen. Ultimo en escribirse.
+
+    \vspace{1cm}
+    \textbf{Keywords:} PENDIENTE.
+
+    \newpage
+
+    % ============================================================
+    % 1. INTRODUCCION
+    % ============================================================
+    \section{Introducción}
+
+    \subsection{Alcance y contribución delimitada de la Entrega 4}
+
+
+    % ============================================================
+    % 2. ARQUITECTURA Y DECISIONES DE DISENO -- Dimension D1
+    % ============================================================
+    \section{Arquitectura y decisiones de diseño}
+
+    \subsection{Refactor en capas y principios SOLID (D1.1)}
+
+
+    \subsection{Patrones GoF aplicados (D1.2)}
+
+
+    % ============================================================
+    % 3. APLICACION WEB -- Dimension D2
+    % ============================================================
+    \section{Aplicación web}
+
+    \subsection{Funcionalidad (D2.1)}
+
+
+    \subsection{Calidad (D2.2)}
+
+    % ============================================================
+    % 4. APLICACION MOVIL -- Dimension D3
+    % ============================================================
+    \section{Aplicación móvil}
+
+    \subsection{Funcionalidad (D3.1)}
+
+
+    \subsection{Calidad (D3.2)}
+
+
+    % ============================================================
+    % 5. INTEGRACION, CONTRATOS Y PERSISTENCIA DISTRIBUIDA -- Dimension D4
+    % ============================================================
+    \section{Integración entre clientes, contratos y persistencia distribuida}
+
+    \subsection{Contratos Pact web/móvil↔backend (D4.1)}
+
+
+    \subsection{Persistencia distribuida operando (D4.2)}
+
+
+    % ============================================================
+    % 6. CALIDAD DE SOFTWARE Y AUTOMATIZACION -- Dimension D5
+    % ============================================================
+    \section{Calidad de software y automatización}
+
+    \subsection{Pirámide de pruebas (D5.1)}
+
+
+    \subsection{Pipeline CI/CD end-to-end (D5.2)}
+
+
+    % ============================================================
+    % 7. DISCUSION
+    % ============================================================
+    \section{Discusión}
+
+
+    \subsection{Alcance no cubierto: observabilidad y evaluación ISO/IEC 25010 (D6, D7)}
+
+    % ============================================================
+    % 8. ETICA, AMENAZAS A LA VALIDEZ Y REPRODUCIBILIDAD -- Dimension D9
+    % ============================================================
+    \section{Ética, amenazas a la validez y reproducibilidad}
+
+    \subsection{Reflexión ética (D9.2)}
+.
+
+    \subsection{Amenazas a la validez (D9.3)}
+
+
+    \subsection{Reproducibilidad (D9.4)}
+
+
+    % ============================================================
+    % 9. TRAZABILIDAD E1-E4 -- Dimension D8.3
+    % ============================================================
+    \section{Trazabilidad de la evolución E1--E4}
+
+    % ============================================================
+    % 10. CONCLUSIONES
+    % ============================================================
+    \section{Conclusiones y trabajo futuro}
+
+
+\end{document}
