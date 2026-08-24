@@ -6,7 +6,7 @@ services:
     environment:
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
       SERVER_PORT: 8083
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       CRDB_RETRY_MAX_ATTEMPTS: 3
@@ -24,6 +24,10 @@ services:
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/actuator/health"]
       interval: 10s
@@ -37,12 +41,16 @@ services:
     container_name: productos-crdb-service
     environment:
       SERVER_PORT: 8081
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   # armado-ia-service: sin datasource propio (servicio de calculo puro sobre
   # el catalogo de productos-crdb-service via HTTP, no persiste nada). Las
@@ -79,12 +87,16 @@ services:
     container_name: inventario-crdb-service
     environment:
       SERVER_PORT: 8082
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   ventas-crdb-service:
     build:
@@ -92,7 +104,7 @@ services:
     container_name: ventas-crdb-service
     environment:
       SERVER_PORT: 8086
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
@@ -102,6 +114,10 @@ services:
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   ordenes-proveedores-crdb-service:
     build:
@@ -109,7 +125,7 @@ services:
     container_name: ordenes-proveedores-crdb-service
     environment:
       SERVER_PORT: 8084
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
@@ -119,6 +135,10 @@ services:
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   usuarios-crdb-service:
     build:
@@ -126,7 +146,7 @@ services:
     container_name: usuarios-crdb-service
     environment:
       SERVER_PORT: 8085
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://18.226.195.135:26257,18.226.195.135:26258,18.226.195.135:26259/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
@@ -151,6 +171,10 @@ services:
     networks:
       - default
       - pfc-net
+    volumes:
+      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
+      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   frontend-crdb:
     build:
