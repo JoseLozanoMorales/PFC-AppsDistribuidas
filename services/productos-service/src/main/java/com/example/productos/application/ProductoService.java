@@ -37,4 +37,5 @@ public class ProductoService {
     public List<Map<String, Object>> detalleParaEditar(Integer id) { return repository.detalleParaEditar(id); }
     public List<Map<String, Object>> listarIvas() { return repository.listarIvas(); }
     public void actualizarBasico(Integer productoId, Map<String, Object> body, String usuario) { repository.actualizarBasico(productoId, body, usuario); }
+    public void activar(Integer productoId) { repository.activar(productoId); }
 }

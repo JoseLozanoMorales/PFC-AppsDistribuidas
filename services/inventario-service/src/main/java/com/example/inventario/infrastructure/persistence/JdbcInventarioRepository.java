@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Repository
 public class JdbcInventarioRepository implements InventarioRepository {
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcInventarioRepository.class);
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
     private final IdempotencyGuard idempotencyGuard;
@@ -142,11 +144,12 @@ public class JdbcInventarioRepository implements InventarioRepository {
         }
 
         Map<String, Object> producto = jdbc.queryForMap("""
-                SELECT stock, costo FROM productos.producto
+                SELECT stock, costo, preciounitario FROM productos.producto
                 WHERE producto_id = ? FOR UPDATE
                 """, productoId);
         int stockAnterior = ((Number) producto.get("stock")).intValue();
         BigDecimal costoAnterior = decimal(producto.get("costo"));
+        BigDecimal precioActual = decimal(producto.get("preciounitario"));
         if ("SALIDA".equalsIgnoreCase(tipo) && stockAnterior < cantidad) {
             throw new IllegalArgumentException("Stock insuficiente para el producto " + productoId);
         }
@@ -172,22 +175,25 @@ public class JdbcInventarioRepository implements InventarioRepository {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, fecha, cantidad, costoEfectivo, total, item.getReferencia(),
                 item.getObservacion(), productoId, subtipoId);
-        // productos.producto tiene un CHECK (preciounitario >= costo): si esta entrada sube
-        // el costo promedio ponderado por encima del precio de venta actual, la actualizacion
-        // falla aqui a proposito -- es la decision de negocio: bloquear la recepcion hasta que
-        // el precio se reajuste manualmente, en vez de dejar el producto vendiendose bajo costo.
-        try {
-            jdbc.update("""
-                    UPDATE productos.producto SET stock = ?, costo = ?, valor_inventario = ?
-                    WHERE producto_id = ?
-                    """, stockNuevo, costoNuevo,
-                    costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP), productoId);
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException(
-                    "El producto " + productoId + " quedaria con un costo de $" + costoNuevo
-                            + " por encima de su precio de venta actual. Actualiza el precio del "
-                            + "producto antes de confirmar este movimiento.", ex);
+        // Decision de negocio: si esta entrada sube el costo promedio ponderado por encima del
+        // precio de venta actual, ya NO se bloquea la recepcion (no hay CHECK en la BD para
+        // esto). En vez de eso el producto se auto-desactiva (habilitado=false): el stock y el
+        // costo se actualizan igual (el kardex queda correcto), pero el producto deja de
+        // aparecer en el catalogo del cliente hasta que el admin repreicie y lo reactive desde
+        // productos-service. Si ya estaba deshabilitado, no lo reactivamos solos aqui.
+        boolean debeDesactivar = costoNuevo.compareTo(precioActual) > 0;
+        if (debeDesactivar) {
+            LOG.warn("Producto {} auto-desactivado: costo recalculado ${} supera el precio actual ${}",
+                    productoId, costoNuevo, precioActual);
         }
+        jdbc.update("""
+                UPDATE productos.producto
+                   SET stock = ?, costo = ?, valor_inventario = ?,
+                       habilitado = CASE WHEN ? THEN false ELSE habilitado END
+                 WHERE producto_id = ?
+                """, stockNuevo, costoNuevo,
+                costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP),
+                debeDesactivar, productoId);
         jdbc.update("""
                 UPSERT INTO inventario.inventario_producto
                     (producto_id, stock, stock_minimo, valor_inventario, actualizado_en)

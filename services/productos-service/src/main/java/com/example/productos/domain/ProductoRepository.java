@@ -24,4 +24,5 @@ public interface ProductoRepository {
     List<Map<String, Object>> detalleParaEditar(Integer id);
     List<Map<String, Object>> listarIvas();
     void actualizarBasico(Integer productoId, Map<String, Object> body, String usuario);
+    void activar(Integer productoId);
 }

@@ -7,7 +7,6 @@ import com.example.productos.domain.ProductoResumen;
 import com.example.productos.domain.ResourceNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -326,33 +325,49 @@ public class JdbcProductoRepository implements ProductoRepository {
     }
 
     // "stock" y "costo" quedaron fuera a proposito: ya no son editables a mano desde aca,
-    // solo cambian via movimientos de inventario (ver inventario-service). Si el precio se
-    // intenta dejar por debajo del costo actual, el CHECK ck_producto_precio_mayor_costo de
-    // la base lo rechaza y lo traducimos a un mensaje claro mas abajo.
+    // solo cambian via movimientos de inventario (ver inventario-service). Ya no bloqueamos
+    // con un CHECK si el precio queda por debajo del costo: en vez de rechazar la edicion,
+    // el producto se auto-desactiva (habilitado=false) para que desaparezca del catalogo del
+    // cliente pero el admin lo siga viendo y pueda corregir el precio y reactivarlo (ver
+    // activar()). Si ya estaba deshabilitado por otra razon, esto no lo reactiva solo.
     @Transactional
     public void actualizarBasico(Integer productoId, Map<String, Object> body, String usuario) {
         Map<String, Object> payload = new LinkedHashMap<>(body == null ? Map.of() : body);
         Map<String, Object> atributos = extraerAtributos(payload);
-        int actualizados;
-        try {
-            actualizados = jdbc.update("""
-                    UPDATE productos.producto SET
-                        nombre = COALESCE(?, nombre),
-                        preciounitario = COALESCE(?, preciounitario),
-                        enlace = COALESCE(?, enlace),
-                        marca_id = COALESCE(?, marca_id), gama_id = COALESCE(?, gama_id),
-                        iva_id = COALESCE(?, iva_id),
-                        categoria_id = COALESCE(?, categoria_id),
-                        atributos = atributos || CAST(? AS JSONB)
-                    WHERE producto_id = ?
-                    """, payload.get("nombre"), payload.get("preciounitario"), payload.get("enlace"),
-                    payload.get("marca_id"), payload.get("gama_id"),
-                    payload.get("iva_id"), payload.get("categoria_id"),
-                    json(atributos), productoId);
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalArgumentException("El precio no puede ser menor al costo actual del producto.", ex);
-        }
+        int actualizados = jdbc.update("""
+                UPDATE productos.producto SET
+                    nombre = COALESCE(?, nombre),
+                    preciounitario = COALESCE(?, preciounitario),
+                    enlace = COALESCE(?, enlace),
+                    marca_id = COALESCE(?, marca_id), gama_id = COALESCE(?, gama_id),
+                    iva_id = COALESCE(?, iva_id),
+                    categoria_id = COALESCE(?, categoria_id),
+                    atributos = atributos || CAST(? AS JSONB),
+                    habilitado = CASE WHEN COALESCE(?, preciounitario) < costo THEN false ELSE habilitado END
+                WHERE producto_id = ?
+                """, payload.get("nombre"), payload.get("preciounitario"), payload.get("enlace"),
+                payload.get("marca_id"), payload.get("gama_id"),
+                payload.get("iva_id"), payload.get("categoria_id"),
+                json(atributos), payload.get("preciounitario"), productoId);
         if (actualizados == 0) throw new ResourceNotFoundException("Producto no encontrado");
+    }
+
+    // Reactivacion manual y explicita: nunca automatica, para no revivir por accidente un
+    // producto que el admin deshabilito por otro motivo (descontinuado, fuera de temporada,
+    // etc). Exige que el precio ya sea >= costo; si no, el admin tiene que repreciar primero.
+    @Transactional
+    public void activar(Integer productoId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "SELECT preciounitario, costo FROM productos.producto WHERE producto_id = ?", productoId);
+        if (rows.isEmpty()) throw new ResourceNotFoundException("Producto no encontrado");
+        java.math.BigDecimal precio = (java.math.BigDecimal) rows.get(0).get("preciounitario");
+        java.math.BigDecimal costo = (java.math.BigDecimal) rows.get(0).get("costo");
+        if (precio.compareTo(costo) < 0) {
+            throw new IllegalArgumentException(
+                    "No se puede activar: el precio ($" + precio + ") sigue por debajo del costo ($" + costo
+                            + "). Actualiza el precio antes de reactivar el producto.");
+        }
+        jdbc.update("UPDATE productos.producto SET habilitado = true WHERE producto_id = ?", productoId);
     }
 
     private static String detalleSql() {

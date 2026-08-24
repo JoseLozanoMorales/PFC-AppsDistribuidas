@@ -272,6 +272,14 @@ public class ProductoController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
+    // Reactivacion manual: el producto pudo haberse auto-desactivado porque una recepcion de
+    // compra dejo el costo por encima del precio. El admin repreicia y despues llama esto.
+    @PutMapping("/api/sp/productos/{id}/activar")
+    public ResponseEntity<Map<String, Boolean>> activar(@PathVariable Integer id) {
+        service.activar(id);
+        return ResponseEntity.ok(Map.of("ok", true));
+    }
+
     private static MediaType mediaType(String value) {
         try {
             return value != null && !value.isBlank()
