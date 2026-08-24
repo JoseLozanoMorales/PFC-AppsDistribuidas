@@ -1,0 +1,198 @@
+name: tiendatech
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  pull_policy: always
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+  networks:
+    - backend
+
+x-crdb-environment: &crdb-environment
+  CRDB_DATASOURCE_URL: ${CRDB_DATASOURCE_URL:?CRDB_DATASOURCE_URL debe existir en .env}
+  CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:?CRDB_DATASOURCE_USERNAME debe existir en .env}
+  CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
+  CRDB_RETRY_MAX_ATTEMPTS: ${CRDB_RETRY_MAX_ATTEMPTS:-3}
+  CRDB_RETRY_DELAY_MS: ${CRDB_RETRY_DELAY_MS:-100}
+  CRDB_POOL_MAX_SIZE: ${CRDB_POOL_MAX_SIZE:-10}
+  CRDB_POOL_MIN_IDLE: ${CRDB_POOL_MIN_IDLE:-2}
+
+x-crdb-volumes: &crdb-volumes
+  - ${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro
+
+services:
+  productos-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:productos-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8081"
+    volumes: *crdb-volumes
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8081/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  inventario-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:inventario-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8082"
+    volumes: *crdb-volumes
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8082/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  ventas-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:ventas-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8086"
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+    volumes: *crdb-volumes
+    depends_on:
+      inventario-crdb-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8086/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  usuarios-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:usuarios-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8085"
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
+      TT_MAIL_USERNAME: ${TT_MAIL_USERNAME:-}
+      TT_MAIL_PASSWORD: ${TT_MAIL_PASSWORD:-}
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT: ${MAIL_CONNECTION_TIMEOUT_MS:-5000}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT: ${MAIL_READ_TIMEOUT_MS:-5000}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT: ${MAIL_WRITE_TIMEOUT_MS:-5000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-false}
+      APP_UPLOAD_ROOT: /app/uploads
+    volumes:
+      - ${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro
+      - usuarios-uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  ordenes-proveedores-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:ordenes-proveedores-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8084"
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+    volumes: *crdb-volumes
+    depends_on:
+      inventario-crdb-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8084/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  armado-ia-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:armado-ia-${IMAGE_TAG:-latest}
+    environment:
+      SERVER_PORT: "8087"
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-2}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
+    depends_on:
+      productos-crdb-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8087/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  pedidos-crdb-service:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:pedidos-${IMAGE_TAG:-latest}
+    environment:
+      <<: *crdb-environment
+      SERVER_PORT: "8083"
+      PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
+      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
+    volumes: *crdb-volumes
+    depends_on:
+      ventas-crdb-service:
+        condition: service_healthy
+      productos-crdb-service:
+        condition: service_healthy
+      usuarios-crdb-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  frontend-crdb:
+    <<: *service-defaults
+    image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:frontend-${IMAGE_TAG:-latest}
+    environment:
+      SERVER_PORT: "8080"
+      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
+      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      PEDIDOS_SERVICE_URL: http://pedidos-crdb-service:8083
+      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-crdb-service:8084
+      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
+      ARMADO_IA_SERVICE_URL: http://armado-ia-service:8087
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
+    depends_on:
+      pedidos-crdb-service:
+        condition: service_healthy
+      ordenes-proveedores-crdb-service:
+        condition: service_healthy
+      armado-ia-service:
+        condition: service_healthy
+    ports:
+      - "${GATEWAY_BIND_ADDRESS:-0.0.0.0}:${GATEWAY_PORT:-8180}:8080"
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  usuarios-uploads:

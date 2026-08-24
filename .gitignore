@@ -17,3 +17,4 @@ docs/entrega3/build/
 tmp/
 
 Apps/web/infra/crdb-certs/
+/crdb-certs/
