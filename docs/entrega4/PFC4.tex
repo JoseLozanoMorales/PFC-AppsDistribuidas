@@ -236,19 +236,25 @@
     \section{Arquitectura y decisiones de diseño}
 
     \subsection{Refactor en capas y principios SOLID (D1.1)}
-    % TODO: describir la migracion a los 4 paquetes por microservicio
-    % (presentation/application/domain/infrastructure), con enfasis en
-    % ordenes-proveedores-service y ventas-service. Referenciar puertos
-    % (interfaces de domain) y adaptadores (infrastructure). Justificar con
-    % principios SOLID aplicados (SRP, DIP en particular via los Port).
+    Los seis microservicios Java del backend (\texttt{usuarios}, \texttt{productos-service}, \texttt{inventario-service}, \texttt{pedidos-service}, \texttt{ordenes-proveedores-service} y \texttt{ventas-service}) quedaron organizados en los cuatro paquetes exigidos: \texttt{presentation} (controladores REST y DTO de entrada/salida), \texttt{application} (servicios de caso de uso, sin acceso directo a JDBC ni a HTTP saliente), \texttt{domain} (entidades y \emph{puertos}, es decir, interfaces que declaran lo que el dominio necesita del exterior) e \texttt{infrastructure} (adaptadores concretos: repositorios JDBC, clientes HTTP, configuración de seguridad). El microservicio \texttt{armado-ia}, escrito en Python, mantiene una separación equivalente por responsabilidad (\texttt{clients/}, \texttt{explicacion/}, capa de servicio) sin adoptar literalmente la misma nomenclatura de paquetes Java.
 
-    \subsection{Patrones GoF aplicados (D1.2)}
-    % TODO: resumir docs/adr/ADR-005-patrones-gof.md -- nombrar cada patron,
-    % su proposito concreto en TiendaTech y el archivo/clase donde vive.
+        El patrón de puerto y adaptador se aplica de forma consistente: \texttt{ordenes-proveedores-service} y \texttt{ventas-service} declaran \texttt{InventarioPort} en \texttt{domain}, implementado por \texttt{InventarioClient} en \texttt{infrastructure}; \texttt{ventas-service} añade además \texttt{FacturaStore} y \texttt{FacturaOutboxStore} como puertos de persistencia; \texttt{pedidos-service} es el caso más extenso, con puertos dedicados para cada colaborador externo (\texttt{ProductoPort}, \texttt{UsuarioPort}, \texttt{FacturaPort}, \texttt{CrdbProbePort}, \texttt{CrdbRetryPort}, \texttt{CrdbMetricsPort}, \texttt{BusinessMetricsPort}); y \texttt{usuarios} generaliza la convención a \texttt{domain/port/out} (\texttt{TokenPort}, \texttt{UsuarioRepositoryPort}, \texttt{EmailPort}, \texttt{PasswordHasher}, \texttt{OtpStorePort}, entre otros), cada uno con su adaptador en \texttt{infrastructure/persistence/adapter} o \texttt{infrastructure/security}.
 
-    % ============================================================
-    % 3. APLICACION WEB -- Dimension D2 -- responsable: Jeremy
-    % ============================================================
+        Esta organización materializa dos principios SOLID de forma verificable en el código. El \textbf{principio de responsabilidad única} (SRP) separa qué hace el sistema (\texttt{application}) de cómo lo hace (\texttt{infrastructure}): por ejemplo, \texttt{OrdenCompraService} orquesta la recepción de una orden de compra sin saber si el inventario se actualiza vía HTTP, cola de mensajes o llamada local. El \textbf{principio de inversión de dependencias} (DIP) se sostiene en que las clases de \texttt{application} dependen únicamente de las interfaces declaradas en \texttt{domain}, nunca de una clase concreta de \texttt{infrastructure}; Spring resuelve la implementación real (\texttt{InventarioClient}, \texttt{JdbcOrdenCompraRepository}, etc.) por inyección en tiempo de arranque. Esto permite, por ejemplo, sustituir \texttt{InventarioClient} por un doble de prueba sin tocar \texttt{OrdenCompraService}.
+
+        \subsection{Patrones GoF aplicados (D1.2)}
+
+        La documentación completa de esta decisión vive en \texttt{docs/adr/ADR-005-patrones-gof.md}. La auditoría registrada en ese ADR es deliberadamente conservadora: de los ocho servicios del backend, la mayoría implementa una arquitectura por capas limpia sin patrones GoF genuinos, y lo que a primera vista parece un patrón resulta ser inyección de dependencias de Spring, un \emph{Repository} (Fowler, no GoF) con una sola implementación, o un \emph{builder} de una librería de terceros. En vez de etiquetar falsamente esos casos, el equipo documenta cinco patrones GoF con evidencia real en el código:
+
+        \begin{enumerate}
+            \item \textbf{Strategy} (comportamiento): \texttt{ExplicacionClient} (\texttt{services/armado-ia/app/explicacion/client.py}) como interfaz, con dos estrategias intercambiables --- \texttt{BedrockExplicacionClient} (usa AWS Bedrock) y \texttt{DeterministicExplicacionClient} (redacción sin LLM) --- seleccionadas en runtime por \texttt{ExplicacionService}.
+            \item \textbf{Adapter} (estructural): \texttt{BedrockExplicacionClient} envuelve el SDK \texttt{boto3} y \texttt{ProductoClient} (\texttt{services/armado-ia/app/clients/producto\_client.py}) envuelve \texttt{httpx}, ambos traduciendo su fuente externa a tipos de dominio propios.
+            \item \textbf{Decorator} (estructural): \texttt{TrustedUserHeaderRequest}, clase interna de \texttt{JwtGatewayFilter} (\texttt{Apps/web/frontend}), extiende \texttt{HttpServletRequestWrapper} para inyectar cabeceras de identidad verificadas sin mutar la petición original.
+            \item \textbf{Chain of Responsibility} (comportamiento): \texttt{ExplanationValidationHandler} y sus implementaciones concretas (\texttt{NonEmptyExplanationHandler}, \texttt{VerifiedHardwareTokenHandler}) forman una cadena de validadores anti-alucinación sobre la respuesta del LLM.
+            \item \textbf{Template Method} (comportamiento): el método \texttt{validate()} de \texttt{ExplanationValidationHandler} fija el algoritmo común (ejecutar regla, devolver problema si existe, delegar al siguiente) y delega el paso variable a \texttt{\_validate\_current()} en cada subclase.
+        \end{enumerate}
+
+        El ADR también deja constancia explícita de los patrones evaluados y descartados por no tener estructura GoF real en este backend (Strategy sobre puertos con una sola implementación, Factory Method/Abstract Factory sobre \texttt{@Bean} sin jerarquía Creator, Builder de terceros, Observer, Facade, Command, State y Singleton), y documenta por separado --- sin mezclarlos con el catálogo GoF --- otros patrones legítimos presentes en el proyecto: \emph{Repository} (Fowler) en los seis servicios Java, \emph{Outbox} en \texttt{ventas-service} y \emph{Circuit Breaker}/\emph{Retry} (Nygard) en \texttt{pedidos-service}, \texttt{ordenes-proveedores-service} y \texttt{armado-ia}.
     \section{Aplicación web}
 
     \subsection{Funcionalidad (D2.1)}
