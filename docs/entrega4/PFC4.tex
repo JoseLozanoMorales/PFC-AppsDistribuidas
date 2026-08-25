@@ -381,12 +381,28 @@
     % 9. TRAZABILIDAD E1-E4 -- Dimension D8.3 -- responsable: Andy
     % ============================================================
     \section{Trazabilidad de la evolución E1--E4}
-    % TODO: tabla resumen de que cambio en cada entrega, apoyandose en
-    % docs/entrega1/, docs/entrega2/, docs/entrega3/ y docs/evidencias/.
 
-    % ============================================================
-    % 10. CONCLUSIONES -- responsable: EN CONJUNTO, al final
-    % ============================================================
+   La Tabla \ref{tab:trazabilidad-e1e4} resume el aporte específico de cada entrega, construida a partir de la lectura directa de \texttt{docs/entrega1/entrega1.pdf}, \texttt{docs/entrega2/entrega2.pdf}, \texttt{docs/entrega3/PFC3.tex} y la evidencia técnica en \texttt{docs/evidencias/}.
+
+       \begin{table}[H]
+           \centering
+           \caption{Trazabilidad de la evolución del proyecto entre E1 y E4.}
+           \label{tab:trazabilidad-e1e4}
+           \small
+           \begin{tabularx}{\textwidth}{>{\bfseries}p{1.6cm} p{2cm} X}
+   \toprule
+   \textbf{Entrega} & \textbf{Enfoque} & \textbf{Aporte específico} \\
+   \midrule
+   E1 (27 may. 2026) & Propuesta y análisis & Especificación del problema (brecha de requerimientos formales de compatibilidad de hardware), delimitación explícita de la contribución al núcleo transaccional (autenticación, carrito, motor de compatibilidad, interfaz base del asistente inteligente) y roles del equipo (Arquitecto, Líder de Desarrollo, Responsable de Calidad, Responsable de Documentación). \\
+   E2 (6 jun. 2026) & Diseño arquitectónico & Diagramas C4 (contexto, contenedores, componentes), definición inicial de los servicios REST por dominio, contrato OpenAPI 3.0 y estrategia de contenerización con Docker para la arquitectura de microservicios propuesta. \\
+   E3 (28 jul. 2026) & Implementación y validación & Despliegue contenerizado real del frontend y seis microservicios sobre una base compartida, validado con 10 casos funcionales y 210 solicitudes (100\,\% de éxito, p95 < 52\,ms). En paralelo, un perfil experimental desplegó un clúster CockroachDB de 3 nodos con fragmentación de \texttt{pedidos.orden} por trimestre (ADR-003) y factor de replicación 3 (ADR-004), verificado con pruebas de tolerancia a fallos documentadas en video (\texttt{docs/evidencias/tolerancia\_fallos.mp4}), además de un pipeline analítico PySpark sobre 600\,000 órdenes. \\
+   E4 (esta entrega) & Calidad, persistencia distribuida en producción y cierre & CockroachDB deja de ser un perfil experimental y pasa a ser la base de datos real de los seis microservicios en \texttt{docker-compose.yml}, ahora con conexión cifrada por certificado (mTLS); los seis servicios Java se refactorizaron a la arquitectura de puertos y adaptadores en cuatro capas, con 5 patrones GoF documentados (ADR-005); se corrigió el almacenamiento del token JWT en la web; se amplió --- de forma desigual, ver Sección 6 --- la cobertura de pruebas y el pipeline de CI/CD con publicación de imágenes Docker; y se declaran explícitamente fuera de alcance la observabilidad distribuida, la evaluación ISO/IEC 25010 y los contratos Pact. \\
+   \bottomrule
+           \end{tabularx}
+       \end{table}
+
+       Dos piezas de evidencia en \texttt{docs/evidencias/} documentan específicamente la transición entre el perfil experimental de E3 y el uso productivo de CockroachDB en E4: \texttt{integracion-pedidos-crdb.md} y \texttt{colision-serializable-controlada.md}, esta última relevante para el aislamiento \texttt{SERIALIZABLE} aplicado en \texttt{ordenes-proveedores-service} al enviar y cancelar órdenes de compra (Sección 2).
+
     \section{Conclusiones y trabajo futuro}
     % TODO: cerrar con lo logrado vs. lo declarado como alcance en la
     % seccion 1.1, y el trabajo futuro honesto (lo que quedo fuera de esta
