@@ -315,17 +315,17 @@
     \section{Calidad de software y automatización}
 
     \subsection{Pirámide de pruebas (D5.1)}
-    % TODO: cobertura por capa (unitarias, integracion con Testcontainers,
-    % e2e-web con Playwright, carga con Locust). Priorizar cobertura en la
-    % logica de negocio nueva (recepciones, costeo, auto-desactivacion por
-    % precio/costo) antes que perseguir el 70% exacto en toda la superficie
-    % del codigo.
+    La cobertura de pruebas del backend es desigual entre servicios y se documenta aquí con exactitud en vez de promediarla. Cuatro de los seis microservicios Java tienen pruebas unitarias reales con JUnit 5: \texttt{usuarios} (filtros JWT, guardia de acceso, sesiones), \texttt{productos-service} (controlador, manejador de excepciones, validación de DTO), \texttt{inventario-service} (idempotencia, DTO) y \texttt{pedidos-service}, que además de sus pruebas unitarias (\texttt{CarritoServiceTest}, \texttt{OrdenServiceTest}, \texttt{MetodoPagoServiceTest}) incluye la única prueba de \textbf{integración} real del backend: \texttt{CockroachDbIntegrationTest}, que levanta un contenedor \texttt{cockroachdb/cockroach:v23.2.4} real vía Testcontainers (\texttt{@Testcontainers}, \texttt{@Container}) en lugar de simular la base de datos.
 
-    \subsection{Pipeline CI/CD end-to-end (D5.2)}
-    % TODO: describir .github/workflows/ci.yml (jobs actuales: android-mobile,
-    % crdb-tests, armado-ia-tests) y el nuevo publish-images.yml si ya
-    % construye/publica imagenes en GHCR. Documentar brecha frente a los 7
-    % jobs esperados por la rubrica si no se completo todo.
+        Los otros dos microservicios Java, \texttt{ordenes-proveedores-service} y \texttt{ventas-service}, no tienen ninguna prueba (\texttt{src/test} no existe en ninguno de los dos). Esto es una brecha significativa precisamente porque ambos concentran la lógica de negocio más nueva y más sensible de esta entrega: la recepción parcial de órdenes de compra, el recálculo de costo por promedio ponderado y la auto-desactivación de productos cuando el costo supera el precio. El plan de cierre del equipo (\texttt{docs/plan-cierre-e4.md}) declaraba esta lógica como prioridad de cobertura por encima de perseguir un 70\,\% exacto en toda la superficie del código; a la fecha de esta sección, esa prioridad está declarada pero no ejecutada, y se dejará constancia de ello en la Discusión (Sección \ref{sec:discusion}) en vez de reportarla como resuelta.
+
+        No existe una carpeta \texttt{tests/} en la raíz del repositorio, por lo que tampoco hay pruebas end-to-end de la web con Playwright ni pruebas de carga con Locust. La aplicación móvil sí cierra su propia pirámide de forma más completa, con pruebas unitarias y pruebas instrumentadas (detalladas en la Sección 4.2).
+
+        \subsection{Pipeline CI/CD end-to-end (D5.2)}
+
+        El repositorio tiene dos workflows de GitHub Actions. \texttt{.github/workflows/ci.yml} corre en cada \emph{push}/\emph{pull request} y define tres jobs: \texttt{android-mobile} (lint, pruebas unitarias e instrumentadas, y publicación del APK como artefacto --- ver Sección 4.2), \texttt{crdb-tests} (ejecuta \texttt{mvn verify} sobre \texttt{pedidos-service}, incluyendo la prueba de integración con Testcontainers) y \texttt{armado-ia-tests} (pruebas con \texttt{pytest} y lint con \texttt{ruff} sobre el microservicio Python). \texttt{.github/workflows/publish-images.yml}, agregado en esta entrega, construye y publica en un registro Docker las ocho imágenes del sistema (frontend y los siete microservicios) en una matriz paralela, con soporte multi-arquitectura (\texttt{linux/amd64,linux/arm64}) y cacheo de capas vía \texttt{type=gha}.
+
+        Comparado contra los siete jobs que exige la rúbrica (\texttt{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}), el pipeline actual cubre de forma parcial \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}), \texttt{integration} (dentro de \texttt{crdb-tests}, pero limitada a un solo servicio) y \texttt{build-images} (\texttt{publish-images.yml}). Quedan sin job dedicado: \texttt{lint} para los servicios Java y para la web (solo \texttt{armado-ia} tiene lint automatizado, vía \texttt{ruff}), y \texttt{test-backend}/\texttt{test-web} como jobs que corran las pruebas de \emph{todos} los servicios Java y de la SPA respectivamente --- esta última, además, no puede ejecutarse todavía porque, como se documentó en la Sección 3.2, la web no tiene ningún framework de pruebas configurado. Una diferencia adicional frente a lo esperado por la rúbrica es que \texttt{publish-images.yml} publica en Docker Hub (\texttt{docker/login-action} contra \texttt{vars.DOCKERHUB\_USERNAME}) y no en GitHub Container Registry (GHCR) como se sugiere en la guía de la entrega; el resultado funcional --- imágenes versionadas y publicadas automáticamente --- es equivalente, pero el registro concreto difiere del nombrado explícitamente en la rúbrica.
 
     % ============================================================
     % 7. DISCUSION -- responsable: EN CONJUNTO, al final
