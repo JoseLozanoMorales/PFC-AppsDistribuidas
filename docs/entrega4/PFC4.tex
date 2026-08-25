@@ -352,18 +352,30 @@
     \section{Ética, amenazas a la validez y reproducibilidad}
 
     \subsection{Reflexión ética (D9.2)}
-    % TODO: discusion referenciando el ACM Code of Ethics aplicada al
-    % dominio del proyecto (datos de usuarios, seguridad de credenciales,
-    % decisiones automatizadas como la auto-desactivacion de productos).
+
+    Se toma como marco de referencia el \emph{ACM Code of Ethics and Professional Conduct} (2018), aplicado a tres decisiones de diseño concretas de \textbf{TiendaTech}, no como una discusión abstracta.
+
+    La primera es la protección de credenciales y datos personales (principio 1.6, \emph{Respect privacy}; principio 2.9, \emph{Design for security}). Las contraseñas se almacenan con \texttt{BCryptPasswordEncoder} de factor 12, nunca en texto plano; el token de sesión se guarda cifrado con Android Keystore en el cliente móvil y solo en \texttt{sessionStorage} (no en \texttt{localStorage} persistente) en el cliente web; y la conexión hacia la base de datos distribuida se cifra con autenticación mutua por certificado (mTLS) desde esta entrega, en lugar de la conexión sin cifrar heredada de E3.
+
+    La segunda es la decisión de auto-desactivar un producto cuando su costo recalculado supera su precio de venta (documentada en la Sección 2 y en el código de \texttt{inventario-service}/\texttt{productos-service}). Esta es una decisión automatizada con impacto económico directo sobre el catálogo visible al cliente, y por tanto queda dentro del alcance del principio 2.5 (\emph{Give comprehensive evaluation of computer systems... including analysis of possible risks}) y del principio 1.2 (\emph{Avoid harm}): vender por debajo del costo perjudicaría al negocio, pero desactivar un producto sin aviso también tiene un costo (pérdida de visibilidad, posible error de cálculo transitorio). Por eso la implementación no es una decisión silenciosa e irreversible: queda registrada en el log del servicio (\texttt{LOG.warn} con el producto, el costo recalculado y el precio vigente), es visible y reversible por un administrador humano, y la reactivación exige explícitamente que el precio ya no esté por debajo del costo antes de permitirla --- es decir, el sistema no permite reactivar "a ciegas" un producto que seguiría vendiéndose con pérdida.
+
+    La tercera es la honestidad en la comunicación de resultados, que el Code of Ethics exige en el principio 2.6 (\emph{Perform work only in areas of competence}) y, sobre todo, en el compromiso general de integridad profesional: este mismo documento declara explícitamente, sección por sección, qué partes de la rúbrica se cumplen, cuáles se cumplen de forma parcial y cuáles no se abordaron (Observabilidad e ISO/IEC 25010 en la Sección \ref{sec:discusion}; ausencia de pruebas en dos microservicios en la Sección 6; ausencia de contratos Pact en la Sección 5.1), en vez de presentar el proyecto como completo cuando no lo está.
 
     \subsection{Amenazas a la validez (D9.3)}
-    % TODO: limitaciones de los experimentos/mediciones reportados en la
-    % seccion 6 (validez interna, externa, de constructo).
+
+    Sobre las mediciones y verificaciones reportadas en la Sección 6, corresponde declarar tres amenazas a su validez siguiendo la clasificación estándar de estudios empíricos en ingeniería de software.
+
+    \textbf{Validez de constructo:} la cobertura de pruebas se reportó por \emph{presencia de archivos de prueba por servicio}, no por un porcentaje de líneas o ramas cubiertas medido con una herramienta como JaCoCo. Solo \texttt{pedidos-service} tiene JaCoCo configurado en su \texttt{pom.xml}; en el resto del backend, "tiene pruebas" y "tiene buena cobertura" no son estrictamente lo mismo, y este documento no confunde ambas cosas al reportar el estado del servicio.
+
+    \textbf{Validez interna:} la única prueba de integración real contra una base de datos (\texttt{CockroachDbIntegrationTest} en \texttt{pedidos-service}) corre contra un contenedor CockroachDB de un solo nodo levantado por Testcontainers, mientras que el sistema en ejecución real usa un clúster de tres nodos con mTLS. El comportamiento verificado en la prueba automatizada no cubre escenarios de consenso Raft entre réplicas, conflictos de rango entre nodos, ni la ruta de conexión cifrada.
+
+    \textbf{Validez externa:} las pruebas manuales de extremo a extremo de esta entrega (recepción de órdenes, actualización de inventario, auto-desactivación de productos) se ejecutaron principalmente contra el entorno local descrito en la Sección 8.3, con datos de catálogo sintéticos y volumen bajo. No hay evidencia todavía de que el mismo flujo se comporte igual bajo carga concurrente o con el volumen de datos del clúster de AWS, precisamente el tipo de medición que correspondería a una evaluación ISO/IEC 25010 --- fuera de alcance de esta entrega, como se declaró en la Sección 1.1.
 
     \subsection{Reproducibilidad (D9.4)}
-    % TODO: documentar el modo "desde cero" via docker-compose.override.yml
-    % con CockroachDB local (evita depender del cluster AWS de IP fija) y
-    % los pasos verificados para levantar el sistema en una maquina limpia.
+
+    El sistema completo puede levantarse con \texttt{docker compose up --build} contra el clúster CockroachDB de AWS usando las credenciales por defecto embebidas en \texttt{docker-compose.yml}, pero esto ata cualquier prueba local a un recurso compartido por todo el equipo y a una base de datos que no se puede resetear libremente. Para resolver esto, \texttt{docker-compose.override.yml} --- que \texttt{docker compose} carga automáticamente junto al archivo principal, sin modificarlo --- añade un nodo CockroachDB local de un solo contenedor (\texttt{crdb-local}, modo \texttt{--insecure}, sin necesidad de certificados) y un segundo contenedor de inicialización (\texttt{crdb-local-init}) que carga, en orden, el esquema (\texttt{schema.sql}), los datos semilla (\texttt{seeds.sql}) y dos catálogos de referencia críticos para que el sistema funcione de punta a punta: \texttt{product-management-reference.sql} (categorías, marcas, IVA) y \texttt{inventario-movimientos-reference.sql} (tipos y subtipos de movimiento de inventario, cuya ausencia fue precisamente la causa raíz de un defecto de esta misma entrega, donde las recepciones de órdenes de compra no actualizaban el stock ni en el entorno local ni en AWS).
+
+    Esta reproducibilidad tiene un límite honesto que se documenta aquí en vez de omitirse: los servicios Java no apuntan automáticamente a \texttt{crdb-local} por defecto, sino al clúster mTLS de AWS (Sección 5.2); para usar el entorno local hay que sobrescribir la variable de entorno \texttt{CRDB\_DATASOURCE\_URL} antes de levantar los contenedores (por ejemplo, \texttt{\$env:CRDB\_DATASOURCE\_URL} en PowerShell), y esa variable es de alcance de sesión de terminal --- si se abre una pestaña nueva sin volver a definirla, los contenedores reconstruidos en esa pestaña vuelven a apuntar por defecto a AWS mientras el resto del stack sigue apuntando a \texttt{crdb-local}, produciendo un entorno mixto (\emph{split-brain}) difícil de diagnosticar. El equipo confirmó este comportamiento durante las pruebas de esta entrega. La reproducibilidad "desde cero" en una máquina limpia es alcanzable pero no todavía a prueba de error humano; formalizar la variable en un archivo \texttt{.env} versionado (con placeholder) en vez de exportarla manualmente por sesión queda como mejora concreta pendiente.
 
     % ============================================================
     % 9. TRAZABILIDAD E1-E4 -- Dimension D8.3 -- responsable: Andy
