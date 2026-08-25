@@ -120,12 +120,6 @@
     morestring=[b]"
 }
 
-% NOTA DE EQUIPO: se reutiliza el archivo de referencias de la Entrega 3 para
-% no perder la bibliografia ya citada (E1-E3). Las citas nuevas que requiera
-% cada seccion de la Entrega 4 (Trabajos relacionados, Fundamento teorico,
-% Pact, etica en ingenieria de software) se agregan a ese mismo .bib
-% compartido y se citan con \cite{clave} una vez agregadas -- NO inventar
-% citas sin entrada real en el .bib.
 \addbibresource{../entrega3/referenciasPFC.bib}
 
 \begin{document}
@@ -185,16 +179,14 @@
 
         {\large\textbf{FECHA DE ENTREGA:}\par}
         \vspace{0.2cm}
-        {\large PENDIENTE \par}
+        {\large Martes 25 de agosto del 2026 \par}
     \end{titlepage}
 
     \tableofcontents
     \newpage
 
     % ============================================================
-    % RESUMEN / ABSTRACT (bilingue) -- en conjunto, al final
-    % Tabla 3: "Objetivo, metodo, resultados, conclusiones; <=200 palabras
-    % cada uno" -- redactar solo cuando el resto del documento este cerrado.
+    % RESUMEN / ABSTRACT
     % ============================================================
     \section*{Resumen}
     \addcontentsline{toc}{section}{Resumen}
@@ -215,7 +207,7 @@
     \newpage
 
     % ============================================================
-    % 1. INTRODUCCION -- responsable: Jeremy Ruperto Gaibor Rodriguez
+    % 1. INTRODUCCION
     % ============================================================
     \section{Introducción}
 
@@ -232,8 +224,7 @@
     Quedan explícitamente fuera del alcance de esta entrega la instrumentación de observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y, como consecuencia directa de ello, la evaluación experimental basada en ISO/IEC 25010 (D6 y D7), dado que esta última depende de contar con las métricas operativas que solo la primera puede producir. Las Secciones \ref{sec:observabilidad}, \ref{sec:iso25010} y \ref{sec:discusion} retoman esta decisión de alcance con más detalle. Esta exclusión se declara aquí de forma explícita, antes de que el lector avance en el documento, para no generar la expectativa de una cobertura que el equipo no pudo verificar en el tiempo disponible.
 
     % ============================================================
-    % 2. TRABAJOS RELACIONADOS -- Tabla 3: >= 6 fuentes indexadas sobre
-    % BDD, microservicios, movil y calidad. PENDIENTE DE INVESTIGACION REAL.
+    % 2. TRABAJOS RELACIONADOS
     % ============================================================
     \section{Trabajos relacionados}
 
@@ -280,8 +271,7 @@
     \end{table}
 
     % ============================================================
-    % 3. FUNDAMENTO TEORICO -- Capas+SOLID, GoF, movil, CI/CD,
-    % observabilidad, ISO 25010 (conceptos, no implementacion propia)
+    % 3. FUNDAMENTO TEORICO -
     % ============================================================
     \section{Fundamento teórico}
 
@@ -310,8 +300,7 @@
     El modelo ISO/IEC 25010:2023 organiza la calidad de un producto de software en ocho características --- adecuación funcional, eficiencia de desempeño, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad y portabilidad --- cada una descompuesta en subcaracterísticas medibles mediante métricas objetivas. Una evaluación seria bajo este modelo no describe la calidad de forma cualitativa, sino que fija un umbral objetivo por métrica y reporta si el sistema lo alcanza, con el nivel de rigor de un experimento controlado (media, desviación típica e intervalo de confianza sobre repeticiones).
 
     % ============================================================
-    % 4. ARQUITECTURA DEL SISTEMA -- Dimension D1 + D4.2
-    % responsable: Jhinson Stalyn Aucatoma Celorio
+    % 4. ARQUITECTURA DEL SISTEMA
     % ============================================================
     \section{Arquitectura del sistema}
     \label{sec:arquitectura-sistema}
@@ -384,7 +373,7 @@
         \end{table}
 
     % ============================================================
-    % 5. APLICACION WEB -- Dimension D2 -- responsable: Jeremy
+    % 5. APLICACION WEB -- Dimension D2
     % ============================================================
     \section{Aplicación web}
 
@@ -456,7 +445,7 @@
     El empaquetado sí está resuelto correctamente: \texttt{Apps/web/frontend/Dockerfile} usa una construcción \emph{multi-stage} de tres etapas --- \texttt{node:22-alpine} para compilar la SPA con \texttt{npm run build}, \texttt{maven:3.9-eclipse-temurin-17} para empaquetar el frontend Spring Cloud Gateway junto con los estáticos ya compilados de React, y \texttt{eclipse-temurin:17-jre} como imagen final de ejecución --- lo que mantiene la imagen de producción libre de herramientas de compilación.
 
     % ============================================================
-    % 6. APLICACION MOVIL -- Dimension D3 -- responsable: Andy
+    % 6. APLICACION MOVIL -- Dimension D3
     % ============================================================
     \section{Aplicación móvil}
 
@@ -502,7 +491,7 @@
 
     % ============================================================
     % 7. PRUEBAS Y CI/CD -- Dimension D4.1 + D5
-    % responsable: José Alejandro Lozano Morales
+    %
     % ============================================================
     \section{Pruebas y CI/CD}
 
@@ -525,7 +514,7 @@
     Comparado contra los siete jobs que exige la rúbrica (\texttt{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}), el pipeline actual cubre de forma parcial \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}), \texttt{integration} (dentro de \texttt{crdb-tests}, pero limitada a un solo servicio) y \texttt{build-images} (\texttt{publish-images.yml}). Quedan sin job dedicado: \texttt{lint} para los servicios Java y para la web (solo \texttt{armado-ia} tiene lint automatizado, vía \texttt{ruff}), y \texttt{test-backend}/\texttt{test-web} como jobs que corran las pruebas de \emph{todos} los servicios Java y de la SPA respectivamente --- esta última, además, no puede ejecutarse todavía porque, como se documentó en la Sección 5.2, la web no tiene ningún framework de pruebas configurado. Una diferencia adicional frente a lo esperado por la rúbrica es que \texttt{publish-images.yml} publica en Docker Hub (\texttt{docker/login-action} contra \texttt{vars.DOCKERHUB\_USERNAME}) y no en GitHub Container Registry (GHCR) como se sugiere en la guía de la entrega; el resultado funcional --- imágenes versionadas y publicadas automáticamente --- es equivalente, pero el registro concreto difiere del nombrado explícitamente en la rúbrica.
 
     % ============================================================
-    % 8. OBSERVABILIDAD -- Dimension D6. Declarada fuera de alcance.
+    % 8. OBSERVABILIDAD -- Dimension D6. fuera de alcance.
     % ============================================================
     \section{Observabilidad}
     \label{sec:observabilidad}
@@ -533,7 +522,7 @@
     Este criterio (D6: instrumentación con OpenTelemetry, métricas Prometheus, registros estructurados con \texttt{trace\_id} y dashboard operativo en Grafana con los seis paneles obligatorios) se declara \textbf{no implementado} en esta entrega. No hay carpeta \texttt{ops/} en el repositorio, ni \texttt{opentelemetry-spring-boot-starter}, ni \texttt{prometheus}/\texttt{grafana} en \texttt{docker-compose.yml}, ni logs en formato JSON con identificador de traza en la configuración de Logback de los servicios revisados. Esta decisión de alcance ya fue declarada en la Sección 1.1 y se retoma con su justificación completa en la Discusión (Sección \ref{sec:discusion}): la instrumentación de las tres señales de observabilidad es, de todo lo pendiente en la rúbrica, la de mayor costo de infraestructura por punto de nota, y compite directamente por el mismo tiempo que se usó para asegurar la persistencia distribuida seleccionada como prioridad (Sección \ref{sec:persistencia-distribuida}).
 
     % ============================================================
-    % 9. EVALUACION ISO 25010 -- Dimension D7. Declarada fuera de alcance.
+    % 9. EVALUACION ISO 25010 -- Dimension D7.fuera de alcance.
     % ============================================================
     \section{Evaluación ISO/IEC 25010}
     \label{sec:iso25010}
@@ -587,8 +576,7 @@
     Esta reproducibilidad tiene un límite honesto que se documenta aquí en vez de omitirse: los servicios Java no apuntan automáticamente a \texttt{crdb-local} por defecto, sino al clúster mTLS de AWS (Sección \ref{sec:persistencia-distribuida}); para usar el entorno local hay que sobrescribir la variable de entorno \texttt{CRDB\_DATASOURCE\_URL} antes de levantar los contenedores (por ejemplo, \texttt{\$env:CRDB\_DATASOURCE\_URL} en PowerShell), y esa variable es de alcance de sesión de terminal --- si se abre una pestaña nueva sin volver a definirla, los contenedores reconstruidos en esa pestaña vuelven a apuntar por defecto a AWS mientras el resto del stack sigue apuntando a \texttt{crdb-local}, produciendo un entorno mixto (\emph{split-brain}) difícil de diagnosticar. El equipo confirmó este comportamiento durante las pruebas de esta entrega. La reproducibilidad "desde cero" en una máquina limpia es alcanzable pero no todavía a prueba de error humano; formalizar la variable en un archivo \texttt{.env} versionado (con placeholder) en vez de exportarla manualmente por sesión queda como mejora concreta pendiente.
 
     % ============================================================
-    % 11. CONCLUSIONES Y TRABAJO FUTURO -- responsable: EN CONJUNTO
-    % (Tabla 3: "Cierre del ciclo E1-E4") -- redactar al final
+    % 11. CONCLUSIONES Y TRABAJO FUTURO
     % ============================================================
     \section{Conclusiones y trabajo futuro}
     \label{sec:conclusiones}
