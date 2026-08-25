@@ -297,16 +297,16 @@
     \section{Integración entre clientes, contratos y persistencia distribuida}
 
     \subsection{Contratos Pact web/móvil↔backend (D4.1)}
-    % TODO: estado de tests/contract (Pact). Si el tiempo obligo a priorizar,
-    % documentar honestamente cual consumidor quedo en verde y cual pendiente
-    % (segun docs/plan-cierre-e4.md, prioridad: dejar primero el contrato
-    % web-backend en verde antes que el movil).
+    A la fecha de cierre de esta entrega no existe en el repositorio ninguna carpeta \texttt{tests/contract} ni configuración de Pact (no hay dependencias de \texttt{pact-jvm} en ningún \texttt{pom.xml} del backend, ni de un \emph{Pact broker} referenciado en el pipeline de CI/CD). Este criterio se declara explícitamente como \textbf{no cumplido} en el estado actual del proyecto. La razón no es desconocimiento de la herramienta, sino una decisión de priorización bajo el tiempo disponible del equipo: se optó por asegurar primero que la persistencia distribuida operara de forma segura (Sección \ref{sec:5-2-persistencia}) y que la calidad de las aplicaciones cliente avanzara (Secciones 3 y 4), antes de introducir una herramienta de verificación de contratos que ninguno de los servicios consumidores tenía previamente. Queda como trabajo inmediato siguiente, con una ruta ya decidida en \texttt{docs/plan-cierre-e4.md}: priorizar el contrato \emph{web↔backend} (el cliente con más tráfico y más rutas) antes que el contrato del consumidor móvil, de modo que exista al menos un contrato verificado en verde en lugar de dos a medio terminar.
 
-    \subsection{Persistencia distribuida operando (D4.2)}
-    % TODO: estado del cluster CockroachDB heredado de E3, healthchecks de
-    % los 7 servicios en docker-compose.yml, y la nueva conexion mTLS con
-    % certificados cliente (sslmode=verify-ca) que reemplazo la conexion
-    % directa sslmode=disable contra la IP fija de AWS.
+        \subsection{Persistencia distribuida operando (D4.2)}
+        \label{sec:5-2-persistencia}
+
+        El clúster CockroachDB de tres nodos heredado de la Entrega 3 (puertos \texttt{26257}/\texttt{26258}/\texttt{26259}) se mantiene operando y es el que sostiene la persistencia de los seis microservicios Java. Sobre esa base, esta entrega incorpora dos mejoras verificables en \texttt{docker-compose.yml}.
+
+        La primera es de \textbf{disponibilidad}: los siete servicios que dependen de una base de datos o exponen un endpoint HTTP (\texttt{pedidos}, \texttt{productos}, \texttt{inventario}, \texttt{ventas}, \texttt{ordenes-proveedores}, \texttt{usuarios} y \texttt{armado-ia}) ahora declaran un bloque \texttt{healthcheck:} contra \texttt{/actuator/health} (o el equivalente del servicio Python), con reintentos y periodo de arranque configurados; antes de esta entrega, \texttt{ventas-crdb-service} y \texttt{ordenes-proveedores-crdb-service} carecían de este chequeo, lo que impedía que \texttt{docker compose} reportara con precisión cuándo el sistema completo estaba realmente listo para recibir tráfico.
+
+        La segunda es de \textbf{seguridad de la conexión}: la cadena de conexión de los seis servicios Java se migró de \texttt{jdbc:postgresql://<IP fija de AWS>:26257,...\allowbreak\&sslmode=disable} --- una conexión sin cifrar contra una dirección IP fija --- a \texttt{jdbc:postgresql://host.docker.internal:26257,...\allowbreak\&sslmode=verify-ca\allowbreak\&sslrootcert=/app/crdb-certs/ca.crt\allowbreak\&sslcert=/app/crdb-certs/client.jhinson.crt\allowbreak\&sslkey=/app/crdb-certs/client.jhinson.key.pk8}, es decir, autenticación mutua por certificado (mTLS) en vez de una conexión abierta. Los tres archivos de certificado se montan como volúmenes de solo lectura (\texttt{./Apps/web/infra/crdb-certs/*.crt|.key.pk8:...:ro}) en cada contenedor. Este cambio requirió reconciliar manualmente un conflicto de fusión en \texttt{docker-compose.yml} porque ambas mejoras (healthchecks y mTLS) se desarrollaron en paralelo sobre los mismos bloques de servicio; el resultado final conserva ambas.
 
     % ============================================================
     % 6. CALIDAD DE SOFTWARE Y AUTOMATIZACION -- Dimension D5
