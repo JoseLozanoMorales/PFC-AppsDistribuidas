@@ -127,18 +127,13 @@
     morestring=[b]"
 }
 
-% NOTA DE EQUIPO: se reutiliza el archivo de referencias de la Entrega 3 para
-% no perder la bibliografia ya citada (E1-E3). Las citas nuevas que requiera
-% cada seccion de la Entrega 4 (Trabajos relacionados, Fundamento teorico,
-% Pact, etica en ingenieria de software) se agregan a ese mismo .bib
-% compartido y se citan con \cite{clave} una vez agregadas -- NO inventar
-% citas sin entrada real en el .bib.
 \addbibresource{../entrega3/referenciasPFC.bib}
 
 \begin{document}
     \shorthandoff{"}
 
     \begin{titlepage}
+        \setlength{\parskip}{0pt}
         \AddToShipoutPicture* {
             \AtPageCenter{%
                 \makebox(0,0){%
@@ -193,16 +188,15 @@
 
         {\large\textbf{FECHA DE ENTREGA:}\par}
         \vspace{0.2cm}
-        {\large PENDIENTE \par}
+        {\large Martes 25 de agosto del 2026 \par}
+        \setlength{\parskip}{0.8em}
     \end{titlepage}
 
     \tableofcontents
     \newpage
 
     % ============================================================
-    % RESUMEN / ABSTRACT (bilingue) -- en conjunto, al final
-    % Tabla 3: "Objetivo, metodo, resultados, conclusiones; <=200 palabras
-    % cada uno" -- redactar solo cuando el resto del documento este cerrado.
+    % RESUMEN / ABSTRACT (bilingue)
     % ============================================================
     \section*{Resumen}
     \addcontentsline{toc}{section}{Resumen}
@@ -287,7 +281,7 @@
     \end{table}
 
     % ============================================================
-    % 3. FUNDAMENTO TEORICO --
+    % 3. FUNDAMENTO TEORICO -
     % ============================================================
     \section{Fundamento teórico}
 
@@ -545,8 +539,7 @@
     Este criterio (D7: medir cinco características del modelo ISO/IEC 25010:2023 con métricas objetivas, repeticiones y un intervalo de confianza del 95\,\%) se declara \textbf{no implementado} en esta entrega, como consecuencia directa de la Sección \ref{sec:observabilidad}: las métricas de fiabilidad (tasa de errores 5xx) y de eficiencia de desempeño (latencia p95 bajo carga con Locust) que exige el protocolo experimental de la rúbrica dependen de la instrumentación de observabilidad, que no se implementó. No existe \texttt{\seqsplit{docs/experimentos/protocolo-e4.md}} ni \texttt{\seqsplit{docs/experimentos/resultados/iso25010.csv}} en el repositorio. El equipo prefiere declarar esta ausencia con claridad antes que reportar métricas medidas de forma artesanal o no reproducible, lo cual violaría el mismo estándar de rigor experimental que la rúbrica exige.
 
     % ============================================================
-    % 10. DISCUSION Y AMENAZAS A LA VALIDEZ -- responsable: EN CONJUNTO
-    % (Interpretacion, alcance, limitaciones -- D9.2, D9.3, D9.4)
+    % 10. DISCUSION Y AMENAZAS A LA VALIDEZ
     % ============================================================
     \section{Discusión y amenazas a la validez}
     \label{sec:discusion}
@@ -591,8 +584,7 @@
     Esta reproducibilidad tiene un límite honesto que se documenta aquí en vez de omitirse: los servicios Java no apuntan automáticamente a \texttt{crdb-local} por defecto, sino al clúster mTLS de AWS (Sección \ref{sec:persistencia-distribuida}); para usar el entorno local hay que sobrescribir la variable de entorno \texttt{CRDB\_DATASOURCE\_URL} antes de levantar los contenedores (por ejemplo, \texttt{\$env:CRDB\_DATASOURCE\_URL} en PowerShell), y esa variable es de alcance de sesión de terminal --- si se abre una pestaña nueva sin volver a definirla, los contenedores reconstruidos en esa pestaña vuelven a apuntar por defecto a AWS mientras el resto del stack sigue apuntando a \texttt{crdb-local}, produciendo un entorno mixto (\emph{split-brain}) difícil de diagnosticar. El equipo confirmó este comportamiento durante las pruebas de esta entrega. La reproducibilidad "desde cero" en una máquina limpia es alcanzable pero no todavía a prueba de error humano; formalizar la variable en un archivo \texttt{.env} versionado (con placeholder) en vez de exportarla manualmente por sesión queda como mejora concreta pendiente.
 
     % ============================================================
-    % 11. CONCLUSIONES Y TRABAJO FUTURO -- responsable: EN CONJUNTO
-    % (Tabla 3: "Cierre del ciclo E1-E4") -- redactar al final
+    % 11. CONCLUSIONES Y TRABAJO FUTURO
     % ============================================================
     \section{Conclusiones y trabajo futuro}
     \label{sec:conclusiones}
