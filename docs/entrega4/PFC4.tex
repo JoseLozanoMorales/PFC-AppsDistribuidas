@@ -189,10 +189,14 @@
     \newpage
 
     % ============================================================
-    % RESUMEN / ABSTRACT
+    % RESUMEN / ABSTRACT -- en conjunto, al final
     % ============================================================
     \section*{Resumen}
     \addcontentsline{toc}{section}{Resumen}
+    % responsable: EN CONJUNTO, al final
+    % TODO: sintesis cuantificada de lo logrado en E4 (que se agrego sobre E3,
+    % resultados de calidad/CI-CD, alcance declarado vs. cubierto). Se escribe
+    % cuando el resto del documento (secciones 1-10) ya este cerrado.
 
     \vspace{1cm}
     \textbf{Palabras clave:} PENDIENTE.
@@ -201,7 +205,7 @@
 
     \section*{Abstract}
     \addcontentsline{toc}{section}{Abstract}
-    % TODO: version en ingles del Resumen. Ultimo en escribirse.
+    % TODO: version en ingles del Resumen.
 
     \vspace{1cm}
     \textbf{Keywords:} PENDIENTE.
@@ -209,98 +213,156 @@
     \newpage
 
     % ============================================================
-    % 1. INTRODUCCION
+    % 1. INTRODUCCION -- responsable: Jeremy Ruperto Gaibor Rodriguez
     % ============================================================
     \section{Introducción}
+    % TODO: enlazar brevemente con el problema y la contribucion delimitada
+    % ya declarados en E1-E3 (docs/entrega3/PFC3.tex, seccion 1). No repetir
+    % todo el contexto de mercado: solo el parrafo de transicion hacia lo que
+    % agrega especificamente la Entrega 4 (calidad, automatizacion, cierre
+    % del manuscrito acumulativo).
 
     \subsection{Alcance y contribución delimitada de la Entrega 4}
-
+    % TODO: declarar explicitamente que criterios de la rubrica de E4 se
+    % cubren y cuales quedan fuera de alcance. Mencionar aqui, en una frase,
+    % que Observabilidad (D6) e ISO/IEC 25010 (D7) quedan fuera de alcance --
+    % se retoma en la Discusion (seccion 7.1).
 
     % ============================================================
     % 2. ARQUITECTURA Y DECISIONES DE DISENO -- Dimension D1
+    % responsable: Jhinson Stalyn Aucatoma Celorio
     % ============================================================
     \section{Arquitectura y decisiones de diseño}
 
     \subsection{Refactor en capas y principios SOLID (D1.1)}
-
+    % TODO: describir la migracion a los 4 paquetes por microservicio
+    % (presentation/application/domain/infrastructure), con enfasis en
+    % ordenes-proveedores-service y ventas-service. Referenciar puertos
+    % (interfaces de domain) y adaptadores (infrastructure). Justificar con
+    % principios SOLID aplicados (SRP, DIP en particular via los Port).
 
     \subsection{Patrones GoF aplicados (D1.2)}
-
+    % TODO: resumir docs/adr/ADR-005-patrones-gof.md -- nombrar cada patron,
+    % su proposito concreto en TiendaTech y el archivo/clase donde vive.
 
     % ============================================================
-    % 3. APLICACION WEB -- Dimension D2
+    % 3. APLICACION WEB -- Dimension D2 -- responsable: Jeremy
     % ============================================================
     \section{Aplicación web}
 
     \subsection{Funcionalidad (D2.1)}
-
+    % TODO: rutas de la SPA React, autenticacion JWT, guard de admin,
+    % estado de internacionalizacion (react-i18next) y manejo seguro del
+    % token (correccion de almacenamiento en localStorage plano).
 
     \subsection{Calidad (D2.2)}
+    % TODO: linting/formateo configurado, pruebas (Vitest/Jest) y cobertura,
+    % Dockerfile multi-stage.
 
     % ============================================================
-    % 4. APLICACION MOVIL -- Dimension D3
+    % 4. APLICACION MOVIL -- Dimension D3 -- responsable: Andy
     % ============================================================
     \section{Aplicación móvil}
 
     \subsection{Funcionalidad (D3.1)}
-
+    % TODO: describir Apps/mobile (Kotlin + Jetpack Compose), capacidades
+    % de dispositivo utilizadas (camara/scanner, notificaciones), flujos
+    % cubiertos (auth, catalogo, carrito, ordenes, cuenta/checkout).
 
     \subsection{Calidad (D3.2)}
-
+    % TODO: pruebas instrumentadas (androidTest) existentes, pruebas unitarias
+    % de ViewModels pendientes de confirmar, publicacion del APK como artefacto
+    % de CI.
 
     % ============================================================
     % 5. INTEGRACION, CONTRATOS Y PERSISTENCIA DISTRIBUIDA -- Dimension D4
+    % 5.1 responsable: José Alejandro Lozano Morales (Pact)
+    % 5.2 responsable: Jhinson Stalyn Aucatoma Celorio (persistencia)
     % ============================================================
     \section{Integración entre clientes, contratos y persistencia distribuida}
 
     \subsection{Contratos Pact web/móvil↔backend (D4.1)}
-
+    % TODO: estado de tests/contract (Pact). Si el tiempo obligo a priorizar,
+    % documentar honestamente cual consumidor quedo en verde y cual pendiente
+    % (segun docs/plan-cierre-e4.md, prioridad: dejar primero el contrato
+    % web-backend en verde antes que el movil).
 
     \subsection{Persistencia distribuida operando (D4.2)}
-
+    % TODO: estado del cluster CockroachDB heredado de E3, healthchecks de
+    % los 7 servicios en docker-compose.yml, y la nueva conexion mTLS con
+    % certificados cliente (sslmode=verify-ca) que reemplazo la conexion
+    % directa sslmode=disable contra la IP fija de AWS.
 
     % ============================================================
     % 6. CALIDAD DE SOFTWARE Y AUTOMATIZACION -- Dimension D5
+    % responsable: José Alejandro Lozano Morales
     % ============================================================
     \section{Calidad de software y automatización}
 
     \subsection{Pirámide de pruebas (D5.1)}
-
+    % TODO: cobertura por capa (unitarias, integracion con Testcontainers,
+    % e2e-web con Playwright, carga con Locust). Priorizar cobertura en la
+    % logica de negocio nueva (recepciones, costeo, auto-desactivacion por
+    % precio/costo) antes que perseguir el 70% exacto en toda la superficie
+    % del codigo.
 
     \subsection{Pipeline CI/CD end-to-end (D5.2)}
-
+    % TODO: describir .github/workflows/ci.yml (jobs actuales: android-mobile,
+    % crdb-tests, armado-ia-tests) y el nuevo publish-images.yml si ya
+    % construye/publica imagenes en GHCR. Documentar brecha frente a los 7
+    % jobs esperados por la rubrica si no se completo todo.
 
     % ============================================================
-    % 7. DISCUSION
+    % 7. DISCUSION -- responsable: EN CONJUNTO, al final
     % ============================================================
     \section{Discusión}
-
+    % TODO: interpretar los resultados de la seccion 6 (calidad de software
+    % y automatizacion) en conjunto, contrastar contra los umbrales/objetivos
+    % declarados en E3.
 
     \subsection{Alcance no cubierto: observabilidad y evaluación ISO/IEC 25010 (D6, D7)}
+    % TODO: parrafo breve y honesto (no una seccion completa) explicando que
+    % la instrumentacion distribuida (OpenTelemetry, Prometheus, Grafana) y
+    % la evaluacion experimental ISO/IEC 25010 -- que depende de tener esas
+    % metricas funcionando -- quedaron fuera del alcance de esta entrega por
+    % restriccion de tiempo, y se declaran explicitamente como trabajo futuro
+    % en la seccion de Conclusiones. No se fabrican metricas ni dashboards
+    % simulados para cubrir este punto.
 
     % ============================================================
     % 8. ETICA, AMENAZAS A LA VALIDEZ Y REPRODUCIBILIDAD -- Dimension D9
+    % responsable: José Alejandro Lozano Morales
     % ============================================================
     \section{Ética, amenazas a la validez y reproducibilidad}
 
     \subsection{Reflexión ética (D9.2)}
-.
+    % TODO: discusion referenciando el ACM Code of Ethics aplicada al
+    % dominio del proyecto (datos de usuarios, seguridad de credenciales,
+    % decisiones automatizadas como la auto-desactivacion de productos).
 
     \subsection{Amenazas a la validez (D9.3)}
-
+    % TODO: limitaciones de los experimentos/mediciones reportados en la
+    % seccion 6 (validez interna, externa, de constructo).
 
     \subsection{Reproducibilidad (D9.4)}
-
+    % TODO: documentar el modo "desde cero" via docker-compose.override.yml
+    % con CockroachDB local (evita depender del cluster AWS de IP fija) y
+    % los pasos verificados para levantar el sistema en una maquina limpia.
 
     % ============================================================
-    % 9. TRAZABILIDAD E1-E4 -- Dimension D8.3
+    % 9. TRAZABILIDAD E1-E4 -- Dimension D8.3 -- responsable: Andy
     % ============================================================
     \section{Trazabilidad de la evolución E1--E4}
+    % TODO: tabla resumen de que cambio en cada entrega, apoyandose en
+    % docs/entrega1/, docs/entrega2/, docs/entrega3/ y docs/evidencias/.
 
     % ============================================================
-    % 10. CONCLUSIONES
+    % 10. CONCLUSIONES -- responsable: EN CONJUNTO, al final
     % ============================================================
     \section{Conclusiones y trabajo futuro}
-
+    % TODO: cerrar con lo logrado vs. lo declarado como alcance en la
+    % seccion 1.1, y el trabajo futuro honesto (lo que quedo fuera de esta
+    % entrega: Pact movil si no se completo, Observabilidad D6, ISO 25010 D7,
+    % y cualquier otro punto que el equipo decida documentar como pendiente).
 
 \end{document}
