@@ -470,9 +470,13 @@
 
     \subsection{Interpretación de resultados y alcance no cubierto}
 
-    % TODO: interpretar en conjunto los resultados de la Sección 7 (pruebas
-    % y CI/CD) frente a los umbrales/objetivos declarados en E3, una vez
-    % que el resto de secciones tecnicas este cerrado.
+    La Entrega 3 cerró declarando como trabajo posterior explícito la calidad de código, la observabilidad y la evaluación experimental formal del sistema (Sección 1). Frente a esa línea base, esta entrega avanza de forma desigual entre esos tres frentes, y esa desigualdad es en sí misma el hallazgo principal de la Discusión.
+
+    El avance más sólido es arquitectónico: los seis microservicios Java completaron el refactor en capas con puertos y adaptadores (Sección \ref{sec:arquitectura-sistema}), y la persistencia distribuida pasó de ser un perfil experimental paralelo en E3 a ser la base de datos real del sistema, ahora protegida con mTLS. Este resultado es consistente con la prioridad que el equipo declaró en \texttt{docs/plan-cierre-e4.md}: asegurar primero la infraestructura de la que todo lo demás depende.
+
+    El avance en calidad de código es parcial y concentrado: cuatro de los seis microservicios Java tienen pruebas unitarias reales, mientras que los dos que concentran la lógica de negocio más nueva de esta entrega (recepción de órdenes, costeo, auto-desactivación) no tienen ninguna (Sección 7.1). Esto invierte la prioridad que el propio equipo se había fijado por escrito --- cubrir primero la lógica nueva antes que perseguir cobertura pareja --- y es una inconsistencia entre lo planeado y lo ejecutado que este documento prefiere señalar explícitamente en vez de omitir. De forma similar, el pipeline de CI/CD cubre de forma parcial cuatro de los siete \emph{jobs} esperados (Sección 7.3), y los contratos Pact no se iniciaron (Sección 7.2).
+
+    La evaluación experimental formal --- el tercer frente declarado pendiente en E3 --- sigue sin abordarse en E4: la observabilidad distribuida y la evaluación ISO/IEC 25010 (Secciones \ref{sec:observabilidad} y \ref{sec:iso25010}) se declaran explícitamente fuera de alcance, no por desconocimiento de las herramientas sino porque instrumentar las tres señales de observabilidad (métricas, registros, trazas) y luego ejecutar un protocolo experimental con repeticiones e intervalos de confianza sobre esas métricas es, de todo lo pendiente en la rúbrica, lo que exige más tiempo de infraestructura por punto de nota disponible. Priorizar la persistencia distribuida seleccionada como base de todo el sistema, en lugar de la observabilidad, fue una decisión consciente del equipo bajo la restricción de tiempo real que enfrentó esta entrega, y no un descuido.
 
     La instrumentación de observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y la evaluación experimental ISO/IEC 25010 --- que depende de tener esas métricas funcionando --- quedaron fuera del alcance de esta entrega por restricción de tiempo del equipo, y se declaran explícitamente como trabajo futuro en las Conclusiones (Sección \ref{sec:conclusiones}). No se fabrican métricas ni dashboards simulados para cubrir estos puntos (Secciones \ref{sec:observabilidad} y \ref{sec:iso25010}).
 
@@ -535,9 +539,9 @@ E4 (esta entrega) & Calidad, persistencia distribuida en producción y cierre & 
 
     \subsection{Conclusiones}
 
-    % TODO: cerrar con lo logrado vs. lo declarado como alcance en la
-    % Seccion 1.1, redactado al final cuando el resto del documento este
-    % cerrado. Es una seccion de GRUPO, no individual por integrante.
+    Contrastado contra el alcance declarado en la Sección 1.1, el equipo cumplió de forma completa el refactor en capas y los patrones GoF (D1), avanzó de forma sólida en la persistencia distribuida segura (D4.2) y en la funcionalidad de ambas aplicaciones cliente (D2.1, D3.1), y corrigió el manejo inseguro del token JWT identificado como pendiente antes de esta entrega. Cumplió de forma parcial la calidad de las aplicaciones cliente (D2.2, D3.2) y la pirámide de pruebas del backend (D5.1), con una brecha concreta y ya identificada: los dos microservicios con la lógica de negocio más nueva de la entrega no tienen pruebas propias. No abordó, y lo declara así en vez de simularlo, los contratos de consumidor Pact (D4.1), la observabilidad distribuida (D6) y la evaluación experimental ISO/IEC 25010 (D7).
+
+    El resultado neto es un sistema que evolucionó genuinamente en la dirección que E3 dejó pendiente --- de \emph{funciona} a \emph{se puede sostener y verificar} --- pero que no alcanzó a cubrir la totalidad de esa transición en el tiempo disponible. Esta entrega documenta esa transición de forma honesta antes que completa: cada sección declara explícitamente su estado real, sin inflar lo logrado ni ocultar lo pendiente, siguiendo el mismo estándar de honestidad de alcance aplicado en las entregas anteriores del proyecto.
 
     \subsection{Trabajo futuro}
 
