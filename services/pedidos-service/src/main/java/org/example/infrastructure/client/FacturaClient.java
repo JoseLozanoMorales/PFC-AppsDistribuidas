@@ -18,8 +18,11 @@ public class FacturaClient implements FacturaPort {
 
     public FacturaClient(RestClient.Builder restClientBuilder,
                          @Value("${ventas.service.base-url}") String ventasBaseUrl,
-                         CircuitBreakerRegistry circuitBreakerRegistry) {
-        this.restClient = restClientBuilder.baseUrl(ventasBaseUrl).build();
+                         CircuitBreakerRegistry circuitBreakerRegistry,
+                         InboundAuthorizationInterceptor authorizationInterceptor) {
+        this.restClient = restClientBuilder.baseUrl(ventasBaseUrl)
+                .requestInterceptor(authorizationInterceptor)
+                .build();
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("facturaClient");
     }
 

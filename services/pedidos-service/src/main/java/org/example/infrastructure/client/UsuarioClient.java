@@ -25,8 +25,11 @@ public class UsuarioClient implements UsuarioPort {
     public UsuarioClient(RestClient.Builder restClientBuilder,
                          @Value("${usuarios.service.base-url}") String usuariosBaseUrl,
                          CircuitBreakerRegistry circuitBreakerRegistry,
-                         RetryRegistry retryRegistry) {
-        this.restClient = restClientBuilder.baseUrl(usuariosBaseUrl).build();
+                         RetryRegistry retryRegistry,
+                         InboundAuthorizationInterceptor authorizationInterceptor) {
+        this.restClient = restClientBuilder.baseUrl(usuariosBaseUrl)
+                .requestInterceptor(authorizationInterceptor)
+                .build();
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("usuarioClient");
         this.retry = retryRegistry.retry("usuarioClient");
     }

@@ -27,8 +27,11 @@ public class ProductoClient implements ProductoPort {
     public ProductoClient(RestClient.Builder restClientBuilder,
                            @Value("${productos.service.base-url}") String productosBaseUrl,
                            CircuitBreakerRegistry circuitBreakerRegistry,
-                           RetryRegistry retryRegistry) {
-        this.restClient = restClientBuilder.baseUrl(productosBaseUrl).build();
+                           RetryRegistry retryRegistry,
+                           InboundAuthorizationInterceptor authorizationInterceptor) {
+        this.restClient = restClientBuilder.baseUrl(productosBaseUrl)
+                .requestInterceptor(authorizationInterceptor)
+                .build();
         this.circuitBreaker = circuitBreakerRegistry.circuitBreaker("productoClient");
         this.retry = retryRegistry.retry("productoClient");
     }
