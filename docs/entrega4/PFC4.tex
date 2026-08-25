@@ -236,27 +236,47 @@
     % ============================================================
     \section{Trabajos relacionados}
 
-    % TODO -- ESTA SECCION REQUIERE INVESTIGACION BIBLIOGRAFICA REAL, NO
-    % SOLO REDACCION. No inventar fuentes ni citas. Pasos sugeridos:
-    % 1. Buscar >= 6 fuentes indexadas (IEEE Xplore, ACM DL, Scopus,
-    %    Google Scholar con revision por pares) publicadas preferentemente
-    %    2020-2025, cubriendo los 4 ejes que pide la rubrica:
-    %    (a) bases de datos distribuidas / CockroachDB / consenso Raft,
-    %    (b) arquitecturas de microservicios y patrones de diseno,
-    %    (c) ingenieria de aplicaciones moviles (Android nativo vs.
-    %        multiplataforma, patrones MVVM),
-    %    (d) calidad de software / pruebas automatizadas / CI-CD.
-    % 2. Agregar cada fuente como entrada BibTeX en
-    %    docs/entrega3/referenciasPFC.bib (reutilizado por este documento).
-    % 3. Redactar 1-2 parrafos por eje sintetizando que aporta cada fuente
-    %    y en que se diferencia el enfoque de TiendaTech, siguiendo el
-    %    mismo estilo de sintesis usado en docs/entrega3/PFC3.tex, seccion
-    %    "Trabajos relacionados" (ya tiene un nucleo de fuentes reutilizable
-    %    para el eje de recomendacion/compatibilidad y el eje de
-    %    distribucion de datos -- revisar si alcanzan para cubrir la cuota
-    %    de esta entrega o si hace falta ampliar).
-    % 4. Cerrar con una matriz comparativa (tabla) igual que
-    %    docs/entrega3/PFC3.tex, Tabla "estado_arte".
+    Esta sección revisa siete fuentes indexadas --- dos ya citadas en \texttt{docs/entrega3/PFC3.tex} y reutilizadas aquí por seguir siendo pertinentes, y cinco incorporadas específicamente para esta entrega --- organizadas en los cuatro ejes que exige la rúbrica de la Entrega 4: bases de datos distribuidas, arquitectura de microservicios, ingeniería de aplicaciones móviles y calidad de software/CI-CD.
+
+    \subsection{Bases de datos distribuidas}
+
+    \textcite{taft2020} describen la arquitectura de CockroachDB --- el motor efectivamente usado por TiendaTech desde E3 --- detallando cómo fragmenta las tablas en rangos replicados por consenso Raft y las lecciones aprendidas al adaptar Raft a un sistema de producción (agrupar \emph{heartbeats}, pausar grupos Raft inactivos, reconfiguración por consenso conjunto). \textcite{ozsu2020} complementan esto con el marco formal de fragmentación horizontal primaria y derivada que TiendaTech ya usó para justificar el particionamiento de \texttt{pedidos.orden} por trimestre en E3 (ADR-003). Ninguna de las dos fuentes evalúa, sin embargo, el costo operativo de migrar una conexión insegura a una conexión mTLS con certificados cliente sobre un clúster ya desplegado --- que es exactamente el cambio de infraestructura documentado en la Sección \ref{sec:persistencia-distribuida} de esta entrega.
+
+    \subsection{Arquitectura de microservicios}
+
+    \textcite{marquez2018review} revisan sistemáticamente la literatura académica e industrial sobre patrones y tácticas arquitectónicas para microservicios, identificando 44 patrones en fuentes académicas y 74 en fuentes industriales, la mayoría asociados a escalabilidad, flexibilidad, capacidad de prueba, desempeño y elasticidad. \textcite{zhong2024domaindriven} investigan empíricamente --- combinando una revisión sistemática de 34 estudios con una encuesta a 63 profesionales --- el uso de \emph{Domain-Driven Design} para identificar los límites (\emph{bounded contexts}) de cada microservicio, un problema de diseño previo al que TiendaTech resolvió de forma pragmática y no formalizada al dividir el dominio en usuarios, productos, inventario, pedidos, órdenes a proveedores y ventas. Ninguna de las dos fuentes profundiza en el refactor interno de un microservicio ya existente hacia una arquitectura de puertos y adaptadores en cuatro capas --- que es precisamente lo que la Sección \ref{sec:arquitectura-sistema} documenta para los seis servicios Java de TiendaTech.
+
+    \subsection{Ingeniería de aplicaciones móviles}
+
+    \textcite{nawrocki2021comparison} comparan empíricamente aplicaciones idénticas desarrolladas con frameworks nativos y multiplataforma (Kotlin nativo frente a React Native y Flutter, entre otros), evaluando funcionalidad, esfuerzo de desarrollo y rendimiento; sus resultados muestran que el desarrollo nativo ofrece el mayor rendimiento y el acceso más directo a las capacidades del dispositivo, a costa de mayor esfuerzo de desarrollo por no compartir código entre plataformas. Este hallazgo es directamente relevante para TiendaTech: la aplicación móvil (Sección 6) se construyó en Kotlin nativo con Jetpack Compose precisamente para acceder sin capas intermedias a CameraX/ML Kit (escaneo de códigos de barras) y a la API de notificaciones del sistema operativo, las dos capacidades de dispositivo requeridas por la rúbrica --- una elección que este trabajo relacionado ayuda a justificar cuantitativamente, aunque TiendaTech mismo no ejecutó un benchmark comparativo propio frente a una alternativa multiplataforma.
+
+    \subsection{Calidad de software y CI/CD}
+
+    \textcite{shahin2017continuous} ofrecen la revisión sistemática de referencia sobre integración, entrega y despliegue continuos, clasificando enfoques, herramientas, desafíos y prácticas de la industria; su marco conceptual de \emph{pipeline} como \emph{quality gate} automatizado es el que se usa para evaluar, en la Sección 7.3, qué tan completo está el pipeline real de TiendaTech frente al ideal de siete \emph{jobs} de la rúbrica. \textcite{hui2025unveiling} aportan el estudio más reciente y más específico para este proyecto: un mapeo sistemático de métodos de prueba para sistemas basados en microservicios, que identifica nueve categorías de pruebas (incluidas pruebas unitarias, de contrato y extremo a extremo) y los desafíos de aplicarlas cuando los servicios se despliegan y actualizan de forma independiente --- exactamente la situación de TiendaTech, donde la cobertura de pruebas es desigual entre sus seis microservicios (Sección 7.1). Ninguna de las dos fuentes mide el costo de retrasar la adopción de pruebas de contrato (Pact) cuando el tiempo del equipo es limitado, que es la decisión de priorización que TiendaTech documenta explícitamente en la Sección 7.2.
+
+    \subsection{Matriz comparativa}
+
+    La Tabla \ref{tab:trabajos-relacionados-e4} condensa el aporte de cada fuente y la brecha que deja abierta respecto del trabajo realizado en TiendaTech.
+
+    \begin{table}[H]
+        \centering
+        \caption{Matriz comparativa de trabajos relacionados (Entrega 4).}
+        \label{tab:trabajos-relacionados-e4}
+        \small
+        \begin{tabularx}{\textwidth}{p{2.6cm} X X}
+\toprule
+\textbf{Referencia} & \textbf{Aporte principal} & \textbf{Brecha frente a TiendaTech E4} \\
+\midrule
+\textcite{taft2020} & Arquitectura de CockroachDB y adaptación de Raft a producción. & No evalúa migrar una conexión insegura a mTLS sobre un clúster ya desplegado. \\
+\textcite{ozsu2020} & Marco formal de fragmentación horizontal primaria/derivada. & Supone conocida la carga de consultas desde el diseño inicial. \\
+\textcite{marquez2018review} & 44+74 patrones/tácticas arquitectónicas para microservicios. & No cubre el refactor interno de un servicio ya existente hacia capas. \\
+\textcite{zhong2024domaindriven} & DDD para identificar límites de microservicios (34 estudios, 63 encuestados). & No aborda la reestructuración posterior de un microservicio ya delimitado. \\
+\textcite{nawrocki2021comparison} & Comparación empírica nativo vs. multiplataforma (funcionalidad, esfuerzo, rendimiento). & TiendaTech no ejecutó un benchmark propio frente a una alternativa multiplataforma. \\
+\textcite{shahin2017continuous} & Revisión sistemática de CI/CD: enfoques, herramientas, prácticas. & No mide el costo de un pipeline parcialmente implementado bajo restricción de tiempo. \\
+\textcite{hui2025unveiling} & Mapeo sistemático de pruebas para sistemas basados en microservicios. & No mide el costo de retrasar la adopción de pruebas de contrato (Pact). \\
+\bottomrule
+        \end{tabularx}
+    \end{table}
 
     % ============================================================
     % 3. FUNDAMENTO TEORICO -- Capas+SOLID, GoF, movil, CI/CD,
