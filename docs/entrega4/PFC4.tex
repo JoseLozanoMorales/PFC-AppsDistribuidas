@@ -258,13 +258,17 @@
     \section{Aplicación web}
 
     \subsection{Funcionalidad (D2.1)}
-    % TODO: rutas de la SPA React, autenticacion JWT, guard de admin,
-    % estado de internacionalizacion (react-i18next) y manejo seguro del
-    % token (correccion de almacenamiento en localStorage plano).
+    La SPA (\texttt{Apps/web/frontend/webapp}), construida con React 18 y \texttt{react-router-dom}, expone doce rutas declaradas en \texttt{App.tsx}: catálogo (\texttt{/}), detalle de producto (\texttt{/producto/:id}), armado de PC (\texttt{/armado}), carrito (\texttt{/carrito}), pago (\texttt{/pago}), factura (\texttt{/factura/:id?}), autenticación (\texttt{/login}, \texttt{/registro}, \texttt{/recuperacion}), cuenta (\texttt{/cuenta}), panel de trabajador (\texttt{/trabajador}) y administración (\texttt{/admin}), superando ampliamente el mínimo de cinco exigido por la rúbrica.
 
-    \subsection{Calidad (D2.2)}
-    % TODO: linting/formateo configurado, pruebas (Vitest/Jest) y cobertura,
-    % Dockerfile multi-stage.
+        La sesión se identifica mediante un token JWT emitido por \texttt{usuarios-crdb-service}. El módulo \texttt{src/services/session.ts} guarda el token exclusivamente en \texttt{sessionStorage} (nunca en \texttt{localStorage}: al cargar, el propio módulo purga activamente cualquier clave de sesión que hubiera quedado en \texttt{localStorage} de una versión anterior), cumpliendo la restricción explícita de la rúbrica sobre el manejo del token. La ruta \texttt{/admin} está protegida por un componente \texttt{AdminRoute} que valida el rol del usuario (\texttt{id\_rol === 1} o \texttt{rol === "admin"}) y redirige a \texttt{/login} si no se cumple. Adicionalmente, \texttt{App.tsx} implementa expiración de sesión por inactividad (30 minutos sin interacción del usuario cierran la sesión automáticamente).
+
+        La internacionalización declarada como deseable en la rúbrica (\texttt{react-i18next} con al menos español e inglés) no está implementada: toda la interfaz está codificada directamente en español. Se documenta aquí como brecha conocida en vez de omitirla.
+
+        \subsection{Calidad (D2.2)}
+
+        El \texttt{package.json} de la webapp no declara \texttt{eslint} ni \texttt{prettier} como dependencias de desarrollo, por lo que no hay una verificación de estilo o de reglas de código automatizada más allá de la que impone el propio compilador de TypeScript (\texttt{tsc -b}) durante el paso de \texttt{build}. Tampoco hay un framework de pruebas configurado (ni Vitest ni Jest aparecen en \texttt{devDependencies}), por lo que no existe cobertura de pruebas automatizada para la SPA en este momento; esta ausencia se retoma como brecha en la Sección \ref{sec:discusion}.
+
+        El empaquetado sí está resuelto correctamente: \texttt{Apps/web/frontend/Dockerfile} usa una construcción \emph{multi-stage} de tres etapas --- \texttt{node:22-alpine} para compilar la SPA con \texttt{npm run build}, \texttt{maven:3.9-eclipse-temurin-17} para empaquetar el frontend Spring Cloud Gateway junto con los estáticos ya compilados de React, y \texttt{eclipse-temurin:17-jre} como imagen final de ejecución --- lo que mantiene la imagen de producción libre de herramientas de compilación.
 
     % ============================================================
     % 4. APLICACION MOVIL -- Dimension D3 -- responsable: Andy
