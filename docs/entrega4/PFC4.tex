@@ -276,14 +276,18 @@
     \section{Aplicación móvil}
 
     \subsection{Funcionalidad (D3.1)}
-    % TODO: describir Apps/mobile (Kotlin + Jetpack Compose), capacidades
-    % de dispositivo utilizadas (camara/scanner, notificaciones), flujos
-    % cubiertos (auth, catalogo, carrito, ordenes, cuenta/checkout).
+
+    \texttt{Apps/mobile} es una aplicación Android nativa en Kotlin con Jetpack Compose, organizada por \emph{feature} (\texttt{auth}, \texttt{catalog}, \texttt{cart}, \texttt{orders}, \texttt{account}, \texttt{scanner}, \texttt{notifications}), cada una dividida internamente en \texttt{data}/\texttt{domain}/\texttt{ui}, con inyección de dependencias vía Hilt y comunicación HTTP con el backend mediante Retrofit y OkHttp. La capa \texttt{core/database} usa Room para cachear productos y categorías localmente (\texttt{ProductCacheDao}, \texttt{CategoryCacheDao}, \texttt{CacheMetadataDao}), permitiendo operar el catálogo con datos ya vistos aunque la conexión falle.
+
+    La aplicación utiliza dos capacidades del dispositivo, superando el mínimo exigido por la rúbrica. La primera es la \textbf{cámara}: la feature \texttt{scanner} usa CameraX (\texttt{androidx.camera.core/camera2/lifecycle/view}) junto con ML Kit Barcode Scanning para leer códigos de barras de productos y resolverlos contra el catálogo (\texttt{BarcodeAnalyzer}, \texttt{BarcodeLookup}). La segunda son las \textbf{notificaciones nativas}: \texttt{AndroidOrderNotificationPublisher} publica notificaciones reales del sistema operativo (API \texttt{NotificationManager}/\texttt{NotificationCompat}, con el permiso \texttt{POST\_NOTIFICATIONS} declarado en el manifiesto) para informar cambios de estado en las órdenes del usuario.
+
+    Los flujos de negocio cubiertos son autenticación (login/registro, \texttt{feature/auth}), catálogo y detalle de producto (\texttt{feature/catalog}), carrito (\texttt{feature/cart}), órdenes y su historial (\texttt{feature/orders}), y cuenta con checkout (\texttt{feature/account}, incluye \texttt{CheckoutScreen}). La sesión se protege de forma más estricta que en la web: el token no se guarda en texto plano sino cifrado mediante Android Keystore (\texttt{AndroidKeystoreTokenCipher}, \texttt{SecureSessionStore}), y \texttt{AuthInterceptor} lo adjunta automáticamente a las peticiones salientes de Retrofit.
 
     \subsection{Calidad (D3.2)}
-    % TODO: pruebas instrumentadas (androidTest) existentes, pruebas unitarias
-    % de ViewModels pendientes de confirmar, publicacion del APK como artefacto
-    % de CI.
+
+    La aplicación cuenta con dos niveles de prueba verificados en el repositorio. Existen pruebas instrumentadas (\texttt{app/src/androidTest}) que corren sobre un dispositivo o emulador real: \texttt{TiendaTechDatabaseTest} valida el esquema Room y \texttt{NotificationIntegrationTest} valida la publicación de notificaciones nativas, además de la plantilla \texttt{ExampleInstrumentedTest} generada por Android Studio. Adicionalmente --- y a diferencia de lo que se había señalado como pendiente de confirmar en la auditoría interna previa a esta entrega --- sí existen pruebas unitarias reales sobre \texttt{app/src/test}: doce archivos que cubren \texttt{ViewModels} (\texttt{ScannerViewModelTest}, usando \texttt{kotlinx.coroutines.test} con \texttt{StandardTestDispatcher} y \texttt{runTest} para probar corrutinas de forma determinista), repositorios (\texttt{AuthRepositoryTest}, \texttt{CartContractTest}, \texttt{OrdersContractTest}), validadores (\texttt{AuthValidatorTest}), mapeadores (\texttt{CatalogMapperTest}) y almacenamiento seguro de sesión (\texttt{SecureSessionStoreTest}), todas con JUnit 4 y \texttt{okhttp-mockwebserver} para simular el backend.
+
+    El job \texttt{android-mobile} de \texttt{.github/workflows/ci.yml} ejecuta \texttt{lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest} en cada push y publica el APK de depuración y el APK de pruebas instrumentadas como artefactos descargables del pipeline, cumpliendo la exigencia de que el CI produzca un artefacto instalable de la app móvil.
 
     % ============================================================
     % 5. INTEGRACION, CONTRATOS Y PERSISTENCIA DISTRIBUIDA -- Dimension D4
