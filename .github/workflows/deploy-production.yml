@@ -1,0 +1,95 @@
+name: Desplegar en producción
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Etiqueta de imágenes que se desplegará
+        required: true
+        default: latest
+  workflow_run:
+    workflows: ["Publicar imágenes Docker"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Desplegar en EC2
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: [self-hosted, Linux, ARM64]
+    timeout-minutes: 20
+
+    steps:
+      - name: Descargar código desplegado
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Determinar etiqueta de imágenes
+        id: image
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MANUAL_TAG: ${{ inputs.image_tag }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            tag="$MANUAL_TAG"
+          else
+            tag="${HEAD_SHA:0:7}"
+          fi
+          [[ "$tag" =~ ^[A-Za-z0-9_.-]+$ ]] || {
+            echo "Etiqueta de imagen no válida: $tag" >&2
+            exit 1
+          }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Validar configuración privada
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s /opt/tiendatech/.env
+          test "$(stat -c '%a' /opt/tiendatech/.env)" = "600"
+          grep -q '^CRDB_DATASOURCE_URL=' /opt/tiendatech/.env
+          grep -q '^CRDB_DATASOURCE_USERNAME=' /opt/tiendatech/.env
+          grep -q '^AUTH_JWT_SECRET=' /opt/tiendatech/.env
+
+      - name: Instalar y validar Compose de producción
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: |
+          set -euo pipefail
+          install -m 0644 docker-compose.prod.yml /opt/tiendatech/docker-compose.prod.yml
+          cd /opt/tiendatech
+          docker compose --env-file .env -f docker-compose.prod.yml config --quiet
+
+      - name: Descargar y levantar servicios
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd /opt/tiendatech
+          docker compose --env-file .env -f docker-compose.prod.yml pull
+          docker compose --env-file .env -f docker-compose.prod.yml up \
+            -d --remove-orphans --wait --wait-timeout 300
+
+      - name: Resumen del despliegue
+        if: always()
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: |
+          cd /opt/tiendatech
+          docker compose --env-file .env -f docker-compose.prod.yml ps
