@@ -2,6 +2,7 @@ package com.tiendatech.mobile.feature.scanner
 
 import com.tiendatech.mobile.feature.scanner.domain.BarcodeLookupResult
 import com.tiendatech.mobile.feature.scanner.domain.BarcodePolicy
+import com.tiendatech.mobile.feature.scanner.domain.DemoBarcodeCatalog
 import com.tiendatech.mobile.feature.scanner.domain.ProductLookupByBarcode
 import com.tiendatech.mobile.feature.scanner.ui.ScannerViewModel
 import kotlinx.coroutines.Dispatchers
@@ -46,12 +47,19 @@ class ScannerViewModelTest {
     }
 
     @Test fun `lookup encontrado expone producto`() = runTest(dispatcher) {
-        val viewModel = ScannerViewModel(ProductLookupByBarcode { BarcodeLookupResult.Found(42) })
+        val viewModel = ScannerViewModel(ProductLookupByBarcode { BarcodeLookupResult.Found(42, "Producto de prueba") })
         viewModel.codeChanged("ABC-42")
         viewModel.search()
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals(42L, viewModel.state.value.productId)
-        assertEquals("Producto encontrado", viewModel.state.value.message)
+        assertEquals("Producto encontrado: Producto de prueba", viewModel.state.value.message)
+    }
+
+    @Test fun `catalogo demo contiene cinco codigos asociados a productos reales`() {
+        assertEquals(5, DemoBarcodeCatalog.entries.size)
+        assertEquals(5, DemoBarcodeCatalog.entries.map { it.productId }.distinct().size)
+        assertTrue(DemoBarcodeCatalog.entries.all { it.productName.isNotBlank() && it.categoryName.isNotBlank() })
+        assertTrue(DemoBarcodeCatalog.entries.all { BarcodePolicy.validationMessage(it.code) == null })
     }
 
     @Test fun `reintentar limpia lectura y reactiva camara`() = runTest(dispatcher) {

@@ -12,6 +12,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.time.LocalDate
+import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,14 +60,14 @@ class AccountRepository @Inject constructor(private val api: AccountApi) {
 
     suspend fun createPayment(card: String, expiration: String, typeId: Long): AccountResult<Unit> = request {
         AccountValidator.payment(card, expiration)?.let { return@request AccountResult.Failure(it) }
-        val response = api.createPayment(PaymentRequest(card.filter(Char::isDigit), expiration, typeId))
+        val response = api.createPayment(PaymentRequest(card.filter(Char::isDigit), PaymentExpiration.toApiDate(expiration)!!, typeId))
         if (!response.isSuccessful) return@request failure(response.code())
         AccountResult.Success(Unit)
     }
 
     suspend fun updatePayment(id: Long, card: String, expiration: String, typeId: Long, enabled: Boolean): AccountResult<Unit> = request {
         AccountValidator.payment(card, expiration)?.let { return@request AccountResult.Failure(it) }
-        val response = api.updatePayment(id, PaymentUpdateRequest(card.filter(Char::isDigit), expiration, typeId, enabled))
+        val response = api.updatePayment(id, PaymentUpdateRequest(card.filter(Char::isDigit), PaymentExpiration.toApiDate(expiration)!!, typeId, enabled))
         if (!response.isSuccessful) return@request failure(response.code())
         AccountResult.Success(Unit)
     }
@@ -129,10 +131,10 @@ class AccountRepository @Inject constructor(private val api: AccountApi) {
 }
 
 object AccountValidator {
-    private val isoDate = Regex("^\\d{4}-\\d{2}-\\d{2}$")
     fun payment(card: String, expiration: String): String? = when {
         card.filter(Char::isDigit).length !in 13..19 -> "El número de tarjeta debe tener entre 13 y 19 dígitos"
-        !isoDate.matches(expiration) -> "La fecha debe usar el formato YYYY-MM-DD"
+        PaymentExpiration.toApiDate(expiration) == null -> "La fecha debe usar el formato MM/AA"
+        !PaymentExpiration.isCurrentOrFuture(expiration) -> "La tarjeta está vencida"
         else -> null
     }
     fun password(current: String, new: String, repeated: String): String? = when {
@@ -141,4 +143,25 @@ object AccountValidator {
         new != repeated -> "Las contraseñas nuevas no coinciden"
         else -> null
     }
+}
+
+object PaymentExpiration {
+    private val monthYear = Regex("^(0[1-9]|1[0-2])/(\\d{2})$")
+
+    fun toApiDate(value: String): String? {
+        val match = monthYear.matchEntire(value.trim()) ?: return null
+        val month = match.groupValues[1].toInt()
+        val year = 2000 + match.groupValues[2].toInt()
+        return YearMonth.of(year, month).atEndOfMonth().toString()
+    }
+
+    fun isCurrentOrFuture(value: String, current: YearMonth = YearMonth.now()): Boolean {
+        val apiDate = toApiDate(value) ?: return false
+        return !YearMonth.from(LocalDate.parse(apiDate)).isBefore(current)
+    }
+
+    fun display(value: String): String = runCatching {
+        val date = LocalDate.parse(value)
+        "%02d/%02d".format(date.monthValue, date.year % 100)
+    }.getOrDefault(value)
 }

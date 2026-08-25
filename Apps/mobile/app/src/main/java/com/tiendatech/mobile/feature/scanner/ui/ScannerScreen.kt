@@ -81,7 +81,16 @@ fun ScannerScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Button(onClick = viewModel::search, enabled = !state.lookingUp, modifier = Modifier.fillMaxWidth()) { Text(if (state.lookingUp) "Buscando…" else "Buscar código") }
-        state.message?.let { Text(it, color = if (state.productId != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
+        state.message?.let {
+            Text(
+                it,
+                color = if (state.productId != null || state.categoryId != null) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
         state.productId?.let { id -> Button(onClick = { onProduct(id) }, modifier = Modifier.fillMaxWidth()) { Text("Abrir producto") } }
         if (state.analysisPaused) OutlinedButton(onClick = viewModel::retry, modifier = Modifier.fillMaxWidth()) { Text("Escanear otro código") }
     }

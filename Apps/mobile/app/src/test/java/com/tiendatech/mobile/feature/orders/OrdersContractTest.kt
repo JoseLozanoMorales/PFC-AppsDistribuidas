@@ -42,6 +42,13 @@ class OrdersContractTest {
         val invoice = api.invoices(7).body()?.single(); assertEquals(5L, invoice?.ordenId); assertEquals("FAC-8", invoice?.numero)
     }
 
+    @Test fun `invoice response accepts nullable customer fields`() = runTest {
+        server.enqueue(json("""[{"facturaId":1,"ordenId":1000001,"usuarioId":4,"fechaEmision":"2026-08-25","fechaOrden":"2026-08-25","cedula":null,"nombre":"José Morales","correo":"jose@example.com","telefono":null,"direccionEntrega":null,"subtotal":473.01,"total":543.96,"numero":"FAC-E3-1000001"}]"""))
+        val invoice = api.invoices(4).body()?.single()
+        assertEquals(1000001L, invoice?.ordenId)
+        assertEquals(null, invoice?.direccionEntrega)
+    }
+
     @Test fun `invoice detail has product name`() = runTest {
         server.enqueue(json("""[{"productoId":9,"nombreProducto":"Procesador","cantidad":1,"precio":100,"subtotal":100,"iva":15,"total":115}]"""))
         assertEquals("Procesador", api.invoiceLines(8).body()?.single()?.nombreProducto)

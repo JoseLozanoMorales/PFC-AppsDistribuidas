@@ -28,6 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tiendatech.mobile.core.designsystem.component.TiendaTechErrorState
 import com.tiendatech.mobile.core.designsystem.component.TiendaTechLoadingState
+import com.tiendatech.mobile.feature.account.data.PaymentExpiration
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -64,7 +65,7 @@ fun CheckoutScreen(
         enabledAddresses.forEach { address -> SelectCard(state.selectedAddressId == address.id, { viewModel.selectAddress(address.id) }) { Text(address.street); Text(listOfNotNull(address.city, address.province).joinToString(" · ")) } }
         Text("Método de pago", style = MaterialTheme.typography.titleLarge)
         if (enabledMethods.isEmpty()) TextButton(onClick = onAccount) { Text("Agregar un método de pago") }
-        enabledMethods.forEach { method -> SelectCard(state.selectedPaymentId == method.id, { viewModel.selectPayment(method.id) }) { Text("${method.typeName} · ${method.mask}"); Text("Vence ${method.expiration}") } }
+        enabledMethods.forEach { method -> SelectCard(state.selectedPaymentId == method.id, { viewModel.selectPayment(method.id) }) { Text("${method.typeName} · ${method.mask}"); Text("Vence ${PaymentExpiration.display(method.expiration)}") } }
         Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("Unidades"); Text(cart.units.toString()) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("Total", style = MaterialTheme.typography.titleLarge); Text(money(cart.total), style = MaterialTheme.typography.titleLarge) }

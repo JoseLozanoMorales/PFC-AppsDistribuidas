@@ -18,5 +18,19 @@ interface OrdersApi {
 @Serializable data class OrderPageDto(val content: List<OrderDto> = emptyList(), val page: Int = 0, val size: Int = 20, val totalElements: Long = 0, val totalPages: Int = 0)
 @Serializable data class OrderLineDto(val ordenId: Long, val productoId: Long, val cantidad: Int, val precioUnitario: Double, val subtotal: Double, val iva: Double, val total: Double)
 @Serializable data class OrderLinePageDto(val content: List<OrderLineDto> = emptyList(), val page: Int = 0, val size: Int = 0, val totalElements: Long = 0, val totalPages: Int = 0)
-@Serializable data class InvoiceDto(val facturaId: Long, val ordenId: Long, val usuarioId: Long, val fechaEmision: String, val fechaOrden: String, val cedula: String, val nombre: String, val correo: String, val telefono: String, val direccionEntrega: String, val subtotal: Double, val total: Double, val numero: String)
+@Serializable data class InvoiceDto(
+    val facturaId: Long,
+    val ordenId: Long,
+    val usuarioId: Long,
+    val fechaEmision: String,
+    val fechaOrden: String,
+    val cedula: String? = null,
+    val nombre: String? = null,
+    val correo: String? = null,
+    val telefono: String? = null,
+    val direccionEntrega: String? = null,
+    val subtotal: Double,
+    val total: Double,
+    val numero: String
+)
 @Serializable data class InvoiceLineDto(val productoId: Long, val nombreProducto: String, val cantidad: Int, val precio: Double, val subtotal: Double, val iva: Double, val total: Double)

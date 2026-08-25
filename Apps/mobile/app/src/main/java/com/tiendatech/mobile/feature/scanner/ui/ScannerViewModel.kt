@@ -19,6 +19,8 @@ data class ScannerUiState(
     val lookingUp: Boolean = false,
     val message: String? = null,
     val productId: Long? = null,
+    val categoryId: Long? = null,
+    val categoryName: String? = null,
     val analysisPaused: Boolean = false
 )
 
@@ -30,7 +32,7 @@ class ScannerViewModel @Inject constructor(
     val state: StateFlow<ScannerUiState> = mutableState.asStateFlow()
 
     fun codeChanged(value: String) {
-        mutableState.update { it.copy(code = value, validationError = null, message = null, productId = null) }
+        mutableState.update { it.copy(code = value, validationError = null, message = null, productId = null, categoryId = null, categoryName = null) }
     }
 
     fun detected(value: String) {
@@ -46,10 +48,12 @@ class ScannerViewModel @Inject constructor(
             mutableState.update { it.copy(validationError = error) }
             return
         }
-        mutableState.update { it.copy(code = code, validationError = null, lookingUp = true, message = null, productId = null, analysisPaused = true) }
+        mutableState.update { it.copy(code = code, validationError = null, lookingUp = true, message = null, productId = null, categoryId = null, categoryName = null, analysisPaused = true) }
         viewModelScope.launch {
             when (val result = lookup.find(code)) {
-                is BarcodeLookupResult.Found -> mutableState.update { it.copy(lookingUp = false, productId = result.productId, message = "Producto encontrado") }
+                is BarcodeLookupResult.Found -> mutableState.update {
+                    it.copy(lookingUp = false, productId = result.productId, message = "Producto encontrado: ${result.productName}")
+                }
                 BarcodeLookupResult.NotFound -> mutableState.update { it.copy(lookingUp = false, message = "No se encontró un producto para este código") }
                 BarcodeLookupResult.BackendUnavailable -> mutableState.update { it.copy(lookingUp = false, message = "Código leído correctamente. El catálogo todavía no permite buscar productos por código de barras.") }
             }

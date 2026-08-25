@@ -18,11 +18,12 @@ import javax.inject.Singleton
 class OrdersRepository @Inject constructor(private val api: OrdersApi, private val catalog: CatalogRepository) {
     suspend fun page(userId: Long, page: Int): OrdersResult<OrdersPage> = request {
         coroutineScope {
-            val ordersCall = async { api.orders(userId, page) }; val invoicesCall = async { api.invoices(userId) }
+            val ordersCall = async { api.orders(userId, page) }
+            val invoicesCall = async { runCatching { api.invoices(userId) }.getOrNull() }
             val orders = ordersCall.await(); val invoices = invoicesCall.await()
             if (!orders.isSuccessful) return@coroutineScope failure(orders.code())
-            if (!invoices.isSuccessful) return@coroutineScope failure(invoices.code())
-            val invoiceByOrder = invoices.body().orEmpty().filter { it.usuarioId == userId }.associateBy(InvoiceDto::ordenId)
+            val invoiceByOrder = invoices?.takeIf { it.isSuccessful }?.body().orEmpty()
+                .filter { it.usuarioId == userId }.associateBy(InvoiceDto::ordenId)
             val body = orders.body() ?: return@coroutineScope OrdersResult.Failure("La respuesta de pedidos está vacía")
             OrdersResult.Success(OrdersPage(body.content.map { it.summary(invoiceByOrder[it.ordenId]) }, body.page, body.totalPages))
         }
@@ -30,17 +31,19 @@ class OrdersRepository @Inject constructor(private val api: OrdersApi, private v
 
     suspend fun detail(userId: Long, orderId: Long): OrdersResult<OrderDetail> = request {
         coroutineScope {
-            val orderCall = async { api.order(orderId) }; val linesCall = async { api.orderLines(orderId) }; val invoicesCall = async { api.invoices(userId) }
+            val orderCall = async { api.order(orderId) }
+            val linesCall = async { api.orderLines(orderId) }
+            val invoicesCall = async { runCatching { api.invoices(userId) }.getOrNull() }
             val orderResponse = orderCall.await(); val linesResponse = linesCall.await(); val invoicesResponse = invoicesCall.await()
             if (!orderResponse.isSuccessful) return@coroutineScope failure(orderResponse.code())
             if (!linesResponse.isSuccessful) return@coroutineScope failure(linesResponse.code())
-            if (!invoicesResponse.isSuccessful) return@coroutineScope failure(invoicesResponse.code())
             val order = orderResponse.body() ?: return@coroutineScope OrdersResult.Failure("Pedido no encontrado")
             if (order.usuarioId != userId) return@coroutineScope OrdersResult.Failure("Pedido no encontrado")
-            val ownedInvoice = invoicesResponse.body().orEmpty().firstOrNull { it.usuarioId == userId && it.ordenId == orderId }
+            val ownedInvoice = invoicesResponse?.takeIf { it.isSuccessful }?.body().orEmpty()
+                .firstOrNull { it.usuarioId == userId && it.ordenId == orderId }
             val invoiceLines = if (ownedInvoice != null) {
-                val response = api.invoiceLines(ownedInvoice.facturaId)
-                if (response.isSuccessful) response.body().orEmpty() else emptyList()
+                val response = runCatching { api.invoiceLines(ownedInvoice.facturaId) }.getOrNull()
+                if (response?.isSuccessful == true) response.body().orEmpty() else emptyList()
             } else emptyList()
             val names = invoiceLines.associate { it.productoId to it.nombreProducto }
             val lines = linesResponse.body()?.content.orEmpty().map { line ->
@@ -48,7 +51,7 @@ class OrdersRepository @Inject constructor(private val api: OrdersApi, private v
                 OrderLine(line.productoId, names[line.productoId] ?: cachedName, line.cantidad, line.precioUnitario, line.subtotal, line.iva, line.total)
             }
             val invoice = ownedInvoice?.let { value ->
-                Invoice(value.facturaId, value.numero, value.fechaEmision, value.nombre, value.direccionEntrega, value.subtotal, value.total,
+                Invoice(value.facturaId, value.numero, value.fechaEmision, value.nombre ?: "Cliente", value.direccionEntrega ?: "Dirección no disponible", value.subtotal, value.total,
                     invoiceLines.map { OrderLine(it.productoId, it.nombreProducto, it.cantidad, it.precio, it.subtotal, it.iva, it.total) })
             }
             OrdersResult.Success(OrderDetail(order.summary(ownedInvoice), order.direccionId, order.metodopagoId, lines, invoice))

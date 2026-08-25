@@ -4,6 +4,7 @@ import com.tiendatech.mobile.feature.account.data.AccountApi
 import com.tiendatech.mobile.feature.account.data.AccountValidator
 import com.tiendatech.mobile.feature.account.data.CheckoutRequest
 import com.tiendatech.mobile.feature.account.data.PasswordRequest
+import com.tiendatech.mobile.feature.account.data.PaymentExpiration
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -17,6 +18,7 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.time.YearMonth
 
 class AccountContractTest {
     private lateinit var server: MockWebServer
@@ -46,11 +48,21 @@ class AccountContractTest {
     }
 
     @Test fun `payment validation accepts academic contract`() {
-        assertNull(AccountValidator.payment("4111111111111111", "2028-12-31"))
+        assertNull(AccountValidator.payment("4111111111111111", "12/28"))
     }
 
     @Test fun `payment validation rejects malformed date`() {
-        assertEquals("La fecha debe usar el formato YYYY-MM-DD", AccountValidator.payment("4111111111111111", "12/28"))
+        assertEquals("La fecha debe usar el formato MM/AA", AccountValidator.payment("4111111111111111", "13/28"))
+    }
+
+    @Test fun `expiration converts month and year to backend date`() {
+        assertEquals("2026-07-31", PaymentExpiration.toApiDate("07/26"))
+        assertEquals("07/26", PaymentExpiration.display("2026-07-31"))
+    }
+
+    @Test fun `expiration rejects a previous month`() {
+        assertTrue(!PaymentExpiration.isCurrentOrFuture("08/23", YearMonth.of(2026, 8)))
+        assertTrue(PaymentExpiration.isCurrentOrFuture("08/26", YearMonth.of(2026, 8)))
     }
 
     @Test fun `password confirmation is validated locally`() {

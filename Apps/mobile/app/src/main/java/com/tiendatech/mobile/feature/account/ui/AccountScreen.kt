@@ -6,17 +6,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import com.tiendatech.mobile.core.designsystem.component.TiendaTechErrorState
 import com.tiendatech.mobile.core.designsystem.component.TiendaTechLoadingState
 import com.tiendatech.mobile.feature.account.domain.Address
 import com.tiendatech.mobile.feature.account.domain.PaymentMethod
+import com.tiendatech.mobile.feature.account.data.PaymentExpiration
 import com.tiendatech.mobile.core.preferences.ThemeMode
 
 @Composable
@@ -78,7 +81,7 @@ fun AccountScreen(
         Text("Mecanismo académico: no corresponde a una pasarela PCI real.", style = MaterialTheme.typography.bodySmall)
         if (data.paymentMethods.isEmpty()) Text("No tienes métodos registrados.")
         data.paymentMethods.forEach { method -> Card(Modifier.fillMaxWidth()) { Row(Modifier.fillMaxWidth().padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column { Text(method.typeName); Text(method.mask); Text("Vence: ${method.expiration}") }
+            Column { Text(method.typeName); Text(method.mask); Text("Vence: ${PaymentExpiration.display(method.expiration)}") }
             Column { TextButton(onClick = { paymentEditor = method }) { Text("Actualizar") }; TextButton(onClick = { viewModel.setPaymentEnabled(method.id, !method.enabled, onUnauthorized) }, enabled = !state.busy) { Text(if (method.enabled) "Inactivar" else "Reactivar") } }
         } } }
         PasswordForm(state.busy) { current, new, repeated, clear -> viewModel.changePassword(current, new, repeated, onUnauthorized, clear) }
@@ -104,23 +107,83 @@ fun AccountScreen(
 
 @Composable private fun AddressDialog(address: Address?, cities: List<com.tiendatech.mobile.feature.account.domain.City>, dismiss: () -> Unit, save: (Long?, String, String?, Long) -> Unit) {
     var street by remember(address) { mutableStateOf(address?.street.orEmpty()) }; var reference by remember(address) { mutableStateOf(address?.reference.orEmpty()) }
-    var cityId by remember(address, cities) { mutableStateOf(address?.cityId ?: cities.firstOrNull()?.id) }; var expanded by remember { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = dismiss, title = { Text(if (address == null) "Nueva dirección" else "Editar dirección") }, text = { Column {
-        OutlinedTextField(street, { street = it }, label = { Text("Calle y número") }); OutlinedTextField(reference, { reference = it }, label = { Text("Referencia") })
-        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text(cities.firstOrNull { it.id == cityId }?.let { "${it.name} · ${it.provinceName}" } ?: "Seleccionar ciudad") }
-        DropdownMenu(expanded, { expanded = false }) { cities.forEach { city -> DropdownMenuItem({ Text("${city.name} · ${city.provinceName}") }, { cityId = city.id; expanded = false }) } }
+    var cityId by remember(address) { mutableStateOf(address?.cityId) }
+    var cityQuery by remember { mutableStateOf("") }
+    val visibleCities = remember(cities, cityQuery) {
+        cities
+            .filter { cityQuery.isBlank() || "${it.name} ${it.provinceName}".contains(cityQuery.trim(), ignoreCase = true) }
+            .sortedWith(compareBy({ it.provinceName }, { it.name }))
+    }
+    AlertDialog(onDismissRequest = dismiss, title = { Text(if (address == null) "Nueva dirección" else "Editar dirección") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(street, { street = it }, label = { Text("Calle y número") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(reference, { reference = it }, label = { Text("Referencia") }, modifier = Modifier.fillMaxWidth())
+        Text("Ciudad de Ecuador", style = MaterialTheme.typography.titleSmall)
+        OutlinedTextField(cityQuery, { cityQuery = it }, label = { Text("Buscar ciudad o provincia") }, modifier = Modifier.fillMaxWidth())
+        if (cities.isEmpty()) {
+            Text("No se pudieron cargar las ciudades. Vuelve a intentarlo con conexión.", color = MaterialTheme.colorScheme.error)
+        } else if (visibleCities.isEmpty()) {
+            Text("No hay ciudades que coincidan con la búsqueda")
+        } else {
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 220.dp)) {
+                items(visibleCities, key = { it.id }) { city ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { cityId = city.id }.padding(vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        RadioButton(selected = cityId == city.id, onClick = { cityId = city.id })
+                        Column {
+                            Text(city.name, style = MaterialTheme.typography.bodyLarge)
+                            Text(city.provinceName, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        }
+        cities.firstOrNull { it.id == cityId }?.let { Text("Seleccionada: ${it.name} · ${it.provinceName}", color = MaterialTheme.colorScheme.primary) }
     } }, confirmButton = { Button(onClick = { cityId?.let { save(address?.id, street, reference.takeIf(String::isNotBlank), it) } }, enabled = street.isNotBlank() && cityId != null) { Text("Guardar") } }, dismissButton = { TextButton(onClick = dismiss) { Text("Cancelar") } })
 }
 
 @Composable private fun PaymentDialog(method: PaymentMethod?, types: List<com.tiendatech.mobile.feature.account.domain.PaymentType>, dismiss: () -> Unit, save: (String, String, Long, () -> Unit) -> Unit) {
-    var card by remember { mutableStateOf("") }; var expiration by remember(method) { mutableStateOf(method?.expiration.orEmpty()) }; var typeId by remember(types, method) { mutableStateOf(method?.typeId ?: types.firstOrNull()?.id) }; var expanded by remember { mutableStateOf(false) }
+    var card by remember { mutableStateOf("") }; var expiration by remember(method) { mutableStateOf(method?.let { PaymentExpiration.display(it.expiration) }.orEmpty()) }; var typeId by remember(method) { mutableStateOf(method?.typeId) }
     val clear = { card = ""; expiration = "" }
-    AlertDialog(onDismissRequest = { clear(); dismiss() }, title = { Text(if (method == null) "Agregar método" else "Actualizar método") }, text = { Column {
+    val expirationError = when {
+        expiration.isBlank() -> null
+        PaymentExpiration.toApiDate(expiration) == null -> "Usa el formato MM/AA"
+        !PaymentExpiration.isCurrentOrFuture(expiration) -> "La tarjeta está vencida"
+        else -> null
+    }
+    AlertDialog(onDismissRequest = { clear(); dismiss() }, title = { Text(if (method == null) "Agregar método" else "Actualizar método") }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("No se solicita CVV. El número completo se envía una sola vez y no se guarda en el dispositivo.", style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(card, { card = it.filter(Char::isDigit).take(19) }, label = { Text(if (method == null) "Número de tarjeta" else "Nuevo número completo") }); OutlinedTextField(expiration, { expiration = it.take(10) }, label = { Text("Fecha YYYY-MM-DD") })
-        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text(types.firstOrNull { it.id == typeId }?.name ?: "Tipo") }
-        DropdownMenu(expanded, { expanded = false }) { types.forEach { type -> DropdownMenuItem({ Text(type.name) }, { typeId = type.id; expanded = false }) } }
-    } }, confirmButton = { Button(onClick = { typeId?.let { save(card, expiration, it, clear) } }) { Text("Guardar") } }, dismissButton = { TextButton(onClick = { clear(); dismiss() }) { Text("Cancelar") } })
+        OutlinedTextField(card, { card = it.filter(Char::isDigit).take(19) }, label = { Text(if (method == null) "Número de tarjeta" else "Nuevo número completo") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            expiration,
+            { expiration = formatExpiration(it) },
+            label = { Text("Vencimiento MM/AA") },
+            placeholder = { Text("07/26") },
+            isError = expirationError != null,
+            supportingText = expirationError?.let { message -> { Text(message) } },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text("Tipo de tarjeta", style = MaterialTheme.typography.titleSmall)
+        if (types.isEmpty()) {
+            Text("No se pudieron cargar los tipos débito/crédito. Vuelve a intentarlo con conexión.", color = MaterialTheme.colorScheme.error)
+        } else {
+            types.forEach { type ->
+                Row(
+                    Modifier.fillMaxWidth().clickable { typeId = type.id }.padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    RadioButton(selected = typeId == type.id, onClick = { typeId = type.id })
+                    Text(type.name, modifier = Modifier.padding(top = 12.dp))
+                }
+            }
+        }
+    } }, confirmButton = { Button(onClick = { typeId?.let { save(card, expiration, it, clear) } }, enabled = card.length in 13..19 && expirationError == null && expiration.isNotBlank() && typeId != null) { Text("Guardar") } }, dismissButton = { TextButton(onClick = { clear(); dismiss() }) { Text("Cancelar") } })
+}
+
+private fun formatExpiration(value: String): String {
+    val digits = value.filter(Char::isDigit).take(4)
+    return if (digits.length <= 2) digits else "${digits.take(2)}/${digits.drop(2)}"
 }
 
 @Composable private fun PasswordForm(busy: Boolean, submit: (String, String, String, () -> Unit) -> Unit) {
