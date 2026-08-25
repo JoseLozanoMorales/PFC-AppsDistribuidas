@@ -5,8 +5,8 @@
 **Institución:** Universidad Técnica Estatal de Quevedo (UTEQ)
 **Docente:** Ing. Gleiston C. Guerrero-Ulloa, Mgs.
 **Período académico:** 2026-2027
-**Entrega vigente:** Entrega 3 (E3) — clúster de datos distribuido, tolerancia a fallos y pipeline analítico paralelo
-**Rama de trabajo:** `feature/entrega-3`
+**Entrega vigente:** Entrega 4 (E4) — refactor en capas, calidad de software, aplicaciones cliente y persistencia distribuida con mTLS
+**Rama de trabajo:** `main` (fusionada desde `feature/entrega-4` por PR con revisión cruzada)
 
 ## Equipo
 
@@ -17,64 +17,53 @@
 | Andy Paul Sánchez Pilaloa | Integrante | `AndySanchez2004` |
 | José Alejandro Lozano Morales | Integrante | `JoseLozanoMorales` |
 
-<!-- TODO: verificar — el equipo debe confirmar el rol específico de cada integrante (p. ej. líder, responsable de capa de datos, responsable de pipeline); no se encontró esa asignación documentada en el repositorio. -->
-
 ---
 
-## 1. Estado de la Entrega 3
+## 1. Estado de la Entrega 4
 
-La numeración A–G agrupa los dieciséis criterios de la rúbrica (sección 13) en
-siete bloques temáticos, para facilidad de lectura. No corresponde a una
-nomenclatura oficial de la guía; es un ordenamiento propio hecho a partir de
-la evidencia encontrada en `docs/evidencias/`, `docs/adr/` y `docs/db/`.
+El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto sección por sección, declarando explícitamente lo que se cumple, lo parcial y lo no implementado. Este resumen sigue ese mismo criterio: no se reporta nada como completo si no lo está.
 
-| Módulo | Alcance (criterios rúbrica) | Estado | Evidencia |
+| Frente | Alcance | Estado | Evidencia |
 |---|---|---|---|
-| A — Esquema distribuido y fragmentación | 1.1, 1.2 | ✅ Completo | `docs/adr/ADR-003-fragmentacion-pedidos.md`, `docs/db/schema.sql`, `docs/evidencias/validacion-esquema-distribuido.md` |
-| B — Clúster CockroachDB de 3 nodos | 2.1 | ✅ Completo | `docs/evidencias/cluster-cockroachdb-3-nodos.md` |
-| C — Tolerancia a fallos | 2.2 | 🟨 Parcial | `docs/evidencias/tolerancia_fallos.md` + `docs/evidencias/resultados-tolerancia/`; falta el vídeo exigido por la guía |
-| D — Integración microservicio↔clúster y métricas | 3.1, 3.2 | ✅ Integrado | `docs/evidencias/integracion-pedidos-crdb.md`, `docs/evidencias/colision-serializable-controlada.md`; CockroachDB es el flujo predeterminado |
-| E — Pipeline analítico paralelo (PySpark) | 4.1 | ✅ Completo | `spark/pipeline.py`, `spark/baseline.py`, `docs/evidencias/resultados-pipeline-analitico.md` |
-| F — Protocolo experimental y comparativa | 4.2, 4.3 | ✅ Completo | `docs/experimentos/protocolo.md`, `docs/evidencias/resultados-pipeline-analitico.md` |
-| G — Documentación, trazabilidad y reproducibilidad | 5.x, 6.x | 🟨 Parcial | `docs/entrega3/PFC3.tex`, este README; ver discrepancia señalada abajo |
+| Arquitectura en capas | Refactor de los 6 microservicios Java a `domain`/`application`/`infrastructure`/`presentation`, con patrones GoF (Repository, Factory Method, Strategy, Observer, Decorator) | ✅ Completo | `docs/entrega4/PFC4.tex` §"Arquitectura del sistema", código en `*-service/src/main/java/org/example/` |
+| Persistencia distribuida | Clúster CockroachDB de 3 nodos, ahora con **mTLS** (certificados por integrante) en lugar de la conexión sin cifrar de E3 | ✅ Completo | `docker-compose.yml`, `.env.example`, `docs/diagrams/tiendatech-arquitectura-e4.drawio` |
+| Aplicación web | SPA con 12 rutas documentadas, panel de administración completo | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación web", capturas en `docs/entrega4/img/` |
+| Aplicación móvil | App Android con 2 capacidades de dispositivo (caché local Room/SQLite + funcionalidad adicional documentada), pruebas unitarias e instrumentadas | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación móvil" |
+| Contratos Pact (consumidor-proveedor) | Verificación de contratos web↔backend y móvil↔backend | ⬜ No implementado | Declarado explícitamente en `docs/entrega4/PFC4.tex` §"Pruebas y CI/CD" |
+| Pirámide de pruebas backend | Unitarias en 4 de 6 microservicios (`usuarios`, `productos-service`, `inventario-service`, `pedidos-service`, este último con integración real vía Testcontainers) | 🟨 Parcial | `docs/entrega4/PFC4.tex` §"Pirámide de pruebas"; **`ordenes-proveedores-service` y `ventas-service` no tienen `src/test`** |
+| E2E / carga | Playwright (web) y Locust | ⬜ No implementado | No existe carpeta `tests/` en la raíz |
+| CI/CD | `.github/workflows/ci.yml` (3 jobs: `android-mobile`, `crdb-tests`, `armado-ia-tests`) + `.github/workflows/publish-images.yml` (build multi-arquitectura de 8 imágenes) | 🟨 Parcial — cubre ~4 de los 7 jobs esperados por la rúbrica (falta `lint` Java/web dedicado y `test-web`, porque la web aún no tiene framework de pruebas configurado) | `.github/workflows/` |
+| Observabilidad (OpenTelemetry, Prometheus, Grafana) | Instrumentación de métricas, logs estructurados y trazas | ⬜ No implementado, declarado fuera de alcance por decisión consciente del equipo | `docs/entrega4/PFC4.tex` §"Observabilidad" y §"Discusión" |
+| Evaluación ISO/IEC 25010 | Medición formal de 5 características con intervalo de confianza 95% | ⬜ No implementado (depende de la observabilidad, que no se hizo) | `docs/entrega4/PFC4.tex` §"Evaluación ISO/IEC 25010" |
+| Manuscrito completo | Introducción, arquitectura, apps web/móvil, persistencia, calidad/CI-CD, observabilidad, ISO 25010, discusión y amenazas a la validez, ética, reproducibilidad, trazabilidad E1-E4, conclusiones | ✅ Completo | `docs/entrega4/PFC4.tex` |
 
-> **Discrepancia detectada:** la sección "Resultados de la Entrega 3" del
-> manuscrito (`docs/entrega3/PFC3.tex`, líneas 1094–1188) describe únicamente
-> el flujo heredado sobre PostgreSQL mono-nodo (puertos 8080–8086) y no
-> incorpora los resultados del clúster CockroachDB, la prueba de tolerancia a
-> fallos ni el pipeline PySpark, pese a que esa evidencia sí existe en
-> `docs/evidencias/` y `docs/experimentos/`. El manuscrito todavía no está
-> sincronizado con el trabajo de datos distribuidos y analítica realizado.
+> **Nota de honestidad académica:** las secciones "Observabilidad", "Evaluación ISO/IEC 25010" y "Pirámide de pruebas" del manuscrito declaran sus propios vacíos con el mismo nivel de detalle que este README, en vez de reportar el proyecto como completo cuando no lo está. Ver `docs/entrega4/PFC4.tex` §"Discusión y amenazas a la validez" para la justificación de cada decisión de alcance.
 
 ### Qué está operativo hoy
 
-| Servicio | Puerto | Persistencia | Requiere perfil |
+| Servicio | Puerto | Persistencia | Comunicación saliente |
 |---|---:|---|---|
-| `frontend-crdb` | 8180 | — (enrutador) | No |
-| `productos-crdb-service` | 8081 interno | CockroachDB | No |
-| `inventario-crdb-service` | 8082 interno | CockroachDB | No |
-| `pedidos-crdb-service` | 8083 interno | CockroachDB | No |
-| `ordenes-proveedores-crdb-service` | 8084 interno | CockroachDB | No |
-| `usuarios-crdb-service` | 8085 interno | CockroachDB | No |
-| `ventas-crdb-service` | 8086 interno | CockroachDB | No |
-| `crdb-1` / `crdb-2` / `crdb-3` | SQL 26257 / 26258 / 26259 · consola 8091 / 8092 / 8093 | CockroachDB, `num_replicas = 3` | No |
-
-El stack predeterminado (`docker compose up`) utiliza exclusivamente el
-clúster CockroachDB de tres nodos. El despliegue PostgreSQL mononodo y el
-perfil Compose `e3-crdb` fueron retirados.
+| `frontend-crdb` (API Gateway) | 8180 (host) / 8080 (interno) | — (enrutador) | Enruta a los 7 microservicios |
+| `productos-service` | 8081 | CockroachDB (mTLS) | — |
+| `inventario-service` | 8082 | CockroachDB (mTLS) | — |
+| `pedidos-service` | 8083 | CockroachDB (mTLS) | `ventas-service`, `productos-service`, `usuarios-service` |
+| `ordenes-proveedores-service` | 8084 | CockroachDB (mTLS) | `inventario-service` (síncrono, Circuit Breaker) |
+| `usuarios-service` | 8085 | CockroachDB (mTLS) | — |
+| `ventas-service` | 8086 | CockroachDB (mTLS) | `inventario-service` (asíncrono, patrón Outbox) |
+| `armado-ia` (Python/FastAPI) | 8087 | — | `productos-service`, Amazon Bedrock (Nova Lite) |
+| `crdb-1` / `crdb-2` / `crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB, `num_replicas = 3`, mTLS | — |
 
 ---
 
 ## 2. Requisitos previos
 
-| Herramienta | Versión usada/verificada en el repositorio |
+| Herramienta | Versión |
 |---|---|
-| Docker | <!-- TODO: verificar — no se encontró una versión mínima documentada; usar una versión reciente con soporte de `profiles` en Compose (2021+). --> |
-| Docker Compose | v2 (sintaxis `profiles` en `docker-compose.yml`) |
-| JDK | 21 (todos los microservicios backend); el módulo `frontend` compila con Java 17 |
-| Maven | 3.9 dentro de las imágenes de compilación Docker; no se requiere instalación local para el despliegue |
-| Python | 3.x compatible con PySpark 3.5.5 (la imagen `spark/Dockerfile` usa `apache/spark:3.5.5-python3`); ver `spark/requirements.txt` para las versiones exactas de librerías |
-| LaTeX | Distribución con `pdflatex`, `bibtex` y los paquetes `biblatex` (estilo `ieee`, backend `bibtex`), `tikz`, `tabularx`, `booktabs` |
+| Docker + Docker Compose v2 | Reciente, con soporte de `profiles` |
+| JDK | 21 (microservicios backend); el módulo `frontend` compila con Java 17 |
+| Maven | 3.9 (embebido en las imágenes de build Docker) |
+| Android Studio / SDK | Para compilar la app móvil desde fuente (el CI publica el APK como artefacto) |
+| LaTeX | `pdflatex` + `biblatex` (backend `bibtex`), paquetes `tikz`, `tabularx`, `booktabs`, `subcaption` |
 
 ---
 
@@ -83,239 +72,71 @@ perfil Compose `e3-crdb` fueron retirados.
 ```bash
 git clone <url-del-repositorio>
 cd PFC-AppsDistribuidas
-git checkout feature/entrega-3
 ```
 
-Copie `.env.example` a `.env` y complete los secretos locales. `.env` está
-excluido por `.gitignore`. La configuración mínima de persistencia es:
+Copie `.env.example` a `.env` y complete los secretos locales (`.env` está excluido por `.gitignore`). La conexión por defecto apunta al clúster CockroachDB con mTLS (certificados en `./crdb-certs`); revise `.env.example` para las variables de autenticación, correo y AWS Bedrock.
 
-```dotenv
-CRDB_DATASOURCE_URL=jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
-CRDB_DATASOURCE_USERNAME=root
-CRDB_DATASOURCE_PASSWORD=
-AUTH_JWT_SECRET=<su_secreto>
-TT_MAIL_USERNAME=<opcional>
-TT_MAIL_PASSWORD=<opcional>
-COOKIE_SECURE=false
-```
-
-Levantar el clúster distribuido, el frontend y los seis microservicios:
+Levantar el stack completo (gateway + 7 microservicios + `armado-ia`):
 
 ```bash
 docker compose up -d --build frontend-crdb
 ```
 
-Comprobación de los servicios:
+Para desarrollo local sin depender del clúster compartido, `docker-compose.override.yml` levanta un nodo CockroachDB local de un solo contenedor (`crdb-local`, modo `--insecure`) precargado con esquema, seeds y catálogos de referencia. Hay que sobrescribir `CRDB_DATASOURCE_URL` en la sesión de terminal antes de levantar los contenedores; ver `docs/entrega4/PFC4.tex` §"Reproducibilidad" para el procedimiento exacto y su limitación conocida (riesgo de entorno mixto si se abre una pestaña nueva sin redefinir la variable).
+
+Comprobación:
 
 ```bash
-curl http://localhost:8180/actuator/health   # frontend
+curl http://localhost:8180/actuator/health
+docker exec tiendatech-crdb-1 cockroach node status --certs-dir=/certs --host=localhost:26257
 ```
-
-Comprobar los tres nodos CockroachDB:
-
-```bash
-docker exec tiendatech-crdb-1 cockroach node status --insecure --host=localhost:26257
-```
-
-<!-- TODO: verificar — no se encontró en el repositorio un endpoint /actuator/health explícito confirmado por captura para cada servicio del stack por defecto; se asume por ser Spring Boot con starter-actuator declarado en los pom.xml. Confirmar antes de publicar. -->
 
 ---
 
 ## 4. Arquitectura
 
-El sistema se organiza como un frontend (Spring Cloud Gateway) que enruta
-hacia seis microservicios de dominio, cada uno con su propio módulo Maven:
-`productos-service`, `inventario-service`, `pedidos-service`,
-`ordenes-proveedores-service`, `usuarios` (imagen `usuarios-service`) y
-`ventas-service`. La comunicación entre servicios es REST síncrona (por
-ejemplo, `pedidos-service` consulta `ventas-service`, `productos-service` y
-`usuarios-service`; `ventas-service` consulta `inventario-service`). Todos los
-contenedores comparten la red por defecto de Compose y la red interna
-`pfc-net` para conectarse con CockroachDB.
-
-Existe además, en `src/` (raíz del repositorio), un proyecto Spring Boot
-independiente (`com.example.tienda_tech`) con vistas estáticas HTML. No tiene
-`Dockerfile` propio ni aparece en `docker-compose.yml`, por lo que no forma
-parte del despliegue distribuido activo.
-<!-- TODO: verificar — confirmar con el equipo si `src/` es un remanente de una entrega previa (monolito original) que debe documentarse como legado o si debe eliminarse. -->
+El sistema se organiza como un API Gateway (Spring Cloud Gateway) que enruta hacia 7 microservicios de dominio (6 en Java/Spring Boot, 1 en Python/FastAPI para el motor de recomendación con IA), cada uno refactorizado en capas (`domain` → `application` → `infrastructure` → `presentation`) con patrones GoF aplicados según el dominio de cada servicio. La comunicación entre servicios es REST síncrona, salvo `ventas-service`→`inventario-service`, que usa un patrón Outbox transaccional asíncrono para desacoplar la generación de facturas de la disponibilidad de inventario-service.
 
 ### Diagramas disponibles (`docs/diagrams/`)
 
-- `tiendatech-c4-l1.drawio` / `.png` — Contexto del sistema (C4 nivel 1).
-- `tiendatech-c4-l2.drawio` / `.png` — Contenedores (C4 nivel 2).
-- `tiendatech-c4-l3-checkout.drawio` / `.png` — Componentes del flujo de checkout (C4 nivel 3).
+- `tiendatech-arquitectura-e4.drawio` / `.png` — Arquitectura general consolidada de la Entrega 4 (nueva, reemplaza la referencia a regenerar diagramas C4 de E3).
+- `tiendatech-c4-l1.drawio` / `.png`, `tiendatech-c4-l2.drawio` / `.png`, `tiendatech-c4-l3-checkout.drawio` / `.png` — Vistas C4 heredadas de E3.
 - `tiendatech-despliegue.drawio` / `.png` — Diagrama de despliegue.
 - `db-schema.drawio` / `.png` — Esquema de base de datos.
 
 ---
 
-## 5. Capa de datos distribuida
+## 5. Pruebas y CI/CD
 
-Los seis microservicios persisten sobre un clúster CockroachDB 23.2.4 de tres
-nodos (`crdb-1`, `crdb-2`, `crdb-3`), inicializado con
-`docs/db/schema.sql` y poblado con `docs/db/seeds.sql`.
+Ver el detalle completo, con justificación de las decisiones de priorización del equipo, en `docs/entrega4/PFC4.tex` §"Pruebas y CI/CD". En resumen:
 
-- **Fragmentación horizontal:** `pedidos.orden` y `pedidos.detalle_orden` se
-  fragmentan por rangos trimestrales de `fecha` (equivalente a `fecha_pedido`
-  en la guía), materializados con `SPLIT AT` y distribuidos con `SCATTER` —
-  CockroachDB Community (23.2.4) rechaza `PARTITION BY RANGE` por ser una
-  capacidad Enterprise. Decisión documentada en
-  `docs/adr/ADR-003-fragmentacion-pedidos.md`.
-- **Colocalización `clientes ⋉ pedidos`:** se resuelve mediante el índice
-  `(usuario_id, fecha DESC)` sobre `pedidos.orden`, como afinidad de acceso;
-  `INTERLEAVE IN PARENT` fue descartado por estar retirado de versiones
-  modernas de CockroachDB.
-- **Replicación:** `num_replicas = 3` en la configuración de zona por
-  defecto, confirmado en `docs/evidencias/cluster-cockroachdb-3-nodos.md`
-  (`replicas = {1,2,3}`, `voting_replicas = {1,2,3}`). Decisión de consenso
-  documentada en `docs/adr/ADR-004-consenso-raft.md`.
+- **Con pruebas unitarias reales:** `usuarios`, `productos-service`, `inventario-service`, `pedidos-service` (este último con la única prueba de integración real del backend, contra un CockroachDB real vía Testcontainers).
+- **Sin pruebas:** `ordenes-proveedores-service`, `ventas-service` — declarado como brecha significativa porque concentran la lógica de negocio más nueva de esta entrega.
+- **CI:** `.github/workflows/ci.yml` (lint + tests + APK móvil, tests backend CRDB, tests + lint Python de `armado-ia`) y `.github/workflows/publish-images.yml` (build y publicación multi-arquitectura de las 8 imágenes en Docker Hub).
+- **No implementado:** contratos Pact, pruebas E2E (Playwright), pruebas de carga (Locust), lint dedicado para todos los servicios Java y para la web.
 
-Verificación:
+---
+
+## 6. Documentación
+
+El manuscrito de la Entrega 4 está en `docs/entrega4/PFC4.tex`, y reutiliza la bibliografía compartida `docs/entrega3/referenciasPFC.bib`.
+
+Compilación (desde `docs/entrega4/`):
 
 ```bash
-docker exec tiendatech-crdb-1 cockroach node status --insecure --host=localhost:26257
+pdflatex PFC4.tex
+bibtex PFC4
+pdflatex PFC4.tex
+pdflatex PFC4.tex
 ```
 
----
-
-## 6. Tolerancia a fallos
-
-Procedimiento previsto y ya ejecutado una vez, registrado en
-`docs/evidencias/tolerancia_fallos.md` y
-`docs/evidencias/resultados-tolerancia/` (`mediciones.csv`, `resumen.csv`,
-capturas de estado):
-
-1. Confirmar los tres nodos vivos y ejecutar 5 repeticiones de una consulta
-   de control con los tres nodos disponibles.
-2. Detener `crdb-2` con `docker kill` y repetir la consulta 5 veces (queda
-   quórum con 2 réplicas).
-3. Reincorporar `crdb-2` y repetir la consulta 5 veces.
-4. Detener simultáneamente `crdb-2` y `crdb-3` (una sola réplica, sin
-   quórum) y ejecutar la consulta con `statement_timeout` de 8 s.
-5. Restaurar los nodos y confirmar `is_available=true` / `is_live=true` en
-   los tres.
-
-Script: `docs/evidencias/probar-tolerancia-fallos.ps1`.
-
-**Evidencia esperada pendiente:** el vídeo de la caída controlada de uno y
-dos nodos, exigido por la guía, todavía no se ha grabado — así lo señala
-explícitamente `docs/evidencias/tolerancia_fallos.md` en su sección de
-limitaciones. La bitácora escrita y los datos crudos (CSV) sí están
-disponibles.
+**Advertencia:** las rutas de figuras (`\includegraphics{../diagrams/...}`, `\includegraphics{img/...}`) son relativas a `docs/entrega4/`. Si se compila en Overleaf, hay que subir también `docs/diagrams/` y `docs/entrega4/img/` con esa misma estructura relativa.
 
 ---
 
-## 7. Pipeline analítico paralelo
+## 7. Declaración de uso de IA generativa
 
-Ubicado en `spark/`:
-
-- `pipeline.py` — pipeline PySpark.
-- `baseline.py` — equivalente en pandas.
-- `experimento.py` — orquesta repeticiones y calcula estadísticos.
-- `validar_resultados.py` — compara igualdad numérica pandas/PySpark.
-- `requirements.txt` — dependencias (`pandas`, `pyspark`, `pyarrow`, `scipy`, `psycopg`, `psutil`).
-- `analisis.ipynb` — notebook de análisis.
-- `ejecutar-pyspark.ps1` — ejecuta PySpark en Windows usando la imagen Linux oficial de Spark (evita depender de `winutils.exe`).
-
-Cinco transformaciones exigidas, implementadas de forma equivalente en ambos
-motores (`docs/experimentos/protocolo.md`):
-
-1. **Filtrado** — año 2026, órdenes no canceladas, cantidades positivas, usuarios habilitados.
-2. **Join** entre tablas colocalizadas — orden, detalle y usuario.
-3. **Agregación con ventanas** — unidades por producto y ranking top-10 por trimestre; frecuencia y gasto por cliente.
-4. **Transformación de tipos temporales** — conversión de `fecha` y derivación de trimestre.
-5. **Operación de `spark.ml`** — `Bucketizer` de gasto en segmentos BRONCE/PLATA/ORO/PLATINO.
-
-Salida en Parquet: `top_productos`, `segmentos_clientes`.
-
-Resultados ya obtenidos sobre un dataset determinista de 600 000 órdenes y
-600 000 detalles están en `docs/evidencias/resultados-pipeline-analitico.md`.
-
----
-
-## 8. Protocolo experimental
-
-Definido en `docs/experimentos/protocolo.md` y ya ejecutado una vez
-(`docs/evidencias/resultados-pipeline-analitico.md`):
-
-- `N ∈ {1, 2, 4, 8}` workers PySpark en modo `local[N]`, más un baseline pandas.
-- `r = 10` repeticiones por configuración, descartando la primera y la última
-  (8 mediciones válidas por configuración).
-- Media, desviación típica e intervalo de confianza al 95 % sobre las 8
-  mediciones restantes.
-- Prueba de normalidad Shapiro-Wilk sobre las diferencias emparejadas; si
-  `p ≥ 0.05` se aplica prueba t pareada, en caso contrario Wilcoxon.
-
-Comando de referencia:
-
-```powershell
-python spark/baseline.py --overwrite
-powershell -ExecutionPolicy Bypass -File spark/ejecutar-pyspark.ps1 -Workers 4 -Salida pyspark
-python spark/validar_resultados.py
-python spark/experimento.py --repeticiones 10 --workers 1 2 4 8 --incluir-pandas
-```
-
----
-
-## 9. Estructura del repositorio
-
-```text
-.
-├── docker-compose.yml
-├── docs/
-│   ├── adr/                  # ADR-003 (fragmentación), ADR-004 (consenso Raft)
-│   ├── db/                   # schema.sql, seeds.sql (CockroachDB)
-│   ├── diagrams/             # Diagramas C4 (L1–L3), despliegue, esquema DB
-│   ├── entrega1/             # entrega1.pdf
-│   ├── entrega2/             # entrega2.pdf
-│   ├── entrega3/             # PFC3.tex, referenciasPFC.bib (manuscrito E3)
-│   ├── evidencias/           # Evidencia verificable de clúster, tolerancia, integración, pipeline
-│   └── experimentos/         # protocolo.md
-├── frontend/                 # Spring Cloud Gateway (puerto 8080)
-├── inventario-service/       # Puerto 8082
-├── ordenes-proveedores-service/  # Puerto 8084
-├── pedidos-service/          # Puerto interno 8083, CockroachDB
-├── productos-service/        # Puerto 8081
-├── spark/                    # Pipeline PySpark, baseline pandas, experimento
-├── src/                      # Proyecto Spring Boot independiente, sin Dockerfile ni referencia en compose (legado, ver §4)
-├── usuarios/                 # Imagen usuarios-service, puerto 8085
-└── ventas-service/           # Puerto interno 8086, CockroachDB
-```
-
----
-
-## 10. Documentación
-
-El manuscrito de la Entrega 3 está en `docs/entrega3/PFC3.tex`, con su
-bibliografía en `docs/entrega3/referenciasPFC.bib`.
-
-Compilación (desde `docs/entrega3/`):
-
-```bash
-pdflatex PFC3.tex
-bibtex PFC3
-pdflatex PFC3.tex
-pdflatex PFC3.tex
-```
-
-**Advertencias:**
-
-- Las rutas de las figuras (`\includegraphics{../diagrams/...}`) son
-  relativas a `docs/entrega3/`. Si se compila en Overleaf, es necesario subir
-  también la carpeta `docs/diagrams/` con esa misma estructura relativa, o la
-  compilación fallará al no encontrar las imágenes.
-- El documento usa `backend=bibtex` (no `biber`), que no maneja UTF-8 de
-  forma fiable. Por eso los acentos en `referenciasPFC.bib` están escapados
-  en notación LaTeX (por ejemplo, `{\"O}zsu`) en las entradas originales del
-  eje de distribución; **no deben convertirse a UTF-8 directo**, o `bibtex`
-  puede fallar o producir caracteres incorrectos en el PDF.
-
----
-
-## 11. Declaración de uso de IA generativa
-
-*(Pendiente de completar por el equipo — no autocompletada por esta
-generación de README)*
+*(Pendiente de completar por el equipo)*
 
 | Herramienta | Propósito | Alcance |
 |---|---|---|
@@ -323,117 +144,32 @@ generación de README)*
 
 ---
 
-## 12. Trazabilidad con la rúbrica
+## 8. Trazabilidad con la rúbrica
 
-| Criterio | Peso | Evidencia prevista | Estado |
-|---|---:|---|---|
-| 1.1 Esquema distribuido y fragmentación | 9 % | `docs/adr/ADR-003-fragmentacion-pedidos.md`, `docs/db/schema.sql`, `docs/evidencias/validacion-esquema-distribuido.md` | ✅ Completo |
-| 1.2 Diseño de replicación y factor Raft | 8 % | `docs/adr/ADR-004-consenso-raft.md`, `docs/evidencias/cluster-cockroachdb-3-nodos.md` | ✅ Completo |
-| 2.1 Clúster de 3 nodos funcionando | 8 % | `docs/evidencias/cluster-cockroachdb-3-nodos.md` | ✅ Completo |
-| 2.2 Verificación de tolerancia a fallos | 10 % | `docs/evidencias/tolerancia_fallos.md`, `docs/evidencias/resultados-tolerancia/` | 🟨 Parcial — falta vídeo |
-| 3.1 Integración microservicio → clúster | 8 % | `docs/evidencias/integracion-pedidos-crdb.md` | ✅ CockroachDB es el stack predeterminado |
-| 3.2 Métricas Prometheus incrementales | 4 % | `docs/evidencias/integracion-pedidos-crdb.md`, `docs/evidencias/colision-serializable-controlada.md` | 🟨 Parcial — contadores validados con `promtool`, sin servidor Prometheus desplegado en `docker-compose.yml` |
-| 4.1 Pipeline PySpark completo | 10 % | `spark/pipeline.py`, `docs/evidencias/resultados-pipeline-analitico.md` | ✅ Completo |
-| 4.2 Baseline pandas y comparativa | 4 % | `spark/baseline.py`, `docs/evidencias/resultados-pipeline-analitico.md` | ✅ Completo |
-| 4.3 Protocolo experimental | 8 % | `docs/experimentos/protocolo.md`, `docs/evidencias/resultados-pipeline-analitico.md` | ✅ Completo |
-| 5.1 Estructura del manuscrito | 5 % | `docs/entrega3/PFC3.tex` | 🟨 Parcial — sección de resultados no integra evidencia CRDB/tolerancia/Spark (ver §1) |
-| 5.2 Uso de LaTeX y calidad tipográfica | 4 % | `docs/entrega3/PFC3.tex` | 🟨 Parcial — ver pendientes de compilación en §14 |
-| 5.3 Bibliografía IEEE | 4 % | `docs/entrega3/referenciasPFC.bib` | 🟨 Parcial — entradas duplicadas, ver §14 |
-| 6.1 Repositorio y trazabilidad | 4 % | Este README, `docs/adr/`, `docs/evidencias/` | 🟨 Parcial |
-| 6.2 Reproducibilidad | 4 % | `docker-compose.yml`, este README | 🟨 Parcial — falta `.env.example`; `.env` no ignorado correctamente |
-| 7.1 Defensa oral | 6 % | ⬜ Pendiente | ⬜ Pendiente |
-| 7.2 Ética y honestidad académica | 4 % | Sección 11 (declaración de IA, pendiente de completar por el equipo) | ⬜ Pendiente |
+Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de cierre del ciclo de las 4 entregas, y la Tabla 4 de `RÚBRICA FINAL PFC.pdf` (dimensiones D1-D9) para los pesos exactos de evaluación. Resumen por dimensión:
+
+| Dimensión | Estado |
+|---|---|
+| D1 — Arquitectura y decisiones | ✅ Completo |
+| D2 — Aplicación web | ✅ Completo |
+| D3 — Aplicación móvil | ✅ Completo |
+| D4.1 — Contratos Pact | ⬜ No implementado |
+| D4.2 — Persistencia distribuida | ✅ Completo (mTLS) |
+| D5.1 — Pirámide de pruebas | 🟨 Parcial (4/6 microservicios Java, sin E2E ni carga) |
+| D5.2 — Pipeline CI/CD | 🟨 Parcial (~4/7 jobs esperados) |
+| D6 — Observabilidad | ⬜ No implementado, fuera de alcance declarado |
+| D7 — Evaluación ISO/IEC 25010 | ⬜ No implementado, fuera de alcance declarado |
+| D8 — Documentación y reproducibilidad | ✅ Completo |
+| D9 — Ética, discusión y defensa oral | ✅ Completo (defensa oral pendiente de presentar) |
 
 ---
 
-## 13. Aclaraciones: contenido adicional a la rúbrica
+## 9. Pendientes conocidos
 
-Esta sección distingue lo exigido por la guía de la Entrega 3 de lo construido
-por encima de ella. Nada de lo aquí listado sustituye un requisito de la
-rúbrica.
-
-- **Seis microservicios en lugar de uno.** La guía pide refactorizar el
-  microservicio principal hacia el clúster distribuido; este proyecto
-  mantiene seis dominios separados (`productos`, `inventario`, `pedidos`,
-  `ordenes-proveedores`, `usuarios`, `ventas`), por lo que la superficie de la
-  refactorización es mayor que la prevista.
-- **Tres niveles de diagramas C4 más despliegue.** La guía pide los niveles 2
-  y 3; el repositorio incluye además el nivel 1 (`tiendatech-c4-l1.drawio`) y
-  un diagrama de despliegue (`tiendatech-despliegue.drawio`).
-- **ADR heredados.** Además de `ADR-003-fragmentacion-pedidos.md` y
-  `ADR-004-consenso-raft.md`, que exige E3, el manuscrito conserva ADR-01
-  (arquitectura de microservicios), ADR-02 (enrutamiento centralizado) y
-  ADR-03 (motor de compatibilidad, propuesto y no implementado) de entregas
-  anteriores.
-- **Métricas de calidad ISO/IEC 25010.** El manuscrito define umbrales
-  (P95, throughput, uptime, error rate, MTTR, etc.) que E3 no exige; se
-  conservan porque alimentan la Entrega 4.
-- **Validación funcional y de latencia REST.** Diez casos funcionales y 210
-  solicitudes secuenciales sobre siete endpoints, con P95 máximo de 51,94 ms
-  (`docs/entrega3/PFC3.tex`, sección "Resultados de la Entrega 3"). Esto **no**
-  es el protocolo experimental del criterio 4.3: aquello mide latencia HTTP de
-  la capa de servicios sobre PostgreSQL mono-nodo, mientras el criterio 4.3
-  exige medir aceleración del pipeline paralelo con repeticiones e intervalos
-  de confianza. Son mediciones distintas y se reportan por separado.
-- **Dos ejes en trabajos relacionados.** La guía pide al menos cinco fuentes
-  indexadas sobre bases de datos distribuidas, CockroachDB, Spark y la ley de
-  Amdahl; el manuscrito cubre ese eje (nueve fuentes del período 2020–2024,
-  según su propio texto) y conserva además el eje heredado sobre sistemas de
-  recomendación y configuración por restricciones.
-- **Fuentes primarias fuera del rango de años.** Amdahl (1967), Gustafson
-  (1988) y Zhou et al. (2008) se citan pese a ser anteriores al período de
-  revisión, porque la atribución de un método exige citar su formulación
-  original.
-
----
-
-## 14. Pendientes conocidos
-
-- Las figuras del manuscrito no se resuelven al compilar en Overleaf, porque
-  `docs/diagrams/` no está subido allí (ver §10).
-- Bibliografía con entradas duplicadas: `ozsu2020`/`ozsu2020principles`,
-  `taft2020`/`taft2020cockroachdb`, `amdahl1967`/`amdahl1967validity` y
-  `gustafson1988`/`gustafson1988reevaluating` aparecen dos veces con claves
-  distintas en `docs/entrega3/referenciasPFC.bib`; la segunda entrada de Taft
-  está además malformada.
-- La cadena `artno` aparece sin traducir en la referencia de Ahmed et al.
-  (2021) (`docs/entrega3/referenciasPFC.bib`, entrada `ahmed2021`, campo
-  `eid = {107}`), por localización española del estilo IEEE.
-- El contador de página se reinicia tras el entorno `titlepage`
-  (`docs/entrega3/PFC3.tex`, líneas 127–183), lo que produce dos páginas
-  numeradas 1 y anclajes duplicados en el PDF.
-- Contratos OpenAPI no formalizados (deuda técnica declarada desde la
-  Entrega 2).
-- La sección "Resultados de la Entrega 3" del manuscrito no refleja todavía
-  el trabajo sobre CockroachDB, tolerancia a fallos ni el pipeline PySpark
-  (ver discrepancia en §1).
-- Falta grabar el vídeo de la caída controlada de uno y dos nodos, exigido
-  por la guía (criterio 2.2); la bitácora y los datos crudos sí existen.
-- El servicio `pedidos-crdb-service` expone contadores Prometheus
-  incrementales validados con `promtool`, pero no hay un servidor Prometheus
-  ni Grafana desplegado en `docker-compose.yml` que los recolecte o
-  visualice.
-- El proyecto Spring Boot en `src/` (raíz) no tiene Dockerfile ni aparece en
-  `docker-compose.yml`; su relación con el resto del sistema no está
-  documentada.
-- No se encontró en el repositorio la imagen `UteqLogo.png` que
-  `docs/entrega3/PFC3.tex` intenta cargar como marca de agua de la portada
-  (protegido con `\IfFileExists`, por lo que la compilación no falla, pero la
-  marca de agua no aparece).
-- La rama `feature/entrega-3` contiene además directorios generados por build
-  (`pedidos-service/target/`) sin seguimiento en Git; deben limpiarse o
-  agregarse correctamente al `.gitignore` una vez corregida su codificación.
-
-### TODO dejados en este README
-
-- `<!-- TODO: verificar -->` sobre el rol específico de cada integrante del
-  equipo (sección Equipo): no se encontró esa asignación en el repositorio.
-- `<!-- TODO: verificar -->` sobre la versión mínima de Docker requerida
-  (sección Requisitos previos): no está documentada en el repositorio.
-- `<!-- TODO: verificar -->` sobre la existencia confirmada de endpoints
-  `/actuator/health` en cada microservicio del stack por defecto (sección
-  Arranque rápido): se infiere de la dependencia `spring-boot-starter-actuator`
-  declarada en los `pom.xml`, pero no se ejecutó `docker compose up` para
-  confirmarlo en esta generación del README.
-- `<!-- TODO: verificar -->` sobre si `src/` (raíz) es legado intencional o
-  código a eliminar (sección Arquitectura / Estructura del repositorio).
+- Contratos Pact (consumer-driven) entre clientes web/móvil y backend: no iniciados.
+- `ordenes-proveedores-service` y `ventas-service` sin pruebas unitarias (`src/test` no existe en ninguno de los dos).
+- Sin carpeta `tests/` en la raíz: no hay E2E con Playwright ni pruebas de carga con Locust.
+- Pipeline CI/CD cubre parcialmente los 7 jobs esperados por la rúbrica; falta `lint` dedicado para servicios Java y para la web (la web no tiene framework de pruebas configurado todavía).
+- Observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y evaluación ISO/IEC 25010: declaradas explícitamente fuera de alcance de esta entrega por restricción de tiempo del equipo — ver justificación completa en `docs/entrega4/PFC4.tex` §"Discusión".
+- Declaración de uso de IA generativa (Sección 7 de este README): pendiente de completar por el equipo.
+- Reproducibilidad local depende de sobrescribir `CRDB_DATASOURCE_URL` manualmente por sesión de terminal; riesgo de entorno mixto documentado en `docs/entrega4/PFC4.tex` §"Reproducibilidad".
