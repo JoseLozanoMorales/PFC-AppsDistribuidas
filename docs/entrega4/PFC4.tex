@@ -216,17 +216,18 @@
     % 1. INTRODUCCION -- responsable: Jeremy Ruperto Gaibor Rodriguez
     % ============================================================
     \section{Introducción}
-    % TODO: enlazar brevemente con el problema y la contribucion delimitada
-    % ya declarados en E1-E3 (docs/entrega3/PFC3.tex, seccion 1). No repetir
-    % todo el contexto de mercado: solo el parrafo de transicion hacia lo que
-    % agrega especificamente la Entrega 4 (calidad, automatizacion, cierre
-    % del manuscrito acumulativo).
+
+    La Entrega 3 de \textbf{TiendaTech} validó un despliegue contenerizado compuesto por un frontend y seis microservicios conectados a una base de datos distribuida CockroachDB, confirmando el flujo transaccional básico de carrito, orden, factura e inventario sobre esa infraestructura. Esa entrega dejó explícitamente fuera de su contribución delimitada el aislamiento de persistencia por servicio, la alta disponibilidad productiva, el motor de compatibilidad de componentes y el asistente conversacional, así como la calidad de código, la observabilidad y la evaluación experimental formal del sistema.
+
+    La Entrega 4 retoma el sistema en ese punto y se concentra en cerrar la brecha entre \emph{tener un sistema distribuido que funciona} y \emph{tener un sistema distribuido que puede sostenerse, verificarse y evolucionar de forma controlada}. En este período se completó la migración de los microservicios afectados hacia una organización en capas explícita (\texttt{presentation/application/domain/infrastructure}), se documentaron los patrones de diseño GoF aplicados, se aseguró la persistencia distribuida con una conexión cifrada por certificados (mTLS) hacia el clúster CockroachDB en lugar de la conexión directa sin cifrar heredada de E3, y se avanzó en la calidad de las aplicaciones cliente (web y móvil) y en la automatización del ciclo de integración continua.
 
     \subsection{Alcance y contribución delimitada de la Entrega 4}
-    % TODO: declarar explicitamente que criterios de la rubrica de E4 se
-    % cubren y cuales quedan fuera de alcance. Mencionar aqui, en una frase,
-    % que Observabilidad (D6) e ISO/IEC 25010 (D7) quedan fuera de alcance --
-    % se retoma en la Discusion (seccion 7.1).
+
+    Siguiendo el mismo principio de honestidad de alcance aplicado en las entregas anteriores, esta sección declara explícitamente qué criterios de la Guía Integral de la Entrega 4 cubre este documento y cuáles quedan fuera.
+
+    Se abordan de forma directa: el refactor en capas y los patrones GoF con su respectivo registro de decisión arquitectónica (D1); el estado de las aplicaciones web y móvil, tanto en funcionalidad como en calidad de código (D2, D3); la persistencia distribuida operando de forma segura y, en la medida en que el tiempo del equipo lo permitió, los contratos de consumidor entre los clientes y el backend (D4); la pirámide de pruebas y el pipeline de integración continua (D5); la trazabilidad de la evolución del proyecto entre E1 y E4 (D8.3); y la reflexión ética, las amenazas a la validez y la reproducibilidad del entorno de despliegue (D9).
+
+    Quedan explícitamente fuera del alcance de esta entrega la instrumentación de observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y, como consecuencia directa de ello, la evaluación experimental basada en ISO/IEC 25010 (D6 y D7), dado que esta última depende de contar con las métricas operativas que solo la primera puede producir. La Sección \ref{sec:discusion} retoma esta decisión de alcance con más detalle. Esta exclusión se declara aquí de forma explícita, antes de que el lector avance en el documento, para no generar la expectativa de una cobertura que el equipo no pudo verificar en el tiempo disponible.
 
     % ============================================================
     % 2. ARQUITECTURA Y DECISIONES DE DISENO -- Dimension D1
@@ -316,6 +317,7 @@
     % 7. DISCUSION -- responsable: EN CONJUNTO, al final
     % ============================================================
     \section{Discusión}
+    \label{sec:discusion}
     % TODO: interpretar los resultados de la seccion 6 (calidad de software
     % y automatizacion) en conjunto, contrastar contra los umbrales/objetivos
     % declarados en E3.
