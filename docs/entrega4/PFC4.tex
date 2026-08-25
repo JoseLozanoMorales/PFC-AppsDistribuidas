@@ -324,7 +324,14 @@
 
     \subsection{Vistas C4 y evolución respecto a E3}
 
-    Las vistas C4 de nivel 1 (contexto) y nivel 2 (contenedores) construidas en E3 --- frontend con Spring Cloud Gateway enrutando hacia los seis microservicios de Productos, Inventario, Pedidos, Órdenes y proveedores, Usuarios y Ventas --- se mantienen vigentes en su forma general: esta entrega no agrega ni elimina microservicios, refactoriza su interior y asegura su conexión a la base de datos distribuida. El cambio relevante a nivel de contenedor es que \textbf{todos} los microservicios usan ahora CockroachDB como base real (Sección \ref{sec:persistencia-distribuida}), mientras que en E3 esto era un perfil experimental paralelo a la base compartida usada para la validación funcional. Los diagramas actualizados (\texttt{docs/diagrams/tiendatech-c4-l1.drawio.png}, \texttt{-l2.drawio.png}) deben regenerarse para reflejar esta unificación antes del cierre final del manuscrito.
+    Las vistas C4 de nivel 1 (contexto) y nivel 2 (contenedores) construidas en E3 --- frontend con Spring Cloud Gateway enrutando hacia los seis microservicios de Productos, Inventario, Pedidos, Órdenes y proveedores, Usuarios y Ventas --- se mantienen vigentes en su forma general: esta entrega no agrega ni elimina microservicios, refactoriza su interior y asegura su conexión a la base de datos distribuida. El cambio relevante a nivel de contenedor es que \textbf{todos} los microservicios usan ahora CockroachDB como base real (Sección \ref{sec:persistencia-distribuida}), mientras que en E3 esto era un perfil experimental paralelo a la base compartida usada para la validación funcional. La Figura \ref{fig:arquitectura-e4} consolida esta vista actualizada: capa de clientes (SPA web y app Android), capa de acceso y seguridad (Caddy y el Gateway con filtro JWT), los seis microservicios y \texttt{armado-ia} sobre la red interna de Docker, el clúster CockroachDB de tres nodos con replicación Raft, y los dos servicios externos (SMTP para OTP, Amazon Bedrock para las explicaciones de \texttt{armado-ia}).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{../diagrams/tiendatech-arquitectura-e4.drawio.png}
+        \caption{Arquitectura general de TiendaTech en la Entrega 4, con la persistencia distribuida ya unificada sobre CockroachDB.}
+        \label{fig:arquitectura-e4}
+    \end{figure}
 
     \subsection{Refactor en capas y principios SOLID (D1.1)}
 
