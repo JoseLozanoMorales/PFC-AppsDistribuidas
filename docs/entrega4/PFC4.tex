@@ -4,6 +4,7 @@
 \usepackage[spanish]{babel}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{enumitem}
 \usepackage{hyperref}
 \hypersetup{
@@ -394,9 +395,58 @@
 
     La internacionalización declarada como deseable en la rúbrica (\texttt{react-i18next} con al menos español e inglés) no está implementada: toda la interfaz está codificada directamente en español. Se documenta aquí como brecha conocida en vez de omitirla.
 
-    % TODO: insertar capturas de pantalla de al menos las 5 rutas principales
-    % (figuras \includegraphics), tal como exige la Tabla 3 ("capturas de
-    % las 5 rutas, evidencia i18n").
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/principal_web.jpeg}
+            \caption{Página principal (\texttt{/})}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/catalogo_web.jpeg}
+            \caption{Catálogo filtrado por categoría}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/armado_ia_web.jpeg}
+            \caption{Armado de PC (\texttt{/armado})}
+        \end{subfigure}
+
+        \vspace{0.4cm}
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/admin_resumen_web.jpeg}
+            \caption{Panel administrativo, resumen (\texttt{/admin})}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/usuarios_admin_web.jpeg}
+            \caption{Administración de usuarios}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/productos_admin_web.jpeg}
+            \caption{Administración de productos}
+        \end{subfigure}
+
+        \vspace{0.4cm}
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/facturacion_admin_web.jpeg}
+            \caption{Facturación}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/proveedores_admin_web.jpeg}
+            \caption{Administración de proveedores}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.30\textwidth}
+            \includegraphics[width=\textwidth]{img/ordenes_proveedores_admin_web.jpeg}
+            \caption{Órdenes a proveedores}
+        \end{subfigure}
+
+        \caption{Capturas de las rutas principales de la SPA (página principal, catálogo, armado de PC) y del panel de administración (\texttt{/admin}), que cubre las seis entidades de negocio del sistema. La interfaz está codificada íntegramente en español, consistente con la ausencia de \texttt{react-i18next} señalada arriba.}
+        \label{fig:web-rutas}
+    \end{figure}
 
     \subsection{Calidad (D2.2)}
 
@@ -417,9 +467,31 @@
 
     Los flujos de negocio cubiertos son autenticación (login/registro, \texttt{feature/auth}), catálogo y detalle de producto (\texttt{feature/catalog}), carrito (\texttt{feature/cart}), órdenes y su historial (\texttt{feature/orders}), y cuenta con checkout (\texttt{feature/account}, incluye \texttt{CheckoutScreen}). La sesión se protege de forma más estricta que en la web: el token no se guarda en texto plano sino cifrado mediante Android Keystore (\texttt{AndroidKeystoreTokenCipher}, \texttt{SecureSessionStore}), y \texttt{AuthInterceptor} lo adjunta automáticamente a las peticiones salientes de Retrofit.
 
-    % TODO: insertar capturas de pantalla de los flujos principales y
-    % evidencia visual de las dos capacidades del dispositivo usadas
-    % (Tabla 3: "capturas, evidencia de capacidades usadas").
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.22\textwidth}
+            \includegraphics[width=\textwidth]{img/interfaz_movil_1.jpeg}
+            \caption{Inicio de sesión}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.22\textwidth}
+            \includegraphics[width=\textwidth]{img/interfaz_movil_2.jpeg}
+            \caption{Escaneo de código de barras (CameraX + ML Kit)}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.22\textwidth}
+            \includegraphics[width=\textwidth]{img/interfaz_movil_3.jpeg}
+            \caption{Detalle de producto resuelto desde el escaneo}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.22\textwidth}
+            \includegraphics[width=\textwidth]{img/interfaz_movil_4.jpeg}
+            \caption{Catálogo con acceso a búsqueda y escaneo}
+        \end{subfigure}
+
+        \caption{Flujo de autenticación y evidencia visual de la capacidad de cámara (escaneo de código de barras vía CameraX y ML Kit) en la aplicación móvil nativa. La segunda capacidad usada, notificaciones nativas (\texttt{AndroidOrderNotificationPublisher}), no se ilustra aquí para evitar exponer datos personales reales de la cuenta de prueba visibles en esa pantalla.}
+        \label{fig:movil-flujos}
+    \end{figure}
 
     \subsection{Calidad (D3.2)}
 
