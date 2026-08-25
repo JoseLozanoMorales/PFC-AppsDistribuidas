@@ -257,6 +257,27 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="VOa9x2o8rGUaCtdoPXNb-104" parent="1" style="swimlane;html=1;rounded=1;startSize=32;horizontal=1;fillColor=#E8F5E9;strokeColor=#2E7D32;strokeWidth=2;fontStyle=1;fontSize=15;" value="CAPA DE CLIENTES" vertex="1">
+          <mxGeometry height="180" width="1480" x="60" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VOa9x2o8rGUaCtdoPXNb-106" parent="VOa9x2o8rGUaCtdoPXNb-104" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#2E7D32;strokeWidth=2;fontStyle=1;fontSize=15;" value="Navegador + SPA web&#xa;React + TypeScript + Vite&#xa;(ejecutada en el cliente)" vertex="1">
+          <mxGeometry height="100" width="270" x="320" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="VOa9x2o8rGUaCtdoPXNb-105" parent="VOa9x2o8rGUaCtdoPXNb-104" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;fontSize=15;" value="Usuario / Administrador" vertex="1">
+          <mxGeometry height="80" width="220" x="55" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="VOa9x2o8rGUaCtdoPXNb-128" edge="1" parent="VOa9x2o8rGUaCtdoPXNb-104" source="VOa9x2o8rGUaCtdoPXNb-105" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=12;" target="VOa9x2o8rGUaCtdoPXNb-106" value="usa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VOa9x2o8rGUaCtdoPXNb-130" edge="1" parent="1" source="VOa9x2o8rGUaCtdoPXNb-106" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#455A64;strokeWidth=2;fontSize=12;" target="VOa9x2o8rGUaCtdoPXNb-110" value="HTTPS / REST">
+          <mxGeometry relative="1" x="-0.0769" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="480" y="220" />
+              <mxPoint x="480" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
