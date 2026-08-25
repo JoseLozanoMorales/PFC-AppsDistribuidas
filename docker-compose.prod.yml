@@ -172,6 +172,7 @@ services:
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:frontend-${IMAGE_TAG:-latest}
     environment:
       SERVER_PORT: "8080"
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
       USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
       PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
       INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
@@ -190,9 +191,26 @@ services:
     ports:
       - "${GATEWAY_BIND_ADDRESS:-0.0.0.0}:${GATEWAY_PORT:-8180}:8080"
 
+  caddy:
+    <<: *service-defaults
+    image: caddy:2-alpine
+    depends_on:
+      frontend-crdb:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
 networks:
   backend:
     driver: bridge
 
 volumes:
   usuarios-uploads:
+  caddy-data:
+  caddy-config:

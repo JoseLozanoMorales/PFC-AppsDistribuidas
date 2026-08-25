@@ -20,6 +20,15 @@ Para un dispositivo físico, una instalación remota o un puerto diferente, conf
 ./gradlew assembleRelease -PTIENDATECH_API_BASE_URL=https://gateway.example.com/
 ```
 
+La compilación `release` usa por defecto el gateway público de producción:
+
+```text
+https://18-221-94-105.sslip.io/
+```
+
+La propiedad `TIENDATECH_API_BASE_URL` permite sustituirlo cuando TiendaTech
+disponga de un dominio propio.
+
 La URL debe terminar en `/`. Para una distribución fuera de la red de desarrollo se debe utilizar HTTPS.
 
 Desde esta carpeta:

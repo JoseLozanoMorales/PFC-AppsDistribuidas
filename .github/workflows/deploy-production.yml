@@ -1,6 +1,12 @@
 name: Desplegar en producción
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "docker-compose.prod.yml"
+      - "deploy/**"
+      - ".github/workflows/deploy-production.yml"
   workflow_dispatch:
     inputs:
       image_tag:
@@ -23,7 +29,7 @@ jobs:
   deploy:
     name: Desplegar en EC2
     if: >-
-      github.event_name == 'workflow_dispatch' ||
+      github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: [self-hosted, Linux, ARM64]
     timeout-minutes: 20
@@ -45,8 +51,10 @@ jobs:
           set -euo pipefail
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             tag="$MANUAL_TAG"
-          else
+          elif [[ "$EVENT_NAME" == "workflow_run" ]]; then
             tag="${HEAD_SHA:0:7}"
+          else
+            tag="latest"
           fi
           [[ "$tag" =~ ^[A-Za-z0-9_.-]+$ ]] || {
             echo "Etiqueta de imagen no válida: $tag" >&2
@@ -70,6 +78,8 @@ jobs:
           IMAGE_TAG: ${{ steps.image.outputs.tag }}
         run: |
           set -euo pipefail
+          install -d -m 0755 /opt/tiendatech/deploy
+          install -m 0644 deploy/Caddyfile /opt/tiendatech/deploy/Caddyfile
           install -m 0644 docker-compose.prod.yml /opt/tiendatech/docker-compose.prod.yml
           cd /opt/tiendatech
           docker compose --env-file .env -f docker-compose.prod.yml config --quiet
@@ -84,6 +94,15 @@ jobs:
           docker compose --env-file .env -f docker-compose.prod.yml pull
           docker compose --env-file .env -f docker-compose.prod.yml up \
             -d --remove-orphans --wait --wait-timeout 300
+
+      - name: Verificar HTTPS público
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --retry 12 --retry-delay 5 --retry-all-errors \
+            --resolve 18-221-94-105.sslip.io:443:127.0.0.1 \
+            https://18-221-94-105.sslip.io/ >/dev/null
 
       - name: Resumen del despliegue
         if: always()

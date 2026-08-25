@@ -28,7 +28,7 @@ android {
         }
         release {
             val releaseApiBaseUrl = providers.gradleProperty("TIENDATECH_API_BASE_URL")
-                .getOrElse("https://invalid.tiendatech.local/")
+                .getOrElse("https://18-221-94-105.sslip.io/")
             buildConfigField("String", "API_BASE_URL", "\"$releaseApiBaseUrl\"")
             optimization {
                 enable = false
