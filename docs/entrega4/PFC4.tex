@@ -30,6 +30,13 @@
 \usepackage{longtable}
 \usepackage{tabularx}
 \usepackage[most]{tcolorbox}
+\usepackage{newunicodechar}
+\newunicodechar{↔}{$\leftrightarrow$}
+\usepackage{seqsplit}
+\usepackage{microtype}
+\tolerance=2000
+\emergencystretch=2.5em
+\hbadness=10000
 
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
@@ -120,9 +127,16 @@
     morestring=[b]"
 }
 
+% NOTA DE EQUIPO: se reutiliza el archivo de referencias de la Entrega 3 para
+% no perder la bibliografia ya citada (E1-E3). Las citas nuevas que requiera
+% cada seccion de la Entrega 4 (Trabajos relacionados, Fundamento teorico,
+% Pact, etica en ingenieria de software) se agregan a ese mismo .bib
+% compartido y se citan con \cite{clave} una vez agregadas -- NO inventar
+% citas sin entrada real en el .bib.
 \addbibresource{../entrega3/referenciasPFC.bib}
 
 \begin{document}
+    \shorthandoff{"}
 
     \begin{titlepage}
         \AddToShipoutPicture* {
@@ -179,21 +193,23 @@
 
         {\large\textbf{FECHA DE ENTREGA:}\par}
         \vspace{0.2cm}
-        {\large Martes 25 de agosto del 2026 \par}
+        {\large PENDIENTE \par}
     \end{titlepage}
 
     \tableofcontents
     \newpage
 
     % ============================================================
-    % RESUMEN / ABSTRACT
+    % RESUMEN / ABSTRACT (bilingue) -- en conjunto, al final
+    % Tabla 3: "Objetivo, metodo, resultados, conclusiones; <=200 palabras
+    % cada uno" -- redactar solo cuando el resto del documento este cerrado.
     % ============================================================
     \section*{Resumen}
     \addcontentsline{toc}{section}{Resumen}
     \textbf{Objetivo:} cerrar, sobre el sistema distribuido \textbf{TiendaTech} validado en la Entrega 3, la brecha entre un sistema que funciona y uno que puede sostenerse, verificarse y evolucionar de forma controlada, mediante refactor arquitectónico, persistencia distribuida segura, calidad de las aplicaciones cliente y automatización del ciclo de integración continua. \textbf{Método:} auditoría directa del código fuente frente a cada criterio de la rúbrica de la Entrega 4, declarando explícitamente qué se cumple, qué se cumple de forma parcial y qué queda fuera de alcance, en lugar de reportar cobertura no verificada. \textbf{Resultados:} los seis microservicios Java quedaron organizados en cuatro capas con puertos y adaptadores, con cinco patrones GoF documentados con evidencia real; la persistencia distribuida en CockroachDB migró a una conexión cifrada por certificado (mTLS) con \emph{healthchecks} en los siete servicios; la aplicación web expone doce rutas y la aplicación móvil usa dos capacidades del dispositivo con pruebas unitarias e instrumentadas; el pipeline de CI/CD cubre de forma parcial cuatro de los siete \emph{jobs} esperados; y las pruebas del backend, los contratos Pact, la observabilidad distribuida y la evaluación ISO/IEC 25010 quedan con cobertura desigual o explícitamente pendientes. \textbf{Conclusiones:} el sistema avanzó de forma genuina pero incompleta hacia la sostenibilidad operativa, documentada con honestidad de alcance en cada sección.
 
-        \vspace{1cm}
-        \textbf{Palabras clave:} Microservicios, Arquitectura en capas, Persistencia distribuida, CockroachDB, Calidad de software, CI/CD.
+    \vspace{1cm}
+    \textbf{Palabras clave:} Microservicios, Arquitectura en capas, Persistencia distribuida, CockroachDB, Calidad de software, CI/CD.
 
     \newpage
 
@@ -201,19 +217,19 @@
     \addcontentsline{toc}{section}{Abstract}
     \textbf{Objective:} to close, over the \textbf{TiendaTech} distributed system validated in Deliverable 3, the gap between a system that works and one that can be sustained, verified, and evolved in a controlled way, through architectural refactoring, secure distributed persistence, client application quality, and continuous integration automation. \textbf{Method:} a direct source-code audit against each criterion of the Deliverable 4 rubric, explicitly stating what is fully met, partially met, or out of scope, instead of reporting unverified coverage. \textbf{Results:} the six Java microservices were reorganized into four layers with ports and adapters, with five GoF design patterns documented with real code evidence; distributed persistence on CockroachDB migrated to a certificate-based encrypted connection (mTLS) with healthchecks on all seven services; the web application exposes twelve routes and the mobile application uses two device capabilities with unit and instrumented tests; the CI/CD pipeline partially covers four of the seven expected jobs; and backend testing, Pact contracts, distributed observability, and the ISO/IEC 25010 evaluation remain unevenly covered or explicitly pending. \textbf{Conclusions:} the system advanced genuinely, though incompletely, toward operational sustainability, documented with honest scope declarations throughout.
 
-        \vspace{1cm}
-        \textbf{Keywords:} Microservices, Layered architecture, Distributed persistence, CockroachDB, Software quality, CI/CD.
+    \vspace{1cm}
+    \textbf{Keywords:} Microservices, Layered architecture, Distributed persistence, CockroachDB, Software quality, CI/CD.
 
     \newpage
 
     % ============================================================
-    % 1. INTRODUCCION
+    % 1. INTRODUCCION -- responsable: Jeremy Ruperto Gaibor Rodriguez
     % ============================================================
     \section{Introducción}
 
     La Entrega 3 de \textbf{TiendaTech} validó un despliegue contenerizado compuesto por un frontend y seis microservicios conectados a una base de datos distribuida CockroachDB, confirmando el flujo transaccional básico de carrito, orden, factura e inventario sobre esa infraestructura. Esa entrega dejó explícitamente fuera de su contribución delimitada el aislamiento de persistencia por servicio, la alta disponibilidad productiva, el motor de compatibilidad de componentes y el asistente conversacional, así como la calidad de código, la observabilidad y la evaluación experimental formal del sistema.
 
-    La Entrega 4 retoma el sistema en ese punto y se concentra en cerrar la brecha entre \emph{tener un sistema distribuido que funciona} y \emph{tener un sistema distribuido que puede sostenerse, verificarse y evolucionar de forma controlada}. En este período se completó la migración de los microservicios afectados hacia una organización en capas explícita (\texttt{presentation/application/domain/infrastructure}), se documentaron los patrones de diseño GoF aplicados, se aseguró la persistencia distribuida con una conexión cifrada por certificados (mTLS) hacia el clúster CockroachDB en lugar de la conexión directa sin cifrar heredada de E3, y se avanzó en la calidad de las aplicaciones cliente (web y móvil) y en la automatización del ciclo de integración continua.
+    La Entrega 4 retoma el sistema en ese punto y se concentra en cerrar la brecha entre \emph{tener un sistema distribuido que funciona} y \emph{tener un sistema distribuido que puede sostenerse, verificarse y evolucionar de forma controlada}. En este período se completó la migración de los microservicios afectados hacia una organización en capas explícita (\texttt{\seqsplit{presentation/application/domain/infrastructure}}), se documentaron los patrones de diseño GoF aplicados, se aseguró la persistencia distribuida con una conexión cifrada por certificados (mTLS) hacia el clúster CockroachDB en lugar de la conexión directa sin cifrar heredada de E3, y se avanzó en la calidad de las aplicaciones cliente (web y móvil) y en la automatización del ciclo de integración continua.
 
     \subsection{Alcance y contribución delimitada de la Entrega 4}
 
@@ -224,11 +240,11 @@
     Quedan explícitamente fuera del alcance de esta entrega la instrumentación de observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y, como consecuencia directa de ello, la evaluación experimental basada en ISO/IEC 25010 (D6 y D7), dado que esta última depende de contar con las métricas operativas que solo la primera puede producir. Las Secciones \ref{sec:observabilidad}, \ref{sec:iso25010} y \ref{sec:discusion} retoman esta decisión de alcance con más detalle. Esta exclusión se declara aquí de forma explícita, antes de que el lector avance en el documento, para no generar la expectativa de una cobertura que el equipo no pudo verificar en el tiempo disponible.
 
     % ============================================================
-    % 2. TRABAJOS RELACIONADOS
+    % 2. TRABAJOS RELACIONADOS -
     % ============================================================
     \section{Trabajos relacionados}
 
-    Esta sección revisa siete fuentes indexadas --- dos ya citadas en \texttt{docs/entrega3/PFC3.tex} y reutilizadas aquí por seguir siendo pertinentes, y cinco incorporadas específicamente para esta entrega --- organizadas en los cuatro ejes que exige la rúbrica de la Entrega 4: bases de datos distribuidas, arquitectura de microservicios, ingeniería de aplicaciones móviles y calidad de software/CI-CD.
+    Esta sección revisa siete fuentes indexadas --- dos ya citadas en \texttt{\seqsplit{docs/entrega3/PFC3.tex}} y reutilizadas aquí por seguir siendo pertinentes, y cinco incorporadas específicamente para esta entrega --- organizadas en los cuatro ejes que exige la rúbrica de la Entrega 4: bases de datos distribuidas, arquitectura de microservicios, ingeniería de aplicaciones móviles y calidad de software/CI-CD.
 
     \subsection{Bases de datos distribuidas}
 
@@ -271,7 +287,7 @@
     \end{table}
 
     % ============================================================
-    % 3. FUNDAMENTO TEORICO -
+    % 3. FUNDAMENTO TEORICO --
     % ============================================================
     \section{Fundamento teórico}
 
@@ -300,7 +316,7 @@
     El modelo ISO/IEC 25010:2023 organiza la calidad de un producto de software en ocho características --- adecuación funcional, eficiencia de desempeño, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad y portabilidad --- cada una descompuesta en subcaracterísticas medibles mediante métricas objetivas. Una evaluación seria bajo este modelo no describe la calidad de forma cualitativa, sino que fija un umbral objetivo por métrica y reporta si el sistema lo alcanza, con el nivel de rigor de un experimento controlado (media, desviación típica e intervalo de confianza sobre repeticiones).
 
     % ============================================================
-    % 4. ARQUITECTURA DEL SISTEMA
+    % 4. ARQUITECTURA DEL SISTEMA -- Dimension D1 + D4.2
     % ============================================================
     \section{Arquitectura del sistema}
     \label{sec:arquitectura-sistema}
@@ -318,70 +334,70 @@
 
     \subsection{Refactor en capas y principios SOLID (D1.1)}
 
-    Los seis microservicios Java del backend (\texttt{usuarios}, \texttt{productos-service}, \texttt{inventario-service}, \texttt{pedidos-service}, \texttt{ordenes-proveedores-service} y \texttt{ventas-service}) quedaron organizados en los cuatro paquetes exigidos: \texttt{presentation} (controladores REST y DTO de entrada/salida), \texttt{application} (servicios de caso de uso, sin acceso directo a JDBC ni a HTTP saliente), \texttt{domain} (entidades y \emph{puertos}, es decir, interfaces que declaran lo que el dominio necesita del exterior) e \texttt{infrastructure} (adaptadores concretos: repositorios JDBC, clientes HTTP, configuración de seguridad). El microservicio \texttt{armado-ia}, escrito en Python, mantiene una separación equivalente por responsabilidad (\texttt{clients/}, \texttt{explicacion/}, capa de servicio) sin adoptar literalmente la misma nomenclatura de paquetes Java.
+    Los seis microservicios Java del backend (\texttt{usuarios}, \texttt{productos-service}, \texttt{inventario-service}, \texttt{pedidos-service}, \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service}) quedaron organizados en los cuatro paquetes exigidos: \texttt{presentation} (controladores REST y DTO de entrada/salida), \texttt{application} (servicios de caso de uso, sin acceso directo a JDBC ni a HTTP saliente), \texttt{domain} (entidades y \emph{puertos}, es decir, interfaces que declaran lo que el dominio necesita del exterior) e \texttt{infrastructure} (adaptadores concretos: repositorios JDBC, clientes HTTP, configuración de seguridad). El microservicio \texttt{armado-ia}, escrito en Python, mantiene una separación equivalente por responsabilidad (\texttt{clients/}, \texttt{explicacion/}, capa de servicio) sin adoptar literalmente la misma nomenclatura de paquetes Java.
 
-    El patrón de puerto y adaptador se aplica de forma consistente: \texttt{ordenes-proveedores-service} y \texttt{ventas-service} declaran \texttt{InventarioPort} en \texttt{domain}, implementado por \texttt{InventarioClient} en \texttt{infrastructure}; \texttt{ventas-service} añade además \texttt{FacturaStore} y \texttt{FacturaOutboxStore} como puertos de persistencia; \texttt{pedidos-service} es el caso más extenso, con puertos dedicados para cada colaborador externo (\texttt{ProductoPort}, \texttt{UsuarioPort}, \texttt{FacturaPort}, \texttt{CrdbProbePort}, \texttt{CrdbRetryPort}, \texttt{CrdbMetricsPort}, \texttt{BusinessMetricsPort}); y \texttt{usuarios} generaliza la convención a \texttt{domain/port/out} (\texttt{TokenPort}, \texttt{UsuarioRepositoryPort}, \texttt{EmailPort}, \texttt{PasswordHasher}, \texttt{OtpStorePort}, entre otros), cada uno con su adaptador en \texttt{infrastructure/persistence/adapter} o \texttt{infrastructure/security}.
+    El patrón de puerto y adaptador se aplica de forma consistente: \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service} declaran \texttt{InventarioPort} en \texttt{domain}, implementado por \texttt{InventarioClient} en \texttt{infrastructure}; \texttt{ventas-service} añade además \texttt{FacturaStore} y \texttt{FacturaOutboxStore} como puertos de persistencia; \texttt{pedidos-service} es el caso más extenso, con puertos dedicados para cada colaborador externo (\texttt{ProductoPort}, \texttt{UsuarioPort}, \texttt{FacturaPort}, \texttt{CrdbProbePort}, \texttt{CrdbRetryPort}, \texttt{CrdbMetricsPort}, \texttt{\seqsplit{BusinessMetricsPort}}); y \texttt{usuarios} generaliza la convención a \texttt{domain/port/out} (\texttt{TokenPort}, \texttt{\seqsplit{UsuarioRepositoryPort}}, \texttt{EmailPort}, \texttt{PasswordHasher}, \texttt{OtpStorePort}, entre otros), cada uno con su adaptador en \texttt{\seqsplit{infrastructure/persistence/adapter}} o \texttt{\seqsplit{infrastructure/security}}.
 
-    Esta organización materializa dos principios SOLID de forma verificable en el código. El \textbf{principio de responsabilidad única} (SRP) separa qué hace el sistema (\texttt{application}) de cómo lo hace (\texttt{infrastructure}): por ejemplo, \texttt{OrdenCompraService} orquesta la recepción de una orden de compra sin saber si el inventario se actualiza vía HTTP, cola de mensajes o llamada local. El \textbf{principio de inversión de dependencias} (DIP) se sostiene en que las clases de \texttt{application} dependen únicamente de las interfaces declaradas en \texttt{domain}, nunca de una clase concreta de \texttt{infrastructure}; Spring resuelve la implementación real (\texttt{InventarioClient}, \texttt{JdbcOrdenCompraRepository}, etc.) por inyección en tiempo de arranque. Esto permite, por ejemplo, sustituir \texttt{InventarioClient} por un doble de prueba sin tocar \texttt{OrdenCompraService}.
+    Esta organización materializa dos principios SOLID de forma verificable en el código. El \textbf{principio de responsabilidad única} (SRP) separa qué hace el sistema (\texttt{application}) de cómo lo hace (\texttt{infrastructure}): por ejemplo, \texttt{OrdenCompraService} orquesta la recepción de una orden de compra sin saber si el inventario se actualiza vía HTTP, cola de mensajes o llamada local. El \textbf{principio de inversión de dependencias} (DIP) se sostiene en que las clases de \texttt{application} dependen únicamente de las interfaces declaradas en \texttt{domain}, nunca de una clase concreta de \texttt{infrastructure}; Spring resuelve la implementación real (\texttt{InventarioClient}, \texttt{\seqsplit{JdbcOrdenCompraRepository}}, etc.) por inyección en tiempo de arranque. Esto permite, por ejemplo, sustituir \texttt{InventarioClient} por un doble de prueba sin tocar \texttt{OrdenCompraService}.
 
     \subsection{Patrones GoF aplicados (D1.2)}
 
-    La documentación completa de esta decisión vive en \texttt{docs/adr/ADR-005-patrones-gof.md}. La auditoría registrada en ese ADR es deliberadamente conservadora: de los ocho servicios del backend, la mayoría implementa una arquitectura por capas limpia sin patrones GoF genuinos, y lo que a primera vista parece un patrón resulta ser inyección de dependencias de Spring, un \emph{Repository} (Fowler, no GoF) con una sola implementación, o un \emph{builder} de una librería de terceros. En vez de etiquetar falsamente esos casos, el equipo documenta cinco patrones GoF con evidencia real en el código:
+    La documentación completa de esta decisión vive en \texttt{\seqsplit{docs/adr/ADR-005-patrones-gof.md}}. La auditoría registrada en ese ADR es deliberadamente conservadora: de los ocho servicios del backend, la mayoría implementa una arquitectura por capas limpia sin patrones GoF genuinos, y lo que a primera vista parece un patrón resulta ser inyección de dependencias de Spring, un \emph{Repository} (Fowler, no GoF) con una sola implementación, o un \emph{builder} de una librería de terceros. En vez de etiquetar falsamente esos casos, el equipo documenta cinco patrones GoF con evidencia real en el código:
 
     \begin{enumerate}
-        \item \textbf{Strategy} (comportamiento): \texttt{ExplicacionClient} (\texttt{services/armado-ia/app/explicacion/client.py}) como interfaz, con dos estrategias intercambiables --- \texttt{BedrockExplicacionClient} (usa AWS Bedrock) y \texttt{DeterministicExplicacionClient} (redacción sin LLM) --- seleccionadas en runtime por \texttt{ExplicacionService}.
-        \item \textbf{Adapter} (estructural): \texttt{BedrockExplicacionClient} envuelve el SDK \texttt{boto3} y \texttt{ProductoClient} (\texttt{services/armado-ia/app/clients/producto\_client.py}) envuelve \texttt{httpx}, ambos traduciendo su fuente externa a tipos de dominio propios.
-        \item \textbf{Decorator} (estructural): \texttt{TrustedUserHeaderRequest}, clase interna de \texttt{JwtGatewayFilter} (\texttt{Apps/web/frontend}), extiende \texttt{HttpServletRequestWrapper} para inyectar cabeceras de identidad verificadas sin mutar la petición original.
-        \item \textbf{Chain of Responsibility} (comportamiento): \texttt{ExplanationValidationHandler} y sus implementaciones concretas (\texttt{NonEmptyExplanationHandler}, \texttt{VerifiedHardwareTokenHandler}) forman una cadena de validadores anti-alucinación sobre la respuesta del LLM.
-        \item \textbf{Template Method} (comportamiento): el método \texttt{validate()} de \texttt{ExplanationValidationHandler} fija el algoritmo común (ejecutar regla, devolver problema si existe, delegar al siguiente) y delega el paso variable a \texttt{\_validate\_current()} en cada subclase.
+        \item \textbf{Strategy} (comportamiento): \texttt{ExplicacionClient} (\texttt{\seqsplit{services/armado-ia/app/explicacion/client.py}}) como interfaz, con dos estrategias intercambiables --- \texttt{\seqsplit{BedrockExplicacionClient}} (usa AWS Bedrock) y \texttt{\seqsplit{DeterministicExplicacionClient}} (redacción sin LLM) --- seleccionadas en runtime por \texttt{ExplicacionService}.
+        \item \textbf{Adapter} (estructural): \texttt{\seqsplit{BedrockExplicacionClient}} envuelve el SDK \texttt{boto3} y \texttt{ProductoClient} (\texttt{services/armado-ia/app/clients/producto\_client.py}) envuelve \texttt{httpx}, ambos traduciendo su fuente externa a tipos de dominio propios.
+        \item \textbf{Decorator} (estructural): \texttt{\seqsplit{TrustedUserHeaderRequest}}, clase interna de \texttt{JwtGatewayFilter} (\texttt{Apps/web/frontend}), extiende \texttt{\seqsplit{HttpServletRequestWrapper}} para inyectar cabeceras de identidad verificadas sin mutar la petición original.
+        \item \textbf{Chain of Responsibility} (comportamiento): \texttt{\seqsplit{ExplanationValidationHandler}} y sus implementaciones concretas (\texttt{\seqsplit{NonEmptyExplanationHandler}}, \texttt{\seqsplit{VerifiedHardwareTokenHandler}}) forman una cadena de validadores anti-alucinación sobre la respuesta del LLM.
+        \item \textbf{Template Method} (comportamiento): el método \texttt{validate()} de \texttt{\seqsplit{ExplanationValidationHandler}} fija el algoritmo común (ejecutar regla, devolver problema si existe, delegar al siguiente) y delega el paso variable a \texttt{\_validate\_current()} en cada subclase.
     \end{enumerate}
 
-    El ADR también deja constancia explícita de los patrones evaluados y descartados por no tener estructura GoF real en este backend (Strategy sobre puertos con una sola implementación, Factory Method/Abstract Factory sobre \texttt{@Bean} sin jerarquía Creator, Builder de terceros, Observer, Facade, Command, State y Singleton), y documenta por separado --- sin mezclarlos con el catálogo GoF --- otros patrones legítimos presentes en el proyecto: \emph{Repository} (Fowler) en los seis servicios Java, \emph{Outbox} en \texttt{ventas-service} y \emph{Circuit Breaker}/\emph{Retry} (Nygard) en \texttt{pedidos-service}, \texttt{ordenes-proveedores-service} y \texttt{armado-ia}.
+    El ADR también deja constancia explícita de los patrones evaluados y descartados por no tener estructura GoF real en este backend (Strategy sobre puertos con una sola implementación, Factory Method/Abstract Factory sobre \texttt{@Bean} sin jerarquía Creator, Builder de terceros, Observer, Facade, Command, State y Singleton), y documenta por separado --- sin mezclarlos con el catálogo GoF --- otros patrones legítimos presentes en el proyecto: \emph{Repository} (Fowler) en los seis servicios Java, \emph{Outbox} en \texttt{ventas-service} y \emph{Circuit Breaker}/\emph{Retry} (Nygard) en \texttt{pedidos-service}, \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{armado-ia}.
 
     \subsection{Persistencia distribuida operando (D4.2)}
     \label{sec:persistencia-distribuida}
 
     El clúster CockroachDB de tres nodos heredado de la Entrega 3 (puertos \texttt{26257}/\texttt{26258}/\texttt{26259}) se mantiene operando y es el que sostiene la persistencia de los seis microservicios Java. Sobre esa base, esta entrega incorpora dos mejoras verificables en \texttt{docker-compose.yml}.
 
-    La primera es de \textbf{disponibilidad}: los siete servicios que dependen de una base de datos o exponen un endpoint HTTP (\texttt{pedidos}, \texttt{productos}, \texttt{inventario}, \texttt{ventas}, \texttt{ordenes-proveedores}, \texttt{usuarios} y \texttt{armado-ia}) ahora declaran un bloque \texttt{healthcheck:} contra \texttt{/actuator/health} (o el equivalente del servicio Python), con reintentos y periodo de arranque configurados; antes de esta entrega, \texttt{ventas-crdb-service} y \texttt{ordenes-proveedores-crdb-service} carecían de este chequeo, lo que impedía que \texttt{docker compose} reportara con precisión cuándo el sistema completo estaba realmente listo para recibir tráfico.
+    La primera es de \textbf{disponibilidad}: los siete servicios que dependen de una base de datos o exponen un endpoint HTTP (\texttt{pedidos}, \texttt{productos}, \texttt{inventario}, \texttt{ventas}, \texttt{\seqsplit{ordenes-proveedores}}, \texttt{usuarios} y \texttt{armado-ia}) ahora declaran un bloque \texttt{healthcheck:} contra \texttt{/actuator/health} (o el equivalente del servicio Python), con reintentos y periodo de arranque configurados; antes de esta entrega, \texttt{\seqsplit{ventas-crdb-service}} y \texttt{\seqsplit{ordenes-proveedores-crdb-service}} carecían de este chequeo, lo que impedía que \texttt{docker compose} reportara con precisión cuándo el sistema completo estaba realmente listo para recibir tráfico.
 
-    La segunda es de \textbf{seguridad de la conexión}: la cadena de conexión de los seis servicios Java se migró de \texttt{jdbc:postgresql://<IP fija de AWS>:26257,...\allowbreak\&sslmode=disable} --- una conexión sin cifrar contra una dirección IP fija --- a \texttt{jdbc:postgresql://host.docker.internal:26257,...\allowbreak\&sslmode=verify-ca\allowbreak\&sslrootcert=/app/crdb-certs/ca.crt\allowbreak\&sslcert=/app/crdb-certs/client.jhinson.crt\allowbreak\&sslkey=/app/crdb-certs/client.jhinson.key.pk8}, es decir, autenticación mutua por certificado (mTLS) en vez de una conexión abierta. Los tres archivos de certificado se montan como volúmenes de solo lectura (\texttt{./Apps/web/infra/crdb-certs/*.crt|.key.pk8:...:ro}) en cada contenedor. Este cambio requirió reconciliar manualmente un conflicto de fusión en \texttt{docker-compose.yml} porque ambas mejoras (healthchecks y mTLS) se desarrollaron en paralelo sobre los mismos bloques de servicio; el resultado final conserva ambas.
+    La segunda es de \textbf{seguridad de la conexión}: la cadena de conexión de los seis servicios Java se migró de \texttt{jdbc:postgresql:\allowbreak//<IP fija de AWS>:26257,...\allowbreak\&sslmode=disable} --- una conexión sin cifrar contra una dirección IP fija --- a \texttt{jdbc:postgresql:\allowbreak//host.docker.internal:26257,...\allowbreak\&sslmode=verify-ca\allowbreak\&sslrootcert=/app\allowbreak/crdb-certs/ca.crt\allowbreak\&sslcert=/app\allowbreak/crdb-certs/client.jhinson.crt\allowbreak\&sslkey=/app\allowbreak/crdb-certs/client.jhinson.key.pk8}, es decir, autenticación mutua por certificado (mTLS) en vez de una conexión abierta. Los tres archivos de certificado se montan como volúmenes de solo lectura (\texttt{\seqsplit{./Apps/web/infra/crdb-certs/*.crt|.key.pk8:...:ro}}) en cada contenedor. Este cambio requirió reconciliar manualmente un conflicto de fusión en \texttt{docker-compose.yml} porque ambas mejoras (healthchecks y mTLS) se desarrollaron en paralelo sobre los mismos bloques de servicio; el resultado final conserva ambas.
 
     \subsection{Stack tecnológico}
 
-    La Tabla \ref{tab:stack-e4} consolida las versiones vigentes verificadas directamente en los archivos de build del repositorio (\texttt{pom.xml}, \texttt{package.json}, \texttt{libs.versions.toml}), actualizando la Tabla de herramientas de \texttt{docs/entrega3/PFC3.tex} con lo efectivamente usado en esta entrega.
+    La Tabla \ref{tab:stack-e4} consolida las versiones vigentes verificadas directamente en los archivos de build del repositorio (\texttt{pom.xml}, \texttt{package.json}, \texttt{libs.versions.toml}), actualizando la Tabla de herramientas de \texttt{\seqsplit{docs/entrega3/PFC3.tex}} con lo efectivamente usado en esta entrega.
 
-        \begin{table}[H]
-            \centering
-            \caption{Stack tecnológico consolidado por capa (Entrega 4).}
-            \label{tab:stack-e4}
-            \small
-            \begin{tabularx}{\textwidth}{>{\bfseries}l l X}
+    \begin{table}[H]
+        \centering
+        \caption{Stack tecnológico consolidado por capa (Entrega 4).}
+        \label{tab:stack-e4}
+        \small
+        \begin{tabularx}{\textwidth}{>{\bfseries}l l >{\raggedright\arraybackslash}X}
     \toprule
     Capa & Tecnología & Versión verificada \\
     \midrule
     Backend (6 microservicios Java) & Java / Spring Boot & Java 21, Spring Boot 3.3.5 (\texttt{pom.xml} de \texttt{pedidos-service}) \\
     Backend (armado-ia) & Python & FastAPI, \texttt{pytest} + \texttt{ruff} en CI \\
-    Persistencia distribuida & CockroachDB & v23.2.4 verificado en la prueba de integración con Testcontainers de \texttt{pedidos-service}; v23.1.13 en el nodo local de \texttt{docker-compose.override.yml} \\
+    Persistencia distribuida & CockroachDB & v23.2.4 verificado en la prueba de integración con Testcontainers de \texttt{pedidos-service}; v23.1.13 en el nodo local de \texttt{\seqsplit{docker-compose.override.yml}} \\
     Web (SPA) & React / TypeScript & React 18.3.1, \texttt{react-router-dom} 7.18.2, TypeScript 5.9.2, Vite 7.1.2 (\texttt{package.json}) \\
     Web (Gateway) & Spring Cloud Gateway & Empaquetado junto al frontend, ver Dockerfile multi-stage (Sección 5.2) \\
     Móvil & Kotlin / Jetpack Compose & Kotlin 2.2.10, Compose BOM 2026.02.01, Hilt 2.60.1, \texttt{compileSdk}/\texttt{targetSdk} 37, \texttt{minSdk} 26 (\texttt{libs.versions.toml}, \texttt{build.gradle.kts}) \\
-    Contenerización & Docker / Docker Compose & Build multi-stage por servicio; publicación multi-arquitectura \texttt{linux/amd64,linux/arm64} en \texttt{publish-images.yml} \\
+    Contenerización & Docker / Docker Compose & Build multi-stage por servicio; publicación multi-arquitectura \texttt{\seqsplit{linux/amd64,linux/arm64}} en \texttt{publish-images.yml} \\
     CI/CD & GitHub Actions & \texttt{ci.yml} (3 jobs) + \texttt{publish-images.yml}, ver Sección 7.3 \\
     \bottomrule
-            \end{tabularx}
-        \end{table}
+        \end{tabularx}
+    \end{table}
 
     % ============================================================
-    % 5. APLICACION WEB -- Dimension D2
+    % 5. APLICACION WEB -- Dimension D2 -- responsable: Jeremy
     % ============================================================
     \section{Aplicación web}
 
     \subsection{Funcionalidad (D2.1)}
 
-    La SPA (\texttt{Apps/web/frontend/webapp}), construida con React 18 y \texttt{react-router-dom}, expone doce rutas declaradas en \texttt{App.tsx}: catálogo (\texttt{/}), detalle de producto (\texttt{/producto/:id}), armado de PC (\texttt{/armado}), carrito (\texttt{/carrito}), pago (\texttt{/pago}), factura (\texttt{/factura/:id?}), autenticación (\texttt{/login}, \texttt{/registro}, \texttt{/recuperacion}), cuenta (\texttt{/cuenta}), panel de trabajador (\texttt{/trabajador}) y administración (\texttt{/admin}), superando ampliamente el mínimo de cinco exigido por la rúbrica.
+    La SPA (\texttt{\seqsplit{Apps/web/frontend/webapp}}), construida con React 18 y \texttt{react-router-dom}, expone doce rutas declaradas en \texttt{App.tsx}: catálogo (\texttt{/}), detalle de producto (\texttt{/producto/:id}), armado de PC (\texttt{/armado}), carrito (\texttt{/carrito}), pago (\texttt{/pago}), factura (\texttt{/factura/:id?}), autenticación (\texttt{/login}, \texttt{/registro}, \texttt{/recuperacion}), cuenta (\texttt{/cuenta}), panel de trabajador (\texttt{/trabajador}) y administración (\texttt{/admin}), superando ampliamente el mínimo de cinco exigido por la rúbrica.
 
-    La sesión se identifica mediante un token JWT emitido por \texttt{usuarios-crdb-service}. El módulo \texttt{src/services/session.ts} guarda el token exclusivamente en \texttt{sessionStorage} (nunca en \texttt{localStorage}: al cargar, el propio módulo purga activamente cualquier clave de sesión que hubiera quedado en \texttt{localStorage} de una versión anterior), cumpliendo la restricción explícita de la rúbrica sobre el manejo del token. La ruta \texttt{/admin} está protegida por un componente \texttt{AdminRoute} que valida el rol del usuario (\texttt{id\_rol === 1} o \texttt{rol === "admin"}) y redirige a \texttt{/login} si no se cumple. Adicionalmente, \texttt{App.tsx} implementa expiración de sesión por inactividad (30 minutos sin interacción del usuario cierran la sesión automáticamente).
+    La sesión se identifica mediante un token JWT emitido por \texttt{\seqsplit{usuarios-crdb-service}}. El módulo \texttt{\seqsplit{src/services/session.ts}} guarda el token exclusivamente en \texttt{sessionStorage} (nunca en \texttt{localStorage}: al cargar, el propio módulo purga activamente cualquier clave de sesión que hubiera quedado en \texttt{localStorage} de una versión anterior), cumpliendo la restricción explícita de la rúbrica sobre el manejo del token. La ruta \texttt{/admin} está protegida por un componente \texttt{AdminRoute} que valida el rol del usuario (\texttt{id\_rol === 1} o \texttt{rol === "admin"}) y redirige a \texttt{/login} si no se cumple. Adicionalmente, \texttt{App.tsx} implementa expiración de sesión por inactividad (30 minutos sin interacción del usuario cierran la sesión automáticamente).
 
     La internacionalización declarada como deseable en la rúbrica (\texttt{react-i18next} con al menos español e inglés) no está implementada: toda la interfaz está codificada directamente en español. Se documenta aquí como brecha conocida en vez de omitirla.
 
@@ -442,10 +458,10 @@
 
     El \texttt{package.json} de la webapp no declara \texttt{eslint} ni \texttt{prettier} como dependencias de desarrollo, por lo que no hay una verificación de estilo o de reglas de código automatizada más allá de la que impone el propio compilador de TypeScript (\texttt{tsc -b}) durante el paso de \texttt{build}. Tampoco hay un framework de pruebas configurado (ni Vitest ni Jest aparecen en \texttt{devDependencies}), por lo que no existe cobertura de pruebas automatizada para la SPA en este momento; esta ausencia se retoma como brecha en la Sección \ref{sec:discusion}.
 
-    El empaquetado sí está resuelto correctamente: \texttt{Apps/web/frontend/Dockerfile} usa una construcción \emph{multi-stage} de tres etapas --- \texttt{node:22-alpine} para compilar la SPA con \texttt{npm run build}, \texttt{maven:3.9-eclipse-temurin-17} para empaquetar el frontend Spring Cloud Gateway junto con los estáticos ya compilados de React, y \texttt{eclipse-temurin:17-jre} como imagen final de ejecución --- lo que mantiene la imagen de producción libre de herramientas de compilación.
+    El empaquetado sí está resuelto correctamente: \texttt{\seqsplit{Apps/web/frontend/Dockerfile}} usa una construcción \emph{multi-stage} de tres etapas --- \texttt{node:22-alpine} para compilar la SPA con \texttt{npm run build}, \texttt{\seqsplit{maven:3.9-eclipse-temurin-17}} para empaquetar el frontend Spring Cloud Gateway junto con los estáticos ya compilados de React, y \texttt{\seqsplit{eclipse-temurin:17-jre}} como imagen final de ejecución --- lo que mantiene la imagen de producción libre de herramientas de compilación.
 
     % ============================================================
-    % 6. APLICACION MOVIL -- Dimension D3
+    % 6. APLICACION MOVIL -- Dimension D3 -- responsable: Andy
     % ============================================================
     \section{Aplicación móvil}
 
@@ -453,9 +469,9 @@
 
     \texttt{Apps/mobile} es una aplicación Android nativa en Kotlin con Jetpack Compose, organizada por \emph{feature} (\texttt{auth}, \texttt{catalog}, \texttt{cart}, \texttt{orders}, \texttt{account}, \texttt{scanner}, \texttt{notifications}), cada una dividida internamente en \texttt{data}/\texttt{domain}/\texttt{ui}, con inyección de dependencias vía Hilt y comunicación HTTP con el backend mediante Retrofit y OkHttp. La capa \texttt{core/database} usa Room para cachear productos y categorías localmente (\texttt{ProductCacheDao}, \texttt{CategoryCacheDao}, \texttt{CacheMetadataDao}), permitiendo operar el catálogo con datos ya vistos aunque la conexión falle.
 
-    La aplicación utiliza dos capacidades del dispositivo, superando el mínimo exigido por la rúbrica. La primera es la \textbf{cámara}: la feature \texttt{scanner} usa CameraX (\texttt{androidx.camera.core/camera2/lifecycle/view}) junto con ML Kit Barcode Scanning para leer códigos de barras de productos y resolverlos contra el catálogo (\texttt{BarcodeAnalyzer}, \texttt{BarcodeLookup}). La segunda son las \textbf{notificaciones nativas}: \texttt{AndroidOrderNotificationPublisher} publica notificaciones reales del sistema operativo (API \texttt{NotificationManager}/\texttt{NotificationCompat}, con el permiso \texttt{POST\_NOTIFICATIONS} declarado en el manifiesto) para informar cambios de estado en las órdenes del usuario.
+    La aplicación utiliza dos capacidades del dispositivo, superando el mínimo exigido por la rúbrica. La primera es la \textbf{cámara}: la feature \texttt{scanner} usa CameraX (\texttt{\seqsplit{androidx.camera.core/camera2/lifecycle/view}}) junto con ML Kit Barcode Scanning para leer códigos de barras de productos y resolverlos contra el catálogo (\texttt{BarcodeAnalyzer}, \texttt{BarcodeLookup}). La segunda son las \textbf{notificaciones nativas}: \texttt{\seqsplit{AndroidOrderNotificationPublisher}} publica notificaciones reales del sistema operativo (API \texttt{\seqsplit{NotificationManager}}/\texttt{NotificationCompat}, con el permiso \texttt{POST\_NOTIFICATIONS} declarado en el manifiesto) para informar cambios de estado en las órdenes del usuario.
 
-    Los flujos de negocio cubiertos son autenticación (login/registro, \texttt{feature/auth}), catálogo y detalle de producto (\texttt{feature/catalog}), carrito (\texttt{feature/cart}), órdenes y su historial (\texttt{feature/orders}), y cuenta con checkout (\texttt{feature/account}, incluye \texttt{CheckoutScreen}). La sesión se protege de forma más estricta que en la web: el token no se guarda en texto plano sino cifrado mediante Android Keystore (\texttt{AndroidKeystoreTokenCipher}, \texttt{SecureSessionStore}), y \texttt{AuthInterceptor} lo adjunta automáticamente a las peticiones salientes de Retrofit.
+    Los flujos de negocio cubiertos son autenticación (login/registro, \texttt{feature/auth}), catálogo y detalle de producto (\texttt{feature/catalog}), carrito (\texttt{feature/cart}), órdenes y su historial (\texttt{feature/orders}), y cuenta con checkout (\texttt{feature/account}, incluye \texttt{CheckoutScreen}). La sesión se protege de forma más estricta que en la web: el token no se guarda en texto plano sino cifrado mediante Android Keystore (\texttt{\seqsplit{AndroidKeystoreTokenCipher}}, \texttt{SecureSessionStore}), y \texttt{AuthInterceptor} lo adjunta automáticamente a las peticiones salientes de Retrofit.
 
     \begin{figure}[H]
         \centering
@@ -485,49 +501,48 @@
 
     \subsection{Calidad (D3.2)}
 
-    La aplicación cuenta con dos niveles de prueba verificados en el repositorio. Existen pruebas instrumentadas (\texttt{app/src/androidTest}) que corren sobre un dispositivo o emulador real: \texttt{TiendaTechDatabaseTest} valida el esquema Room y \texttt{NotificationIntegrationTest} valida la publicación de notificaciones nativas, además de la plantilla \texttt{ExampleInstrumentedTest} generada por Android Studio. Adicionalmente --- y a diferencia de lo que se había señalado como pendiente de confirmar en la auditoría interna previa a esta entrega --- sí existen pruebas unitarias reales sobre \texttt{app/src/test}: doce archivos que cubren \texttt{ViewModels} (\texttt{ScannerViewModelTest}, usando \texttt{kotlinx.coroutines.test} con \texttt{StandardTestDispatcher} y \texttt{runTest} para probar corrutinas de forma determinista), repositorios (\texttt{AuthRepositoryTest}, \texttt{CartContractTest}, \texttt{OrdersContractTest}), validadores (\texttt{AuthValidatorTest}), mapeadores (\texttt{CatalogMapperTest}) y almacenamiento seguro de sesión (\texttt{SecureSessionStoreTest}), todas con JUnit 4 y \texttt{okhttp-mockwebserver} para simular el backend.
+    La aplicación cuenta con dos niveles de prueba verificados en el repositorio. Existen pruebas instrumentadas (\texttt{\seqsplit{app/src/androidTest}}) que corren sobre un dispositivo o emulador real: \texttt{\seqsplit{TiendaTechDatabaseTest}} valida el esquema Room y \texttt{\seqsplit{NotificationIntegrationTest}} valida la publicación de notificaciones nativas, además de la plantilla \texttt{\seqsplit{ExampleInstrumentedTest}} generada por Android Studio. Adicionalmente --- y a diferencia de lo que se había señalado como pendiente de confirmar en la auditoría interna previa a esta entrega --- sí existen pruebas unitarias reales sobre \texttt{app/src/test}: doce archivos que cubren \texttt{ViewModels} (\texttt{\seqsplit{ScannerViewModelTest}}, usando \texttt{\seqsplit{kotlinx.coroutines.test}} con \texttt{\seqsplit{StandardTestDispatcher}} y \texttt{runTest} para probar corrutinas de forma determinista), repositorios (\texttt{AuthRepositoryTest}, \texttt{CartContractTest}, \texttt{OrdersContractTest}), validadores (\texttt{AuthValidatorTest}), mapeadores (\texttt{CatalogMapperTest}) y almacenamiento seguro de sesión (\texttt{\seqsplit{SecureSessionStoreTest}}), todas con JUnit 4 y \texttt{\seqsplit{okhttp-mockwebserver}} para simular el backend.
 
-    El job \texttt{android-mobile} de \texttt{.github/workflows/ci.yml} ejecuta \texttt{lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest} en cada push y publica el APK de depuración y el APK de pruebas instrumentadas como artefactos descargables del pipeline, cumpliendo la exigencia de que el CI produzca un artefacto instalable de la app móvil.
+    El job \texttt{android-mobile} de \texttt{\seqsplit{.github/workflows/ci.yml}} ejecuta \texttt{\seqsplit{lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest}} en cada push y publica el APK de depuración y el APK de pruebas instrumentadas como artefactos descargables del pipeline, cumpliendo la exigencia de que el CI produzca un artefacto instalable de la app móvil.
 
     % ============================================================
     % 7. PRUEBAS Y CI/CD -- Dimension D4.1 + D5
-    %
     % ============================================================
     \section{Pruebas y CI/CD}
 
     \subsection{Pirámide de pruebas (D5.1)}
 
-    La cobertura de pruebas del backend es desigual entre servicios y se documenta aquí con exactitud en vez de promediarla. Cuatro de los seis microservicios Java tienen pruebas unitarias reales con JUnit 5: \texttt{usuarios} (filtros JWT, guardia de acceso, sesiones), \texttt{productos-service} (controlador, manejador de excepciones, validación de DTO), \texttt{inventario-service} (idempotencia, DTO) y \texttt{pedidos-service}, que además de sus pruebas unitarias (\texttt{CarritoServiceTest}, \texttt{OrdenServiceTest}, \texttt{MetodoPagoServiceTest}) incluye la única prueba de \textbf{integración} real del backend: \texttt{CockroachDbIntegrationTest}, que levanta un contenedor \texttt{cockroachdb/cockroach:v23.2.4} real vía Testcontainers (\texttt{@Testcontainers}, \texttt{@Container}) en lugar de simular la base de datos.
+    La cobertura de pruebas del backend es desigual entre servicios y se documenta aquí con exactitud en vez de promediarla. Cuatro de los seis microservicios Java tienen pruebas unitarias reales con JUnit 5: \texttt{usuarios} (filtros JWT, guardia de acceso, sesiones), \texttt{productos-service} (controlador, manejador de excepciones, validación de DTO), \texttt{inventario-service} (idempotencia, DTO) y \texttt{pedidos-service}, que además de sus pruebas unitarias (\texttt{CarritoServiceTest}, \texttt{OrdenServiceTest}, \texttt{\seqsplit{MetodoPagoServiceTest}}) incluye la única prueba de \textbf{integración} real del backend: \texttt{\seqsplit{CockroachDbIntegrationTest}}, que levanta un contenedor \texttt{\seqsplit{cockroachdb/cockroach:v23.2.4}} real vía Testcontainers (\texttt{@Testcontainers}, \texttt{@Container}) en lugar de simular la base de datos.
 
-    Los otros dos microservicios Java, \texttt{ordenes-proveedores-service} y \texttt{ventas-service}, no tienen ninguna prueba (\texttt{src/test} no existe en ninguno de los dos). Esto es una brecha significativa precisamente porque ambos concentran la lógica de negocio más nueva y más sensible de esta entrega: la recepción parcial de órdenes de compra, el recálculo de costo por promedio ponderado y la auto-desactivación de productos cuando el costo supera el precio. El plan de cierre del equipo (\texttt{docs/plan-cierre-e4.md}) declaraba esta lógica como prioridad de cobertura por encima de perseguir un 70\,\% exacto en toda la superficie del código; a la fecha de esta sección, esa prioridad está declarada pero no ejecutada, y se deja constancia de ello en la Discusión (Sección \ref{sec:discusion}) en vez de reportarla como resuelta.
+    Los otros dos microservicios Java, \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service}, no tienen ninguna prueba (\texttt{src/test} no existe en ninguno de los dos). Esto es una brecha significativa precisamente porque ambos concentran la lógica de negocio más nueva y más sensible de esta entrega: la recepción parcial de órdenes de compra, el recálculo de costo por promedio ponderado y la auto-desactivación de productos cuando el costo supera el precio. El plan de cierre del equipo (\texttt{\seqsplit{docs/plan-cierre-e4.md}}) declaraba esta lógica como prioridad de cobertura por encima de perseguir un 70\,\% exacto en toda la superficie del código; a la fecha de esta sección, esa prioridad está declarada pero no ejecutada, y se deja constancia de ello en la Discusión (Sección \ref{sec:discusion}) en vez de reportarla como resuelta.
 
     No existe una carpeta \texttt{tests/} en la raíz del repositorio, por lo que tampoco hay pruebas end-to-end de la web con Playwright ni pruebas de carga con Locust. La aplicación móvil sí cierra su propia pirámide de forma más completa, con pruebas unitarias y pruebas instrumentadas (detalladas en la Sección 6.2).
 
     \subsection{Contratos de consumidor Pact (D4.1)}
 
-    Como capa de \emph{contrato} de la pirámide de pruebas, la rúbrica exige \emph{consumer-driven contract testing} con Pact entre los clientes (web y móvil, como consumidores) y el backend (como proveedor). A la fecha de cierre de esta sección no existe en el repositorio ninguna carpeta \texttt{tests/contract} ni configuración de Pact (no hay dependencias de \texttt{pact-jvm} en ningún \texttt{pom.xml} del backend, ni de un \emph{Pact broker} referenciado en el pipeline de CI/CD). Este criterio se declara explícitamente como \textbf{no cumplido} en el estado actual del proyecto. La razón no es desconocimiento de la herramienta, sino una decisión de priorización bajo el tiempo disponible del equipo: se optó por asegurar primero que la persistencia distribuida operara de forma segura (Sección \ref{sec:persistencia-distribuida}) y que la calidad de las aplicaciones cliente avanzara (Secciones 5 y 6), antes de introducir una herramienta de verificación de contratos que ninguno de los servicios consumidores tenía previamente. Queda como trabajo inmediato siguiente, con una ruta ya decidida en \texttt{docs/plan-cierre-e4.md}: priorizar el contrato \emph{web↔backend} (el cliente con más tráfico y más rutas) antes que el contrato del consumidor móvil, de modo que exista al menos un contrato verificado en verde en lugar de dos a medio terminar.
+    Como capa de \emph{contrato} de la pirámide de pruebas, la rúbrica exige \emph{consumer-driven contract testing} con Pact entre los clientes (web y móvil, como consumidores) y el backend (como proveedor). A la fecha de cierre de esta sección no existe en el repositorio ninguna carpeta \texttt{tests/contract} ni configuración de Pact (no hay dependencias de \texttt{pact-jvm} en ningún \texttt{pom.xml} del backend, ni de un \emph{Pact broker} referenciado en el pipeline de CI/CD). Este criterio se declara explícitamente como \textbf{no cumplido} en el estado actual del proyecto. La razón no es desconocimiento de la herramienta, sino una decisión de priorización bajo el tiempo disponible del equipo: se optó por asegurar primero que la persistencia distribuida operara de forma segura (Sección \ref{sec:persistencia-distribuida}) y que la calidad de las aplicaciones cliente avanzara (Secciones 5 y 6), antes de introducir una herramienta de verificación de contratos que ninguno de los servicios consumidores tenía previamente. Queda como trabajo inmediato siguiente, con una ruta ya decidida en \texttt{\seqsplit{docs/plan-cierre-e4.md}}: priorizar el contrato \emph{web↔backend} (el cliente con más tráfico y más rutas) antes que el contrato del consumidor móvil, de modo que exista al menos un contrato verificado en verde en lugar de dos a medio terminar.
 
     \subsection{Pipeline CI/CD end-to-end (D5.2)}
 
-    El repositorio tiene dos workflows de GitHub Actions. \texttt{.github/workflows/ci.yml} corre en cada \emph{push}/\emph{pull request} y define tres jobs: \texttt{android-mobile} (lint, pruebas unitarias e instrumentadas, y publicación del APK como artefacto --- ver Sección 6.2), \texttt{crdb-tests} (ejecuta \texttt{mvn verify} sobre \texttt{pedidos-service}, incluyendo la prueba de integración con Testcontainers) y \texttt{armado-ia-tests} (pruebas con \texttt{pytest} y lint con \texttt{ruff} sobre el microservicio Python). \texttt{.github/workflows/publish-images.yml}, agregado en esta entrega, construye y publica en un registro Docker las ocho imágenes del sistema (frontend y los siete microservicios) en una matriz paralela, con soporte multi-arquitectura (\texttt{linux/amd64,linux/arm64}) y cacheo de capas vía \texttt{type=gha}.
+    El repositorio tiene dos workflows de GitHub Actions. \texttt{\seqsplit{.github/workflows/ci.yml}} corre en cada \emph{push}/\emph{pull request} y define tres jobs: \texttt{android-mobile} (lint, pruebas unitarias e instrumentadas, y publicación del APK como artefacto --- ver Sección 6.2), \texttt{crdb-tests} (ejecuta \texttt{mvn verify} sobre \texttt{pedidos-service}, incluyendo la prueba de integración con Testcontainers) y \texttt{armado-ia-tests} (pruebas con \texttt{pytest} y lint con \texttt{ruff} sobre el microservicio Python). \texttt{\seqsplit{.github/workflows/publish-images.yml}}, agregado en esta entrega, construye y publica en un registro Docker las ocho imágenes del sistema (frontend y los siete microservicios) en una matriz paralela, con soporte multi-arquitectura (\texttt{\seqsplit{linux/amd64,linux/arm64}}) y cacheo de capas vía \texttt{type=gha}.
 
-    Comparado contra los siete jobs que exige la rúbrica (\texttt{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}), el pipeline actual cubre de forma parcial \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}), \texttt{integration} (dentro de \texttt{crdb-tests}, pero limitada a un solo servicio) y \texttt{build-images} (\texttt{publish-images.yml}). Quedan sin job dedicado: \texttt{lint} para los servicios Java y para la web (solo \texttt{armado-ia} tiene lint automatizado, vía \texttt{ruff}), y \texttt{test-backend}/\texttt{test-web} como jobs que corran las pruebas de \emph{todos} los servicios Java y de la SPA respectivamente --- esta última, además, no puede ejecutarse todavía porque, como se documentó en la Sección 5.2, la web no tiene ningún framework de pruebas configurado. Una diferencia adicional frente a lo esperado por la rúbrica es que \texttt{publish-images.yml} publica en Docker Hub (\texttt{docker/login-action} contra \texttt{vars.DOCKERHUB\_USERNAME}) y no en GitHub Container Registry (GHCR) como se sugiere en la guía de la entrega; el resultado funcional --- imágenes versionadas y publicadas automáticamente --- es equivalente, pero el registro concreto difiere del nombrado explícitamente en la rúbrica.
+    Comparado contra los siete jobs que exige la rúbrica (\texttt{\seqsplit{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}}), el pipeline actual cubre de forma parcial \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}), \texttt{integration} (dentro de \texttt{crdb-tests}, pero limitada a un solo servicio) y \texttt{build-images} (\texttt{publish-images.yml}). Quedan sin job dedicado: \texttt{lint} para los servicios Java y para la web (solo \texttt{armado-ia} tiene lint automatizado, vía \texttt{ruff}), y \texttt{test-backend}/\texttt{test-web} como jobs que corran las pruebas de \emph{todos} los servicios Java y de la SPA respectivamente --- esta última, además, no puede ejecutarse todavía porque, como se documentó en la Sección 5.2, la web no tiene ningún framework de pruebas configurado. Una diferencia adicional frente a lo esperado por la rúbrica es que \texttt{publish-images.yml} publica en Docker Hub (\texttt{\seqsplit{docker/login-action}} contra \texttt{vars.DOCKERHUB\_USERNAME}) y no en GitHub Container Registry (GHCR) como se sugiere en la guía de la entrega; el resultado funcional --- imágenes versionadas y publicadas automáticamente --- es equivalente, pero el registro concreto difiere del nombrado explícitamente en la rúbrica.
 
     % ============================================================
-    % 8. OBSERVABILIDAD -- Dimension D6. fuera de alcance.
+    % 8. OBSERVABILIDAD -- Dimension D6. Declarada fuera de alcance.
     % ============================================================
     \section{Observabilidad}
     \label{sec:observabilidad}
 
-    Este criterio (D6: instrumentación con OpenTelemetry, métricas Prometheus, registros estructurados con \texttt{trace\_id} y dashboard operativo en Grafana con los seis paneles obligatorios) se declara \textbf{no implementado} en esta entrega. No hay carpeta \texttt{ops/} en el repositorio, ni \texttt{opentelemetry-spring-boot-starter}, ni \texttt{prometheus}/\texttt{grafana} en \texttt{docker-compose.yml}, ni logs en formato JSON con identificador de traza en la configuración de Logback de los servicios revisados. Esta decisión de alcance ya fue declarada en la Sección 1.1 y se retoma con su justificación completa en la Discusión (Sección \ref{sec:discusion}): la instrumentación de las tres señales de observabilidad es, de todo lo pendiente en la rúbrica, la de mayor costo de infraestructura por punto de nota, y compite directamente por el mismo tiempo que se usó para asegurar la persistencia distribuida seleccionada como prioridad (Sección \ref{sec:persistencia-distribuida}).
+    Este criterio (D6: instrumentación con OpenTelemetry, métricas Prometheus, registros estructurados con \texttt{trace\_id} y dashboard operativo en Grafana con los seis paneles obligatorios) se declara \textbf{no implementado} en esta entrega. No hay carpeta \texttt{ops/} en el repositorio, ni \texttt{\seqsplit{opentelemetry-spring-boot-starter}}, ni \texttt{prometheus}/\texttt{grafana} en \texttt{docker-compose.yml}, ni logs en formato JSON con identificador de traza en la configuración de Logback de los servicios revisados. Esta decisión de alcance ya fue declarada en la Sección 1.1 y se retoma con su justificación completa en la Discusión (Sección \ref{sec:discusion}): la instrumentación de las tres señales de observabilidad es, de todo lo pendiente en la rúbrica, la de mayor costo de infraestructura por punto de nota, y compite directamente por el mismo tiempo que se usó para asegurar la persistencia distribuida seleccionada como prioridad (Sección \ref{sec:persistencia-distribuida}).
 
     % ============================================================
-    % 9. EVALUACION ISO 25010 -- Dimension D7.fuera de alcance.
+    % 9. EVALUACION ISO 25010 -- Dimension D7. Declarada fuera de alcance.
     % ============================================================
     \section{Evaluación ISO/IEC 25010}
     \label{sec:iso25010}
 
-    Este criterio (D7: medir cinco características del modelo ISO/IEC 25010:2023 con métricas objetivas, repeticiones y un intervalo de confianza del 95\,\%) se declara \textbf{no implementado} en esta entrega, como consecuencia directa de la Sección \ref{sec:observabilidad}: las métricas de fiabilidad (tasa de errores 5xx) y de eficiencia de desempeño (latencia p95 bajo carga con Locust) que exige el protocolo experimental de la rúbrica dependen de la instrumentación de observabilidad, que no se implementó. No existe \texttt{docs/experimentos/protocolo-e4.md} ni \texttt{docs/experimentos/resultados/iso25010.csv} en el repositorio. El equipo prefiere declarar esta ausencia con claridad antes que reportar métricas medidas de forma artesanal o no reproducible, lo cual violaría el mismo estándar de rigor experimental que la rúbrica exige.
+    Este criterio (D7: medir cinco características del modelo ISO/IEC 25010:2023 con métricas objetivas, repeticiones y un intervalo de confianza del 95\,\%) se declara \textbf{no implementado} en esta entrega, como consecuencia directa de la Sección \ref{sec:observabilidad}: las métricas de fiabilidad (tasa de errores 5xx) y de eficiencia de desempeño (latencia p95 bajo carga con Locust) que exige el protocolo experimental de la rúbrica dependen de la instrumentación de observabilidad, que no se implementó. No existe \texttt{\seqsplit{docs/experimentos/protocolo-e4.md}} ni \texttt{\seqsplit{docs/experimentos/resultados/iso25010.csv}} en el repositorio. El equipo prefiere declarar esta ausencia con claridad antes que reportar métricas medidas de forma artesanal o no reproducible, lo cual violaría el mismo estándar de rigor experimental que la rúbrica exige.
 
     % ============================================================
     % 10. DISCUSION Y AMENAZAS A LA VALIDEZ -- responsable: EN CONJUNTO
@@ -540,7 +555,7 @@
 
     La Entrega 3 cerró declarando como trabajo posterior explícito la calidad de código, la observabilidad y la evaluación experimental formal del sistema (Sección 1). Frente a esa línea base, esta entrega avanza de forma desigual entre esos tres frentes, y esa desigualdad es en sí misma el hallazgo principal de la Discusión.
 
-    El avance más sólido es arquitectónico: los seis microservicios Java completaron el refactor en capas con puertos y adaptadores (Sección \ref{sec:arquitectura-sistema}), y la persistencia distribuida pasó de ser un perfil experimental paralelo en E3 a ser la base de datos real del sistema, ahora protegida con mTLS. Este resultado es consistente con la prioridad que el equipo declaró en \texttt{docs/plan-cierre-e4.md}: asegurar primero la infraestructura de la que todo lo demás depende.
+    El avance más sólido es arquitectónico: los seis microservicios Java completaron el refactor en capas con puertos y adaptadores (Sección \ref{sec:arquitectura-sistema}), y la persistencia distribuida pasó de ser un perfil experimental paralelo en E3 a ser la base de datos real del sistema, ahora protegida con mTLS. Este resultado es consistente con la prioridad que el equipo declaró en \texttt{\seqsplit{docs/plan-cierre-e4.md}}: asegurar primero la infraestructura de la que todo lo demás depende.
 
     El avance en calidad de código es parcial y concentrado: cuatro de los seis microservicios Java tienen pruebas unitarias reales, mientras que los dos que concentran la lógica de negocio más nueva de esta entrega (recepción de órdenes, costeo, auto-desactivación) no tienen ninguna (Sección 7.1). Esto invierte la prioridad que el propio equipo se había fijado por escrito --- cubrir primero la lógica nueva antes que perseguir cobertura pareja --- y es una inconsistencia entre lo planeado y lo ejecutado que este documento prefiere señalar explícitamente en vez de omitir. De forma similar, el pipeline de CI/CD cubre de forma parcial cuatro de los siete \emph{jobs} esperados (Sección 7.3), y los contratos Pact no se iniciaron (Sección 7.2).
 
@@ -554,7 +569,7 @@
 
     \textbf{Validez de constructo:} la cobertura de pruebas se reportó por \emph{presencia de archivos de prueba por servicio}, no por un porcentaje de líneas o ramas cubiertas medido con una herramienta como JaCoCo. Solo \texttt{pedidos-service} tiene JaCoCo configurado en su \texttt{pom.xml}; en el resto del backend, "tiene pruebas" y "tiene buena cobertura" no son estrictamente lo mismo, y este documento no confunde ambas cosas al reportar el estado del servicio.
 
-    \textbf{Validez interna:} la única prueba de integración real contra una base de datos (\texttt{CockroachDbIntegrationTest} en \texttt{pedidos-service}) corre contra un contenedor CockroachDB de un solo nodo levantado por Testcontainers, mientras que el sistema en ejecución real usa un clúster de tres nodos con mTLS. El comportamiento verificado en la prueba automatizada no cubre escenarios de consenso Raft entre réplicas, conflictos de rango entre nodos, ni la ruta de conexión cifrada.
+    \textbf{Validez interna:} la única prueba de integración real contra una base de datos (\texttt{\seqsplit{CockroachDbIntegrationTest}} en \texttt{pedidos-service}) corre contra un contenedor CockroachDB de un solo nodo levantado por Testcontainers, mientras que el sistema en ejecución real usa un clúster de tres nodos con mTLS. El comportamiento verificado en la prueba automatizada no cubre escenarios de consenso Raft entre réplicas, conflictos de rango entre nodos, ni la ruta de conexión cifrada.
 
     \textbf{Validez externa:} las pruebas manuales de extremo a extremo de esta entrega (recepción de órdenes, actualización de inventario, auto-desactivación de productos) se ejecutaron principalmente contra el entorno local descrito en la Sección \ref{sec:reproducibilidad}, con datos de catálogo sintéticos y volumen bajo. No hay evidencia todavía de que el mismo flujo se comporte igual bajo carga concurrente o con el volumen de datos del clúster de AWS, precisamente el tipo de medición que correspondería a una evaluación ISO/IEC 25010 (Sección \ref{sec:iso25010}).
 
@@ -562,7 +577,7 @@
 
     Se toma como marco de referencia el \emph{ACM Code of Ethics and Professional Conduct} (2018), aplicado a tres decisiones de diseño concretas de \textbf{TiendaTech}, no como una discusión abstracta.
 
-    La primera es la protección de credenciales y datos personales (principio 1.6, \emph{Respect privacy}; principio 2.9, \emph{Design for security}). Las contraseñas se almacenan con \texttt{BCryptPasswordEncoder} de factor 12, nunca en texto plano; el token de sesión se guarda cifrado con Android Keystore en el cliente móvil y solo en \texttt{sessionStorage} (no en \texttt{localStorage} persistente) en el cliente web; y la conexión hacia la base de datos distribuida se cifra con autenticación mutua por certificado (mTLS) desde esta entrega, en lugar de la conexión sin cifrar heredada de E3.
+    La primera es la protección de credenciales y datos personales (principio 1.6, \emph{Respect privacy}; principio 2.9, \emph{Design for security}). Las contraseñas se almacenan con \texttt{\seqsplit{BCryptPasswordEncoder}} de factor 12, nunca en texto plano; el token de sesión se guarda cifrado con Android Keystore en el cliente móvil y solo en \texttt{sessionStorage} (no en \texttt{localStorage} persistente) en el cliente web; y la conexión hacia la base de datos distribuida se cifra con autenticación mutua por certificado (mTLS) desde esta entrega, en lugar de la conexión sin cifrar heredada de E3.
 
     La segunda es la decisión de auto-desactivar un producto cuando su costo recalculado supera su precio de venta (documentada en la Sección \ref{sec:arquitectura-sistema} y en el código de \texttt{inventario-service}/\texttt{productos-service}). Esta es una decisión automatizada con impacto económico directo sobre el catálogo visible al cliente, y por tanto queda dentro del alcance del principio 2.5 (\emph{Give comprehensive evaluation of computer systems... including analysis of possible risks}) y del principio 1.2 (\emph{Avoid harm}): vender por debajo del costo perjudicaría al negocio, pero desactivar un producto sin aviso también tiene un costo (pérdida de visibilidad, posible error de cálculo transitorio). Por eso la implementación no es una decisión silenciosa e irreversible: queda registrada en el log del servicio (\texttt{LOG.warn} con el producto, el costo recalculado y el precio vigente), es visible y reversible por un administrador humano, y la reactivación exige explícitamente que el precio ya no esté por debajo del costo antes de permitirla --- es decir, el sistema no permite reactivar "a ciegas" un producto que seguiría vendiéndose con pérdida.
 
@@ -571,19 +586,20 @@
     \subsection{Reproducibilidad (D9.4)}
     \label{sec:reproducibilidad}
 
-    El sistema completo puede levantarse con \texttt{docker compose up --build} contra el clúster CockroachDB de AWS usando las credenciales por defecto embebidas en \texttt{docker-compose.yml}, pero esto ata cualquier prueba local a un recurso compartido por todo el equipo y a una base de datos que no se puede resetear libremente. Para resolver esto, \texttt{docker-compose.override.yml} --- que \texttt{docker compose} carga automáticamente junto al archivo principal, sin modificarlo --- añade un nodo CockroachDB local de un solo contenedor (\texttt{crdb-local}, modo \texttt{--insecure}, sin necesidad de certificados) y un segundo contenedor de inicialización (\texttt{crdb-local-init}) que carga, en orden, el esquema (\texttt{schema.sql}), los datos semilla (\texttt{seeds.sql}) y dos catálogos de referencia críticos para que el sistema funcione de punta a punta: \texttt{product-management-reference.sql} (categorías, marcas, IVA) y \texttt{inventario-movimientos-reference.sql} (tipos y subtipos de movimiento de inventario, cuya ausencia fue precisamente la causa raíz de un defecto de esta misma entrega, donde las recepciones de órdenes de compra no actualizaban el stock ni en el entorno local ni en AWS).
+    El sistema completo puede levantarse con \texttt{\seqsplit{docker compose up --build}} contra el clúster CockroachDB de AWS usando las credenciales por defecto embebidas en \texttt{docker-compose.yml}, pero esto ata cualquier prueba local a un recurso compartido por todo el equipo y a una base de datos que no se puede resetear libremente. Para resolver esto, \texttt{\seqsplit{docker-compose.override.yml}} --- que \texttt{docker compose} carga automáticamente junto al archivo principal, sin modificarlo --- añade un nodo CockroachDB local de un solo contenedor (\texttt{crdb-local}, modo \texttt{--insecure}, sin necesidad de certificados) y un segundo contenedor de inicialización (\texttt{crdb-local-init}) que carga, en orden, el esquema (\texttt{schema.sql}), los datos semilla (\texttt{seeds.sql}) y dos catálogos de referencia críticos para que el sistema funcione de punta a punta: \texttt{\seqsplit{product-management-reference.sql}} (categorías, marcas, IVA) y \texttt{\seqsplit{inventario-movimientos-reference.sql}} (tipos y subtipos de movimiento de inventario, cuya ausencia fue precisamente la causa raíz de un defecto de esta misma entrega, donde las recepciones de órdenes de compra no actualizaban el stock ni en el entorno local ni en AWS).
 
     Esta reproducibilidad tiene un límite honesto que se documenta aquí en vez de omitirse: los servicios Java no apuntan automáticamente a \texttt{crdb-local} por defecto, sino al clúster mTLS de AWS (Sección \ref{sec:persistencia-distribuida}); para usar el entorno local hay que sobrescribir la variable de entorno \texttt{CRDB\_DATASOURCE\_URL} antes de levantar los contenedores (por ejemplo, \texttt{\$env:CRDB\_DATASOURCE\_URL} en PowerShell), y esa variable es de alcance de sesión de terminal --- si se abre una pestaña nueva sin volver a definirla, los contenedores reconstruidos en esa pestaña vuelven a apuntar por defecto a AWS mientras el resto del stack sigue apuntando a \texttt{crdb-local}, produciendo un entorno mixto (\emph{split-brain}) difícil de diagnosticar. El equipo confirmó este comportamiento durante las pruebas de esta entrega. La reproducibilidad "desde cero" en una máquina limpia es alcanzable pero no todavía a prueba de error humano; formalizar la variable en un archivo \texttt{.env} versionado (con placeholder) en vez de exportarla manualmente por sesión queda como mejora concreta pendiente.
 
     % ============================================================
-    % 11. CONCLUSIONES Y TRABAJO FUTURO
+    % 11. CONCLUSIONES Y TRABAJO FUTURO -- responsable: EN CONJUNTO
+    % (Tabla 3: "Cierre del ciclo E1-E4") -- redactar al final
     % ============================================================
     \section{Conclusiones y trabajo futuro}
     \label{sec:conclusiones}
 
     \subsection{Cierre del ciclo E1--E4}
 
-    La Tabla \ref{tab:trazabilidad-e1e4} resume el aporte específico de cada entrega, construida a partir de la lectura directa de \texttt{docs/entrega1/entrega1.pdf}, \texttt{docs/entrega2/entrega2.pdf}, \texttt{docs/entrega3/PFC3.tex} y la evidencia técnica en \texttt{docs/evidencias/}.
+    La Tabla \ref{tab:trazabilidad-e1e4} resume el aporte específico de cada entrega, construida a partir de la lectura directa de \texttt{\seqsplit{docs/entrega1/entrega1.pdf}}, \texttt{\seqsplit{docs/entrega2/entrega2.pdf}}, \texttt{\seqsplit{docs/entrega3/PFC3.tex}} y la evidencia técnica en \texttt{docs/evidencias/}.
 
     \begin{table}[H]
         \centering
@@ -602,7 +618,7 @@ E4 (esta entrega) & Calidad, persistencia distribuida en producción y cierre & 
         \end{tabularx}
     \end{table}
 
-    Dos piezas de evidencia en \texttt{docs/evidencias/} documentan específicamente la transición entre el perfil experimental de E3 y el uso productivo de CockroachDB en E4: \texttt{integracion-pedidos-crdb.md} y \texttt{colision-serializable-controlada.md}, esta última relevante para el aislamiento \texttt{SERIALIZABLE} aplicado en \texttt{ordenes-proveedores-service} al enviar y cancelar órdenes de compra (Sección \ref{sec:arquitectura-sistema}).
+    Dos piezas de evidencia en \texttt{docs/evidencias/} documentan específicamente la transición entre el perfil experimental de E3 y el uso productivo de CockroachDB en E4: \texttt{\seqsplit{integracion-pedidos-crdb.md}} y \texttt{\seqsplit{colision-serializable-controlada.md}}, esta última relevante para el aislamiento \texttt{SERIALIZABLE} aplicado en \texttt{\seqsplit{ordenes-proveedores-service}} al enviar y cancelar órdenes de compra (Sección \ref{sec:arquitectura-sistema}).
 
     \subsection{Conclusiones}
 
@@ -612,7 +628,7 @@ E4 (esta entrega) & Calidad, persistencia distribuida en producción y cierre & 
 
     \subsection{Trabajo futuro}
 
-    Se declara explícitamente como trabajo pendiente, en orden de prioridad según \texttt{docs/plan-cierre-e4.md}: cerrar el contrato Pact web↔backend (Sección 7.2); escribir pruebas unitarias para \texttt{ordenes-proveedores-service} y \texttt{ventas-service} sobre la lógica de recepción, costeo y auto-desactivación (Sección 7.1); instrumentar observabilidad distribuida y, a partir de ella, ejecutar la evaluación ISO/IEC 25010 (Secciones \ref{sec:observabilidad} y \ref{sec:iso25010}); ampliar el pipeline de CI/CD a los siete jobs completos y migrar la publicación de imágenes de Docker Hub a GHCR (Sección 7.3); implementar internacionalización en la web (Sección 5.1); y formalizar la variable \texttt{CRDB\_DATASOURCE\_URL} del entorno local reproducible en un archivo \texttt{.env} versionado (Sección \ref{sec:reproducibilidad}).
+    Se declara explícitamente como trabajo pendiente, en orden de prioridad según \texttt{\seqsplit{docs/plan-cierre-e4.md}}: cerrar el contrato Pact web↔backend (Sección 7.2); escribir pruebas unitarias para \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service} sobre la lógica de recepción, costeo y auto-desactivación (Sección 7.1); instrumentar observabilidad distribuida y, a partir de ella, ejecutar la evaluación ISO/IEC 25010 (Secciones \ref{sec:observabilidad} y \ref{sec:iso25010}); ampliar el pipeline de CI/CD a los siete jobs completos y migrar la publicación de imágenes de Docker Hub a GHCR (Sección 7.3); implementar internacionalización en la web (Sección 5.1); y formalizar la variable \texttt{CRDB\_DATASOURCE\_URL} del entorno local reproducible en un archivo \texttt{.env} versionado (Sección \ref{sec:reproducibilidad}).
 
     % ============================================================
     % BIBLIOGRAFIA
