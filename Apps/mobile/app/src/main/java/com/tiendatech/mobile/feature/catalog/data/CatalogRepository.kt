@@ -21,15 +21,20 @@ class CatalogRepository @Inject constructor(
     private val productDao: ProductCacheDao,
     private val categoryDao: CategoryCacheDao
 ) {
+    companion object { const val PAGE_SIZE = 5 }
+
     fun observeCatalog(): Flow<CatalogSnapshot> = combine(
         productDao.observeEnabledProducts(), categoryDao.observeEnabledCategories()
     ) { products, categories ->
         CatalogSnapshot(products.map(CatalogMapper::domain), categories.map(CatalogMapper::domain))
     }
 
-    suspend fun refresh(): CatalogResult<Unit> = request {
+    suspend fun refresh(categoryId: Long? = null): CatalogResult<Boolean> = request {
         coroutineScope {
-            val productsCall = async { api.products() }
+            val productsCall = async {
+                if (categoryId == null) api.products(page = 0, size = PAGE_SIZE)
+                else api.productsByCategory(categoryId, page = 0, size = PAGE_SIZE)
+            }
             val categoriesCall = async { api.categories() }
             val productsResponse = productsCall.await()
             val categoriesResponse = categoriesCall.await()
@@ -41,15 +46,20 @@ class CatalogRepository @Inject constructor(
             productDao.upsertAll(products)
             categoryDao.clear()
             categoryDao.upsertAll(categories)
-            CatalogResult.Success(Unit)
+            CatalogResult.Success(products.size == PAGE_SIZE)
         }
     }
 
-    suspend fun loadCategory(category: Category): CatalogResult<Unit> = request {
-        val response = api.productsByCategory(category.id)
+    suspend fun loadNextPage(page: Int, categoryId: Long? = null): CatalogResult<Boolean> = request {
+        val response = if (categoryId == null) api.products(page, PAGE_SIZE)
+        else api.productsByCategory(categoryId, page, PAGE_SIZE)
         if (!response.isSuccessful) return@request failure(response.code())
-        productDao.upsertAll(response.body().orEmpty().mapNotNull { CatalogMapper.product(it, category) })
-        CatalogResult.Success(Unit)
+        val body = response.body().orEmpty()
+        val category = categoryId?.let { id ->
+            categoryDao.findById(id)?.let(CatalogMapper::domain)
+        }
+        productDao.upsertAll(body.mapNotNull { CatalogMapper.product(it, category) })
+        CatalogResult.Success(body.size == PAGE_SIZE)
     }
 
     suspend fun product(id: Long): CatalogResult<Product> = request {

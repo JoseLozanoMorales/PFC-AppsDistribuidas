@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -96,10 +97,13 @@ fun CatalogScreen(
             state.loading -> TiendaTechLoadingState("Cargando catálogo", Modifier.fillMaxSize())
             state.products.isEmpty() -> TiendaTechEmptyState(
                 title = "No encontramos productos",
-                message = if (state.query.isBlank()) "No hay productos disponibles en esta categoría" else "Prueba con otra búsqueda",
+                message = if (state.query.isBlank()) "No hay productos disponibles en esta categoría" else "El producto puede estar en la siguiente página",
                 modifier = Modifier.fillMaxSize(),
-                actionText = "Actualizar",
-                onAction = { viewModel.refresh() }
+                actionText = if (state.query.isNotBlank() && state.canLoadMore) "Buscar en más productos" else "Actualizar",
+                onAction = {
+                    if (state.query.isNotBlank() && state.canLoadMore) viewModel.loadNextPage()
+                    else viewModel.refresh()
+                }
             )
             else -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(160.dp),
@@ -109,7 +113,23 @@ fun CatalogScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 gridItems(state.products, key = { it.id }) { product -> ProductCard(product, onProduct) }
-                item { OutlinedButton(onClick = { viewModel.refresh() }, enabled = !state.refreshing, modifier = Modifier.fillMaxWidth()) { Text(if (state.refreshing) "Actualizando…" else "Actualizar catálogo") } }
+                if (state.canLoadMore || state.loadingMore) {
+                    item(key = "load-more") {
+                        LaunchedEffect(state.products.size, state.selectedCategoryId) {
+                            viewModel.loadNextPage()
+                        }
+                        OutlinedButton(
+                            onClick = viewModel::loadNextPage,
+                            enabled = !state.loadingMore,
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text(if (state.loadingMore) "Cargando más…" else "Cargar más") }
+                    }
+                }
+                item(key = "refresh") {
+                    OutlinedButton(onClick = { viewModel.refresh() }, enabled = !state.refreshing, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (state.refreshing) "Actualizando…" else "Actualizar catálogo")
+                    }
+                }
             }
         }
     }

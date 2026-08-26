@@ -9,13 +9,17 @@ import retrofit2.http.Query
 
 interface CatalogApi {
     @GET("api/productos")
-    suspend fun products(@Query("page") page: Int = 0, @Query("size") size: Int = 200): Response<List<ProductDto>>
+    suspend fun products(@Query("page") page: Int = 0, @Query("size") size: Int = 5): Response<List<ProductDto>>
 
     @GET("api/categorias")
     suspend fun categories(): Response<List<CategoryDto>>
 
     @GET("api/productos/por-categoria")
-    suspend fun productsByCategory(@Query("categoriaId") categoryId: Long): Response<List<ProductDto>>
+    suspend fun productsByCategory(
+        @Query("categoriaId") categoryId: Long,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 5
+    ): Response<List<ProductDto>>
 
     @GET("api/productos/{id}")
     suspend fun product(@Path("id") id: Long): Response<ProductDto>

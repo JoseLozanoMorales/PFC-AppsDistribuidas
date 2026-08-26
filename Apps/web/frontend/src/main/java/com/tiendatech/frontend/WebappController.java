@@ -34,7 +34,7 @@ public class WebappController {
     @GetMapping("/Armado.html")
     public RedirectView builder() { return new RedirectView("/app/#/armado"); }
 
-    @GetMapping({"/index.html", "/Busqueda.html"})
+    @GetMapping({"/", "/index.html", "/Busqueda.html"})
     public RedirectView catalog() { return new RedirectView("/app/#/"); }
 
     @GetMapping("/informacion_producto.html")

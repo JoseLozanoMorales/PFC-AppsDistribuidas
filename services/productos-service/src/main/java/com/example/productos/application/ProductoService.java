@@ -27,7 +27,7 @@ public class ProductoService {
     public MediaProducto galeriaContenido(Integer galeriaId) { return repository.galeriaContenido(galeriaId); }
     public List<Map<String, Object>> galeriaProducto(Integer productoId, String scope) { return repository.galeriaProducto(productoId, scope); }
     public List<Map<String, Object>> buscar(Map<String, Object> filtros) { return repository.buscar(filtros); }
-    public List<Map<String, Object>> porCategoria(Integer categoriaId) { return repository.porCategoria(categoriaId); }
+    public List<Map<String, Object>> porCategoria(Integer categoriaId, int page, int size) { return repository.porCategoria(categoriaId, page, size); }
     public Map<String, Object> detalle(Integer id) { return repository.detalle(id); }
     public Long crear(Integer categoriaId, Map<String, Object> body, String usuario) { return repository.crear(categoriaId, body, usuario); }
     public Long agregarImagen(Integer productoId, ImagenProducto imagen, String descripcion, boolean portada) { return repository.agregarImagen(productoId, imagen, descripcion, portada); }

@@ -11,6 +11,9 @@ interface CategoryCacheDao {
     @Query("SELECT * FROM cached_categories WHERE enabled = 1 ORDER BY name COLLATE NOCASE")
     fun observeEnabledCategories(): Flow<List<CategoryCacheEntity>>
 
+    @Query("SELECT * FROM cached_categories WHERE categoryId = :id LIMIT 1")
+    suspend fun findById(id: Long): CategoryCacheEntity?
+
     @Upsert
     suspend fun upsertAll(categories: List<CategoryCacheEntity>)
 

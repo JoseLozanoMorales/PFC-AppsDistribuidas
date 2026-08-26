@@ -14,7 +14,7 @@ public interface ProductoRepository {
     MediaProducto galeriaContenido(Integer galeriaId);
     List<Map<String, Object>> galeriaProducto(Integer productoId, String scope);
     List<Map<String, Object>> buscar(Map<String, Object> filtros);
-    List<Map<String, Object>> porCategoria(Integer categoriaId);
+    List<Map<String, Object>> porCategoria(Integer categoriaId, int page, int size);
     Map<String, Object> detalle(Integer id);
     Long crear(Integer categoriaId, Map<String, Object> body, String usuario);
     Long agregarImagen(Integer productoId, ImagenProducto imagen, String descripcion, boolean portada);

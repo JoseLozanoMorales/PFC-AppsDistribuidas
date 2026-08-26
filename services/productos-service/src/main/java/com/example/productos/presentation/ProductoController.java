@@ -154,8 +154,10 @@ public class ProductoController {
     }
 
     @GetMapping("/api/productos/por-categoria")
-    public List<Map<String, Object>> porCategoria(@RequestParam Integer categoriaId) {
-        return service.porCategoria(categoriaId);
+    public List<Map<String, Object>> porCategoria(@RequestParam Integer categoriaId,
+                                                  @RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "50") int size) {
+        return service.porCategoria(categoriaId, page, size);
     }
 
     @GetMapping("/api/productos/{id}")

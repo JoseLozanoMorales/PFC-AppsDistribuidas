@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +23,8 @@ data class CatalogUiState(
     val categories: List<Category> = emptyList(),
     val query: String = "",
     val selectedCategoryId: Long? = null,
+    val loadingMore: Boolean = false,
+    val canLoadMore: Boolean = true,
     val message: String? = null
 )
 
@@ -32,6 +35,7 @@ class CatalogViewModel @Inject constructor(
     private val query = MutableStateFlow("")
     private val selectedCategoryId = MutableStateFlow<Long?>(null)
     private val status = MutableStateFlow(CatalogStatus())
+    private var catalogRequest: Job? = null
     private val _state = MutableStateFlow(CatalogUiState())
     val state: StateFlow<CatalogUiState> = _state.asStateFlow()
 
@@ -49,6 +53,8 @@ class CatalogViewModel @Inject constructor(
                     categories = snapshot.categories,
                     query = search,
                     selectedCategoryId = categoryId,
+                    loadingMore = currentStatus.loadingMore,
+                    canLoadMore = currentStatus.canLoadMore,
                     message = currentStatus.message
                 )
             }.collect { _state.value = it }
@@ -60,31 +66,41 @@ class CatalogViewModel @Inject constructor(
 
     fun selectCategory(category: Category?) {
         selectedCategoryId.value = category?.id
-        if (category != null) viewModelScope.launch {
-            status.value = CatalogStatus(refreshing = true)
-            status.value = when (val result = repository.loadCategory(category)) {
-                is CatalogResult.Success -> CatalogStatus()
+        refresh(initial = true)
+    }
+
+    fun refresh(initial: Boolean = false) {
+        catalogRequest?.cancel()
+        catalogRequest = viewModelScope.launch {
+            status.value = CatalogStatus(loading = initial, refreshing = !initial)
+            status.value = when (val result = repository.refresh(selectedCategoryId.value)) {
+                is CatalogResult.Success -> CatalogStatus(canLoadMore = result.value, nextPage = 1)
                 is CatalogResult.Failure -> CatalogStatus(message = result.message)
             }
         }
     }
 
-    fun refresh(initial: Boolean = false) = viewModelScope.launch {
-        status.value = CatalogStatus(loading = initial, refreshing = !initial)
-        status.value = when (val result = repository.refresh()) {
-            is CatalogResult.Success -> {
-                val selected = selectedCategoryId.value
-                val category = _state.value.categories.firstOrNull { it.id == selected }
-                if (category != null) repository.loadCategory(category)
-                CatalogStatus()
+    fun loadNextPage() {
+        val current = status.value
+        if (current.loading || current.refreshing || current.loadingMore || !current.canLoadMore) return
+        catalogRequest = viewModelScope.launch {
+            status.value = current.copy(loadingMore = true, message = null)
+            status.value = when (val result = repository.loadNextPage(current.nextPage, selectedCategoryId.value)) {
+                is CatalogResult.Success -> CatalogStatus(
+                    canLoadMore = result.value,
+                    nextPage = current.nextPage + 1
+                )
+                is CatalogResult.Failure -> current.copy(loadingMore = false, message = result.message)
             }
-            is CatalogResult.Failure -> CatalogStatus(message = result.message)
         }
     }
 
     private data class CatalogStatus(
         val loading: Boolean = false,
         val refreshing: Boolean = false,
+        val loadingMore: Boolean = false,
+        val canLoadMore: Boolean = true,
+        val nextPage: Int = 0,
         val message: String? = null
     )
 }

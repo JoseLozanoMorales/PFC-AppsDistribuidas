@@ -41,6 +41,7 @@ public class JdbcProductoRepository implements ProductoRepository {
                         ORDER BY g.es_portada DESC, g.para_menu DESC,
                                  g.posicion_galeria, g.galeria_id LIMIT 1) AS galeria_id
                 from productos.producto p
+                where p.habilitado
                 order by producto_id
                 limit ? offset ?
                 """,
@@ -196,8 +197,12 @@ public class JdbcProductoRepository implements ProductoRepository {
         return jdbc.queryForList(sql.toString(), args.toArray());
     }
 
-    public List<Map<String, Object>> porCategoria(Integer categoriaId) {
-        return jdbc.queryForList(detalleSql() + " WHERE p.categoria_id = ? AND p.habilitado ORDER BY p.nombre", categoriaId);
+    public List<Map<String, Object>> porCategoria(Integer categoriaId, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 200);
+        return jdbc.queryForList(
+                detalleSql() + " WHERE p.categoria_id = ? AND p.habilitado ORDER BY p.nombre LIMIT ? OFFSET ?",
+                categoriaId, safeSize, safePage * safeSize);
     }
 
     public Map<String, Object> detalle(Integer id) {
