@@ -8,7 +8,7 @@
 ## Arranque reproducible
 
 ```powershell
-docker compose --profile e3-crdb up -d crdb-1 crdb-2 crdb-3 crdb-init
+docker compose --profile e3-crdb up -d tiendatech-crdb-1 tiendatech-crdb-2 tiendatech-crdb-3 tiendatech-crdb-init
 ```
 
 El perfil es deliberado: permite trabajar en la migración de E3 sin reemplazar
@@ -27,9 +27,9 @@ devolvió:
 
 | Nodo | Dirección | Versión | Localidad | Disponible | Vivo |
 |---:|---|---|---|---|---|
-| 1 | `crdb-1:26257` | v23.2.4 | `region=local,zone=z1` | true | true |
-| 2 | `crdb-2:26257` | v23.2.4 | `region=local,zone=z2` | true | true |
-| 3 | `crdb-3:26257` | v23.2.4 | `region=local,zone=z3` | true | true |
+| 1 | `tiendatech-crdb-1:26257` | v23.2.4 | `region=local,zone=z1` | true | true |
+| 2 | `tiendatech-crdb-2:26257` | v23.2.4 | `region=local,zone=z2` | true | true |
+| 3 | `tiendatech-crdb-3:26257` | v23.2.4 | `region=local,zone=z3` | true | true |
 
 ## Rangos y replicación
 
@@ -53,9 +53,9 @@ num_replicas = 3
 
 | Nodo | SQL | Consola web |
 |---|---:|---:|
-| crdb-1 | 26257 | 8091 |
-| crdb-2 | 26258 | 8092 |
-| crdb-3 | 26259 | 8093 |
+| tiendatech-crdb-1 | 26257 | 8091 |
+| tiendatech-crdb-2 | 26258 | 8092 |
+| tiendatech-crdb-3 | 26259 | 8093 |
 
 ## Interpretación
 

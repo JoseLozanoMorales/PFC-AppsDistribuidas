@@ -1,8 +1,9 @@
 services:
-  pedidos-crdb-service:
+  tiendatech-pedidos:
     build:
       context: services/pedidos-service
-    container_name: pedidos-crdb-service
+    image: tiendatech/pedidos:local
+    container_name: tiendatech-pedidos
     environment:
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
       SERVER_PORT: 8083
@@ -11,19 +12,19 @@ services:
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       CRDB_RETRY_MAX_ATTEMPTS: 3
       CRDB_RETRY_DELAY_MS: 100
-      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
-      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
+      VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
+      USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
     depends_on:
-      ventas-crdb-service:
+      tiendatech-ventas:
         condition: service_started
-      productos-crdb-service:
+      tiendatech-productos:
         condition: service_started
-      usuarios-crdb-service:
+      tiendatech-usuarios:
         condition: service_started
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
@@ -35,10 +36,11 @@ services:
       retries: 5
       start_period: 30s
 
-  productos-crdb-service:
+  tiendatech-productos:
     build:
       context: services/productos-service
-    container_name: productos-crdb-service
+    image: tiendatech/productos:local
+    container_name: tiendatech-productos
     environment:
       SERVER_PORT: 8081
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
@@ -46,34 +48,35 @@ services:
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
-  # armado-ia-service: sin datasource propio (servicio de calculo puro sobre
-  # el catalogo de productos-crdb-service via HTTP, no persiste nada). Las
+  # tiendatech-armado-ia: sin datasource propio (servicio de calculo puro sobre
+  # el catalogo de tiendatech-productos via HTTP, no persiste nada). Las
   # credenciales de AWS NUNCA van literales aqui: se pasan desde el .env del
   # host via ${VAR}; si faltan, el servicio sigue funcionando con el
   # fallback deterministico de explicacion (ver ExplicacionService).
-  armado-ia-service:
+  tiendatech-armado-ia:
     build:
       context: services/armado-ia
-    container_name: armado-ia-service
+    image: tiendatech/armado-ia:local
+    container_name: tiendatech-armado-ia
     environment:
       SERVER_PORT: 8087
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_REGION: ${AWS_REGION:-us-east-2}
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
     depends_on:
-      productos-crdb-service:
+      tiendatech-productos:
         condition: service_started
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8087/actuator/health"]
       interval: 10s
@@ -81,10 +84,11 @@ services:
       retries: 5
       start_period: 30s
 
-  inventario-crdb-service:
+  tiendatech-inventario:
     build:
       context: services/inventario-service
-    container_name: inventario-crdb-service
+    image: tiendatech/inventario:local
+    container_name: tiendatech-inventario
     environment:
       SERVER_PORT: 8082
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
@@ -92,28 +96,29 @@ services:
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
-  ventas-crdb-service:
+  tiendatech-ventas:
     build:
       context: services/ventas-service
-    container_name: ventas-crdb-service
+    image: tiendatech/ventas:local
+    container_name: tiendatech-ventas
     environment:
       SERVER_PORT: 8086
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     depends_on:
-      inventario-crdb-service:
+      tiendatech-inventario:
         condition: service_started
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
@@ -125,22 +130,23 @@ services:
       retries: 5
       start_period: 30s
 
-  ordenes-proveedores-crdb-service:
+  tiendatech-ordenes-proveedores:
     build:
       context: services/ordenes-proveedores-service
-    container_name: ordenes-proveedores-crdb-service
+    image: tiendatech/ordenes-proveedores:local
+    container_name: tiendatech-ordenes-proveedores
     environment:
       SERVER_PORT: 8084
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     depends_on:
-      inventario-crdb-service:
+      tiendatech-inventario:
         condition: service_started
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
@@ -152,10 +158,11 @@ services:
       retries: 5
       start_period: 30s
 
-  usuarios-crdb-service:
+  tiendatech-usuarios:
     build:
       context: services/usuarios
-    container_name: usuarios-crdb-service
+    image: tiendatech/usuarios:local
+    container_name: tiendatech-usuarios
     environment:
       SERVER_PORT: 8085
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
@@ -182,47 +189,49 @@ services:
       start_period: 30s
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
     volumes:
       - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
-  frontend-crdb:
+  tiendatech-gateway:
     build:
       context: Apps/web/frontend
-    container_name: frontend-crdb
+    image: tiendatech/gateway:local
+    container_name: tiendatech-gateway
     ports:
       - "0.0.0.0:8180:8080"
     environment:
       SERVER_PORT: 8080
-      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
-      PEDIDOS_SERVICE_URL: http://pedidos-crdb-service:8083
-      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-crdb-service:8084
-      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
-      ARMADO_IA_SERVICE_URL: http://armado-ia-service:8087
+      USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
+      PEDIDOS_SERVICE_URL: http://tiendatech-pedidos:8083
+      ORDENES_PROVEEDORES_SERVICE_URL: http://tiendatech-ordenes-proveedores:8084
+      VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
+      ARMADO_IA_SERVICE_URL: http://tiendatech-armado-ia:8087
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
     depends_on:
-      usuarios-crdb-service:
+      tiendatech-usuarios:
         condition: service_started
-      productos-crdb-service:
+      tiendatech-productos:
         condition: service_started
-      inventario-crdb-service:
+      tiendatech-inventario:
         condition: service_started
-      pedidos-crdb-service:
+      tiendatech-pedidos:
         condition: service_started
-      ordenes-proveedores-crdb-service:
+      tiendatech-ordenes-proveedores:
         condition: service_started
-      ventas-crdb-service:
+      tiendatech-ventas:
         condition: service_started
-      armado-ia-service:
+      tiendatech-armado-ia:
         condition: service_started
     networks:
       - default
-      - pfc-net
+      - tiendatech-net
 
 networks:
-  pfc-net:
+  tiendatech-net:
+    name: tiendatech-net
     driver: bridge

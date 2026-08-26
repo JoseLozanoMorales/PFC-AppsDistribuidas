@@ -87,7 +87,7 @@ Estas dependencias deben moverse a `productos` antes de retirar `public`.
 - El microservicio ya no depende de `public`, funciones ni procedimientos.
 - Lecturas, búsqueda, detalle, galería y CRUD básico funcionan contra
   CockroachDB.
-- Pedidos consulta ahora `productos-crdb-service` en el perfil distribuido.
+- Pedidos consulta ahora `tiendatech-productos` en el perfil distribuido.
 - Productos permaneció disponible durante la caída controlada de un nodo.
 
 ### Inventario
@@ -99,7 +99,7 @@ Estas dependencias deben moverse a `productos` antes de retirar `public`.
   el kardex dentro de una transacción serializable.
 - La prueba compensatoria de entrada y salida devolvió el stock al valor
   original y sus registros de auditoría temporales fueron eliminados.
-- Ventas consulta ahora `inventario-crdb-service` en el perfil distribuido.
+- Ventas consulta ahora `tiendatech-inventario` en el perfil distribuido.
 - Inventario permaneció disponible durante la caída controlada de un nodo.
 
 ### Órdenes a proveedores
@@ -123,7 +123,7 @@ Estas dependencias deben moverse a `productos` antes de retirar `public`.
 
 ### Frontend distribuido
 
-- `frontend-crdb` publica las interfaces en `http://localhost:8180`.
+- `tiendatech-gateway` publica las interfaces en `http://localhost:8180`.
 - Sus seis rutas apuntan exclusivamente a los servicios `*-crdb-service`.
 - Se validaron la página principal y los seis dominios con respuestas HTTP 200.
 - El contenedor `frontend` tradicional se conserva separado y sin cambios.

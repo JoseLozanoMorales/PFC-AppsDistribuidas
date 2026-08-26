@@ -2,7 +2,8 @@
 .env.*
 !.env.example
 
-.idea/
+.idea/*
+!.idea/TiendaTech.iml
 .vscode/
 
 .venv/

@@ -35,8 +35,7 @@ tiendatech:
 
 spring:
   application:
-    name: frontend
-
+    name: tiendatech-gateway
   http:
     clients:
       imperative:
@@ -46,7 +45,7 @@ spring:
         # contra CUALQUIER uri http://. Spring Cloud Gateway Server WebMVC
         # reusa este mismo RestClient.Builder autoconfigurado para el proxy de
         # TODAS las rutas (ver RestClientProxyExchange), asi que el intento de
-        # upgrade se manda tambien hacia armado-ia-service (uvicorn/FastAPI,
+        # upgrade se manda tambien hacia tiendatech-armado-ia (uvicorn/FastAPI,
         # HTTP/1.1 unicamente), que lo rechaza (400 "Unsupported upgrade
         # request") y pierde el body en el proceso. No hay forma de
         # configurar el cliente HTTP por ruta en esta version de Gateway MVC

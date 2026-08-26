@@ -3,7 +3,7 @@ param(
     [int]$Workers = 4,
     [int]$Repeticion = 1,
     [string]$Salida = "pyspark",
-    [string]$RedDocker = "pfc-appsdistribuidas_pfc-net"
+    [string]$RedDocker = "tiendatech-db-net"
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,7 +30,7 @@ docker run --rm `
     --jars /opt/jdbc/postgresql.jar `
     /workspace/spark/pipeline.py `
     --master "local[$Workers]" `
-    --jdbc-url "jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable" `
+    --jdbc-url "jdbc:postgresql://tiendatech-crdb-1:26257/tiendatech?sslmode=disable" `
     --jdbc-jar /opt/jdbc/postgresql.jar `
     --output $salidaContenedor `
     --run $Repeticion `

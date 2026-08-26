@@ -6,6 +6,7 @@
 **Docente:** Ing. Gleiston C. Guerrero-Ulloa, Mgs.
 **Período académico:** 2026-2027
 **Entrega vigente:** Entrega 4 (E4) — refactor en capas, calidad de software, aplicaciones cliente y persistencia distribuida con mTLS
+**Denominación anterior:** este repositorio se denominó `PFC-AppsDistribuidas` hasta la adopción de `TiendaTech` en la Entrega Final TA-PFC-E4; ambos nombres corresponden al mismo proyecto y equipo.
 **Rama de trabajo:** `main` (fusionada desde `feature/entrega-4` por PR con revisión cruzada)
 
 ## Equipo
@@ -43,7 +44,7 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 
 | Servicio | Puerto | Persistencia | Comunicación saliente |
 |---|---:|---|---|
-| `frontend-crdb` (API Gateway) | 8180 (host) / 8080 (interno) | — (enrutador) | Enruta a los 7 microservicios |
+| `tiendatech-gateway` (API Gateway) | 8180 (host) / 8080 (interno) | — (enrutador) | Enruta a los 7 microservicios |
 | `productos-service` | 8081 | CockroachDB (mTLS) | — |
 | `inventario-service` | 8082 | CockroachDB (mTLS) | — |
 | `pedidos-service` | 8083 | CockroachDB (mTLS) | `ventas-service`, `productos-service`, `usuarios-service` |
@@ -51,7 +52,7 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 | `usuarios-service` | 8085 | CockroachDB (mTLS) | — |
 | `ventas-service` | 8086 | CockroachDB (mTLS) | `inventario-service` (asíncrono, patrón Outbox) |
 | `armado-ia` (Python/FastAPI) | 8087 | — | `productos-service`, Amazon Bedrock (Nova Lite) |
-| `crdb-1` / `crdb-2` / `crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB, `num_replicas = 3`, mTLS | — |
+| `tiendatech-crdb-1` / `tiendatech-crdb-2` / `tiendatech-crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB, `num_replicas = 3`, mTLS | — |
 
 ---
 
@@ -70,8 +71,8 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 ## 3. Arranque rápido
 
 ```bash
-git clone <url-del-repositorio>
-cd PFC-AppsDistribuidas
+git clone https://github.com/JoseLozanoMorales/TiendaTech.git
+cd TiendaTech
 ```
 
 Copie `.env.example` a `.env` y complete los secretos locales (`.env` está excluido por `.gitignore`). La conexión por defecto apunta al clúster CockroachDB con mTLS (certificados en `./crdb-certs`); revise `.env.example` para las variables de autenticación, correo y AWS Bedrock.
@@ -79,7 +80,7 @@ Copie `.env.example` a `.env` y complete los secretos locales (`.env` está excl
 Levantar el stack completo (gateway + 7 microservicios + `armado-ia`):
 
 ```bash
-docker compose up -d --build frontend-crdb
+docker compose up -d --build tiendatech-gateway
 ```
 
 Para desarrollo local sin depender del clúster compartido, `docker-compose.override.yml` levanta un nodo CockroachDB local de un solo contenedor (`crdb-local`, modo `--insecure`) precargado con esquema, seeds y catálogos de referencia. Hay que sobrescribir `CRDB_DATASOURCE_URL` en la sesión de terminal antes de levantar los contenedores; ver `docs/entrega4/PFC4.tex` §"Reproducibilidad" para el procedimiento exacto y su limitación conocida (riesgo de entorno mixto si se abre una pestaña nueva sin redefinir la variable).

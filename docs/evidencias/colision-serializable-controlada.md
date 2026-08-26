@@ -1,7 +1,7 @@
 # Evidencia de reintento por colisión serializable
 
 - Fecha: 2026-07-28
-- Servicio: `pedidos-crdb-service`
+- Servicio: `tiendatech-pedidos`
 - Endpoint de prueba: `POST /api/crdb/retry-probe`
 - Aislamiento: `SERIALIZABLE`
 - SQLSTATE esperado: `40001`

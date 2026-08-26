@@ -36,8 +36,8 @@ cinco filas de `public` y sus tres detalles sí mantienen integridad referencial
 
 ## Validación funcional
 
-- `pedidos-crdb-service` conectado a `tiendatech_migracion`: salud `UP`.
-- `ventas-crdb-service` conectado a `tiendatech_migracion`: salud `UP`.
+- `tiendatech-pedidos` conectado a `tiendatech_migracion`: salud `UP`.
+- `tiendatech-ventas` conectado a `tiendatech_migracion`: salud `UP`.
 - `GET /api/ordenes`: 16 órdenes.
 - `GET /api/facturas`: 4 facturas.
 - `GET /api/metodopago/tipos`: 2 tipos.
@@ -50,13 +50,13 @@ cinco filas de `public` y sus tres detalles sí mantienen integridad referencial
 Los seis rangos físicos de `pedidos.orden` mostraron réplicas `{1,2,3}` y
 concesiones repartidas entre `z1`, `z2` y `z3`.
 
-Con `crdb-3` detenido:
+Con `tiendatech-crdb-3` detenido:
 
 - Pedidos devolvió las 16 órdenes.
 - Ventas devolvió las 4 facturas.
 - Métodos de pago devolvió los 2 tipos.
 
-Después de reincorporar `crdb-3`, los tres nodos volvieron a reportar
+Después de reincorporar `tiendatech-crdb-3`, los tres nodos volvieron a reportar
 `is_available=true` e `is_live=true`.
 
 ## Productos
@@ -75,8 +75,8 @@ Validaciones realizadas:
 - contenido binario: HTTP 200, 112.767 bytes;
 - creación, actualización de stock y desactivación por SQL portable;
 - eliminación física posterior de la fila creada para la prueba;
-- lectura de detalle y galería disponible con `crdb-2` detenido;
-- los tres nodos vivos después de reincorporar `crdb-2`.
+- lectura de detalle y galería disponible con `tiendatech-crdb-2` detenido;
+- los tres nodos vivos después de reincorporar `tiendatech-crdb-2`.
 
 ## Inventario
 
@@ -94,8 +94,8 @@ Validaciones realizadas:
 - entrada y salida compensatoria: stock inicial 299, stock final 299;
 - eliminación de los dos movimientos y kardex de prueba, recuperando los
   conteos originales;
-- con `crdb-3` detenido se conservaron el stock 299 y los 37 movimientos;
-- los tres nodos vivos después de reincorporar `crdb-3`.
+- con `tiendatech-crdb-3` detenido se conservaron el stock 299 y los 37 movimientos;
+- los tres nodos vivos después de reincorporar `tiendatech-crdb-3`.
 
 ## Órdenes a proveedores
 
@@ -106,7 +106,7 @@ los cinco estados del flujo original.
 Validaciones: 1 proveedor real importado; 0 órdenes y 0 detalles en el backup;
 salud `UP`; flujo crear, enviar y recibir en estado final `RECIBIDA`; subtotal
 12,00, IVA 1,80 y total 13,80; stock integrado 299 a 300; compensación y
-limpieza a 0 órdenes, stock 299 y costo 250. Con `crdb-2` detenido, el servicio
+limpieza a 0 órdenes, stock 299 y costo 250. Con `tiendatech-crdb-2` detenido, el servicio
 continuó `UP` y devolvió el proveedor; el nodo fue reincorporado después.
 
 ## Usuarios
@@ -117,7 +117,7 @@ Pedidos, Ventas y Órdenes a proveedores.
 
 El servicio quedó sin llamadas a procedimientos o funciones PostgreSQL.
 Lectura de perfil, catálogos, búsqueda, registro con BCrypt y login fueron
-validados. El usuario temporal se eliminó después de la prueba. Con `crdb-3`
+validados. El usuario temporal se eliminó después de la prueba. Con `tiendatech-crdb-3`
 detenido, el servicio continuó `UP` y leyó correctamente el usuario existente;
 el nodo fue reincorporado y los tres terminaron disponibles.
 

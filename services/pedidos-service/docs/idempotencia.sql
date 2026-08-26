@@ -1,10 +1,10 @@
 -- Idempotencia de POST /api/ordenes/checkout (pedidos-service)
 -- =============================================================
 --
--- ESTADO: el codigo (org.example.domain.IdempotenciaRepository y su
--- implementacion, org.example.application.OrdenService,
--- org.example.infrastructure.persistence.JdbcOrdenRepository,
--- org.example.presentation.OrdenController) ya implementa el soporte de
+-- ESTADO: el codigo (com.tiendatech.pedidos.domain.IdempotenciaRepository y su
+-- implementacion, com.tiendatech.pedidos.application.OrdenService,
+-- com.tiendatech.pedidos.infrastructure.persistence.JdbcOrdenRepository,
+-- com.tiendatech.pedidos.presentation.OrdenController) ya implementa el soporte de
 -- Idempotency-Key completo, pero esta APAGADO por defecto
 -- (pedidos.idempotencia.enabled=false) porque la tabla de abajo NO existe en
 -- docs/db/schema.sql (archivo compartido del equipo, fuera de esta carpeta).
@@ -12,7 +12,7 @@
 -- QUE FALTA PARA ACTIVARLO:
 --   1) Que el equipo integre el CREATE TABLE de abajo en docs/db/schema.sql
 --      (mismo lugar/estilo que inventario.solicitud_idempotente).
---   2) Aplicar el schema actualizado contra la base (crdb-init o el flujo que
+--   2) Aplicar el schema actualizado contra la base (tiendatech-crdb-init o el flujo que
 --      use el equipo para eso).
 --   3) Levantar pedidos-service con
 --      PEDIDOS_IDEMPOTENCIA_ENABLED=true (o pedidos.idempotencia.enabled=true

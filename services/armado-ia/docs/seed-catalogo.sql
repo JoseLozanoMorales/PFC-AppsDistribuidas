@@ -1,4 +1,4 @@
--- Seed de catalogo para probar armado-ia-service
+-- Seed de catalogo para probar tiendatech-armado-ia
 -- ================================================
 --
 -- productos.producto, categoria_producto, marca, iva y gama estan VACIAS en
@@ -8,7 +8,7 @@
 -- para levantar datos de prueba locales.
 --
 -- Como aplicarlo (perfil e3-crdb, servicio corriendo con
--- docker compose --profile e3-crdb up -d --build armado-ia-service):
+-- docker compose --profile e3-crdb up -d --build tiendatech-armado-ia):
 --
 --   docker exec -i tiendatech-crdb-1 cockroach sql --insecure \
 --       --host=localhost:26257 -d tiendatech \

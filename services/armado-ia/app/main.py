@@ -16,7 +16,7 @@ from app.security import IdentidadOpcional, identidad_opcional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s -- %(message)s")
 
-app = FastAPI(title="armado-ia-service")
+app = FastAPI(title="tiendatech-armado-ia")
 registrar_exception_handlers(app)
 
 # D6.1: expone /metrics con http_requests_total y http_request_duration_seconds

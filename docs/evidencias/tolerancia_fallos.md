@@ -24,10 +24,10 @@ de disponibilidad.
 
 1. Confirmar los tres nodos en ejecución.
 2. Ejecutar cinco repeticiones con los tres nodos disponibles.
-3. Detener abruptamente `crdb-2` con `docker kill`.
-4. Ejecutar cinco repeticiones conservando `crdb-1` y `crdb-3`.
-5. Reincorporar `crdb-2` y ejecutar cinco repeticiones.
-6. Detener simultáneamente `crdb-2` y `crdb-3`.
+3. Detener abruptamente `tiendatech-crdb-2` con `docker kill`.
+4. Ejecutar cinco repeticiones conservando `tiendatech-crdb-1` y `tiendatech-crdb-3`.
+5. Reincorporar `tiendatech-crdb-2` y ejecutar cinco repeticiones.
+6. Detener simultáneamente `tiendatech-crdb-2` y `tiendatech-crdb-3`.
 7. Ejecutar una consulta con un único nodo y timeout de ocho segundos.
 8. Restaurar los nodos y comprobar el estado final.
 
@@ -61,9 +61,9 @@ consistencia ante la pérdida de mayoría.
 Tras restaurar los nodos, `cockroach node status` confirmó nuevamente:
 
 ```text
-crdb-1  is_available=true  is_live=true
-crdb-2  is_available=true  is_live=true
-crdb-3  is_available=true  is_live=true
+tiendatech-crdb-1  is_available=true  is_live=true
+tiendatech-crdb-2  is_available=true  is_live=true
+tiendatech-crdb-3  is_available=true  is_live=true
 ```
 
 ## Limitaciones y evidencia pendiente

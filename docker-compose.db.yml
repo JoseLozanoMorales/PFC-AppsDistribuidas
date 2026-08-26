@@ -1,15 +1,15 @@
 services:
-  crdb-1:
+  tiendatech-crdb-1:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-1
     restart: unless-stopped
     command:
       - start
       - --insecure
-      - --advertise-addr=crdb-1:26257
+      - --advertise-addr=tiendatech-crdb-1:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
       - --locality=region=aws,zone=z1
       - --cache=64MiB
       - --max-sql-memory=64MiB
@@ -18,7 +18,7 @@ services:
       - "127.0.0.1:8091:8080"
     volumes:
       - crdb1-data:/cockroach/cockroach-data
-    networks: [crdb-net]
+    networks: [tiendatech-db-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
@@ -26,17 +26,17 @@ services:
       retries: 20
       start_period: 10s
 
-  crdb-2:
+  tiendatech-crdb-2:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-2
     restart: unless-stopped
     command:
       - start
       - --insecure
-      - --advertise-addr=crdb-2:26257
+      - --advertise-addr=tiendatech-crdb-2:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
       - --locality=region=aws,zone=z2
       - --cache=64MiB
       - --max-sql-memory=64MiB
@@ -45,7 +45,7 @@ services:
       - "127.0.0.1:8092:8080"
     volumes:
       - crdb2-data:/cockroach/cockroach-data
-    networks: [crdb-net]
+    networks: [tiendatech-db-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
@@ -53,17 +53,17 @@ services:
       retries: 20
       start_period: 10s
 
-  crdb-3:
+  tiendatech-crdb-3:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-3
     restart: unless-stopped
     command:
       - start
       - --insecure
-      - --advertise-addr=crdb-3:26257
+      - --advertise-addr=tiendatech-crdb-3:26257
       - --listen-addr=0.0.0.0:26257
       - --http-addr=0.0.0.0:8080
-      - --join=crdb-1:26257,crdb-2:26257,crdb-3:26257
+      - --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
       - --locality=region=aws,zone=z3
       - --cache=64MiB
       - --max-sql-memory=64MiB
@@ -72,7 +72,7 @@ services:
       - "127.0.0.1:8093:8080"
     volumes:
       - crdb3-data:/cockroach/cockroach-data
-    networks: [crdb-net]
+    networks: [tiendatech-db-net]
     healthcheck:
       test: ["CMD-SHELL", "cockroach sql --insecure --host=localhost:26257 -e 'SELECT 1' >/dev/null 2>&1"]
       interval: 5s
@@ -80,27 +80,27 @@ services:
       retries: 20
       start_period: 10s
 
-  crdb-init:
+  tiendatech-crdb-init:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-init
     depends_on:
-      crdb-1:
+      tiendatech-crdb-1:
         condition: service_started
-      crdb-2:
+      tiendatech-crdb-2:
         condition: service_started
-      crdb-3:
+      tiendatech-crdb-3:
         condition: service_started
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >
-        until cockroach sql --insecure --host=crdb-1:26257 -e "SELECT 1" >/dev/null 2>&1; do
-          cockroach init --insecure --host=crdb-1:26257 >/dev/null 2>&1 || true;
+        until cockroach sql --insecure --host=tiendatech-crdb-1:26257 -e "SELECT 1" >/dev/null 2>&1; do
+          cockroach init --insecure --host=tiendatech-crdb-1:26257 >/dev/null 2>&1 || true;
           sleep 2;
         done;
-        cockroach sql --insecure --host=crdb-1:26257 --file=/docs/db/schema.sql
+        cockroach sql --insecure --host=tiendatech-crdb-1:26257 --file=/docs/db/schema.sql
     volumes:
       - ./docs/db/schema.sql:/docs/db/schema.sql:ro
-    networks: [crdb-net]
+    networks: [tiendatech-db-net]
     restart: "no"
 
 volumes:
@@ -109,5 +109,6 @@ volumes:
   crdb3-data:
 
 networks:
-  crdb-net:
+  tiendatech-db-net:
+    name: tiendatech-db-net
     driver: bridge

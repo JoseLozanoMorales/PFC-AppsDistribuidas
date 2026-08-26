@@ -19,4 +19,4 @@ Vite abre la aplicación en `http://localhost:5173` y redirige las solicitudes `
 npm run build
 ```
 
-Los contenedores `frontend` y `frontend-crdb` ejecutan este paso automáticamente y empaquetan el resultado en la aplicación Spring Boot. En el entorno distribuido la interfaz queda disponible en `http://localhost:8180/app/`.
+Los contenedores `frontend` y `tiendatech-gateway` ejecutan este paso automáticamente y empaquetan el resultado en la aplicación Spring Boot. En el entorno distribuido la interfaz queda disponible en `http://localhost:8180/app/`.

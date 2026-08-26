@@ -12,7 +12,7 @@ x-service-defaults: &service-defaults
       max-size: "10m"
       max-file: "3"
   networks:
-    - backend
+    - tiendatech-net
 
 x-crdb-environment: &crdb-environment
   CRDB_DATASOURCE_URL: ${CRDB_DATASOURCE_URL:?CRDB_DATASOURCE_URL debe existir en .env}
@@ -27,7 +27,7 @@ x-crdb-volumes: &crdb-volumes
   - ${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro
 
 services:
-  productos-crdb-service:
+  tiendatech-productos:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:productos-${IMAGE_TAG:-latest}
     environment:
@@ -41,7 +41,7 @@ services:
       retries: 5
       start_period: 45s
 
-  inventario-crdb-service:
+  tiendatech-inventario:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:inventario-${IMAGE_TAG:-latest}
     environment:
@@ -55,16 +55,16 @@ services:
       retries: 5
       start_period: 45s
 
-  ventas-crdb-service:
+  tiendatech-ventas:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:ventas-${IMAGE_TAG:-latest}
     environment:
       <<: *crdb-environment
       SERVER_PORT: "8086"
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     volumes: *crdb-volumes
     depends_on:
-      inventario-crdb-service:
+      tiendatech-inventario:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8086/health"]
@@ -73,7 +73,7 @@ services:
       retries: 5
       start_period: 45s
 
-  usuarios-crdb-service:
+  tiendatech-usuarios:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:usuarios-${IMAGE_TAG:-latest}
     environment:
@@ -103,16 +103,16 @@ services:
       retries: 5
       start_period: 45s
 
-  ordenes-proveedores-crdb-service:
+  tiendatech-ordenes-proveedores:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:ordenes-proveedores-${IMAGE_TAG:-latest}
     environment:
       <<: *crdb-environment
       SERVER_PORT: "8084"
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     volumes: *crdb-volumes
     depends_on:
-      inventario-crdb-service:
+      tiendatech-inventario:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8084/actuator/health"]
@@ -121,19 +121,19 @@ services:
       retries: 5
       start_period: 45s
 
-  armado-ia-service:
+  tiendatech-armado-ia:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:armado-ia-${IMAGE_TAG:-latest}
     environment:
       SERVER_PORT: "8087"
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_REGION: ${AWS_REGION:-us-east-2}
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
     depends_on:
-      productos-crdb-service:
+      tiendatech-productos:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8087/actuator/health"]
@@ -142,23 +142,23 @@ services:
       retries: 5
       start_period: 30s
 
-  pedidos-crdb-service:
+  tiendatech-pedidos:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:pedidos-${IMAGE_TAG:-latest}
     environment:
       <<: *crdb-environment
       SERVER_PORT: "8083"
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
-      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
-      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
+      VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
+      USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
     volumes: *crdb-volumes
     depends_on:
-      ventas-crdb-service:
+      tiendatech-ventas:
         condition: service_healthy
-      productos-crdb-service:
+      tiendatech-productos:
         condition: service_healthy
-      usuarios-crdb-service:
+      tiendatech-usuarios:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/actuator/health"]
@@ -167,35 +167,35 @@ services:
       retries: 5
       start_period: 45s
 
-  frontend-crdb:
+  tiendatech-gateway:
     <<: *service-defaults
     image: ${DOCKERHUB_REPOSITORY:-josemoralito/tiendatech}:frontend-${IMAGE_TAG:-latest}
     environment:
       SERVER_PORT: "8080"
       SERVER_FORWARD_HEADERS_STRATEGY: framework
-      USUARIOS_SERVICE_URL: http://usuarios-crdb-service:8085
-      PRODUCTOS_SERVICE_URL: http://productos-crdb-service:8081
-      INVENTARIO_SERVICE_URL: http://inventario-crdb-service:8082
-      PEDIDOS_SERVICE_URL: http://pedidos-crdb-service:8083
-      ORDENES_PROVEEDORES_SERVICE_URL: http://ordenes-proveedores-crdb-service:8084
-      VENTAS_SERVICE_URL: http://ventas-crdb-service:8086
-      ARMADO_IA_SERVICE_URL: http://armado-ia-service:8087
+      USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
+      PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
+      INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
+      PEDIDOS_SERVICE_URL: http://tiendatech-pedidos:8083
+      ORDENES_PROVEEDORES_SERVICE_URL: http://tiendatech-ordenes-proveedores:8084
+      VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
+      ARMADO_IA_SERVICE_URL: http://tiendatech-armado-ia:8087
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
     depends_on:
-      pedidos-crdb-service:
+      tiendatech-pedidos:
         condition: service_healthy
-      ordenes-proveedores-crdb-service:
+      tiendatech-ordenes-proveedores:
         condition: service_healthy
-      armado-ia-service:
+      tiendatech-armado-ia:
         condition: service_healthy
     ports:
       - "${GATEWAY_BIND_ADDRESS:-0.0.0.0}:${GATEWAY_PORT:-8180}:8080"
 
-  caddy:
+  tiendatech-caddy:
     <<: *service-defaults
     image: caddy:2-alpine
     depends_on:
-      frontend-crdb:
+      tiendatech-gateway:
         condition: service_started
     ports:
       - "80:80"
@@ -207,7 +207,8 @@ services:
       - caddy-config:/config
 
 networks:
-  backend:
+  tiendatech-net:
+    name: tiendatech-net
     driver: bridge
 
 volumes:

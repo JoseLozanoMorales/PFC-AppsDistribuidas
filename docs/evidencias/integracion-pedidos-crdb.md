@@ -1,10 +1,10 @@
 # Integración del servicio Pedidos con CockroachDB
 
 - Fecha: 2026-07-28
-- Servicio: `pedidos-crdb-service`
+- Servicio: `tiendatech-pedidos`
 - Profile Spring: `crdb`
 - Puerto local: 8183
-- Cluster: `crdb-1`, `crdb-2`, `crdb-3`
+- Cluster: `tiendatech-crdb-1`, `tiendatech-crdb-2`, `tiendatech-crdb-3`
 
 ## Configuración
 
@@ -19,7 +19,7 @@ CRDB_DATASOURCE_PASSWORD
 La conexión utilizada en Compose fue:
 
 ```text
-jdbc:postgresql://crdb-1:26257/tiendatech?sslmode=disable
+jdbc:postgresql://tiendatech-crdb-1:26257/tiendatech?sslmode=disable
 ```
 
 El pool Hikari se configuró con aislamiento
@@ -135,7 +135,7 @@ POST /api/carrito/1/agregar        productoId=4, cantidad=1
 POST /api/ordenes/checkout         usuarioId=2, direccionId=8, metodopagoId=1
 ```
 
-Resultado devuelto por `pedidos-crdb-service`:
+Resultado devuelto por `tiendatech-pedidos`:
 
 ```json
 {

@@ -113,8 +113,8 @@ omisión:
   internos no vuelven a validar el JWT: el punto de confianza es el gateway
   y el aislamiento de la red Docker".
 - **El puerto de `armado-ia` no se publica al host.** Verificado en
-  `docker-compose.yml`: `armado-ia-service` no tiene bloque `ports:`, solo
-  pertenece a las redes `default` y `pfc-net`. La única forma de alcanzar
+  `docker-compose.yml`: `tiendatech-armado-ia` no tiene bloque `ports:`, solo
+  pertenece a las redes `default` y `tiendatech-net`. La única forma de alcanzar
   `/api/armado/analizar` desde fuera de la red Docker interna es a través
   del gateway, que ya filtró la petición antes de reenviarla.
 - **El servicio no persiste nada.** `armado-ia` es cómputo puro sobre el
@@ -133,7 +133,7 @@ omisión:
 Dado que no hay dato sensible que proteger y que el aislamiento de red ya
 impide el acceso directo, bloquear la petición cuando faltan las cabeceras
 añadiría una verificación redundante sin reducir superficie de ataque real:
-un cliente que pudiera llegar a `armado-ia-service:8087` sin pasar por el
+un cliente que pudiera llegar a `tiendatech-armado-ia:8087` sin pasar por el
 gateway también podría fabricar las cabeceras `X-User-*` que un chequeo
 "obligatorio" estaría validando, porque `armado-ia` no tiene forma
 independiente de verificar la firma del JWT sin duplicar el secreto y la
