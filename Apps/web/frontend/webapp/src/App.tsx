@@ -69,9 +69,19 @@ export default function App() {
       <div className="actions"><button className="icon-button" type="button" aria-label={dark ? 'Usar tema claro' : 'Usar tema oscuro'} onClick={toggleTheme}>{dark ? '☀' : '☾'}</button>{user ? <><Link className="text-button" to="/cuenta">{user.nombre || user.usuario || 'Mi cuenta'}</Link><button className="text-button" type="button" onClick={logout}>Salir</button></> : <Link className="button small" to="/login">Ingresar</Link>}</div>
     </header>
     <main><Routes>
-      <Route path="/" element={<CatalogView />} /><Route path="/login" element={<LoginView onSessionChanged={() => setUser(getUser())} />} /><Route path="/producto/:id" element={<ProductDetailView />} /><Route path="/carrito" element={<CartView />} />
-      <Route path="/admin" element={<AdminRoute><AdminView /></AdminRoute>} /><Route path="/armado" element={<BuilderView />} /><Route path="/registro" element={<RegisterView />} /><Route path="/recuperacion" element={<RecoveryView />} />
-      <Route path="/cuenta" element={<AccountView />} /><Route path="/pago" element={<CheckoutView />} /><Route path="/factura/:id?" element={<InvoiceView />} /><Route path="/trabajador" element={<WorkerView />} /><Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="/" element={<CatalogView />} />
+      <Route path="/login" element={<LoginView onSessionChanged={() => setUser(getUser())} />} />
+      <Route path="/producto/:id" element={<ProductDetailView />} />
+      <Route path="/carrito" element={<CartView />} />
+      <Route path="/admin" element={<AdminRoute><AdminView /></AdminRoute>} />
+      <Route path="/armado" element={<BuilderView />} />
+      <Route path="/registro" element={<RegisterView />} />
+      <Route path="/recuperacion" element={<RecoveryView />} />
+      <Route path="/cuenta" element={<AccountView />} />
+      <Route path="/pago" element={<CheckoutView />} />
+      <Route path="/factura/:id?" element={<InvoiceView />} />
+      <Route path="/trabajador" element={<WorkerView />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes></main>
     <footer>© 2026 TiendaTech · Arquitectura de microservicios</footer>
   </div>
