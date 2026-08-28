@@ -42,10 +42,10 @@ jobs:
             context: services/productos-service
             dockerfile: services/productos-service/Dockerfile
           - image: inventario
-            context: services/inventario-service
+            context: .
             dockerfile: services/inventario-service/Dockerfile
           - image: pedidos
-            context: services/pedidos-service
+            context: .
             dockerfile: services/pedidos-service/Dockerfile
           - image: ventas
             context: services/ventas-service
@@ -91,4 +91,3 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
           provenance: mode=max
-

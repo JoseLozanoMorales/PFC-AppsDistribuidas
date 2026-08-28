@@ -36,6 +36,7 @@ public class OrdenService {
     private final ObjectProvider<CrdbRetryPort> crdbRetryExecutor;
     private final Optional<IdempotenciaRepository> idempotenciaRepository;
     private final BusinessMetricsPort businessMetrics;
+    private CarritoService carritoService;
 
     @Autowired
     public OrdenService(OrdenRepository ordenRepository, FacturaPort facturaClient,
@@ -47,6 +48,11 @@ public class OrdenService {
         this.crdbRetryExecutor = crdbRetryExecutor;
         this.idempotenciaRepository = idempotenciaRepository;
         this.businessMetrics = businessMetrics;
+    }
+
+    @Autowired
+    public void configureCartReservations(CarritoService carritoService) {
+        this.carritoService = carritoService;
     }
 
     public PageResponse<Orden> listarOrdenes(Paginacion paginacion) {
@@ -81,6 +87,8 @@ public class OrdenService {
     //      orden -- es la semantica correcta de una idempotency key concurrente.
     public Orden generarOrdenDesdeCarrito(Integer usuarioId, Integer direccionId, Integer metodopagoId,
                                            String idempotencyKey) {
+        CarritoService.CartReservationSnapshot reservationSnapshot = carritoService == null
+                ? null : carritoService.snapshotForCheckout(usuarioId);
         IdempotenciaRepository repo = resolverRepositorioIdempotencia(idempotencyKey);
         String payloadHash = repo != null ? calcularPayloadHash(direccionId, metodopagoId) : null;
 
@@ -127,6 +135,7 @@ public class OrdenService {
         }
 
         businessMetrics.registrarCheckoutCompletado();
+        if (carritoService != null) carritoService.releaseAfterCheckout(reservationSnapshot);
         return orden;
     }
 

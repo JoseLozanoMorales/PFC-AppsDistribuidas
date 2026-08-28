@@ -84,7 +84,7 @@ spring:
             - id: inventario-api
               uri: ${INVENTARIO_SERVICE_URL:http://localhost:8082}
               predicates:
-                - Path=/api/movimientos,/api/subtipos-movimiento,/api/sp/movimiento-inventario
+                - Path=/api/movimientos,/api/subtipos-movimiento,/api/sp/movimiento-inventario,/api/reservas/**
 
             - id: pedidos-api
               uri: ${PEDIDOS_SERVICE_URL:http://localhost:8083}

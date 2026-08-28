@@ -83,8 +83,6 @@ Levantar el stack completo (gateway + 7 microservicios + `armado-ia`):
 docker compose up -d --build tiendatech-gateway
 ```
 
-Para desarrollo local sin depender del clúster compartido, `docker-compose.override.yml` levanta un nodo CockroachDB local de un solo contenedor (`crdb-local`, modo `--insecure`) precargado con esquema, seeds y catálogos de referencia. Hay que sobrescribir `CRDB_DATASOURCE_URL` en la sesión de terminal antes de levantar los contenedores; ver `docs/entrega4/PFC4.tex` §"Reproducibilidad" para el procedimiento exacto y su limitación conocida (riesgo de entorno mixto si se abre una pestaña nueva sin redefinir la variable).
-
 Comprobación:
 
 ```bash
@@ -174,3 +172,39 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 - Observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y evaluación ISO/IEC 25010: declaradas explícitamente fuera de alcance de esta entrega por restricción de tiempo del equipo — ver justificación completa en `docs/entrega4/PFC4.tex` §"Discusión".
 - Declaración de uso de IA generativa (Sección 7 de este README): pendiente de completar por el equipo.
 - Reproducibilidad local depende de sobrescribir `CRDB_DATASOURCE_URL` manualmente por sesión de terminal; riesgo de entorno mixto documentado en `docs/entrega4/PFC4.tex` §"Reproducibilidad".
+# Paso 3 — TCP, gRPC y relojes de Lamport
+
+El carrito reserva stock mediante un canal TCP persistente entre `pedidos-service`
+y `inventario-service`. Cada mensaje usa un encabezado de 4 bytes, entero sin
+signo en orden de red (big-endian), seguido por exactamente esa cantidad de bytes
+JSON. Tanto cliente como servidor leen en un ciclo (`readFully`); nunca asumen que
+un solo `recv` contiene el mensaje completo. Inventario publica la misma operación
+en gRPC para el experimento comparativo.
+
+El contrato fuente versionado es `contracts/stock_reservation.proto`. Maven genera
+Java dentro de `target/generated-sources/protobuf`, que está ignorado y no debe
+subirse. Para regenerar y compilar:
+
+```bash
+mvn -f services/inventario-service/pom.xml clean compile
+mvn -f services/pedidos-service/pom.xml clean compile
+```
+
+Los stubs Python del experimento también son temporales:
+
+```bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r experiments/requirements.txt
+sh experiments/generate_proto.sh
+python experiments/run_latency.py --host 127.0.0.1 \
+  --user-id 47 --product-id 4 --tcp-cart-id 1001 --grpc-cart-id 1002
+```
+
+El ejecutor usa `time.perf_counter()` y realiza 100 envíos por tecnología de
+forma predeterminada. Escribe cada observación en
+`experiments/data/latency_sockets.csv` y `latency_grpc.csv`, muestra media,
+mediana, desviación estándar y percentil 95, y genera
+`experiments/figures/latency_boxplot.png` a 300 DPI. Los identificadores deben
+existir en la base desplegada; los CSV incluidos solo contienen la cabecera hasta
+ejecutar el experimento real y no constituyen resultados fabricados.

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/carrito")
@@ -46,31 +47,36 @@ public class CarritoController {
     }
 
     @PostMapping("/{carritoId}/agregar")
-    public ResponseEntity<Void> agregarProducto(@PathVariable Integer carritoId, @RequestBody Map<String, Object> body,
+    public ResponseEntity<?> agregarProducto(@PathVariable Integer carritoId, @RequestBody Map<String, Object> body,
                                                  @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
         Integer productoId = (Integer) body.get("productoId");
         Integer cantidad = (Integer) body.get("cantidad");
-        carritoService.agregarProducto(carritoId, productoId, cantidad);
-        return ResponseEntity.noContent().build();
+        var result = carritoService.agregarProducto(carritoId, usuario.userId(), productoId, cantidad,
+                text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
+                text(body, "operationId", UUID.randomUUID().toString()));
+        return result.accepted() ? ResponseEntity.ok(result) : ResponseEntity.status(HttpStatus.CONFLICT).body(result);
     }
 
     @DeleteMapping("/{carritoId}/quitar/{productoId}")
     public ResponseEntity<Void> quitarProducto(@PathVariable Integer carritoId, @PathVariable Integer productoId,
                                                 @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
-        carritoService.quitarProducto(carritoId, productoId);
+        carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, 0,
+                "legacy-web", 0, UUID.randomUUID().toString());
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{carritoId}/actualizar/{productoId}")
-    public ResponseEntity<Void> actualizarCantidad(@PathVariable Integer carritoId, @PathVariable Integer productoId,
+    public ResponseEntity<?> actualizarCantidad(@PathVariable Integer carritoId, @PathVariable Integer productoId,
                                                     @RequestBody Map<String, Object> body,
                                                     @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
         Integer cantidad = (Integer) body.get("cantidad");
-        carritoService.actualizarCantidad(carritoId, productoId, cantidad);
-        return ResponseEntity.noContent().build();
+        var result = carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, cantidad,
+                text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
+                text(body, "operationId", UUID.randomUUID().toString()));
+        return result.accepted() ? ResponseEntity.ok(result) : ResponseEntity.status(HttpStatus.CONFLICT).body(result);
     }
 
     private void verificarPropioUsuario(Integer usuarioId, AuthenticatedUser usuario) {
@@ -84,5 +90,13 @@ public class CarritoController {
         if (carrito == null || !carrito.getUsuarioId().equals(usuario.userId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Carrito no encontrado");
         }
+    }
+
+    private static String text(Map<String, Object> body, String key, String fallback) {
+        Object value = body.get(key); return value == null || value.toString().isBlank() ? fallback : value.toString();
+    }
+
+    private static long number(Map<String, Object> body, String key, long fallback) {
+        Object value = body.get(key); return value instanceof Number number ? number.longValue() : fallback;
     }
 }

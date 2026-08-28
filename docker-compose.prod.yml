@@ -24,7 +24,7 @@ x-crdb-environment: &crdb-environment
   CRDB_POOL_MIN_IDLE: ${CRDB_POOL_MIN_IDLE:-2}
 
 x-crdb-volumes: &crdb-volumes
-  - ${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro
+  - "${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro"
 
 services:
   tiendatech-productos:
@@ -47,7 +47,12 @@ services:
     environment:
       <<: *crdb-environment
       SERVER_PORT: "8082"
+      RESERVATION_TCP_PORT: "9091"
+      RESERVATION_GRPC_PORT: "9092"
     volumes: *crdb-volumes
+    ports:
+      - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9091:9091"
+      - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9092:9092"
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8082/health"]
       interval: 15s
@@ -94,7 +99,7 @@ services:
       OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-false}
       APP_UPLOAD_ROOT: /app/uploads
     volumes:
-      - ${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro
+      - "${CRDB_CERTS_DIR:-./crdb-certs}:/app/crdb-certs:ro"
       - usuarios-uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
@@ -152,6 +157,8 @@ services:
       VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
+      RESERVATION_TCP_HOST: tiendatech-inventario
+      RESERVATION_TCP_PORT: "9091"
     volumes: *crdb-volumes
     depends_on:
       tiendatech-ventas:

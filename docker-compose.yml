@@ -1,7 +1,8 @@
 services:
   tiendatech-pedidos:
     build:
-      context: services/pedidos-service
+      context: .
+      dockerfile: services/pedidos-service/Dockerfile
     image: tiendatech/pedidos:local
     container_name: tiendatech-pedidos
     environment:
@@ -15,6 +16,8 @@ services:
       VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
+      RESERVATION_TCP_HOST: tiendatech-inventario
+      RESERVATION_TCP_PORT: 9091
     depends_on:
       tiendatech-ventas:
         condition: service_started
@@ -86,7 +89,8 @@ services:
 
   tiendatech-inventario:
     build:
-      context: services/inventario-service
+      context: .
+      dockerfile: services/inventario-service/Dockerfile
     image: tiendatech/inventario:local
     container_name: tiendatech-inventario
     environment:
@@ -94,6 +98,11 @@ services:
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
+      RESERVATION_TCP_PORT: 9091
+      RESERVATION_GRPC_PORT: 9092
+    ports:
+      - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9091:9091"
+      - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9092:9092"
     networks:
       - default
       - tiendatech-net
@@ -124,7 +133,7 @@ services:
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8086/actuator/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8086/health"]
       interval: 10s
       timeout: 3s
       retries: 5

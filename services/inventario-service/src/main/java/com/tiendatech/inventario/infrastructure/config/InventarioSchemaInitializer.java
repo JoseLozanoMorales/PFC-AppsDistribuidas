@@ -21,5 +21,31 @@ public class InventarioSchemaInitializer {
                     creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
                 )
                 """);
+        jdbc.execute("""
+                CREATE TABLE IF NOT EXISTS inventario.reserva_stock (
+                    carrito_id INT8 NOT NULL,
+                    producto_id INT8 NOT NULL,
+                    usuario_id INT8 NOT NULL,
+                    cantidad INT4 NOT NULL CHECK (cantidad >= 0),
+                    lamport INT8 NOT NULL,
+                    dispositivo_id VARCHAR(100) NOT NULL,
+                    actualizado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
+                    PRIMARY KEY (carrito_id, producto_id)
+                )
+                """);
+        jdbc.execute("""
+                CREATE TABLE IF NOT EXISTS inventario.operacion_reserva (
+                    operacion_id UUID PRIMARY KEY,
+                    carrito_id INT8 NOT NULL,
+                    producto_id INT8 NOT NULL,
+                    aceptada BOOL NOT NULL,
+                    cantidad_reservada INT4 NOT NULL,
+                    stock_disponible INT4 NOT NULL,
+                    lamport INT8 NOT NULL,
+                    dispositivo_ganador VARCHAR(100) NOT NULL,
+                    mensaje VARCHAR(300) NOT NULL,
+                    creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+                )
+                """);
     }
 }
