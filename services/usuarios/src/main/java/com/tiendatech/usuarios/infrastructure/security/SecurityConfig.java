@@ -34,7 +34,7 @@ public class SecurityConfig {
                                 "/css/**", "/js/**", "/img/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        .requestMatchers("/actuator/health", "/api/login", "/auth/refresh",
+                        .requestMatchers("/health", "/metrics", "/api/login", "/auth/refresh",
                                 "/auth/keepalive", "/auth/logout", "/api/otp/**",
                                 "/api/usuarios/crear", "/api/usuarios/recuperar-password",
                                 "/api/seguridad/cambiar-password-token").permitAll()
