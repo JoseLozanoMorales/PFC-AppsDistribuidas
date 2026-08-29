@@ -33,7 +33,7 @@ services:
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/actuator/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/health"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -161,7 +161,7 @@ services:
       - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
       - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8084/actuator/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8084/health"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -191,7 +191,7 @@ services:
       COOKIE_SECURE: "false"
       OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
     healthcheck:
-      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/actuator/health"]
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/health"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -240,7 +240,47 @@ services:
       - default
       - tiendatech-net
 
+  tiendatech-prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: tiendatech-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "0.0.0.0:9090:9090"
+    volumes:
+      - ./ops/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - tiendatech-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/-/healthy >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  tiendatech-alloy:
+    image: grafana/alloy:v1.10.2
+    container_name: tiendatech-alloy
+    profiles: ["grafana-cloud"]
+    command: ["run", "/etc/alloy/config.alloy"]
+    environment:
+      GRAFANA_CLOUD_PROM_URL: ${GRAFANA_CLOUD_PROM_URL:-}
+      GRAFANA_CLOUD_PROM_USERNAME: ${GRAFANA_CLOUD_PROM_USERNAME:-}
+      GRAFANA_CLOUD_API_KEY: ${GRAFANA_CLOUD_API_KEY:-}
+    volumes:
+      - ./ops/observability/alloy.config:/etc/alloy/config.alloy:ro
+    networks:
+      - tiendatech-net
+    depends_on:
+      tiendatech-prometheus:
+        condition: service_healthy
+
 networks:
   tiendatech-net:
     name: tiendatech-net
     driver: bridge
+
+volumes:
+  prometheus-data:
