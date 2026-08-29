@@ -561,6 +561,135 @@
 
     Además de las pruebas unitarias, \texttt{pedidos-service} incluye la única prueba de \textbf{integración} real con base de datos del backend: \texttt{\seqsplit{CockroachDbIntegrationTest}}, que levanta un contenedor \texttt{\seqsplit{cockroachdb/cockroach:v23.2.4}} real vía Testcontainers (\texttt{@Testcontainers}, \texttt{@Container}) en lugar de simular la base de datos. A esto se suma \texttt{\seqsplit{GatewayIntegrationTest}} (11 pruebas, 0 fallos), que levanta el API Gateway completo (\texttt{@SpringBootTest} con puerto aleatorio) contra tres backends simulados y verifica tres flujos reales atravesando el Gateway (catálogo de productos, ubicaciones/usuarios, creación de pedidos), más el rechazo con \texttt{401} sin token JWT en las ocho familias de rutas protegidas --- cumpliendo así el mínimo de tres flujos de integración por Gateway exigido por la rúbrica.
 
+    Los Listados \ref{lst:lamport-clock-test}--\ref{lst:gateway-integration-test} ilustran, con código real del repositorio, los tres niveles de la pirámide efectivamente presentes en el backend: prueba unitaria pura, prueba de integración con base de datos real y prueba de integración a través del API Gateway.
+
+    \begin{lstlisting}[style=codigo, language=Java, caption={Prueba unitaria pura, sin colaboradores externos (\texttt{inventario-service}).}, label={lst:lamport-clock-test}]
+package com.tiendatech.inventario.application.reservation;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LamportClockTest {
+    @Test
+    void avanzaElRelojAlMaximoEntreLocalYRemotoMasUno() {
+        var clock = new LamportClock();
+        assertEquals(0, clock.current());
+        assertEquals(6, clock.receive(5));
+        assertEquals(6, clock.current());
+        assertEquals(7, clock.receive(3));
+        assertEquals(7, clock.current());
+        assertEquals(20, clock.receive(19));
+        assertEquals(20, clock.current());
+    }
+}
+    \end{lstlisting}
+
+    \begin{lstlisting}[style=codigo, language=Java, caption={Prueba de integración con base de datos real vía Testcontainers (\texttt{pedidos-service}).}, label={lst:cockroachdb-integration-test}]
+package com.tiendatech.pedidos.integration;
+
+import org.junit.jupiter.api.Test;
+import org.testcontainers.cockroachdb.CockroachContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Testcontainers(disabledWithoutDocker = true)
+class CockroachDbIntegrationTest {
+
+    @Container
+    static final CockroachContainer cockroach =
+            new CockroachContainer("cockroachdb/cockroach:v23.2.4")
+                    .withDatabaseName("tiendatech_test");
+
+    @Test
+    void ejecutaTransaccionSerializableConDriverPostgresql() throws Exception {
+        try (Connection connection = DriverManager.getConnection(
+                cockroach.getJdbcUrl(),
+                cockroach.getUsername(),
+                cockroach.getPassword())) {
+            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            connection.setAutoCommit(false);
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("""
+                        CREATE TABLE pedido_prueba (
+                            fecha DATE NOT NULL,
+                            orden_id INT8 NOT NULL,
+                            total DECIMAL(18,2) NOT NULL,
+                            PRIMARY KEY (fecha, orden_id)
+                        )
+                        """);
+                statement.executeUpdate("""
+                        INSERT INTO pedido_prueba (fecha, orden_id, total)
+                        VALUES (DATE '2026-07-28', 1, 125.50)
+                        """);
+            }
+            connection.commit();
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet result = statement.executeQuery(
+                         "SELECT total FROM pedido_prueba WHERE orden_id = 1")) {
+                result.next();
+                assertEquals("125.50", result.getBigDecimal("total").toPlainString());
+            }
+        }
+    }
+}
+    \end{lstlisting}
+
+    \begin{lstlisting}[style=codigo, language=Java, caption={Extracto de la prueba de integración a través del API Gateway (\texttt{Apps/web/frontend}); se omiten por brevedad los métodos auxiliares que levantan los backends simulados.}, label={lst:gateway-integration-test}]
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class GatewayIntegrationTest {
+    private static final String SECRET = "TiendaTechDistribuidaJwtSecretKey2026Seguro";
+    private static final HttpServer PRODUCTOS = server("/api/productos/10", "{\"servicio\":\"productos\",\"id\":10}");
+    private static final HttpServer USUARIOS = server("/api/provincias", "[{\"id\":1,\"nombre\":\"Guayas\"}]");
+    private static final HttpServer PEDIDOS = server("/api/ordenes", "{\"servicio\":\"pedidos\",\"creada\":true}");
+
+    @LocalServerPort int gatewayPort;
+
+    @DynamicPropertySource
+    static void backends(DynamicPropertyRegistry registry) {
+        registry.add("tiendatech.security.jwt.secret", () -> SECRET);
+        registry.add("PRODUCTOS_SERVICE_URL", () -> url(PRODUCTOS));
+        registry.add("USUARIOS_SERVICE_URL", () -> url(USUARIOS));
+        registry.add("PEDIDOS_SERVICE_URL", () -> url(PEDIDOS));
+        registry.add("tiendatech.security.jwt.public-read-paths", () -> "/api/productos/**,/api/provincias/**");
+    }
+
+    @Test void flujoCatalogoAtraviesaGatewayHastaProductos() throws Exception {
+        var response = get("/api/productos/10");
+        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("productos"));
+    }
+
+    @Test void flujoUbicacionesAtraviesaGatewayHastaUsuarios() throws Exception {
+        var response = get("/api/provincias");
+        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("Guayas"));
+    }
+
+    @Test void flujoPedidosAtraviesaGatewayHastaElMicroservicio() throws Exception {
+        var response = get("/api/ordenes", token());
+        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("creada"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/api/usuarios/buscar", "/api/movimientos", "/api/carrito/1",
+            "/api/ordenes", "/api/proveedores", "/api/ordenes-compra",
+            "/api/facturas/1", "/api/armado/recomendar"
+    })
+    void todaFamiliaProtegidaRechazaSolicitudSinToken(String path) throws Exception {
+        assertEquals(401, get(path).statusCode(), path);
+    }
+    // ... helpers de infraestructura de prueba (get, token, gateway, server, respond) omitidos
+}
+    \end{lstlisting}
+
     No existe una carpeta \texttt{tests/} en la raíz del repositorio, por lo que tampoco hay pruebas end-to-end de la web con Playwright ni pruebas de carga con Locust; esta última queda como paso inmediato siguiente, al ser un insumo compartido con la evaluación ISO/IEC 25010 (Sección \ref{sec:iso25010}). La aplicación móvil sí cierra su propia pirámide de forma más completa, con pruebas unitarias y pruebas instrumentadas (detalladas en la Sección 6.2).
 
     \subsection{Contratos de consumidor Pact (D4.1)}
@@ -572,6 +701,195 @@
     El repositorio incorporó en este ciclo un segundo workflow de GitHub Actions, \texttt{\seqsplit{.github/workflows/ci-cd.yml}} (\emph{CI-CD quality gate}), que corre en cada \emph{push} y \emph{pull request} contra \texttt{main} (además de \texttt{workflow\_dispatch} manual), con \texttt{concurrency} configurado para cancelar ejecuciones obsoletas del mismo \emph{ref}. Define seis jobs: \texttt{test-java} (matriz sobre los seis microservicios, ejecuta \texttt{mvn clean test} y aplica el gate de JaCoCo de la Tabla \ref{tab:cobertura-e4}), \texttt{test-python} (\texttt{pytest} con cobertura sobre \texttt{armado-ia}), \texttt{lint} (compilación de los seis servicios Java, \texttt{ruff} sobre \texttt{armado-ia} y build de TypeScript sobre la SPA), \texttt{integration-test} (\texttt{\seqsplit{GatewayIntegrationTest}} y \texttt{\seqsplit{CockroachDbIntegrationTest}}), \texttt{build} (matriz de \texttt{docker/build-push-action} que construye, sin publicar, las ocho imágenes del sistema con cacheo \texttt{type=gha}) y \texttt{coverage} (publica los reportes XML de JaCoCo y \texttt{pytest-cov} a Codecov). El job \texttt{build} depende explícitamente de que \texttt{test-java}, \texttt{test-python}, \texttt{lint} e \texttt{integration-test} hayan pasado (\texttt{needs}), de modo que no se construye ninguna imagen sobre código que no haya superado su quality gate. El workflow \texttt{\seqsplit{.github/workflows/ci.yml}} original se mantiene activo en paralelo (jobs \texttt{android-mobile}, \texttt{crdb-tests}, \texttt{armado-ia-tests}); su consolidación con \texttt{ci-cd.yml} en un único pipeline queda pendiente como limpieza técnica, declarada aquí en vez de resuelta en silencio.
 
     Comparado contra los siete jobs que exige la rúbrica (\texttt{\seqsplit{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}}), el pipeline vigente cubre ahora \texttt{test-backend} (\texttt{test-java}, sobre los seis servicios y no solo \texttt{pedidos-service}), \texttt{integration} (\texttt{integration-test}, con dos flujos --- Gateway y base de datos --- en vez de uno), \texttt{build-images} (job \texttt{build} de \texttt{ci-cd.yml}, además de \texttt{publish-images.yml}), \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}, sin cambios respecto de la entrega anterior), y \texttt{lint} de forma parcial (compilación Java y \texttt{ruff} sí corren; no hay un linter de estilo dedicado tipo Checkstyle/ESLint, solo un build de TypeScript). Sigue sin job dedicado \texttt{test-web}, porque, como se documentó en la Sección 5.2, la SPA no tiene ningún framework de pruebas configurado. Como en la entrega anterior, \texttt{publish-images.yml} publica en Docker Hub y no en GHCR; el resultado funcional es equivalente.
+
+    La guía específica del Paso 2 (\emph{Pipeline CI/CD con GitHub Actions}) describe la misma exigencia con una nomenclatura más compacta, de cuatro jobs: \texttt{test} (ejecuta pruebas y cobertura), \texttt{lint} (análisis estático), \texttt{build} (construye la imagen Docker) e \texttt{integration-test} (levanta el entorno y ejecuta las pruebas de integración). La correspondencia con los seis jobs reales de \texttt{ci-cd.yml} es directa: \texttt{test} $\to$ \texttt{test-java} + \texttt{test-python} + \texttt{coverage} (pruebas y cobertura de los seis servicios Java y de \texttt{armado-ia}, con la publicación del reporte incluida); \texttt{lint}, \texttt{build} e \texttt{integration-test} conservan el mismo nombre. Se optó por mantener la separación en seis jobs --- en vez de fusionar \texttt{test-java}, \texttt{test-python} y \texttt{coverage} hasta calcar un único job \texttt{test} --- porque el pipeline ya estaba probado y en verde con esta estructura; fusionarlos habría exigido volver a validar el pipeline completo bajo la misma restricción de tiempo documentada en la Discusión (Sección \ref{sec:discusion}), a cambio de un beneficio puramente nominal. El Listado \ref{lst:ci-cd-yaml} reproduce el archivo completo tal como quedó configurado y verificado en verde.
+
+    \begin{lstlisting}[style=yamlStyle, language=yaml, caption={Archivo completo \texttt{.github/workflows/ci-cd.yml}.}, label={lst:ci-cd-yaml}]
+name: CI-CD quality gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-java:
+    name: Test ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - inventario-service
+          - productos-service
+          - ordenes-proveedores-service
+          - ventas-service
+          - pedidos-service
+          - usuarios
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: services/${{ matrix.service }}/pom.xml
+      - name: Unit tests and JaCoCo quality gate
+        working-directory: services/${{ matrix.service }}
+        run: mvn --batch-mode --no-transfer-progress clean test
+      - name: Preserve test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.service }}
+          path: |
+            services/${{ matrix.service }}/target/surefire-reports/
+            services/${{ matrix.service }}/target/site/jacoco/jacoco.xml
+          if-no-files-found: warn
+
+  test-python:
+    name: Test armado-ia
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            services/armado-ia/requirements.txt
+            services/armado-ia/requirements-dev.txt
+      - name: Install dependencies
+        working-directory: services/armado-ia
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Unit tests and coverage gate
+        working-directory: services/armado-ia
+        run: python -m pytest --junitxml=pytest-junit.xml --cov=app.domain --cov=app.explicacion --cov-report=xml:coverage.xml --cov-fail-under=70
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-armado-ia
+          path: |
+            services/armado-ia/pytest-junit.xml
+            services/armado-ia/coverage.xml
+          if-no-files-found: warn
+
+  lint:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/armado-ia/requirements-dev.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Apps/web/frontend/webapp/package-lock.json
+      - name: Check Java compilation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in inventario-service productos-service ordenes-proveedores-service ventas-service pedidos-service usuarios; do
+            mvn -q -f "services/$service/pom.xml" -DskipTests compile
+          done
+      - name: Ruff static analysis
+        working-directory: services/armado-ia
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+          python -m ruff check app tests
+      - name: TypeScript static analysis
+        working-directory: Apps/web/frontend/webapp
+        run: |
+          npm ci
+          npm run build
+
+  integration-test:
+    name: Gateway and CockroachDB integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Three flows through API Gateway
+        working-directory: Apps/web/frontend
+        run: mvn --batch-mode --no-transfer-progress -Dtest=GatewayIntegrationTest test
+      - name: CockroachDB integration through Testcontainers
+        working-directory: services/pedidos-service
+        run: mvn --batch-mode --no-transfer-progress -Dtest=CockroachDbIntegrationTest -Djacoco.skip=true test
+
+  build:
+    name: Build image ${{ matrix.image }}
+    needs: [test-java, test-python, lint, integration-test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: gateway, context: Apps/web/frontend, dockerfile: Apps/web/frontend/Dockerfile }
+          - { image: usuarios, context: services/usuarios, dockerfile: services/usuarios/Dockerfile }
+          - { image: productos, context: services/productos-service, dockerfile: services/productos-service/Dockerfile }
+          - { image: inventario, context: ., dockerfile: services/inventario-service/Dockerfile }
+          - { image: pedidos, context: ., dockerfile: services/pedidos-service/Dockerfile }
+          - { image: ordenes-proveedores, context: services/ordenes-proveedores-service, dockerfile: services/ordenes-proveedores-service/Dockerfile }
+          - { image: ventas, context: services/ventas-service, dockerfile: services/ventas-service/Dockerfile }
+          - { image: armado-ia, context: services/armado-ia, dockerfile: services/armado-ia/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build without publishing
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: tiendatech/${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  coverage:
+    name: Publish coverage
+    needs: [test-java, test-python]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: reports-*
+          path: reports
+          merge-multiple: false
+      - name: Upload XML reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: reports
+          fail_ci_if_error: false
+          verbose: true
+    \end{lstlisting}
 
     % ============================================================
     % 8. OBSERVABILIDAD -- Dimension D6. Declarada fuera de alcance.
