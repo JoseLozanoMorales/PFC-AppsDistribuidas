@@ -1,11 +1,11 @@
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI
-from prometheus_fastapi_instrumentator import Instrumentator
 from prometheus_client import Counter, Gauge, Histogram
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app import armado_service
 from app.clients.producto_client import estado_circuit_breaker
@@ -18,10 +18,11 @@ from app.explicacion.service import ExplicacionService
 from app.schemas import AnalizarRequest, AnalizarResponse
 from app.security import IdentidadOpcional, identidad_opcional
 
+
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         payload = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "service": "tiendatech-armado-ia",
             "logger": record.name,
