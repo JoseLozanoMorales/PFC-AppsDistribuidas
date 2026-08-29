@@ -1,0 +1,50 @@
+services:
+  # CockroachDB local de un solo nodo, solo para pruebas manuales sin tocar
+  # la BD en AWS. docker compose carga este archivo automaticamente junto
+  # al docker-compose.yml original (no lo modifica).
+  crdb-local:
+    image: cockroachdb/cockroach:v23.1.13
+    container_name: crdb-local
+    command: start-single-node --insecure
+    ports:
+      - "26257:26257"
+      - "8091:8080"
+    volumes:
+      - crdb-local-data:/cockroach/cockroach-data
+    healthcheck:
+      test: ["CMD", "cockroach", "sql", "--insecure", "-e", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - default
+
+  # Carga schema.sql + seeds.sql una sola vez contra crdb-local y termina.
+  # Se puede volver a correr cuando quieras resetear los datos de prueba
+  # (borra el volumen crdb-local-data primero con: docker compose down -v crdb-local).
+  crdb-local-init:
+    image: cockroachdb/cockroach:v23.1.13
+    container_name: crdb-local-init
+    depends_on:
+      crdb-local:
+        condition: service_healthy
+    volumes:
+      - ./docs/db/schema.sql:/schema.sql:ro
+      - ./docs/db/seeds.sql:/seeds.sql:ro
+      - ./docs/db/product-management-reference.sql:/reference.sql:ro
+      - ./docs/db/inventario-movimientos-reference.sql:/inventario-reference.sql:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "cockroach sql --insecure --host=crdb-local:26257 -e 'CREATE DATABASE IF NOT EXISTS tiendatech' &&
+       cockroach sql --insecure --host=crdb-local:26257 -d tiendatech --file=/schema.sql &&
+       cockroach sql --insecure --host=crdb-local:26257 -d tiendatech --file=/seeds.sql &&
+       cockroach sql --insecure --host=crdb-local:26257 -d tiendatech --file=/reference.sql &&
+       cockroach sql --insecure --host=crdb-local:26257 -d tiendatech --file=/inventario-reference.sql &&
+       echo 'schema + seeds + catalogos locales cargados OK'"
+    networks:
+      - default
+    restart: "no"
+
+volumes:
+  crdb-local-data:

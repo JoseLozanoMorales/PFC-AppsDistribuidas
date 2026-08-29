@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>TiendaTech — Arquitectura interna: ordenes-proveedores-service y ventas-service</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1f2937;
+    line-height: 1.5;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  h1 { font-size: 22px; border-bottom: 3px solid #1565C0; padding-bottom: 8px; }
+  h2 { font-size: 18px; color: #1565C0; margin-top: 36px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; page-break-before: always;}
+  h2.first { page-break-before: avoid; }
+  h3 { font-size: 15px; color: #0d47a1; margin-top: 22px; }
+  p { font-size: 13px; }
+  .subtitle { color: #555; font-size: 13px; margin-top: -6px; }
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    overflow-x: auto;
+    line-height: 1.4;
+  }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 12px; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #E3F2FD; color: #0d47a1; }
+  tr:nth-child(even) { background: #f8fafc; }
+  .badge {
+    display: inline-block;
+    background: #C2185B;
+    color: white;
+    font-size: 10.5px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .conexion {
+    background: #FFF3E0;
+    border-left: 4px solid #E65100;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 12.5px;
+  }
+  .conexion b { color: #E65100; }
+  .flow {
+    background: #ECEFF1;
+    border-left: 4px solid #546E7A;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 12.5px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    white-space: pre-wrap;
+  }
+  .puerto { color: #6a1b9a; font-weight: bold; }
+  .capa-domain { color: #2e7d32; }
+  .capa-app { color: #1565C0; }
+  .capa-infra { color: #C2185B; }
+  .capa-pres { color: #E65100; }
+  .footer { margin-top: 40px; font-size: 11px; color: #888; border-top: 1px solid #ddd; padding-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Arquitectura interna de mis microservicios</h1>
+<p class="subtitle">ordenes-proveedores-service (puerto 8084) y ventas-service (puerto 8086) — TiendaTech, Entrega 4</p>
+<p>Este documento detalla, carpeta por carpeta y clase por clase, cómo está organizado cada microservicio bajo el patrón de arquitectura en capas (domain / application / infrastructure / presentation), y señala <b>exactamente en qué clase y en qué método</b> ocurre la comunicación con el otro microservicio del que dependen ambos: <b>inventario-service</b> (puerto 8082).</p>
+
+<h2 class="first">1. ordenes-proveedores-service</h2>
+<p>Gestiona proveedores y órdenes de compra. Se comunica con inventario-service para registrar las <b>entradas de stock</b> cuando se confirma la recepción de una orden.</p>
+
+<pre>services/ordenes-proveedores-service/src/main/java/org/example/
+├── domain/
+│   ├── OrdenCompra.java
+│   ├── DetalleOrdenCompra.java
+│   ├── EstadoOrdenCompra.java          (enum)
+│   ├── Proveedor.java
+│   ├── OrdenCompraRepository.java       (puerto)
+│   ├── ProveedorRepository.java         (puerto)
+│   └── InventarioPort.java              (puerto → OTRO MICROSERVICIO)
+├── application/
+│   ├── OrdenCompraService.java          (⭐ dispara la conexión)
+│   └── ProveedorService.java
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── JdbcOrdenCompraRepository.java
+│   │   └── JdbcProveedorRepository.java
+│   ├── config/
+│   │   ├── WebConfig.java
+│   │   └── PgErrorMapper.java
+│   └── client/
+│       └── InventarioClient.java        (⭐⭐ CONEXIÓN REAL, HTTP)
+└── presentation/
+    ├── OrdenCompraController.java
+    ├── ProveedorController.java
+    ├── ApiExceptionHandler.java
+    └── dto/ (7 clases: requests y responses)</pre>
+
+<h3>Carpeta <code>domain/</code> — entidades y contratos, sin dependencias externas</h3>
+<table>
+<tr><th>Clase</th><th>Qué es</th><th>Rol</th></tr>
+<tr><td><code>OrdenCompra</code>, <code>DetalleOrdenCompra</code>, <code>Proveedor</code></td><td>POJOs</td><td>Representan los datos de negocio, sin lógica.</td></tr>
+<tr><td><code>EstadoOrdenCompra</code></td><td>enum</td><td>PENDIENTE, ENVIADA, RECIBIDA_PARCIAL, RECIBIDA, CANCELADA.</td></tr>
+<tr><td><code>OrdenCompraRepository</code>, <code>ProveedorRepository</code></td><td>interfaces (puerto)</td><td>Contrato de persistencia; la implementación real vive en <code>infrastructure/persistence</code>.</td></tr>
+<tr><td><code>InventarioPort</code></td><td>interface (puerto de salida)</td><td><b>Define la abstracción de la conexión con inventario-service</b>: el método <code>registrarEntradasPorRecepcion(...)</code>. El dominio solo conoce esta interfaz, nunca sabe que por debajo hay una llamada HTTP.</td></tr>
+</table>
+
+<h3>Carpeta <code>application/</code> — orquestación de casos de uso</h3>
+<div class="conexion">
+<b>Punto de conexión #1 — clase <code>OrdenCompraService</code>, método <code>registrarRecepcion()</code> (líneas 48–58).</b><br>
+Cuando el controller confirma la recepción de una orden, este método primero guarda la recepción en la propia base de datos (<code>ordenCompraRepository.registrarRecepcion(...)</code>) y luego, en el mismo método, invoca <code>inventarioClient.registrarEntradasPorRecepcion(ordenCompraId, recepcionPorProducto, costosPorProducto, usuario)</code> — pero <code>inventarioClient</code> aquí es de tipo <code>InventarioPort</code> (la interfaz), no la clase concreta. Si esa llamada falla, envuelve la excepción explicando que la recepción sí quedó confirmada pero el stock no se actualizó.
+</div>
+<p><code>ProveedorService</code> no tiene ninguna conexión externa: solo delega en <code>ProveedorRepository</code>.</p>
+
+<h3>Carpeta <code>infrastructure/</code> — adaptadores técnicos</h3>
+<table>
+<tr><th>Subcarpeta</th><th>Clase</th><th>Rol</th></tr>
+<tr><td>persistence/</td><td><code>JdbcOrdenCompraRepository</code>, <code>JdbcProveedorRepository</code></td><td>Implementan los puertos de persistencia contra CockroachDB (JdbcTemplate, SQL crudo). Sin conexión a otros microservicios.</td></tr>
+<tr><td>config/</td><td><code>WebConfig</code></td><td>Habilita CORS para el API Gateway/frontend.</td></tr>
+<tr><td>config/</td><td><code>PgErrorMapper</code></td><td>Traduce SQLSTATE de CockroachDB (23505, 40001, etc.) a códigos HTTP.</td></tr>
+<tr><td><b>client/</b></td><td><b><code>InventarioClient</code></b></td><td><b>Implementa <code>InventarioPort</code>. Es la única clase que realmente abre una conexión HTTP hacia otro microservicio.</b></td></tr>
+</table>
+
+<div class="conexion">
+<b>Punto de conexión #2 (el real) — clase <code>InventarioClient</code>, método <code>registrarEntradasPorRecepcion()</code>.</b><br>
+Usa un <code>RestClient</code> de Spring configurado con <code>base-url = ${INVENTARIO_SERVICE_URL:http://localhost:8082}</code> (propiedad en <code>application.properties</code>, línea 12). Construye una lista de ítems (producto_id, subtipo_id=1 "COMPRA", cantidad, costo_unitario, referencia) y ejecuta:<br>
+<code>restClient.post().uri("/api/sp/movimiento-inventario")...</code><br>
+Protegido con <code>@CircuitBreaker(name="inventario")</code> y <code>@Retry(name="inventario")</code> (Resilience4j): 3 reintentos cada 500ms, ignora errores 4xx (son rechazos de negocio, no caídas), circuito se abre tras 50% de fallos en 10 llamadas. Si el circuito está abierto o se agotan los reintentos, cae en <code>registrarEntradasPorRecepcionFallback()</code>, que loggea el error real y lanza <code>IllegalStateException</code>.
+</div>
+
+<h3>Carpeta <code>presentation/</code> — capa HTTP expuesta al Gateway</h3>
+<table>
+<tr><th>Clase</th><th>Rol</th></tr>
+<tr><td><code>OrdenCompraController</code></td><td>Expone <code>/api/ordenes-compra</code> (crear, actualizar, enviar, cancelar, <code>/recepcion</code>, listar, detalle). El endpoint <code>/recepcion</code> es el que termina disparando la cadena hacia inventario-service.</td></tr>
+<tr><td><code>ProveedorController</code></td><td>Expone <code>/api/proveedores</code> (CRUD + activar/desactivar).</td></tr>
+<tr><td><code>ApiExceptionHandler</code></td><td>Traduce excepciones (incluida la de <code>InventarioClient</code> fallando) a respuestas HTTP con formato uniforme.</td></tr>
+<tr><td><code>dto/*</code></td><td>7 clases de request/response que desacoplan el modelo de dominio del JSON expuesto.</td></tr>
+</table>
+
+<h3>Cadena completa de la conexión</h3>
+<div class="flow">OrdenCompraController.registrarRecepcion()        [presentation]
+  → OrdenCompraService.registrarRecepcion()        [application]   ← orquesta
+    → InventarioPort.registrarEntradasPorRecepcion() [domain]        ← abstracción (interfaz)
+      → InventarioClient.registrarEntradasPorRecepcion() [infrastructure/client] ← HTTP POST real
+                                                                       a inventario-service:8082
+                                                                       /api/sp/movimiento-inventario</div>
+<p><b>Tipo de comunicación:</b> síncrona, HTTP/REST directo, protegida con Circuit Breaker + Retry. Si inventario-service no responde, la recepción ya quedó confirmada en la BD propia — puede quedar una inconsistencia que requiere revisión manual.</p>
+
+
+<h2>2. ventas-service</h2>
+<p>Genera facturas a partir de órdenes de pedido ya confirmadas. Se comunica con inventario-service para registrar las <b>salidas de stock</b> (descuento por venta), pero de forma <b>asíncrona</b> mediante el patrón Outbox.</p>
+
+<pre>services/ventas-service/src/main/java/org/example/
+├── domain/
+│   ├── Factura.java
+│   ├── FacturaDetalle.java
+│   ├── FacturaStore.java                (puerto persistencia)
+│   ├── FacturaOutboxStore.java          (puerto outbox)
+│   └── InventarioPort.java              (puerto → OTRO MICROSERVICIO)
+├── application/
+│   ├── FacturaService.java
+│   └── InventarioOutboxProcessor.java   (⭐⭐ dispara la conexión, async)
+├── infrastructure/
+│   ├── persistence/
+│   │   ├── CrdbFacturaRepository.java   (⭐ crea el evento pendiente)
+│   │   └── FacturaOutboxRepository.java
+│   ├── config/
+│   │   └── WebConfig.java
+│   └── client/
+│       └── InventarioClient.java        (⭐⭐⭐ CONEXIÓN REAL, HTTP)
+└── presentation/
+    ├── FacturaController.java
+    ├── ApiExceptionHandler.java
+    └── dto/ (3 clases)</pre>
+
+<h3>Carpeta <code>domain/</code></h3>
+<table>
+<tr><th>Clase</th><th>Qué es</th><th>Rol</th></tr>
+<tr><td><code>Factura</code>, <code>FacturaDetalle</code></td><td>POJOs</td><td>Cabecera y líneas de la factura (mapean 1 a 1 con las tablas <code>ventas.factura_encabezado</code>/<code>factura_cuerpo</code>).</td></tr>
+<tr><td><code>FacturaStore</code></td><td>interface (puerto)</td><td>Persistencia de facturas. Implementación: <code>CrdbFacturaRepository</code>.</td></tr>
+<tr><td><code>FacturaOutboxStore</code></td><td>interface (puerto)</td><td>Gestión de eventos pendientes de envío a inventario. Implementación: <code>FacturaOutboxRepository</code>.</td></tr>
+<tr><td><code>InventarioPort</code></td><td>interface (puerto de salida)</td><td>Define <code>registrarSalidasPorFactura(...)</code> — misma idea que en ordenes-proveedores, pero para descuento de stock por venta.</td></tr>
+</table>
+
+<h3>Carpeta <code>application/</code></h3>
+<p><code>FacturaService.generarDesdeOrden()</code> <b>NO llama directamente</b> a inventario-service — solo delega en <code>facturaRepository.generarDesdeOrden(ordenId)</code>. La conexión con el otro microservicio queda completamente desacoplada de la creación de la factura.</p>
+
+<div class="conexion">
+<b>Punto de conexión #1 — clase <code>InventarioOutboxProcessor</code>, método <code>reintentarPendientes()</code>.</b><br>
+Anotado con <code>@Scheduled(fixedDelayString = "${outbox.inventario.retry-delay-ms:15000}")</code>: corre cada 15 segundos (independiente de cualquier petición HTTP entrante). Lee hasta 20 facturas pendientes vía <code>outboxRepository.facturasPendientes(5, 20)</code> y, por cada una, llama <code>inventarioClient.registrarSalidasPorFactura(facturaId, detalle, "outbox-retry")</code> — de nuevo, <code>inventarioClient</code> es de tipo <code>InventarioPort</code>. Si tiene éxito, marca <code>PROCESADO</code>; si falla, incrementa el contador de intentos (máx. 5, luego pasa a <code>FALLIDO</code>).
+</div>
+
+<h3>Carpeta <code>infrastructure/</code></h3>
+<table>
+<tr><th>Subcarpeta</th><th>Clase</th><th>Rol</th></tr>
+<tr><td>persistence/</td><td><code>CrdbFacturaRepository</code></td><td><code>generarDesdeOrden()</code> corre en <code>@Transactional(isolation = SERIALIZABLE)</code>: inserta encabezado + cuerpo de la factura <b>y</b> la fila en <code>ventas.factura_outbox</code> (estado <code>PENDIENTE</code>) en <b>una sola transacción atómica</b>. Este es el punto donde nace el evento que luego procesará el outbox — pero aquí todavía no hay ninguna llamada de red.</td></tr>
+<tr><td>persistence/</td><td><code>FacturaOutboxRepository</code></td><td>Implementa <code>FacturaOutboxStore</code>: consulta pendientes, marca procesado, registra fallos — pura SQL contra <code>ventas.factura_outbox</code>.</td></tr>
+<tr><td>config/</td><td><code>WebConfig</code></td><td>CORS.</td></tr>
+<tr><td><b>client/</b></td><td><b><code>InventarioClient</code></b></td><td><b>Implementa <code>InventarioPort</code>. Única clase con la llamada HTTP real.</b></td></tr>
+</table>
+
+<div class="conexion">
+<b>Punto de conexión #2 (el real) — clase <code>InventarioClient</code>, método <code>registrarSalidasPorFactura()</code>.</b><br>
+Mismo patrón que en ordenes-proveedores: <code>RestClient</code> con <code>base-url = ${INVENTARIO_SERVICE_URL:http://localhost:8082}</code>. Arma ítems (producto_id, subtipo_id=4 "VENTA", cantidad, fecha, referencia="FAC-{id}") y ejecuta <code>POST /api/sp/movimiento-inventario</code>. Igual protegido con <code>@CircuitBreaker(name="inventario")</code> + <code>@Retry(name="inventario")</code>; si falla, <code>registrarSalidasPorFacturaFallback()</code> lanza <code>IllegalStateException</code> — pero esa excepción la atrapa el <code>InventarioOutboxProcessor</code>, no rompe nada visible al usuario.
+</div>
+
+<h3>Carpeta <code>presentation/</code></h3>
+<table>
+<tr><th>Clase</th><th>Rol</th></tr>
+<tr><td><code>FacturaController</code></td><td>Expone <code>/api/facturas</code> (generar desde orden, listar, obtener, detalle). <b>No dispara la llamada a inventario-service directamente</b> — solo crea la factura y el evento pendiente.</td></tr>
+<tr><td><code>ApiExceptionHandler</code></td><td>Maneja errores de validación y reglas de negocio (aquí no hay SQLSTATE que traducir, a diferencia de ordenes-proveedores).</td></tr>
+<tr><td><code>dto/*</code></td><td><code>GenerarFacturaRequest</code>, <code>FacturaResponse</code>, <code>FacturaDetalleResponse</code>.</td></tr>
+</table>
+
+<h3>Cadena completa de la conexión</h3>
+<div class="flow">FacturaController.generarDesdeOrden()              [presentation]
+  → FacturaService.generarDesdeOrden()              [application]
+    → CrdbFacturaRepository.generarDesdeOrden()     [infrastructure/persistence]
+        INSERT factura + INSERT factura_outbox (PENDIENTE)  — misma transacción, SIN red
+
+        ⋯ 15 segundos después, en un hilo aparte ⋯
+
+InventarioOutboxProcessor.reintentarPendientes()    [application]   ← @Scheduled, dispara la conexión
+  → InventarioPort.registrarSalidasPorFactura()     [domain]         ← abstracción
+    → InventarioClient.registrarSalidasPorFactura() [infrastructure/client] ← HTTP POST real
+                                                                        a inventario-service:8082
+                                                                        /api/sp/movimiento-inventario</div>
+<p><b>Tipo de comunicación:</b> asíncrona, patrón <b>Outbox transaccional</b>. Si inventario-service no responde, la factura ya está creada y consistente; el evento sigue en <code>PENDIENTE</code> y se reintenta solo, sin intervención manual — más robusto que el enfoque síncrono de ordenes-proveedores-service.</p>
+
+<h2>3. Comparación de los dos patrones de comunicación</h2>
+<table>
+<tr><th></th><th>ordenes-proveedores-service</th><th>ventas-service</th></tr>
+<tr><td>Patrón</td><td>Llamada síncrona directa</td><td>Outbox transaccional + worker asíncrono</td></tr>
+<tr><td>Clase que dispara</td><td><code>OrdenCompraService.registrarRecepcion()</code></td><td><code>InventarioOutboxProcessor.reintentarPendientes()</code> (job, no un request HTTP)</td></tr>
+<tr><td>Clase que ejecuta el HTTP</td><td><code>InventarioClient</code> (infrastructure/client)</td><td><code>InventarioClient</code> (infrastructure/client)</td></tr>
+<tr><td>Endpoint destino</td><td><code>POST http://inventario-service:8082/api/sp/movimiento-inventario</code></td><td>Idéntico endpoint, distinto <code>subtipo_id</code> (1=COMPRA vs 4=VENTA)</td></tr>
+<tr><td>Resiliencia</td><td>Resilience4j (CircuitBreaker + Retry, 3 intentos)</td><td>Resilience4j (mismo) + reintento propio cada 15s hasta 5 veces</td></tr>
+<tr><td>Si inventario-service cae</td><td>Recepción queda confirmada, stock desincronizado — requiere revisión manual</td><td>Factura queda consistente, el outbox reintenta solo hasta que inventario-service vuelve</td></tr>
+</table>
+
+<div class="footer">Generado a partir del código fuente en <code>C:\Users\Usuario\Desktop\TiendaTech\services\ordenes-proveedores-service</code> y <code>...\services\ventas-service</code>, rama <code>main</code>.</div>
+
+</body>
+</html>

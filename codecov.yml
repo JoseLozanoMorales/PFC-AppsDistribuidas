@@ -1,0 +1,28 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 70%
+    patch:
+      default:
+        target: 70%
+
+flags:
+  inventario:
+    paths: [services/inventario-service/src/main/java/com/tiendatech/inventario/application/]
+  productos:
+    paths: [services/productos-service/src/main/java/com/tiendatech/productos/application/]
+  ordenes_proveedores:
+    paths: [services/ordenes-proveedores-service/src/main/java/com/tiendatech/ordenesproveedores/application/]
+  ventas:
+    paths: [services/ventas-service/src/main/java/com/tiendatech/ventas/application/]
+  pedidos:
+    paths: [services/pedidos-service/src/main/java/com/tiendatech/pedidos/application/]
+  usuarios:
+    paths: [services/usuarios/src/main/java/com/tiendatech/usuarios/application/service/]
+  armado_ia:
+    paths: [services/armado-ia/app/domain/, services/armado-ia/app/explicacion/]
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
