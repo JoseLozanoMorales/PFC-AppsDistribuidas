@@ -144,14 +144,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { image: gateway, context: Apps/web/frontend }
-          - { image: usuarios, context: services/usuarios }
-          - { image: productos, context: services/productos-service }
-          - { image: inventario, context: services/inventario-service }
-          - { image: pedidos, context: services/pedidos-service }
-          - { image: ordenes-proveedores, context: services/ordenes-proveedores-service }
-          - { image: ventas, context: services/ventas-service }
-          - { image: armado-ia, context: services/armado-ia }
+          - { image: gateway, context: Apps/web/frontend, dockerfile: Apps/web/frontend/Dockerfile }
+          - { image: usuarios, context: services/usuarios, dockerfile: services/usuarios/Dockerfile }
+          - { image: productos, context: services/productos-service, dockerfile: services/productos-service/Dockerfile }
+          - { image: inventario, context: ., dockerfile: services/inventario-service/Dockerfile }
+          - { image: pedidos, context: ., dockerfile: services/pedidos-service/Dockerfile }
+          - { image: ordenes-proveedores, context: services/ordenes-proveedores-service, dockerfile: services/ordenes-proveedores-service/Dockerfile }
+          - { image: ventas, context: services/ventas-service, dockerfile: services/ventas-service/Dockerfile }
+          - { image: armado-ia, context: services/armado-ia, dockerfile: services/armado-ia/Dockerfile }
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -159,6 +159,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
           push: false
           tags: tiendatech/${{ matrix.image }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.image }}
