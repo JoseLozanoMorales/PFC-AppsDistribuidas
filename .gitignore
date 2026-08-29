@@ -21,3 +21,6 @@ Apps/web/infra/crdb-certs/
 /crdb-certs/
 **/target/generated-sources/protobuf/
 experiments/generated/
+
+tests/load/results/
+__pycache__/
