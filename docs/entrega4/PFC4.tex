@@ -191,7 +191,7 @@
         {\large Martes 25 de agosto del 2026 \par}
         \vspace{0.2cm}
         {\large\textbf{FECHA PERMITIDO DE ÚLTIMO COMMIT:}\par}
-        {\large Viernes 28 de agosto del 2026 hasta Hora: 23h55\par}
+        {\large Viernes 28 de agosto del 2026 hasta Hora: 23h59\par}
         \setlength{\parskip}{0.8em}
     \end{titlepage}
 
@@ -931,10 +931,13 @@ jobs:
       - name: Upload XML reports to Codecov
         uses: codecov/codecov-action@v5
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: reports
           fail_ci_if_error: false
           verbose: true
     \end{lstlisting}
+
+    La confirmación de que Codecov efectivamente recibe los reportes no fue automática: la primera versión del job \texttt{coverage} (sin la línea \texttt{token}) marcaba el job en verde igualmente, porque \texttt{fail\_ci\_if\_error: false} evita que un fallo de subida rompa el pipeline; solo al expandir el log del paso ``Upload coverage to Codecov'' se encontró el error real, \texttt{\{"message":"Token required - not valid tokenless upload"\}}, oculto detrás de un \emph{checkmark} verde. La causa fue doble: primero, la app de GitHub de Codecov solo estaba instalada sobre la cuenta personal de un integrante y no sobre la cuenta propietaria del repositorio, por lo que \texttt{TiendaTech} no aparecía en su panel; una vez el propietario del repositorio instaló la app y autorizó el acceso, siguió exigiéndose un \texttt{CODECOV\_TOKEN} explícito (Codecov v5 ya no acepta subidas sin token para repositorios privados), obtenido desde \emph{Settings $\to$ General $\to$ Repository Upload Token} en Codecov y agregado como secreto en \emph{Settings $\to$ Secrets and variables $\to$ Actions} del repositorio. Con el secreto referenciado en el paso (línea \texttt{token: \$\{\{ secrets.CODECOV\_TOKEN \}\}} del Listado \ref{lst:ci-cd-yaml}), el log del commit \texttt{dd72b3d4} confirma la subida real: \texttt{Your upload is now queued for processing}, con \texttt{status\_code=200}, y el panel de Codecov para ese mismo commit reporta \textbf{75.93\,\%} de cobertura agregada sobre \texttt{main}.
 
     % ============================================================
     % 8. OBSERVABILIDAD -- Dimension D6.
