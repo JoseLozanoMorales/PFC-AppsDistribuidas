@@ -330,7 +330,50 @@
 
     \subsection{Integración y entrega continuas (CI/CD)}
 
-    La entrega continua se apoya en un \emph{pipeline} automatizado que ejecuta pruebas, empaqueta artefactos y despliega en ambientes segregados sin intervención manual en cada paso. La premisa subyacente (cultura DevOps) es que ningún cambio debería llegar a producción sin pasar por los mismos controles automatizados que cualquier otro cambio; el pipeline actúa como \emph{quality gate}: si la integración falla, el despliegue no ocurre.
+    DevOps es una cultura de desarrollo de software que integra los equipos de desarrollo y operaciones mediante la automatización, la colaboración y la entrega continua de software. Uno de sus pilares es el uso de pipelines \emph{CI/CD} (Continuous Integration y Continuous Delivery), los cuales permiten construir, probar y desplegar aplicaciones de manera repetible y confiable \cite{decan2022github,saroar2023survey}.
+
+    \subsubsection{Pipeline CI/CD}
+
+    Un pipeline CI/CD está compuesto por una secuencia de etapas automatizadas que validan el software antes de su liberación. Las fases más comunes son:
+
+    \begin{itemize}
+        \item \textbf{Build:} compila el proyecto y resuelve dependencias.
+        \item \textbf{Test:} ejecuta pruebas unitarias y de integración.
+        \item \textbf{Lint:} analiza el código para detectar errores de estilo y calidad.
+        \item \textbf{Publish:} genera y publica artefactos o imágenes Docker.
+        \item \textbf{Deploy:} despliega automáticamente hacia un entorno de pruebas o producción.
+    \end{itemize}
+
+    La automatización de estas etapas reduce errores humanos y acelera la entrega de nuevas versiones \cite{rostami2023cicd}.
+
+    \subsubsection{GitHub Actions y sintaxis YAML}
+
+    GitHub Actions implementa los pipelines mediante archivos YAML ubicados en el directorio \texttt{.github/workflows/}. Un workflow define los eventos que lo activan (\texttt{on}), los trabajos (\texttt{jobs}) y los pasos (\texttt{steps}) que ejecutarán acciones o comandos sobre un entorno virtual \cite{decan2022github}.
+
+    Los elementos principales de un workflow son:
+
+    \begin{itemize}
+        \item \textbf{Triggers:} eventos como \texttt{push}, \texttt{pull\_request} o ejecución manual.
+        \item \textbf{Jobs:} conjuntos de tareas que pueden ejecutarse en paralelo.
+        \item \textbf{Steps:} instrucciones individuales, comandos o acciones reutilizables.
+        \item \textbf{Marketplace Actions:} componentes reutilizables publicados por la comunidad para instalar dependencias, ejecutar pruebas o desplegar aplicaciones.
+    \end{itemize}
+
+    \subsubsection{Estrategias de despliegue}
+
+    Los pipelines modernos pueden implementar distintas estrategias de liberación para minimizar el riesgo durante una actualización:
+
+    \begin{itemize}
+        \item \textbf{Blue-Green:} mantiene dos entornos idénticos y redirige el tráfico al nuevo cuando es validado.
+        \item \textbf{Canary:} libera la nueva versión únicamente a un pequeño porcentaje de usuarios antes del despliegue completo.
+        \item \textbf{Rolling Update:} reemplaza progresivamente las instancias antiguas sin interrumpir el servicio.
+    \end{itemize}
+
+    Estas estrategias incrementan la disponibilidad y facilitan la recuperación ante fallos durante el despliegue \cite{valenzuela2024hidden}.
+
+    \subsubsection{Cobertura de código dentro del pipeline}
+
+    La cobertura de código mide el porcentaje de instrucciones ejecutadas por las pruebas automatizadas. Integrar herramientas de cobertura en el pipeline permite verificar la calidad del software en cada confirmación de cambios y evitar que nuevas versiones reduzcan el nivel de pruebas existente \cite{faqih2024empirical}.
 
     \subsection{Observabilidad distribuida}
 
