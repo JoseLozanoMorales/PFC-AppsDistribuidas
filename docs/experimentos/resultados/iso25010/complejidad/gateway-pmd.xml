@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd xmlns="http://pmd.sourceforge.net/report/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/report/2.0.0 https://pmd.github.io/schema/report_2_0_0.xsd" version="7.17.0" timestamp="2026-08-28T23:17:16.828">
+<file name="Apps/web/frontend/src/main/java/com/tiendatech/frontend/FrontendApplication.java">
+<violation beginline="7" endline="7" begincolumn="8" endcolumn="13" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="FrontendApplication" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The class 'FrontendApplication' has a total cyclomatic complexity of 1 (highest 1).
+</violation>
+<violation beginline="9" endline="9" begincolumn="21" endcolumn="25" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="FrontendApplication" method="main" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'main(String[])' has a cyclomatic complexity of 1.
+</violation>
+</file>
+<file name="Apps/web/frontend/src/main/java/com/tiendatech/frontend/WebappController.java">
+<violation beginline="9" endline="9" begincolumn="8" endcolumn="13" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The class 'WebappController' has a total cyclomatic complexity of 17 (highest 3).
+</violation>
+<violation beginline="12" endline="12" begincolumn="19" endcolumn="25" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="webapp" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'webapp()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="17" endline="17" begincolumn="25" endcolumn="30" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="login" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'login()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="20" endline="20" begincolumn="25" endcolumn="33" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="register" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'register()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="23" endline="23" begincolumn="25" endcolumn="33" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="recovery" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'recovery()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="26" endline="26" begincolumn="25" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="account" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'account()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="29" endline="29" begincolumn="25" endcolumn="33" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="checkout" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'checkout()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="32" endline="32" begincolumn="25" endcolumn="29" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="cart" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'cart()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="35" endline="35" begincolumn="25" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="builder" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'builder()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="38" endline="38" begincolumn="25" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="catalog" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'catalog()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="41" endline="41" begincolumn="25" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="product" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'product(String)' has a cyclomatic complexity of 2.
+</violation>
+<violation beginline="46" endline="46" begincolumn="25" endcolumn="33" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="password" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'password()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="49" endline="49" begincolumn="25" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="invoice" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'invoice(String, String)' has a cyclomatic complexity of 3.
+</violation>
+<violation beginline="56" endline="56" begincolumn="25" endcolumn="30" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="admin" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'admin()' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="59" endline="59" begincolumn="25" endcolumn="31" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend" class="WebappController" method="worker" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'worker()' has a cyclomatic complexity of 1.
+</violation>
+</file>
+<file name="Apps/web/frontend/src/main/java/com/tiendatech/frontend/security/JwtGatewayFilter.java">
+<violation beginline="32" endline="32" begincolumn="8" endcolumn="13" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The class 'JwtGatewayFilter' has a total cyclomatic complexity of 17 (highest 6).
+</violation>
+<violation beginline="41" endline="41" begincolumn="12" endcolumn="28" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="JwtGatewayFilter" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The constructor 'JwtGatewayFilter(Environment)' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="78" endline="78" begincolumn="26" endcolumn="45" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="configuredOrDefault" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'configuredOrDefault(Environment, String, List&lt;String&gt;)' has a cyclomatic complexity of 3.
+</violation>
+<violation beginline="87" endline="87" begincolumn="20" endcolumn="36" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="doFilterInternal" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain)' has a cyclomatic complexity of 6.
+</violation>
+<violation beginline="118" endline="118" begincolumn="21" endcolumn="29" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="isPublic" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'isPublic(HttpServletRequest)' has a cyclomatic complexity of 3.
+</violation>
+<violation beginline="131" endline="131" begincolumn="21" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="isProtected" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'isProtected(HttpServletRequest)' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="136" endline="136" begincolumn="20" endcolumn="31" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="stringClaim" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'stringClaim(Claims, String)' has a cyclomatic complexity of 2.
+</violation>
+<violation beginline="141" endline="141" begincolumn="18" endcolumn="30" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="JwtGatewayFilter" method="unauthorized" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'unauthorized(HttpServletResponse, String)' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="148" endline="148" begincolumn="26" endcolumn="31" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The class 'TrustedUserHeaderRequest' has a total cyclomatic complexity of 11 (highest 3).
+</violation>
+<violation beginline="151" endline="151" begincolumn="17" endcolumn="41" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" method="TrustedUserHeaderRequest" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The constructor 'TrustedUserHeaderRequest(HttpServletRequest, Map&lt;String, String&gt;)' has a cyclomatic complexity of 1.
+</violation>
+<violation beginline="157" endline="157" begincolumn="23" endcolumn="32" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" method="getHeader" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'getHeader(String)' has a cyclomatic complexity of 2.
+</violation>
+<violation beginline="163" endline="163" begincolumn="36" endcolumn="46" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" method="getHeaders" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'getHeaders(String)' has a cyclomatic complexity of 2.
+</violation>
+<violation beginline="172" endline="172" begincolumn="36" endcolumn="50" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" method="getHeaderNames" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'getHeaderNames()' has a cyclomatic complexity of 3.
+</violation>
+<violation beginline="185" endline="185" begincolumn="24" endcolumn="37" rule="CyclomaticComplexity" ruleset="Design" package="com.tiendatech.frontend.security" class="TrustedUserHeaderRequest" method="trustedHeader" externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.17.0/pmd_rules_java_design.html#cyclomaticcomplexity" priority="3">
+The method 'trustedHeader(String)' has a cyclomatic complexity of 3.
+</violation>
+</file>
+</pmd>

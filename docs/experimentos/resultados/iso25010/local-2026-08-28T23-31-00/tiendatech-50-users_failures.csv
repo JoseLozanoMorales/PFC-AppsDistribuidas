@@ -1,0 +1,5 @@
+Method,Name,Error,Occurrences
+GET,GET /api/provincias,HTTPError('500 Server Error:  for url: GET /api/provincias'),3
+GET,GET /api/marcas,HTTPError('400 Client Error:  for url: GET /api/marcas'),8
+GET,GET /api/categorias,HTTPError('400 Client Error:  for url: GET /api/categorias'),9
+GET,GET /api/productos,HTTPError('400 Client Error:  for url: GET /api/productos'),14

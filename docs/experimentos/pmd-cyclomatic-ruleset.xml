@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="TiendaTech ISO 25010 cyclomatic complexity"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/ruleset_2_0_0.xsd">
+    <description>Reporta cada metodo para conservar el valor medido, no solo los que exceden el umbral.</description>
+    <rule ref="category/java/design.xml/CyclomaticComplexity">
+        <properties>
+            <property name="classReportLevel" value="1"/>
+            <property name="methodReportLevel" value="1"/>
+        </properties>
+    </rule>
+</ruleset>
