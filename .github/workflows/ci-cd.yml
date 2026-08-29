@@ -1,0 +1,184 @@
+name: CI-CD quality gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-java:
+    name: Test ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - inventario-service
+          - productos-service
+          - ordenes-proveedores-service
+          - ventas-service
+          - pedidos-service
+          - usuarios
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: services/${{ matrix.service }}/pom.xml
+      - name: Unit tests and JaCoCo quality gate
+        working-directory: services/${{ matrix.service }}
+        run: mvn --batch-mode --no-transfer-progress clean test
+      - name: Preserve test and coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.service }}
+          path: |
+            services/${{ matrix.service }}/target/surefire-reports/
+            services/${{ matrix.service }}/target/site/jacoco/jacoco.xml
+          if-no-files-found: warn
+
+  test-python:
+    name: Test armado-ia
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            services/armado-ia/requirements.txt
+            services/armado-ia/requirements-dev.txt
+      - name: Install dependencies
+        working-directory: services/armado-ia
+        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Unit tests and coverage gate
+        working-directory: services/armado-ia
+        run: python -m pytest --junitxml=pytest-junit.xml --cov=app.domain --cov=app.explicacion --cov-report=xml:coverage.xml --cov-fail-under=70
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-armado-ia
+          path: |
+            services/armado-ia/pytest-junit.xml
+            services/armado-ia/coverage.xml
+          if-no-files-found: warn
+
+  lint:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/armado-ia/requirements-dev.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: Apps/web/frontend/webapp/package-lock.json
+      - name: Check Java compilation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in inventario-service productos-service ordenes-proveedores-service ventas-service pedidos-service usuarios; do
+            mvn -q -f "services/$service/pom.xml" -DskipTests compile
+          done
+      - name: Ruff static analysis
+        working-directory: services/armado-ia
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+          python -m ruff check app tests
+      - name: TypeScript static analysis
+        working-directory: Apps/web/frontend/webapp
+        run: |
+          npm ci
+          npm run build
+
+  integration-test:
+    name: Gateway and CockroachDB integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Three flows through API Gateway
+        working-directory: Apps/web/frontend
+        run: mvn --batch-mode --no-transfer-progress -Dtest=GatewayIntegrationTest test
+      - name: CockroachDB integration through Testcontainers
+        working-directory: services/pedidos-service
+        run: mvn --batch-mode --no-transfer-progress -Dtest=CockroachDbIntegrationTest -Djacoco.skip=true test
+
+  build:
+    name: Build image ${{ matrix.image }}
+    needs: [test-java, test-python, lint, integration-test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: gateway, context: Apps/web/frontend, dockerfile: Apps/web/frontend/Dockerfile }
+          - { image: usuarios, context: services/usuarios, dockerfile: services/usuarios/Dockerfile }
+          - { image: productos, context: services/productos-service, dockerfile: services/productos-service/Dockerfile }
+          - { image: inventario, context: ., dockerfile: services/inventario-service/Dockerfile }
+          - { image: pedidos, context: ., dockerfile: services/pedidos-service/Dockerfile }
+          - { image: ordenes-proveedores, context: services/ordenes-proveedores-service, dockerfile: services/ordenes-proveedores-service/Dockerfile }
+          - { image: ventas, context: services/ventas-service, dockerfile: services/ventas-service/Dockerfile }
+          - { image: armado-ia, context: services/armado-ia, dockerfile: services/armado-ia/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build without publishing
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: tiendatech/${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  coverage:
+    name: Publish coverage
+    needs: [test-java, test-python]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: reports-*
+          path: reports
+          merge-multiple: false
+      - name: Upload XML reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: reports
+          fail_ci_if_error: false
+          verbose: true
