@@ -296,9 +296,22 @@
 
     El catálogo de patrones de diseño de Gamma, Helm, Johnson y Vlissides (1994) --- conocidos como el "Gang of Four" (GoF) --- documenta veintitrés soluciones recurrentes a problemas de diseño orientado a objetos, agrupadas en patrones creacionales, estructurales y de comportamiento. Su valor no está en aplicarlos por cumplir una cuota, sino en que cada patrón resuelve un problema de acoplamiento o variabilidad concreto; por eso la Sección \ref{sec:arquitectura-sistema} documenta, para cada patrón aplicado en TiendaTech, el problema real que resuelve en el proyecto y no solo su definición canónica.
 
+    \subsection{Pruebas en sistemas distribuidos}
+
+    En un sistema basado en microservicios no es conveniente depender de un solo tipo de prueba. Cada servicio puede funcionar correctamente por separado y, aun así, presentar fallos cuando se comunica con los demás. Por esta razón, la estrategia de pruebas se organiza como una pirámide formada por pruebas unitarias, de integración, de contrato y de extremo a extremo. La mayor cantidad corresponde a las pruebas unitarias, porque son rápidas y permiten revisar reglas de negocio o funciones aisladas. Las pruebas de integración comprueban el trabajo conjunto con elementos como la base de datos, el API Gateway u otros servicios. En los niveles superiores se encuentran las pruebas de contrato y las de extremo a extremo, que abarcan interacciones más completas, pero también requieren más tiempo y recursos para ejecutarse \parencite{winters2020software,richardson2018microservices}.
+
+    Las pruebas de contrato son especialmente útiles cuando un servicio consume la API de otro. Un cambio aparentemente pequeño, como modificar el nombre de un atributo o el formato de una respuesta, puede afectar al consumidor aunque el proveedor continúe funcionando. Pact aplica el enfoque \emph{Consumer-Driven Contract Testing}, en el cual el consumidor define las respuestas que espera y el proveedor verifica que puede cumplirlas. De esta manera, se pueden detectar incompatibilidades antes de desplegar una nueva versión del servicio \parencite{richardson2018microservices}.
+
+    Otro aspecto importante es conocer cómo responde el sistema cuando varias personas lo utilizan al mismo tiempo. Herramientas como Locust o k6 permiten simular usuarios concurrentes y registrar datos como el número de solicitudes atendidas, el tiempo de respuesta y la cantidad de errores. Estas pruebas ayudan a observar si el rendimiento se degrada al aumentar la carga y a identificar cuál servicio puede convertirse en un cuello de botella.
+
+    La cobertura de código sirve como apoyo para conocer qué partes del programa fueron ejecutadas durante las pruebas. Un porcentaje alto permite detectar menos zonas sin verificar, pero no garantiza por sí solo que el sistema esté libre de errores, ya que también importa la calidad de los casos diseñados. Por eso la cobertura debe analizarse junto con los resultados de las pruebas y no únicamente como una cifra que se debe alcanzar \parencite{winters2020software}.
+
+    Finalmente, las pruebas pueden complementarse con herramientas de análisis estático. SonarCloud permite revisar aspectos como duplicación, complejidad y posibles problemas de mantenibilidad; Pylint se utiliza en proyectos Python y ESLint en aplicaciones JavaScript o TypeScript. Estas herramientas examinan el código sin ejecutar el sistema y permiten detectar problemas que podrían pasar desapercibidos durante una prueba funcional. Su incorporación al proceso de integración continua ayuda a mantener criterios de calidad comunes entre los distintos componentes del proyecto \parencite{winters2020software}.
+
     \subsection{Ingeniería de aplicaciones móviles}
 
     El desarrollo móvil enfrenta retos que no existen (o existen de forma distinta) en el desarrollo web: heterogeneidad de dispositivos y versiones de sistema operativo, restricciones de batería y de red intermitente, un ciclo de vida de la aplicación gestionado por el sistema operativo (y no por el desarrollador), y ventanas de publicación controladas por tiendas de aplicaciones. La decisión entre desarrollo nativo (Kotlin/Swift) y multiplataforma (Flutter, React Native) no es una preferencia estética: tiene consecuencias medibles en rendimiento, acceso a APIs del dispositivo, tamaño del binario y tiempo de llegada al mercado, razón por la cual la rúbrica exige justificar la elección con al menos dos criterios cuantitativos.
+
 
     \subsection{Integración y entrega continuas (CI/CD)}
 
