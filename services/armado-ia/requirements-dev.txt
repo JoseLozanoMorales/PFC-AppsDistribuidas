@@ -2,4 +2,5 @@
 # imagen de produccion: el Dockerfile solo usa requirements.txt.
 -r requirements.txt
 pytest==9.1.1
+pytest-cov
 ruff==0.16.4

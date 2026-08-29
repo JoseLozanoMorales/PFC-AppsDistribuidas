@@ -133,7 +133,7 @@ jobs:
         run: mvn --batch-mode --no-transfer-progress -Dtest=GatewayIntegrationTest test
       - name: CockroachDB integration through Testcontainers
         working-directory: services/pedidos-service
-        run: mvn --batch-mode --no-transfer-progress -Dtest=CockroachDbIntegrationTest test
+        run: mvn --batch-mode --no-transfer-progress -Dtest=CockroachDbIntegrationTest -Djacoco.check.skip=true test
 
   build:
     name: Build image ${{ matrix.image }}
