@@ -6,7 +6,7 @@ import java.util.Map;
 /** Puerto de salida que aisla los casos de uso de JDBC y CockroachDB. */
 public interface ProductoRepository {
     List<ProductoResumen> listar(int page, int size);
-    List<Map<String, Object>> masVendidos(int limite);
+    List<Map<String, Object>> resumirVentas(List<Map<String, Object>> ventas);
     List<Map<String, Object>> recientesMenu(int limit);
     List<Map<String, Object>> categorias();
     List<Map<String, Object>> marcas();

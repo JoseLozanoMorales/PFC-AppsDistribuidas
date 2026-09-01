@@ -6,9 +6,11 @@ nada por usuario y no tiene motivo para exigirlas. Si vienen, se usan solo
 para logging del analisis. Un X-User-Id malformado nunca bloquea la
 peticion, simplemente se registra como anonimo.
 """
+import os
 from dataclasses import dataclass
 
-from fastapi import Header
+import jwt
+from fastapi import Header, HTTPException, Request
 
 
 @dataclass(frozen=True)
@@ -37,3 +39,19 @@ def identidad_opcional(
         except ValueError:
             user_id = None
     return IdentidadOpcional(user_id=user_id, username=x_usuario, role=x_user_role)
+
+
+def identidad_requerida(request: Request) -> IdentidadOpcional:
+    authorization = request.headers.get("Authorization", "")
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="JWT requerido")
+    try:
+        claims = jwt.decode(
+            authorization[7:], os.environ["AUTH_JWT_SECRET"], algorithms=["HS256"]
+        )
+        return IdentidadOpcional(
+            user_id=int(claims["sub"]) if claims.get("sub") is not None else None,
+            username=claims.get("username"), role=claims.get("role")
+        )
+    except (jwt.PyJWTError, KeyError, TypeError, ValueError):
+        raise HTTPException(status_code=401, detail="JWT invalido o expirado")

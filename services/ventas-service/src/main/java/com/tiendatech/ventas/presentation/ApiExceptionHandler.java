@@ -44,13 +44,13 @@ public class ApiExceptionHandler {
                 .body(Map.of("error", "Datos invalidos", "detail", detail));
     }
 
-    // Cualquier error real de SQL (constraint violado, columna mal escrita, etc.) que no
-    // atrapamos antes en el service.
+    // Falla de infraestructura (conexion, timeout, pool agotado, constraint violado, etc.)
+    // que no atrapamos antes en el service: no es una solicitud invalida del cliente.
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, Object>> handleDataAccess(DataAccessException ex) {
         String detail = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Error de base de datos", "detail", detail));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", "Servicio no disponible temporalmente", "detail", detail));
     }
 
     @ExceptionHandler(Exception.class)

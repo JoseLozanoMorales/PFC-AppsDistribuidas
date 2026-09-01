@@ -1,0 +1,46 @@
+﻿info
+planning time: 3ms
+execution time: 1.1s
+distribution: full
+vectorized: true
+rows decoded from KV: 151,248 (10 MiB, 2 gRPC calls)
+cumulative time spent in KV: 936ms
+maximum memory usage: 14 MiB
+network usage: 0 B (0 messages)
+sql cpu time: 269ms
+isolation level: serializable
+priority: normal
+quality of service: regular
+
+ÔÇó top-k
+Ôöé nodes: n1
+Ôöé actual row count: 10
+Ôöé estimated max memory allocated: 10 KiB
+Ôöé estimated max sql temp disk usage: 0 B
+Ôöé sql cpu time: 226┬Ás
+Ôöé estimated row count: 10
+Ôöé order: -sum
+Ôöé k: 10
+Ôöé
+ÔööÔöÇÔöÇ ÔÇó group (hash)
+"    Ôöé nodes: n1"
+"    Ôöé actual row count: 2,500"
+"    Ôöé estimated max memory allocated: 3.8 MiB"
+"    Ôöé estimated max sql temp disk usage: 0 B"
+"    Ôöé sql cpu time: 136ms"
+"    Ôöé estimated row count: 2,499"
+"    Ôöé group by: producto_id"
+"    Ôöé"
+"    ÔööÔöÇÔöÇ ÔÇó scan"
+"          nodes: n1"
+"          actual row count: 151,248"
+"          KV time: 936ms"
+"          KV contention time: 0┬Ás"
+"          KV rows decoded: 151,248"
+"          KV bytes read: 10 MiB"
+"          KV gRPC calls: 2"
+"          estimated max memory allocated: 10 MiB"
+"          sql cpu time: 132ms"
+"          estimated row count: 148,320 (25% of the table; stats collected 1 minute ago)"
+"          table: detalle_orden@pk_detalle_orden"
+"          spans: [/'2026-07-01' - /'2026-09-30']"

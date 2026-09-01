@@ -1,0 +1,25 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "check": "pago_exacto",
+      "pass": true,
+      "violations": 0
+    },
+    {
+      "check": "stock_una_vez",
+      "pass": true,
+      "violations": 0
+    },
+    {
+      "check": "stock_nunca_negativo",
+      "pass": true,
+      "violations": 0
+    },
+    {
+      "check": "compensacion_completa",
+      "pass": true,
+      "violations": 0
+    }
+  ]
+}

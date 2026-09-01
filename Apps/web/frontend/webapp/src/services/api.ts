@@ -19,6 +19,21 @@ export class ApiError extends Error {
   }
 }
 
+interface ApiEnvelope<T> {
+  status: number
+  data: T
+  message: string
+  timestamp: string
+}
+
+function unwrapEnvelope<T>(body: unknown): T {
+  if (body && typeof body === 'object' && 'status' in body && 'data' in body &&
+      'message' in body && 'timestamp' in body) {
+    return (body as ApiEnvelope<T>).data
+  }
+  return body as T
+}
+
 let refreshInFlight: Promise<string> | null = null
 
 async function renewAccessToken(): Promise<string> {
@@ -26,7 +41,7 @@ async function renewAccessToken(): Promise<string> {
     refreshInFlight = fetch('/auth/refresh', { method: 'POST', credentials: 'include' })
       .then(async (response) => {
         if (!response.ok) throw new ApiError('La sesión expiró.', response.status)
-        const data = await response.json() as { access?: string }
+        const data = unwrapEnvelope<{ access?: string }>(await response.json())
         if (!data.access) throw new ApiError('No se recibió un nuevo token.', 401)
         saveToken(data.access)
         return data.access
@@ -76,5 +91,5 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     const data = body as { message?: string; error?: string } | null
     throw new ApiError(data?.message || data?.error || String(body || `Error ${response.status}`), response.status)
   }
-  return body as T
+  return unwrapEnvelope<T>(body)
 }

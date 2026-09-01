@@ -13,13 +13,17 @@ import java.util.Map;
 @Service
 public class ProductoService {
     private final ProductoRepository repository;
+    private final com.tiendatech.productos.domain.VentasPort ventas;
 
-    public ProductoService(ProductoRepository repository) {
+    public ProductoService(ProductoRepository repository, com.tiendatech.productos.domain.VentasPort ventas) {
         this.repository = repository;
+        this.ventas = ventas;
     }
 
     public List<ProductoResumen> listar(int page, int size) { return repository.listar(page, size); }
-    public List<Map<String, Object>> masVendidos(int limite) { return repository.masVendidos(limite); }
+    public List<Map<String, Object>> masVendidos(int limite) {
+        return repository.resumirVentas(ventas.masVendidos(Math.max(limite, 1)));
+    }
     public List<Map<String, Object>> recientesMenu(int limit) { return repository.recientesMenu(limit); }
     public List<Map<String, Object>> categorias() { return repository.categorias(); }
     public List<Map<String, Object>> marcas() { return repository.marcas(); }

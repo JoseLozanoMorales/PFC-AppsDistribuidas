@@ -48,17 +48,21 @@ public class ApiExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    // Bug nuestro (SQL mal armado), no un error de entrada del cliente.
     @ExceptionHandler(BadSqlGrammarException.class)
     public ResponseEntity<Map<String, Object>> handleBadSql(BadSqlGrammarException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        log.error("Bad SQL grammar", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Bad SQL grammar", "detail", detail(ex)));
     }
 
+    // Falla de infraestructura (conexion, timeout, pool agotado): no es una solicitud
+    // invalida del cliente, es el servicio/base de datos temporalmente no disponible.
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, Object>> handleDataAccess(DataAccessException ex) {
         log.error("Database operation failed", ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Data access error", "detail", detail(ex)));
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("error", "Servicio no disponible temporalmente", "detail", detail(ex)));
     }
 
     @ExceptionHandler(Exception.class)

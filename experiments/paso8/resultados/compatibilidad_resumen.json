@@ -1,0 +1,10 @@
+{
+  "casos": 120,
+  "aciertos": 120,
+  "falsos_positivos": 0,
+  "falsos_negativos": 0,
+  "accuracy_ic95": [
+    0.968981,
+    1.0
+  ]
+}

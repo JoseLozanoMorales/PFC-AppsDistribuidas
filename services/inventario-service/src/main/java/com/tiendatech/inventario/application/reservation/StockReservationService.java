@@ -32,7 +32,7 @@ public class StockReservationService {
         if (!replay.isEmpty()) return replay.getFirst();
 
         Map<String, Object> product = jdbc.queryForMap(
-                "SELECT stock FROM productos.producto WHERE producto_id = ? AND habilitado FOR UPDATE",
+                "SELECT stock FROM inventario.inventario_producto WHERE producto_id = ? AND habilitado FOR UPDATE",
                 command.productId());
         int physicalStock = ((Number) product.get("stock")).intValue();
         List<State> states = jdbc.query("""

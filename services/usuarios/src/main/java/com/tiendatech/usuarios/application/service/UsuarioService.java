@@ -270,33 +270,59 @@ public class UsuarioService {
 
     @org.springframework.transaction.annotation.Transactional
     public void cambiarPasswordConToken(String token, String actual, String nueva) {
-        if (token == null || token.isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token requerido");
-        if (actual == null || actual.isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingresa tu contraseña actual");
-        if (nueva == null || nueva.length() < 8)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseña debe tener al menos 8 caracteres");
+        validarTokenPresente(token);
+        validarPasswordActualPresente(actual);
+        validarNuevaPassword(nueva);
 
-        // 1) Obtener correo desde el token (sin invalidar aún)
+        // 1) Obtener correo desde el token (sin invalidar aun)
         String correo = otpService.peekTokenCambioPassword(token);
-        if (correo == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token inválido o expirado");
+        validarCorreoDeToken(correo);
 
         // 2) Traer usuario y validar "actual"
-        Usuario u = usuarioRepository.findByEmail(correo)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        String hashActual = u.getContrasenia();
-        if (hashActual == null || !passwordHasher.matches(actual, hashActual))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña actual no es correcta");
-        if (passwordHasher.matches(nueva, hashActual))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseña no puede ser igual a la actual");
+        Usuario u = usuarioPorCorreo(correo);
+        validarCambioPassword(actual, nueva, u.getContrasenia());
 
         // 3) Guardar nueva (tu SP)
         String nuevoHash = passwordHasher.hash(nueva);
         usuarioRepository.updatePasswordByEmail(correo, nuevoHash);
 
-        // 4) Invalidar el token SOLO si todo salió ok
+        // 4) Invalidar el token SOLO si todo salio ok
         otpService.invalidateTokenCambioPassword(token);
+    }
+    private static void validarTokenPresente(String token) {
+        if (token == null || token.isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token requerido");
+    }
+
+    private static void validarPasswordActualPresente(String actual) {
+        if (actual == null || actual.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingresa tu contraseÃ±a actual");
+        }
+    }
+
+    private static void validarNuevaPassword(String nueva) {
+        if (nueva == null || nueva.length() < 8) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseÃ±a debe tener al menos 8 caracteres");
+        }
+    }
+
+    private static void validarCorreoDeToken(String correo) {
+        if (correo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token invÃ¡lido o expirado");
+        }
+    }
+
+    private Usuario usuarioPorCorreo(String correo) {
+        return usuarioRepository.findByEmail(correo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    }
+
+    private void validarCambioPassword(String actual, String nueva, String hashActual) {
+        if (hashActual == null || !passwordHasher.matches(actual, hashActual)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseÃ±a actual no es correcta");
+        }
+        if (passwordHasher.matches(nueva, hashActual)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nueva contraseÃ±a no puede ser igual a la actual");
+        }
     }
 }

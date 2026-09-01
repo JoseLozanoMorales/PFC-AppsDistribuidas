@@ -1,0 +1,1521 @@
+[
+  {
+    "case_id": 1,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 2,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 450,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 3,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 4,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 5,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 6,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 7,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 170,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 8,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 9,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 10,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 11,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 12,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 13,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 14,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 15,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 16,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 17,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 18,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 19,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 20,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 21,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 22,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 23,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 24,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 25,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 26,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 27,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 28,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 29,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 30,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 31,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 32,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 125,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 33,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 34,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 35,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 36,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 37,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 38,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 39,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 40,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 41,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 42,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 43,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 44,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 45,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 46,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 47,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 48,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 49,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 50,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 51,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 52,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 53,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 54,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 55,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 550,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 56,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 57,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 58,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 59,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 60,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 61,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 62,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 63,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 64,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 65,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 66,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 67,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 68,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 69,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 70,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 71,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 72,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 73,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 74,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 75,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 76,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 77,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 78,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 79,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 80,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 81,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 82,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 83,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 84,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 85,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 86,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 87,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 88,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 89,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 90,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 91,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 92,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 650,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 93,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 94,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 250,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 95,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 96,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 97,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 98,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 99,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 100,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 101,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 165,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 102,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 103,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 16,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 104,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 105,
+    "gpu_tdp": 115,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 105,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 250,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb"
+    ]
+  },
+  {
+    "case_id": 106,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 107,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 108,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 170,
+    "gpu_tdp": 285,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 109,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 64,
+    "cpu_tdp": 170,
+    "gpu_tdp": 115,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 110,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 125,
+    "gpu_tdp": 165,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 111,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 105,
+    "gpu_tdp": 285,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 112,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 285,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 113,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 285,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 114,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 16,
+    "cpu_tdp": 125,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 115,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 32,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 750,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 116,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 32,
+    "cpu_tdp": 125,
+    "gpu_tdp": 115,
+    "psu_watts": 450,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible"
+    ]
+  },
+  {
+    "case_id": 117,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 285,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 118,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "LGA1700",
+    "ram_gb": 8,
+    "cpu_tdp": 105,
+    "gpu_tdp": 250,
+    "psu_watts": 550,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "ram_inferior_16gb",
+      "fuente_sin_margen_1_7x"
+    ]
+  },
+  {
+    "case_id": 119,
+    "cpu_socket": "AM5",
+    "motherboard_socket": "AM5",
+    "ram_gb": 64,
+    "cpu_tdp": 65,
+    "gpu_tdp": 165,
+    "psu_watts": 1000,
+    "expected_compatible": true,
+    "expected_reasons": []
+  },
+  {
+    "case_id": 120,
+    "cpu_socket": "LGA1700",
+    "motherboard_socket": "AM5",
+    "ram_gb": 8,
+    "cpu_tdp": 65,
+    "gpu_tdp": 115,
+    "psu_watts": 650,
+    "expected_compatible": false,
+    "expected_reasons": [
+      "socket_incompatible",
+      "ram_inferior_16gb"
+    ]
+  }
+]

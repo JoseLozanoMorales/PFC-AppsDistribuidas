@@ -1,0 +1,50 @@
+﻿info
+planning time: 32ms
+execution time: 625ms
+distribution: full
+vectorized: true
+rows decoded from KV: 151,248 (10 MiB, 2 gRPC calls)
+cumulative time spent in KV: 590ms
+maximum memory usage: 14 MiB
+network usage: 0 B (0 messages)
+regions: aws
+sql cpu time: 103ms
+isolation level: serializable
+priority: normal
+quality of service: regular
+
+ÔÇó top-k
+Ôöé nodes: n1
+Ôöé regions: aws
+Ôöé actual row count: 10
+Ôöé estimated max memory allocated: 10 KiB
+Ôöé estimated max sql temp disk usage: 0 B
+Ôöé sql cpu time: 220┬Ás
+Ôöé estimated row count: 10
+Ôöé order: -sum
+Ôöé k: 10
+Ôöé
+ÔööÔöÇÔöÇ ÔÇó group (hash)
+"    Ôöé nodes: n1"
+"    Ôöé regions: aws"
+"    Ôöé actual row count: 2,500"
+"    Ôöé estimated max memory allocated: 3.8 MiB"
+"    Ôöé estimated max sql temp disk usage: 0 B"
+"    Ôöé sql cpu time: 31ms"
+"    Ôöé estimated row count: 2,499"
+"    Ôöé group by: producto_id"
+"    Ôöé"
+"    ÔööÔöÇÔöÇ ÔÇó scan"
+"          nodes: n1"
+"          regions: aws"
+"          actual row count: 151,248"
+"          KV time: 590ms"
+"          KV contention time: 0┬Ás"
+"          KV rows decoded: 151,248"
+"          KV bytes read: 10 MiB"
+"          KV gRPC calls: 2"
+"          estimated max memory allocated: 10 MiB"
+"          sql cpu time: 71ms"
+"          estimated row count: 147,060 (25% of the table; stats collected 2 hours ago)"
+"          table: detalle_orden@pk_detalle_orden"
+"          spans: [/'2026-07-01' - /'2026-09-30']"

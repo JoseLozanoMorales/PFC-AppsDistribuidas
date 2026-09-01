@@ -1,0 +1,175 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TiendaTech pedidos",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/ordenes": {
+      "get": {
+        "summary": "Consultar /api/ordenes",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/ordenes/{id}": {
+      "get": {
+        "summary": "Consultar /api/ordenes/{id}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/carrito": {
+      "get": {
+        "summary": "Consultar /api/carrito",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/checkout": {
+      "post": {
+        "summary": "Crear o procesar /api/checkout",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/metodos-pago": {
+      "get": {
+        "summary": "Consultar /api/metodos-pago",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "data",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "data": {
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
+

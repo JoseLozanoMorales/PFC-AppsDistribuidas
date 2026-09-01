@@ -1,0 +1,34 @@
+﻿info
+planning time: 2ms
+execution time: 2s
+distribution: full
+vectorized: true
+rows decoded from KV: 150 (13 KiB, 1 gRPC calls)
+cumulative time spent in KV: 2s
+maximum memory usage: 40 KiB
+network usage: 0 B (0 messages)
+sql cpu time: 289┬Ás
+isolation level: serializable
+priority: normal
+quality of service: regular
+
+ÔÇó filter
+Ôöé nodes: n1
+Ôöé actual row count: 29
+Ôöé sql cpu time: 15┬Ás
+Ôöé estimated row count: 29
+Ôöé filter: (categoria_id = 6) AND habilitado
+Ôöé
+ÔööÔöÇÔöÇ ÔÇó scan
+"      nodes: n1"
+"      actual row count: 150"
+"      KV time: 2s"
+"      KV contention time: 0┬Ás"
+"      KV rows decoded: 150"
+"      KV bytes read: 13 KiB"
+"      KV gRPC calls: 1"
+"      estimated max memory allocated: 40 KiB"
+"      sql cpu time: 274┬Ás"
+"      estimated row count: 150 (100% of the table; stats collected 17 seconds ago)"
+"      table: producto@pk_producto"
+"      spans: FULL SCAN"

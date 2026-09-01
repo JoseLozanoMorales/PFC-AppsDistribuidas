@@ -59,7 +59,8 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
                             response.getWriter().write(
-                                    "{\"success\":false,\"message\":\"JWT requerido\"}"
+                                    "{\"status\":401,\"data\":null,\"message\":\"JWT requerido\",\"timestamp\":\""
+                                            + java.time.Instant.now() + "\"}"
                             );
                         })
                         .accessDeniedHandler((request, response, exception) -> {
@@ -67,7 +68,8 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
                             response.getWriter().write(
-                                    "{\"success\":false,\"message\":\"Acceso denegado\"}"
+                                    "{\"status\":403,\"data\":null,\"message\":\"Acceso denegado\",\"timestamp\":\""
+                                            + java.time.Instant.now() + "\"}"
                             );
                         })
                 )

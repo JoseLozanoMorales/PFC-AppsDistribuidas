@@ -3,6 +3,6 @@ inventario-service,8,0,100.00,CUMPLE,docs/evidencias/cobertura/inventario-servic
 ordenes-proveedores-service,47,4,92.16,CUMPLE,docs/evidencias/cobertura/ordenes-proveedores-service-jacoco.xml
 pedidos-service,104,25,80.62,CUMPLE,docs/evidencias/cobertura/pedidos-service-jacoco.xml
 productos-service,23,0,100.00,CUMPLE,docs/evidencias/cobertura/productos-service-jacoco.xml
-usuarios,260,83,75.80,CUMPLE,docs/evidencias/cobertura/usuarios-jacoco.xml
+usuarios,321,37,89.66,CUMPLE,docs/evidencias/cobertura/usuarios-jacoco.xml
 ventas-service,27,0,100.00,CUMPLE,docs/evidencias/cobertura/ventas-service-jacoco.xml
 armado-ia,PENDIENTE,PENDIENTE,>70,CUMPLE,Evidencia suministrada por el equipo; coverage.xml original no presente en este checkout

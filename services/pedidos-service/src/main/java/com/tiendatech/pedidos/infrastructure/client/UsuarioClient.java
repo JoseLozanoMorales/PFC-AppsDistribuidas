@@ -39,10 +39,11 @@ public class UsuarioClient implements UsuarioPort {
      */
     @Override
     public UsuarioInfo obtenerUsuario(Integer usuarioId) {
-        UsuarioResponse response = lectura(() -> restClient.get()
+        ApiEnvelope<UsuarioResponse> envelope = lectura(() -> restClient.get()
                 .uri("/api/usuarios/{id}", usuarioId)
                 .retrieve()
-                .body(UsuarioResponse.class));
+                .body(new ParameterizedTypeReference<ApiEnvelope<UsuarioResponse>>() { }));
+        UsuarioResponse response = envelope == null ? null : envelope.data();
         return response == null ? null : new UsuarioInfo(response.usuarioId(), response.nombre(),
                 response.cedula(), response.correo(), response.telefono(), response.usuario(),
                 response.rolId(), response.habilitado());
@@ -50,13 +51,14 @@ public class UsuarioClient implements UsuarioPort {
 
     @Override
     public List<DireccionInfo> obtenerDirecciones(Integer usuarioId) {
-        List<DireccionResponse> direcciones = lectura(() -> restClient.get()
+        ApiEnvelope<List<DireccionResponse>> envelope = lectura(() -> restClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/usuarios/{usuarioId}/direcciones")
                         .queryParam("view", "full")
                         .build(usuarioId))
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<DireccionResponse>>() {
+                .body(new ParameterizedTypeReference<ApiEnvelope<List<DireccionResponse>>>() {
                 }));
+        List<DireccionResponse> direcciones = envelope == null ? List.of() : envelope.data();
         return direcciones == null ? List.of() : direcciones.stream()
                 .map(d -> new DireccionInfo(d.direccionId(), d.usuarioId(), d.calle(), d.referencia(),
                         d.ciudadId(), d.ciudadNombre(), d.provinciaNombre(), d.habilitado()))
@@ -80,4 +82,7 @@ public class UsuarioClient implements UsuarioPort {
     private record DireccionResponse(Integer direccionId, Integer usuarioId, String calle,
                                      String referencia, Integer ciudadId, String ciudadNombre,
                                      String provinciaNombre, Boolean habilitado) { }
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    private record ApiEnvelope<T>(T data) { }
 }

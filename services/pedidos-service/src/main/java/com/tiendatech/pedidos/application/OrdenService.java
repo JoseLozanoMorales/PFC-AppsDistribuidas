@@ -126,7 +126,9 @@ public class OrdenService {
         }
 
         try {
-            facturaClient.generarFactura(orden.getOrdenId());
+            var detalle = ordenRepository.obtenerDetalle(
+                    orden.getOrdenId(), orden.getFecha(), Paginacion.de(0, 100)).content();
+            facturaClient.generarFactura(orden, detalle);
         } catch (Exception e) {
             // La orden YA está confirmada en la BD (commit hecho). Decide con el equipo:
             // reintento, marcar "pendiente_facturacion", o solo log + seguir.

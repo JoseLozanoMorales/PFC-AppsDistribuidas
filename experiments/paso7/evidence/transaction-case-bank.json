@@ -1,0 +1,1202 @@
+[
+  {
+    "case_id": 1,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026000,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 2,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026001,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 3,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 2000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026002,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 4,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026003,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 5,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026004,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 6,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026005,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 7,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026006,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 8,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 1000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026007,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 9,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 2000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026008,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 10,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 5000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026009,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 11,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026010,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 12,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026011,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 13,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026012,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 14,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 7000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026013,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 15,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 6000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026014,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 16,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026015,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 17,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026016,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 18,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 2000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026017,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 19,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026018,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 20,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026019,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 21,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 5000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026020,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 22,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 8000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026021,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 23,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 5000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026022,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 24,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 6000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026023,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 25,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 8000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026024,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 26,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 2000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026025,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 27,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026026,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 28,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 2000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026027,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 29,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026028,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 30,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026029,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 31,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026030,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 32,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 7000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026031,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 33,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026032,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 34,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026033,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 35,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026034,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 36,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 1000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026035,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 37,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026036,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 38,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 2000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026037,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 39,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 7000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026038,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 40,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 3000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026039,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 41,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026040,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 42,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026041,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 43,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026042,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 44,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026043,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 45,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026044,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 46,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 5000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026045,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 47,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026046,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 48,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026047,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 49,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026048,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 50,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 5000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026049,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 51,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 1000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026050,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 52,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 3000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026051,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 53,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026052,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 54,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026053,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 55,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 4000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026054,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 56,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026055,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 57,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026056,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 58,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026057,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 59,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 1000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026058,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 60,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 6000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026059,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 61,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 2000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026060,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 62,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026061,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 63,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026062,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 64,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026063,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 65,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026064,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 66,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 5000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026065,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 67,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026066,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 68,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026067,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 69,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 7000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026068,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 70,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026069,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 71,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 2000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026070,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 72,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026071,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 73,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026072,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 74,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026073,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 75,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 2000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026074,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 76,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 1000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026075,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 77,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 5000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026076,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 78,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 6000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026077,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 79,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 1000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026078,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 80,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026079,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 81,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 3000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026080,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 82,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 4000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026081,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 83,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 3000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026082,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 84,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 9000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026083,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 85,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 2000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026084,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 86,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 3000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026085,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 87,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 5000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026086,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 88,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026087,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 89,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 3000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026088,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 90,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 4000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026089,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 91,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 1000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026090,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 92,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 7000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026091,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 93,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 1000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026092,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 94,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026093,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 95,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 1000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026094,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 96,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026095,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 97,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 5000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026096,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 98,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 6000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026097,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 99,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026098,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 100,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 3000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026099,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 101,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026100,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 102,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 7000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026101,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 103,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 6000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026102,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 104,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026103,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 105,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 2000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026104,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 106,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 7000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026105,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 107,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 4000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026106,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 108,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 3000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026107,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 109,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026108,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 110,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 8000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026109,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 111,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 4000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026110,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 112,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 1000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026111,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 113,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026112,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 114,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 9000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026113,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 115,
+    "product_id": 1,
+    "quantity": 1,
+    "amount": 3000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026114,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 116,
+    "product_id": 1,
+    "quantity": 3,
+    "amount": 3000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026115,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 117,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 5000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026116,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 118,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 9000,
+    "fault": "none",
+    "fault_probability": 0.0,
+    "seed": 2026117,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 119,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 2000,
+    "fault": "omission",
+    "fault_probability": 0.35,
+    "seed": 2026118,
+    "expected_without_fault": "CONFIRMED"
+  },
+  {
+    "case_id": 120,
+    "product_id": 1,
+    "quantity": 2,
+    "amount": 5000,
+    "fault": "timing",
+    "fault_probability": 0.35,
+    "seed": 2026119,
+    "expected_without_fault": "CONFIRMED"
+  }
+]

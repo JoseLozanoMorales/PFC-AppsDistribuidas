@@ -1,0 +1,13 @@
+metrica,grupo_a,grupo_b,u,z_aprox,p_aprox,a12_a_mayor_b
+latencia_pago_p95_ms,2pc-c50-none,saga-c50-none,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c50-omission,saga-c50-omission,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c50-timing,saga-c50-timing,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c100-none,saga-c100-none,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c100-omission,saga-c100-omission,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c100-timing,saga-c100-timing,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c200-none,saga-c200-none,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c200-omission,saga-c200-omission,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c200-timing,saga-c200-timing,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c400-none,saga-c400-none,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c400-omission,saga-c400-omission,0.0,-2.611165,0.009023,0.0
+latencia_pago_p95_ms,2pc-c400-timing,saga-c400-timing,0.0,-2.611165,0.009023,0.0

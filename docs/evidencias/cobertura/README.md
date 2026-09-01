@@ -9,7 +9,7 @@ La cobertura se mide exclusivamente sobre la capa de lógica de negocio. Los ada
 | ordenes-proveedores-service | 6 | 47/51 | 92.16% |
 | ventas-service | 4 | 27/27 | 100.00% |
 | pedidos-service | 48 | 104/129 | 80.62% |
-| usuarios | 27 | 260/343 | 75.80% |
+| usuarios | 37 | 321/358 | 89.66% |
 | armado-ia | 27 | 405/540 | 75.00% |
 
 Los archivos `*-jacoco.xml` y `armado-ia-coverage.xml` son los reportes consumibles por Codecov o SonarCloud. La prueba `GatewayIntegrationTest` agrega tres flujos HTTP reales a través del API Gateway hacia productos, usuarios y pedidos.

@@ -1,0 +1,27 @@
+﻿info
+planning time: 973┬Ás
+execution time: 3ms
+distribution: local
+vectorized: true
+rows decoded from KV: 60 (3.3 KiB, 1 gRPC calls)
+cumulative time spent in KV: 2ms
+maximum memory usage: 30 KiB
+network usage: 0 B (0 messages)
+sql cpu time: 151┬Ás
+isolation level: serializable
+priority: normal
+quality of service: regular
+
+ÔÇó scan
+"  nodes: n1"
+"  actual row count: 60"
+"  KV time: 2ms"
+"  KV contention time: 0┬Ás"
+"  KV rows decoded: 60"
+"  KV bytes read: 3.3 KiB"
+"  KV gRPC calls: 1"
+"  estimated max memory allocated: 30 KiB"
+"  sql cpu time: 151┬Ás"
+"  estimated row count: 120 (0.02% of the table; stats collected 4 minutes ago)"
+"  table: orden@idx_orden_usuario_fecha"
+"  spans: [/1 - /1]"
