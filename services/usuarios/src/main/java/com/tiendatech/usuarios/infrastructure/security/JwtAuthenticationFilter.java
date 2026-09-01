@@ -52,7 +52,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write(
-                    "{\"success\":false,\"message\":\"JWT invalido o expirado\"}"
+                    "{\"status\":401,\"data\":null,\"message\":\"JWT invalido o expirado\",\"timestamp\":\""
+                            + java.time.Instant.now() + "\"}"
             );
         }
     }

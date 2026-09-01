@@ -42,11 +42,12 @@ public class ProductoClient implements ProductoPort {
      */
     @Override
     public ProductoInfo obtenerPrecioEIva(Integer productoId) {
-        List<ProductoListItem> productos = lectura(() -> restClient.get()
+        ApiEnvelope<List<ProductoListItem>> productosResponse = lectura(() -> restClient.get()
                 .uri("/api/productos?page=0&size=1000")
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<ProductoListItem>>() {
+                .body(new ParameterizedTypeReference<ApiEnvelope<List<ProductoListItem>>>() {
                 }));
+        List<ProductoListItem> productos = productosResponse == null ? List.of() : productosResponse.data();
 
         ProductoListItem producto = (productos == null ? List.<ProductoListItem>of() : productos).stream()
                 .filter(p -> productoId.equals(p.productoId()))
@@ -54,11 +55,12 @@ public class ProductoClient implements ProductoPort {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Producto " + productoId + " no encontrado en productos-service"));
 
-        List<IvaListItem> ivas = lectura(() -> restClient.get()
+        ApiEnvelope<List<IvaListItem>> ivasResponse = lectura(() -> restClient.get()
                 .uri("/api/sp/ivas")
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<IvaListItem>>() {
+                .body(new ParameterizedTypeReference<ApiEnvelope<List<IvaListItem>>>() {
                 }));
+        List<IvaListItem> ivas = ivasResponse == null ? List.of() : ivasResponse.data();
 
         BigDecimal porcentajeIva = (ivas == null ? List.<IvaListItem>of() : ivas).stream()
                 .filter(i -> producto.ivaId().equals(i.ivaId()))
@@ -92,4 +94,7 @@ public class ProductoClient implements ProductoPort {
             @JsonProperty("iva_id") Integer ivaId,
             @JsonProperty("porcentaje") BigDecimal porcentaje) {
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record ApiEnvelope<T>(T data) { }
 }

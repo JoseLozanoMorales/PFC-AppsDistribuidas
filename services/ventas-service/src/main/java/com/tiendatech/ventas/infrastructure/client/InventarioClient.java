@@ -23,6 +23,7 @@ public class InventarioClient implements InventarioPort {
 
     public InventarioClient(RestClient.Builder restClientBuilder,
                             @Value("${inventario.service.base-url}") String inventarioBaseUrl,
+                            @Value("${INTERNAL_SERVICE_TOKEN}") String internalToken,
                             @Value("${inventario.service.connect-timeout-ms:3000}") int connectTimeoutMs,
                             @Value("${inventario.service.read-timeout-ms:5000}") int readTimeoutMs) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
@@ -31,6 +32,7 @@ public class InventarioClient implements InventarioPort {
 
         this.restClient = restClientBuilder
                 .baseUrl(inventarioBaseUrl)
+                .defaultHeader("X-Internal-Token", internalToken)
                 .requestFactory(requestFactory)
                 .build();
     }

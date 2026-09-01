@@ -5,7 +5,7 @@
 **Institución:** Universidad Técnica Estatal de Quevedo (UTEQ)
 **Docente:** Ing. Gleiston C. Guerrero-Ulloa, Mgs.
 **Período académico:** 2026-2027
-**Entrega vigente:** Entrega 4 (E4) — refactor en capas, calidad de software, aplicaciones cliente y persistencia distribuida con mTLS
+**Entrega vigente:** Entrega 4 (E4) — refactor en capas, calidad de software, aplicaciones cliente y persistencia distribuida
 **Denominación anterior:** este repositorio se denominó `PFC-AppsDistribuidas` hasta la adopción de `TiendaTech` en la Entrega Final TA-PFC-E4; ambos nombres corresponden al mismo proyecto y equipo.
 **Rama de trabajo:** `main` (fusionada desde `feature/entrega-4` por PR con revisión cruzada)
 
@@ -27,12 +27,12 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 | Frente | Alcance | Estado | Evidencia |
 |---|---|---|---|
 | Arquitectura en capas | Refactor de los 6 microservicios Java a `domain`/`application`/`infrastructure`/`presentation`, con patrones GoF (Repository, Factory Method, Strategy, Observer, Decorator) | ✅ Completo | `docs/entrega4/PFC4.tex` §"Arquitectura del sistema", código en `*-service/src/main/java/org/example/` |
-| Persistencia distribuida | Clúster CockroachDB de 3 nodos, ahora con **mTLS** (certificados por integrante) en lugar de la conexión sin cifrar de E3 | ✅ Completo | `docker-compose.yml`, `.env.example`, `docs/diagrams/tiendatech-arquitectura-e4.drawio` |
+| Persistencia distribuida | Clúster CockroachDB de 3 nodos; cada microservicio es dueño de su esquema y no consulta esquemas ajenos | ✅ Completo | `docker-compose.yml`, `.env.example`, `docs/db/schema.sql` |
 | Aplicación web | SPA con 12 rutas documentadas, panel de administración completo | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación web", capturas en `docs/entrega4/img/` |
 | Aplicación móvil | App Android con 2 capacidades de dispositivo (caché local Room/SQLite + funcionalidad adicional documentada), pruebas unitarias e instrumentadas | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación móvil" |
 | Contratos Pact (consumidor-proveedor) | Verificación de contratos web↔backend y móvil↔backend | ⬜ No implementado | Declarado explícitamente en `docs/entrega4/PFC4.tex` §"Pruebas y CI/CD" |
-| Pirámide de pruebas backend | Unitarias en 4 de 6 microservicios (`usuarios`, `productos-service`, `inventario-service`, `pedidos-service`, este último con integración real vía Testcontainers) | 🟨 Parcial | `docs/entrega4/PFC4.tex` §"Pirámide de pruebas"; **`ordenes-proveedores-service` y `ventas-service` no tienen `src/test`** |
-| E2E / carga | Playwright (web) y Locust | ⬜ No implementado | No existe carpeta `tests/` en la raíz |
+| Pirámide de pruebas backend | Los 6 microservicios Java contienen pruebas; `pedidos-service` incluye integración con CockroachDB vía Testcontainers | ✅ Completo para Paso 4 | Código bajo `services/*/src/test/` |
+| Pruebas de carga | Escenario Locust versionado | ✅ Implementado | `tests/load/` |
 | CI/CD | `.github/workflows/ci.yml` (3 jobs: `android-mobile`, `crdb-tests`, `armado-ia-tests`) + `.github/workflows/publish-images.yml` (build multi-arquitectura de 8 imágenes) | 🟨 Parcial — cubre ~4 de los 7 jobs esperados por la rúbrica (falta `lint` Java/web dedicado y `test-web`, porque la web aún no tiene framework de pruebas configurado) | `.github/workflows/` |
 | Observabilidad (OpenTelemetry, Prometheus, Grafana) | Instrumentación de métricas, logs estructurados y trazas | ⬜ No implementado, declarado fuera de alcance por decisión consciente del equipo | `docs/entrega4/PFC4.tex` §"Observabilidad" y §"Discusión" |
 | Evaluación ISO/IEC 25010 | Medición formal de 5 características con intervalo de confianza 95% | ⬜ No implementado (depende de la observabilidad, que no se hizo) | `docs/entrega4/PFC4.tex` §"Evaluación ISO/IEC 25010" |
@@ -45,14 +45,14 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 | Servicio | Puerto | Persistencia | Comunicación saliente |
 |---|---:|---|---|
 | `tiendatech-gateway` (API Gateway) | 8180 (host) / 8080 (interno) | — (enrutador) | Enruta a los 7 microservicios |
-| `productos-service` | 8081 | CockroachDB (mTLS) | — |
-| `inventario-service` | 8082 | CockroachDB (mTLS) | — |
-| `pedidos-service` | 8083 | CockroachDB (mTLS) | `ventas-service`, `productos-service`, `usuarios-service` |
-| `ordenes-proveedores-service` | 8084 | CockroachDB (mTLS) | `inventario-service` (síncrono, Circuit Breaker) |
-| `usuarios-service` | 8085 | CockroachDB (mTLS) | — |
-| `ventas-service` | 8086 | CockroachDB (mTLS) | `inventario-service` (asíncrono, patrón Outbox) |
+| `productos-service` | 8081 | CockroachDB, esquema `productos` | `ventas-service` |
+| `inventario-service` | 8082 | CockroachDB, esquema `inventario` | — |
+| `pedidos-service` | 8083 | CockroachDB, esquema `pedidos` | `ventas-service`, `productos-service`, `usuarios-service` |
+| `ordenes-proveedores-service` | 8084 | CockroachDB, esquema `ordenes_proveedores` | `inventario-service` (síncrono, Circuit Breaker) |
+| `usuarios-service` | 8085 | CockroachDB, esquema `usuarios` | — |
+| `ventas-service` | 8086 | CockroachDB, esquema `ventas` | `inventario-service` (asíncrono, patrón Outbox) |
 | `armado-ia` (Python/FastAPI) | 8087 | — | `productos-service`, Amazon Bedrock (Nova Lite) |
-| `tiendatech-crdb-1` / `tiendatech-crdb-2` / `tiendatech-crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB, `num_replicas = 3`, mTLS | — |
+| `tiendatech-crdb-1` / `tiendatech-crdb-2` / `tiendatech-crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB local de 3 nodos, `num_replicas = 3`, modo desarrollo sin TLS | — |
 
 ---
 
@@ -75,19 +75,26 @@ git clone https://github.com/JoseLozanoMorales/TiendaTech.git
 cd TiendaTech
 ```
 
-Copie `.env.example` a `.env` y complete los secretos locales (`.env` está excluido por `.gitignore`). La conexión por defecto apunta al clúster CockroachDB con mTLS (certificados en `./crdb-certs`); revise `.env.example` para las variables de autenticación, correo y AWS Bedrock.
+Copie `.env.example` a `.env` y cambie los valores marcados con `reemplazar_`
+(`.env` está excluido por `.gitignore`). El Compose local crea e inicializa un
+clúster CockroachDB de tres nodos; no necesita certificados ni una base externa.
+En producción, `CRDB_DATASOURCE_URL` y `CRDB_CERTS_DIR` deben apuntar al clúster
+y certificados administrados por el equipo.
 
 Levantar el stack completo (gateway + 7 microservicios + `armado-ia`):
 
 ```bash
-docker compose up -d --build tiendatech-gateway
+cp .env.example .env
+docker compose up -d --build
 ```
 
 Comprobación:
 
 ```bash
-curl http://localhost:8180/actuator/health
-docker exec tiendatech-crdb-1 cockroach node status --certs-dir=/certs --host=localhost:26257
+docker compose ps
+curl --fail http://localhost:8180/actuator/health
+docker compose exec tiendatech-crdb-1 cockroach node status --insecure --host=localhost:26257
+python3 scripts/audit_paso4.py
 ```
 
 ---
@@ -109,10 +116,9 @@ El sistema se organiza como un API Gateway (Spring Cloud Gateway) que enruta hac
 
 Ver el detalle completo, con justificación de las decisiones de priorización del equipo, en `docs/entrega4/PFC4.tex` §"Pruebas y CI/CD". En resumen:
 
-- **Con pruebas unitarias reales:** `usuarios`, `productos-service`, `inventario-service`, `pedidos-service` (este último con la única prueba de integración real del backend, contra un CockroachDB real vía Testcontainers).
-- **Sin pruebas:** `ordenes-proveedores-service`, `ventas-service` — declarado como brecha significativa porque concentran la lógica de negocio más nueva de esta entrega.
+- **Con pruebas:** los seis microservicios Java (`usuarios`, `productos-service`, `inventario-service`, `pedidos-service`, `ordenes-proveedores-service` y `ventas-service`); `pedidos-service` incluye integración contra CockroachDB mediante Testcontainers.
 - **CI:** `.github/workflows/ci.yml` (lint + tests + APK móvil, tests backend CRDB, tests + lint Python de `armado-ia`) y `.github/workflows/publish-images.yml` (build y publicación multi-arquitectura de las 8 imágenes en Docker Hub).
-- **No implementado:** contratos Pact, pruebas E2E (Playwright), pruebas de carga (Locust), lint dedicado para todos los servicios Java y para la web.
+- **No implementado:** contratos Pact, pruebas E2E con Playwright y lint dedicado para todos los servicios Java y para la web. Las pruebas de carga Locust están en `tests/load/`.
 
 ---
 
@@ -153,7 +159,7 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 | D2 — Aplicación web | ✅ Completo |
 | D3 — Aplicación móvil | ✅ Completo |
 | D4.1 — Contratos Pact | ⬜ No implementado |
-| D4.2 — Persistencia distribuida | ✅ Completo (mTLS) |
+| D4.2 — Persistencia distribuida | ✅ Completo (clúster de 3 nodos y propiedad por esquema) |
 | D5.1 — Pirámide de pruebas | 🟨 Parcial (4/6 microservicios Java, sin E2E ni carga) |
 | D5.2 — Pipeline CI/CD | 🟨 Parcial (~4/7 jobs esperados) |
 | D6 — Observabilidad | ⬜ No implementado, fuera de alcance declarado |
@@ -166,12 +172,12 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 ## 9. Pendientes conocidos
 
 - Contratos Pact (consumer-driven) entre clientes web/móvil y backend: no iniciados.
-- `ordenes-proveedores-service` y `ventas-service` sin pruebas unitarias (`src/test` no existe en ninguno de los dos).
-- Sin carpeta `tests/` en la raíz: no hay E2E con Playwright ni pruebas de carga con Locust.
+- Falta ampliar la cobertura de `ordenes-proveedores-service` y `ventas-service`; ambos ya contienen pruebas unitarias.
+- No hay E2E con Playwright; sí existe el escenario de carga Locust en `tests/load/`.
 - Pipeline CI/CD cubre parcialmente los 7 jobs esperados por la rúbrica; falta `lint` dedicado para servicios Java y para la web (la web no tiene framework de pruebas configurado todavía).
 - Observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y evaluación ISO/IEC 25010: declaradas explícitamente fuera de alcance de esta entrega por restricción de tiempo del equipo — ver justificación completa en `docs/entrega4/PFC4.tex` §"Discusión".
 - Declaración de uso de IA generativa (Sección 7 de este README): pendiente de completar por el equipo.
-- Reproducibilidad local depende de sobrescribir `CRDB_DATASOURCE_URL` manualmente por sesión de terminal; riesgo de entorno mixto documentado en `docs/entrega4/PFC4.tex` §"Reproducibilidad".
+- Para producción deben sustituirse todos los valores de ejemplo y montarse los certificados del clúster administrado; el Compose local es autocontenido y no requiere sobrescribir `CRDB_DATASOURCE_URL`.
 # Paso 3 — TCP, gRPC y relojes de Lamport
 
 El carrito reserva stock mediante un canal TCP persistente entre `pedidos-service`

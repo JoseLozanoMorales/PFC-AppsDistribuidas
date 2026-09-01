@@ -3,6 +3,7 @@ package com.tiendatech.ventas.infrastructure.persistence;
 import com.tiendatech.ventas.domain.Factura;
 import com.tiendatech.ventas.domain.FacturaDetalle;
 import com.tiendatech.ventas.domain.FacturaStore;
+import com.tiendatech.ventas.domain.FacturaDraft;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adaptador JDBC (patron Repository) del puerto domain.FacturaStore.
@@ -27,7 +29,8 @@ public class CrdbFacturaRepository implements FacturaStore {
 
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Integer generarDesdeOrden(Integer ordenId) {
+    public Integer generar(FacturaDraft draft) {
+        Integer ordenId = draft.ordenId();
         List<Integer> existentes = jdbcTemplate.query(
                 "SELECT factura_id FROM ventas.factura_encabezado WHERE orden_id = ?",
                 (rs, rowNum) -> rs.getInt("factura_id"), ordenId);
@@ -37,26 +40,21 @@ public class CrdbFacturaRepository implements FacturaStore {
 
         Integer facturaId = jdbcTemplate.queryForObject("""
                 INSERT INTO ventas.factura_encabezado
-                    (orden_id, fecha_orden, usuario_id, nombre, correo,
-                     subtotal, total, numero)
-                SELECT o.orden_id, o.fecha, o.usuario_id, u.nombre, u.correo,
-                       o.subtotal, o.total,
-                       concat('FAC-E3-', CAST(orden_id AS STRING))
-                FROM pedidos.orden o
-                JOIN usuarios.usuario u ON u.usuario_id = o.usuario_id
-                WHERE o.orden_id = ?
+                    (orden_id, fecha_orden, usuario_id, subtotal, total, numero)
+                VALUES (?, ?, ?, ?, ?, concat('FAC-E3-', CAST(? AS STRING)))
                 RETURNING factura_id
-                """, Integer.class, ordenId);
+                """, Integer.class, ordenId, draft.fechaOrden(), draft.usuarioId(),
+                draft.subtotal(), draft.total(), ordenId);
 
-        jdbcTemplate.update("""
-                INSERT INTO ventas.factura_cuerpo
-                    (factura_id, producto_id, nombre_producto, cantidad,
-                     precio, subtotal, iva, total)
-                SELECT ?, producto_id, concat('Producto ', CAST(producto_id AS STRING)), cantidad,
-                       precio_unitario, subtotal, iva, total
-                FROM pedidos.detalle_orden
-                WHERE orden_id = ?
-                """, facturaId, ordenId);
+        for (FacturaDraft.Linea linea : draft.lineas()) {
+            jdbcTemplate.update("""
+                    INSERT INTO ventas.factura_cuerpo
+                        (factura_id, producto_id, nombre_producto, cantidad,
+                         precio, subtotal, iva, total)
+                    VALUES (?, ?, concat('Producto ', CAST(? AS STRING)), ?, ?, ?, ?, ?)
+                    """, facturaId, linea.productoId(), linea.productoId(), linea.cantidad(),
+                    linea.precio(), linea.subtotal(), linea.iva(), linea.total());
+        }
 
         jdbcTemplate.update("""
                 INSERT INTO ventas.factura_outbox (factura_id, estado)
@@ -124,5 +122,16 @@ public class CrdbFacturaRepository implements FacturaStore {
                 rs.getString("telefono"), rs.getString("direccion_entrega"),
                 rs.getBigDecimal("subtotal"), rs.getBigDecimal("total"), rs.getString("numero")
         ), args);
+    }
+
+    @Override
+    public List<Map<String, Object>> masVendidos(int limite) {
+        return jdbcTemplate.queryForList("""
+                SELECT producto_id AS "productoId", sum(cantidad) AS unidades
+                FROM ventas.factura_cuerpo
+                GROUP BY producto_id
+                ORDER BY unidades DESC, producto_id
+                LIMIT ?
+                """, limite);
     }
 }

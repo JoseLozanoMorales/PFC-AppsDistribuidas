@@ -48,7 +48,7 @@ public class JdbcInventarioRepository implements InventarioRepository {
                        p.nombre AS producto, m.cantidad, m.costo_unitario, m.costo_total,
                        m.referencia, m.observacion, m.producto_id
                 FROM inventario.movimiento_inventario m
-                JOIN productos.producto p ON p.producto_id = m.producto_id
+                JOIN inventario.inventario_producto p ON p.producto_id = m.producto_id
                 JOIN inventario.subtipo_movimiento s ON s.subtipo_id = m.subtipo_id
                 JOIN inventario.tipo_movimiento t ON t.tipo_id = s.tipo_id
                 ORDER BY m.fecha DESC, m.movimiento_id DESC
@@ -70,7 +70,7 @@ public class JdbcInventarioRepository implements InventarioRepository {
         }
 
         List<StockProducto> rows = jdbc.query(
-                "SELECT producto_id, nombre, stock FROM productos.producto WHERE producto_id = ? AND habilitado",
+                "SELECT producto_id, nombre, stock FROM inventario.inventario_producto WHERE producto_id = ? AND habilitado",
                 (rs, rowNum) -> new StockProducto(
                         rs.getLong("producto_id"),
                         rs.getString("nombre"),
@@ -100,7 +100,7 @@ public class JdbcInventarioRepository implements InventarioRepository {
 
         String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
         return jdbc.query("""
-                SELECT producto_id, nombre, stock FROM productos.producto
+                SELECT producto_id, nombre, stock FROM inventario.inventario_producto
                 WHERE habilitado AND producto_id IN (%s) ORDER BY producto_id
                 """.formatted(placeholders),
                 (rs, rowNum) -> new StockProducto(
@@ -144,12 +144,12 @@ public class JdbcInventarioRepository implements InventarioRepository {
         }
 
         Map<String, Object> producto = jdbc.queryForMap("""
-                SELECT stock, costo, preciounitario FROM productos.producto
+                SELECT stock, costo, precio_referencia FROM inventario.inventario_producto
                 WHERE producto_id = ? FOR UPDATE
                 """, productoId);
         int stockAnterior = ((Number) producto.get("stock")).intValue();
         BigDecimal costoAnterior = decimal(producto.get("costo"));
-        BigDecimal precioActual = decimal(producto.get("preciounitario"));
+        BigDecimal precioActual = decimal(producto.get("precio_referencia"));
         if ("SALIDA".equalsIgnoreCase(tipo) && stockAnterior < cantidad) {
             throw new IllegalArgumentException("Stock insuficiente para el producto " + productoId);
         }
@@ -187,20 +187,13 @@ public class JdbcInventarioRepository implements InventarioRepository {
                     productoId, costoNuevo, precioActual);
         }
         jdbc.update("""
-                UPDATE productos.producto
-                   SET stock = ?, costo = ?, valor_inventario = ?,
+                UPDATE inventario.inventario_producto
+                   SET stock = ?, costo = ?, valor_inventario = ?, actualizado_en = now(),
                        habilitado = CASE WHEN ? THEN false ELSE habilitado END
                  WHERE producto_id = ?
                 """, stockNuevo, costoNuevo,
                 costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP),
                 debeDesactivar, productoId);
-        jdbc.update("""
-                UPSERT INTO inventario.inventario_producto
-                    (producto_id, stock, stock_minimo, valor_inventario, actualizado_en)
-                VALUES (?, ?, COALESCE((SELECT stock_minimo FROM inventario.inventario_producto
-                                        WHERE producto_id = ?), 0), ?, now())
-                """, productoId, stockNuevo, productoId,
-                costoNuevo.multiply(BigDecimal.valueOf(stockNuevo)).setScale(2, RoundingMode.HALF_UP));
         jdbc.update("""
                 INSERT INTO inventario.kardex_inventario
                     (fecha, tipo_operacion, cantidad_entrada, costo_unitario_entrada,

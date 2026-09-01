@@ -28,16 +28,18 @@ class JdbcProductoRepositoryH10Test {
     }
 
     @Test
-    void masVendidosUsaConsultaVersionadaEnLugarDeFuncionDeBaseDeDatos() {
-        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(List.of());
+    void masVendidosEnriqueceRankingSinConsultarElEsquemaVentas() {
+        when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(List.of(
+                Map.of("productoId", 7L, "nombre", "CPU", "precio", 100)));
 
-        repository.masVendidos(5);
+        var resultado = repository.resumirVentas(List.of(
+                Map.of("productoId", 7L, "unidades", 4)));
 
         String sql = capturarSqlConArgumentos();
         assertThat(sql)
-                .doesNotContainIgnoringCase("productos_mas_vendidos_menu")
-                .containsIgnoringCase("ventas.factura_cuerpo")
+                .doesNotContainIgnoringCase("ventas.")
                 .containsIgnoringCase("productos.producto");
+        assertThat(resultado.getFirst()).containsEntry("unidades", 4);
     }
 
     @Test
