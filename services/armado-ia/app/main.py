@@ -16,7 +16,7 @@ from app.explicacion.bedrock_client import BedrockExplicacionClient
 from app.explicacion.client import ExplicacionClient
 from app.explicacion.fallback_client import DeterministicExplicacionClient
 from app.explicacion.service import ExplicacionService
-from app.schemas import AnalizarRequest, AnalizarResponse
+from app.schemas import AnalizarRequest
 from app.security import IdentidadOpcional, identidad_requerida
 
 

@@ -6,9 +6,9 @@ nada por usuario y no tiene motivo para exigirlas. Si vienen, se usan solo
 para logging del analisis. Un X-User-Id malformado nunca bloquea la
 peticion, simplemente se registra como anonimo.
 """
+import os
 from dataclasses import dataclass
 
-import os
 import jwt
 from fastapi import Header, HTTPException, Request
 
