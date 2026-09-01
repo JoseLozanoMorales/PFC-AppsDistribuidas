@@ -4,8 +4,8 @@
 > de este documento ya corrió: PR #81 (rama `ci/demo-rojo-verde`, commit `f58869b`,
 > merge `d183382`) contiene el fallo intencional; PR #82 (misma rama reabierta,
 > commit `e494b1a`, merge `21db029`) contiene la reversión a verde.
-> - PR rojo: https://github.com/JoseLozanoMorales/TiendaTech/pull/81
-> - PR verde: https://github.com/JoseLozanoMorales/TiendaTech/pull/82
+> - PR rojo: https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33554959074
+> - PR verde: https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557136678
 >
 > Esos son los links a los Pull Request, verificados desde `git log` + `git remote -v`
 > de este repo — no son un enlace a la ejecución de Actions en sí (ese ID numérico de
