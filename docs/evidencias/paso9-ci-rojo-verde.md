@@ -1,5 +1,23 @@
 # Paso 9 - Evidencia rojo/verde del pipeline CI/CD
 
+> **Estado: secuencia ya ejecutada.** Por el historial de git (`git log`), la secuencia
+> de este documento ya corrió: PR #81 (rama `ci/demo-rojo-verde`, commit `f58869b`,
+> merge `d183382`) contiene el fallo intencional; PR #82 (misma rama reabierta,
+> commit `e494b1a`, merge `21db029`) contiene la reversión a verde.
+> - PR rojo: https://github.com/JoseLozanoMorales/TiendaTech/pull/81
+> - PR verde: https://github.com/JoseLozanoMorales/TiendaTech/pull/82
+>
+> Esos son los links a los Pull Request, verificados desde `git log` + `git remote -v`
+> de este repo — no son un enlace a la ejecución de Actions en sí (ese ID numérico de
+> run no se puede derivar desde git local). Entrá a cada PR, pestaña de checks, y copiá
+> el link al run concreto de `ci-cd.yml` para reemplazar los dos placeholders de abajo.
+>
+> **Efecto colateral encontrado y corregido:** el comando de PowerShell de reversión
+> (`Set-Content -Encoding utf8`) dejó un BOM UTF-8 al inicio de `PaginacionTest.java`,
+> lo que rompía la compilación de *todo* el módulo de test de pedidos-service
+> (no solo el test tocado). Ya se corrigió el archivo (se quitó el BOM, mismo contenido)
+> y se actualizaron los comandos de este documento para no repetirlo.
+
 Este documento deja preparado el cambio mínimo para que `.github/workflows/ci-cd.yml`
 falle de forma limpia y evidente, y la corrección exacta para devolverlo a verde.
 Lo ejecuta el Responsable de Calidad (no se automatiza aquí porque implica push a GitHub).
@@ -33,10 +51,16 @@ por:
 Comando exacto para editar la línea sin abrir un editor (PowerShell, desde la raíz del repo):
 
 ```powershell
-(Get-Content services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java) `
-  -replace 'assertThat\(paginacion\.size\(\)\)\.isEqualTo\(20\);', 'assertThat(paginacion.size()).isEqualTo(21);' |
-  Set-Content -Encoding utf8 services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java
+$f = "services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java"
+$text = (Get-Content -Raw $f) -replace 'assertThat\(paginacion\.size\(\)\)\.isEqualTo\(20\);', 'assertThat(paginacion.size()).isEqualTo(21);'
+[System.IO.File]::WriteAllText($f, $text, (New-Object System.Text.UTF8Encoding($false)))
 ```
+
+> **No uses `Set-Content -Encoding utf8`**: en PowerShell 5.1 eso escribe un BOM UTF-8
+> al inicio del archivo. `javac` en el contenedor `maven:3.9-eclipse-temurin-21` no lo
+> tolera y rompe la compilación de *todo* el módulo de test con
+> `illegal character: '﻿'` — no solo el test que tocaste. `[System.IO.File]::WriteAllText`
+> con `UTF8Encoding($false)` escribe UTF-8 sin BOM y evita el problema.
 
 Commitear y subir en una rama de feature (para que dispare el trigger `pull_request`
 y no ensucie `main` directamente):
@@ -67,9 +91,9 @@ por este cambio: solo falla la celda `test-java (pedidos-service)`.
 Revertir la línea 18 a su valor original. Comando exacto (mismo mecanismo, a la inversa):
 
 ```powershell
-(Get-Content services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java) `
-  -replace 'assertThat\(paginacion\.size\(\)\)\.isEqualTo\(21\);', 'assertThat(paginacion.size()).isEqualTo(20);' |
-  Set-Content -Encoding utf8 services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java
+$f = "services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java"
+$text = (Get-Content -Raw $f) -replace 'assertThat\(paginacion\.size\(\)\)\.isEqualTo\(21\);', 'assertThat(paginacion.size()).isEqualTo(20);'
+[System.IO.File]::WriteAllText($f, $text, (New-Object System.Text.UTF8Encoding($false)))
 
 git add services/pedidos-service/src/test/java/com/tiendatech/pedidos/domain/PaginacionTest.java
 git commit -m "ci: revertir fallo intencional, vuelve a verde"

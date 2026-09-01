@@ -1,4 +1,4 @@
-﻿package com.tiendatech.pedidos.domain;
+package com.tiendatech.pedidos.domain;
 
 import org.junit.jupiter.api.Test;
 
