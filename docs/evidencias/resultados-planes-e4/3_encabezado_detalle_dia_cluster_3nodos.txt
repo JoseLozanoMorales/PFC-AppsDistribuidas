@@ -1,0 +1,52 @@
+﻿info
+planning time: 2ms
+execution time: 11ms
+distribution: full
+vectorized: true
+rows decoded from KV: 3,288 (238 KiB, 2 gRPC calls)
+cumulative time spent in KV: 9ms
+maximum memory usage: 200 KiB
+network usage: 208 KiB (16 messages)
+regions: aws
+sql cpu time: 4ms
+isolation level: serializable
+priority: normal
+quality of service: regular
+
+ÔÇó hash join
+Ôöé nodes: n2, n3
+Ôöé actual row count: 1,644
+Ôöé estimated max memory allocated: 390 KiB
+Ôöé estimated max sql temp disk usage: 0 B
+Ôöé sql cpu time: 2ms
+Ôöé estimated row count: 1,230
+Ôöé equality: (fecha, orden_id) = (fecha, orden_id)
+Ôöé right cols are key
+Ôöé
+Ôö£ÔöÇÔöÇ ÔÇó scan
+Ôöé     nodes: n2
+Ôöé     actual row count: 1,644
+Ôöé     KV time: 3ms
+Ôöé     KV contention time: 0┬Ás
+Ôöé     KV rows decoded: 1,644
+Ôöé     KV bytes read: 117 KiB
+Ôöé     KV gRPC calls: 1
+Ôöé     estimated max memory allocated: 190 KiB
+Ôöé     sql cpu time: 811┬Ás
+Ôöé     estimated row count: 1,980 (0.33% of the table; stats collected 2 hours ago)
+Ôöé     table: detalle_orden@pk_detalle_orden
+Ôöé     spans: [/'2026-07-15' - /'2026-07-15']
+Ôöé
+ÔööÔöÇÔöÇ ÔÇó scan
+"      nodes: n3"
+"      actual row count: 1,644"
+"      KV time: 5ms"
+"      KV contention time: 0┬Ás"
+"      KV rows decoded: 1,644"
+"      KV bytes read: 121 KiB"
+"      KV gRPC calls: 1"
+"      estimated max memory allocated: 220 KiB"
+"      sql cpu time: 1ms"
+"      estimated row count: 1,230 (0.21% of the table; stats collected 2 hours ago)"
+"      table: orden@pk_orden"
+"      spans: [/'2026-07-15' - /'2026-07-15']"
