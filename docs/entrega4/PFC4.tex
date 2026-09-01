@@ -508,6 +508,29 @@
 
     Mantener alineados encabezado y detalle bajo los mismos límites temporales reduce los rangos examinados en reportes trimestrales y evita una junta distribuida entre fragmentos ubicados en nodos distintos --- la razón que documenta ADR-003 para esta elección.
 
+    \paragraph{Distribución de rangos de \texttt{pedidos.orden}, verificada (Paso 5.4).} La Tabla~\ref{tab:rangos-pedidos} confronta el conteo real de órdenes por trimestre (\texttt{\seqsplit{docs/evidencias/conteo-trimestral-pedidos-e4.txt}}) contra el \texttt{key\_count} de cada rango físico verificado con \texttt{SHOW RANGES FROM TABLE pedidos.orden WITH DETAILS} (\texttt{\seqsplit{docs/evidencias/rangos-pedidos-e4.txt}}). Los cuatro trimestres de 2026 --- el único año con datos, porque \texttt{seeds.sql} genera el conjunto íntegramente dentro de 2026 --- coinciden exactamente entre ambas fuentes. Los rangos anterior a 2026 y posterior a 2026 aparecen vacíos de órdenes en el conteo directo, pero su \texttt{key\_count} en \texttt{SHOW RANGES} es alto (30\,003 y 1\,200\,423 respectivamente): esto no es un error de la fragmentación, es evidencia de que CockroachDB fusiona automáticamente rangos físicos pequeños o vacíos con el rango contiguo de otra tabla en el espacio de claves cuando ambos están muy por debajo del tamaño objetivo de rango (64\,MiB) --- en este caso, con datos de una tabla vecina, no de \texttt{orden}. Reportar el desajuste en los extremos en vez de forzar una coincidencia que no existe es más honesto que omitirlo.
+
+    \begin{table}[H]
+        \centering
+        \caption{Distribución de rangos de \texttt{pedidos.orden}: conteo real de órdenes por trimestre frente al \texttt{key\_count} verificado en el rango correspondiente.}
+        \label{tab:rangos-pedidos}
+        \small
+        \begin{tabular}{lrrl}
+        \toprule
+        \textbf{Fragmento} & \textbf{Órdenes (conteo real)} & \textbf{key\_count del rango} & \textbf{¿Coincide?} \\
+        \midrule
+        Antes de 2026-01-01 & 0 & 30\,003 & No --- rango fusionado con tabla vecina \\
+        2026 T1 (ene--mar) & 147\,959 & 147\,959 & Sí \\
+        2026 T2 (abr--jun) & 149\,604 & 149\,604 & Sí \\
+        2026 T3 (jul--sep) & 151\,248 & 151\,248 & Sí \\
+        2026 T4 (oct--dic) & 151\,189 & 151\,189 & Sí \\
+        Desde 2027-01-01 & 0 & 1\,200\,423 & No --- rango fusionado con tabla vecina \\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+
+    Los seis rangos mantienen el factor de replicación 3 (\texttt{voting\_replicas=\{1,2,3\}}) y sus líderes de arriendo (\emph{lease holder}) están repartidos entre los tres nodos del clúster (1, 1, 1, 2, 3, 2), confirmando que la fragmentación es física y no solo lógica.
+
     \paragraph{Fragmentación del catálogo, en notación formal (nuevo en E4).} El catálogo real (\texttt{productos.producto}) solo tenía cuatro filas al iniciar esta verificación --- volumen insuficiente para fragmentar con sentido. Se generó un dataset sintético determinista de 150 productos (\texttt{\seqsplit{docs/db/seed-catalogo-sintetico.sql}}), distribuido proporcionalmente al campo \texttt{peso\_presupuesto} que ya existía en \texttt{productos.categoria\_producto} --- pensado originalmente para el motor de recomendación \texttt{armado-ia} ---, para no inventar una distribución arbitraria de productos por categoría; los datos quedan declarados como sintéticos en el propio script, consistente con el criterio de piso P6 de la rúbrica. Sea $P$ la relación \texttt{productos.producto}. Su fragmentación horizontal primaria por \texttt{categoria\_id} produce diez fragmentos:
 
     \begin{equation}
@@ -541,6 +564,27 @@
     \end{table}
 
     A diferencia de \texttt{pedidos.orden}, esta fragmentación no está atada a ningún patrón de acceso recurrente del negocio --- no hay reportes trimestrales de catálogo ---; su propósito es cumplir el requisito formal de esta guía y demostrar el mecanismo, no resolver un problema de escala que un catálogo de 154 filas no tiene todavía. Se documenta esta honestidad en vez de presentar la fragmentación como una necesidad operativa inexistente, siguiendo el mismo criterio de transparencia del resto de esta entrega.
+
+    \paragraph{Prueba de tolerancia a fallos, con espera de 30 segundos y reintegración medida por sondeo (Paso 5.5, repetida con la secuencia exacta de la guía).} La prueba de julio (\texttt{\seqsplit{docs/evidencias/probar-tolerancia-fallos.ps1}}, documentada en \texttt{\seqsplit{docs/evidencias/cluster-cockroachdb-3-nodos.md}}) usaba esperas fijas (8\,s tras la caída, 12\,s tras la recuperación) y nunca midió el tiempo de reintegración de forma directa. Se repitió la prueba el 1 de septiembre de 2026 con un script adaptado (\texttt{\seqsplit{docs/evidencias/probar-tolerancia-fallos-e4.ps1}}) que sigue la secuencia literal de esta guía: contar registros con los tres nodos arriba, detener un nodo, repetir la consulta de inmediato, esperar exactamente 30 segundos, observar la redistribución, reincorporar el nodo y medir el tiempo de reintegración sondeando \texttt{cockroach node status --format=csv} cada segundo hasta que el nodo reporte \texttt{is\_live=true}, en vez de inferirlo de una espera fija. La Tabla~\ref{tab:tolerancia-fallos} resume las cuatro consultas ejecutadas (\texttt{\seqsplit{docs/evidencias/resultados-tolerancia-e4/mediciones.csv}}); la bitácora completa con marcas de tiempo por evento queda en \texttt{\seqsplit{docs/evidencias/resultados-tolerancia-e4/bitacora-tiempos.csv}}.
+
+    \begin{table}[H]
+        \centering
+        \caption{Prueba de tolerancia a fallos: latencia y resultado de la consulta \texttt{count(*)} sobre \texttt{pedidos.orden} en cada etapa.}
+        \label{tab:tolerancia-fallos}
+        \small
+        \begin{tabular}{lrrl}
+        \toprule
+        \textbf{Etapa} & \textbf{Latencia (ms)} & \textbf{Resultado} & \textbf{Éxito} \\
+        \midrule
+        Tres nodos, antes de la caída & 464.01 & 1\,644 órdenes & Sí \\
+        Inmediatamente tras la caída del nodo 2 & 4\,919.55 & 1\,644 órdenes & Sí \\
+        Tras 30\,s de espera & 428.94 & 1\,644 órdenes & Sí \\
+        Tras la reintegración del nodo 2 & 918.40 & 1\,644 órdenes & Sí \\
+        \bottomrule
+        \end{tabular}
+    \end{table}
+
+    Las cuatro consultas devolvieron el mismo resultado (1\,644 órdenes), sin pérdida ni inconsistencia de datos en ningún momento de la prueba. La latencia se disparó de 464.01\,ms a 4\,919.55\,ms inmediatamente tras el \texttt{docker kill} del nodo 2 --- consistente con la reelección de líder Raft en los rangos cuyo \emph{lease holder} era ese nodo ---, y bajó a 428.94\,ms tras los 30 segundos de espera, una vez completada la reelección y estabilizado el clúster con dos nodos activos. Tras reincorporar el nodo 2, la latencia subió levemente a 918.40\,ms, coherente con el nodo poniéndose al día antes de volver a participar del reparto de trabajo. El tiempo de reintegración, medido por sondeo real contra el estado del nodo y no estimado con una espera fija, fue de $3.62$ segundos desde el \texttt{docker start} hasta que \texttt{cockroach node status} reportó al nodo 2 como \texttt{is\_live=true}.
 
     \subsection{Posición CAP y modelo de consistencia por agregado (recuperado de E1)}
     \label{sec:cap-consistencia}
