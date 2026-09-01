@@ -22,7 +22,7 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Cada servicio valida firma HS256 y expiración, aun si se evita el Gateway. */
+/** Cada servicio valida firma HS256 y expiracion, aun si se evita el Gateway. */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class JwtValidationFilter extends OncePerRequestFilter {
@@ -38,7 +38,8 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         this.mapper = mapper;
     }
 
-    @Override protected boolean shouldNotFilter(HttpServletRequest request) {
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         if (!path.startsWith("/api/") || "OPTIONS".equalsIgnoreCase(request.getMethod())) return true;
         if (path.equals("/api/login") || path.startsWith("/api/otp/") || path.equals("/api/usuarios/crear")
@@ -50,35 +51,75 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/ciudades"));
     }
 
-    @Override protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                               FilterChain chain) throws ServletException, IOException {
-        String supplied = request.getHeader("X-Internal-Token");
-        if (!internalToken.isBlank() && supplied != null && MessageDigest.isEqual(
-                internalToken.getBytes(StandardCharsets.UTF_8), supplied.getBytes(StandardCharsets.UTF_8))) {
-            chain.doFilter(request, response); return;
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        if (tokenInternoValido(request)) {
+            chain.doFilter(request, response);
+            return;
         }
         String authorization = request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer ")) { unauthorized(response, "JWT requerido"); return; }
+        if (!authorizationValida(authorization)) {
+            unauthorized(response, "JWT requerido");
+            return;
+        }
+        validarJwtORechazar(authorization.substring(7), response, chain, request);
+    }
+
+    private boolean tokenInternoValido(HttpServletRequest request) {
+        String supplied = request.getHeader("X-Internal-Token");
+        return !internalToken.isBlank() && supplied != null && MessageDigest.isEqual(
+                internalToken.getBytes(StandardCharsets.UTF_8), supplied.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static boolean authorizationValida(String authorization) {
+        return authorization != null && authorization.startsWith("Bearer ");
+    }
+
+    private void validarJwtORechazar(String token, HttpServletResponse response, FilterChain chain,
+                                     HttpServletRequest request) throws ServletException, IOException {
         try {
-            String[] parts = authorization.substring(7).split("\\.");
-            if (parts.length != 3) throw new IllegalArgumentException();
-            JsonNode header = mapper.readTree(Base64.getUrlDecoder().decode(parts[0]));
-            if (!"HS256".equals(header.path("alg").asText())) throw new IllegalArgumentException();
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(secret, "HmacSHA256"));
-            byte[] expected = mac.doFinal((parts[0] + "." + parts[1]).getBytes(StandardCharsets.US_ASCII));
-            if (!MessageDigest.isEqual(expected, Base64.getUrlDecoder().decode(parts[2]))) throw new IllegalArgumentException();
-            JsonNode claims = mapper.readTree(Base64.getUrlDecoder().decode(parts[1]));
-            if (!claims.has("exp") || claims.path("exp").asLong() <= Instant.now().getEpochSecond()) throw new IllegalArgumentException();
+            validarJwt(token);
             chain.doFilter(request, response);
-        } catch (Exception ex) { unauthorized(response, "JWT invalido o expirado"); }
+        } catch (Exception ex) {
+            unauthorized(response, "JWT invalido o expirado");
+        }
+    }
+
+    private void validarJwt(String token) throws Exception {
+        String[] parts = token.split("\\.");
+        if (parts.length != 3) throw new IllegalArgumentException();
+        validarAlgoritmo(parts[0]);
+        validarFirma(parts);
+        validarExpiracion(parts[1]);
+    }
+
+    private void validarAlgoritmo(String headerPart) throws IOException {
+        JsonNode header = mapper.readTree(Base64.getUrlDecoder().decode(headerPart));
+        if (!"HS256".equals(header.path("alg").asText())) throw new IllegalArgumentException();
+    }
+
+    private void validarFirma(String[] parts) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(secret, "HmacSHA256"));
+        byte[] expected = mac.doFinal((parts[0] + "." + parts[1]).getBytes(StandardCharsets.US_ASCII));
+        if (!MessageDigest.isEqual(expected, Base64.getUrlDecoder().decode(parts[2]))) throw new IllegalArgumentException();
+    }
+
+    private void validarExpiracion(String claimsPart) throws IOException {
+        JsonNode claims = mapper.readTree(Base64.getUrlDecoder().decode(claimsPart));
+        if (!claims.has("exp") || claims.path("exp").asLong() <= Instant.now().getEpochSecond()) throw new IllegalArgumentException();
     }
 
     private void unauthorized(HttpServletResponse response, String message) throws IOException {
-        response.setStatus(401); response.setContentType("application/json"); response.setCharacterEncoding("UTF-8");
+        response.setStatus(401);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", 401); body.put("data", null); body.put("message", message); body.put("timestamp", Instant.now());
+        body.put("status", 401);
+        body.put("data", null);
+        body.put("message", message);
+        body.put("timestamp", Instant.now());
         mapper.writeValue(response.getWriter(), body);
     }
 }
-

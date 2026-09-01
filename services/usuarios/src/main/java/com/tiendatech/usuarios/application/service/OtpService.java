@@ -67,37 +67,50 @@ public class OtpService {
             throw new OtpTooManyRequestsException("Demasiados envíos para este correo. Intenta más tarde.");
         }
 
-        String txId = (txIdReuso != null && !txIdReuso.isBlank()) ? txIdReuso : UUID.randomUUID().toString();
-        int bound = (int) Math.pow(10, otpLen);
-        String code = String.format("%0" + otpLen + "d", RAND.nextInt(bound));
+        String txId = resolverTxId(txIdReuso);
+        String code = generarCodigoOtp();
 
         String hash = BCrypt.hashpw(code, BCrypt.gensalt());
         String cacheKey = key(email, txId);
         otpStore.saveOtpHash(cacheKey, hash);
 
-        // Email
         String body = """
                 Tu código de verificación es: %s
                 Expira en %d minutos.
                 Si no solicitaste este código, ignora este correo.
                 """.formatted(code, otpTtlMin);
 
-        boolean mailSent = false;
+        boolean mailSent = enviarOtpOFallback(email, txId, code, cacheKey, body);
+        return construirRespuestaEnvio(txId, email, mailSent, code);
+    }
+
+    private static String resolverTxId(String txIdReuso) {
+        return (txIdReuso != null && !txIdReuso.isBlank()) ? txIdReuso : UUID.randomUUID().toString();
+    }
+
+    private boolean enviarOtpOFallback(String email, String txId, String code, String cacheKey, String body) {
         try {
             emailPort.send(email, "Código de verificación - TiendaTech", body);
-            mailSent = true;
             log.info("OTP enviado a {} txId={}", email, txId);
+            return true;
         } catch (Exception ex) {
-            // no dejes un OTP huérfano si el correo falló
-            if (!mailFallbackEnabled) {
-                otpStore.removeOtp(cacheKey);
-                log.error("Error enviando OTP a {}: {}", email, ex.getMessage(), ex);
-                throw new RuntimeException("MAIL_SEND_FAILED: " + ex.getMessage(), ex);
-            }
-            log.warn("SMTP no disponible. Fallback local activo para OTP. correo={} txId={} otp={}",
-                    email, txId, code, ex);
+            manejarFalloEnvioOtp(email, txId, code, cacheKey, ex);
+            return false;
         }
+    }
 
+    // no dejes un OTP huérfano si el correo falló
+    private void manejarFalloEnvioOtp(String email, String txId, String code, String cacheKey, Exception ex) {
+        if (!mailFallbackEnabled) {
+            otpStore.removeOtp(cacheKey);
+            log.error("Error enviando OTP a {}: {}", email, ex.getMessage(), ex);
+            throw new RuntimeException("MAIL_SEND_FAILED: " + ex.getMessage(), ex);
+        }
+        log.warn("SMTP no disponible. Fallback local activo para OTP. correo={} txId={} otp={}",
+                email, txId, code, ex);
+    }
+
+    private Map<String, Object> construirRespuestaEnvio(String txId, String email, boolean mailSent, String code) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("txId", txId);
         response.put("correo", email);
@@ -110,6 +123,11 @@ public class OtpService {
             response.put("message", "SMTP no disponible; usa devCode solo para pruebas locales.");
         }
         return response;
+    }
+
+    private String generarCodigoOtp() {
+        int bound = (int) Math.pow(10, otpLen);
+        return String.format("%0" + otpLen + "d", RAND.nextInt(bound));
     }
 
     public boolean validar(String email, String code, String txId) {

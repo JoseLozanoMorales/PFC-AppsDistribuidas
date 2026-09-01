@@ -248,31 +248,57 @@ public class JdbcProductoRepository implements ProductoRepository {
 
     @Transactional
     public Long agregarImagen(Integer productoId, ImagenProducto imagen, String descripcion, boolean portada) {
-        if (imagen == null || imagen.estaVacia()) throw new IllegalArgumentException("La imagen está vacía");
-        String mime = imagen.mimeType() == null ? "application/octet-stream" : imagen.mimeType();
-        if (!mime.startsWith("image/")) throw new IllegalArgumentException("Solo se permiten imágenes");
-        if (imagen.pesoBytes() > 8L * 1024 * 1024) throw new IllegalArgumentException("La imagen supera 8 MB");
+        validarImagen(imagen);
+        String mime = mimeType(imagen);
         byte[] content = imagen.contenido();
-        byte[] hash;
+        byte[] hash = sha256(content);
+        List<Long> existing = buscarImagenExistente(productoId, hash, content);
+        if (!existing.isEmpty()) {
+            return reutilizarImagenExistente(productoId, existing.get(0), portada);
+        }
+        return insertarImagen(productoId, imagen, descripcion, portada, mime, hash, content);
+    }
+
+    private static void validarImagen(ImagenProducto imagen) {
+        if (imagen == null || imagen.estaVacia()) throw new IllegalArgumentException("La imagen esta vacia");
+        String mime = mimeType(imagen);
+        if (!mime.startsWith("image/")) throw new IllegalArgumentException("Solo se permiten imagenes");
+        if (imagen.pesoBytes() > 8L * 1024 * 1024) throw new IllegalArgumentException("La imagen supera 8 MB");
+    }
+
+    private static String mimeType(ImagenProducto imagen) {
+        return imagen.mimeType() == null ? "application/octet-stream" : imagen.mimeType();
+    }
+
+    private static byte[] sha256(byte[] content) {
         try {
-            hash = MessageDigest.getInstance("SHA-256").digest(content);
+            return MessageDigest.getInstance("SHA-256").digest(content);
         } catch (Exception ex) {
             throw new IllegalStateException("No fue posible calcular la huella de la imagen", ex);
         }
-        List<Long> existing = jdbc.queryForList("""
+    }
+
+    private List<Long> buscarImagenExistente(Integer productoId, byte[] hash, byte[] content) {
+        return jdbc.queryForList("""
                 SELECT galeria_id FROM productos.galeria_productos_v2
                 WHERE producto_id=? AND habilitado AND (hash_sha256=? OR contenido=?)
                 ORDER BY galeria_id LIMIT 1
                 """, Long.class, productoId, hash, content);
-        if (!existing.isEmpty()) {
-            Long existingId = existing.get(0);
-            if (portada) {
-                jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false, para_menu=false WHERE producto_id=?", productoId);
-                jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=true, para_menu=true WHERE galeria_id=?", existingId);
-            }
-            return existingId;
+    }
+
+    private Long reutilizarImagenExistente(Integer productoId, Long galeriaId, boolean portada) {
+        if (portada) {
+            jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false, para_menu=false WHERE producto_id=?", productoId);
+            jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=true, para_menu=true WHERE galeria_id=?", galeriaId);
         }
-        if (portada) jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false WHERE producto_id=?", productoId);
+        return galeriaId;
+    }
+
+    private Long insertarImagen(Integer productoId, ImagenProducto imagen, String descripcion, boolean portada,
+                                String mime, byte[] hash, byte[] content) {
+        if (portada) {
+            jdbc.update("UPDATE productos.galeria_productos_v2 SET es_portada=false WHERE producto_id=?", productoId);
+        }
         return jdbc.queryForObject("""
                 INSERT INTO productos.galeria_productos_v2
                     (producto_id, descripcion, habilitado, es_portada, para_galeria, para_menu,
