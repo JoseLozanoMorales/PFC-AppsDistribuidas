@@ -1,4 +1,4 @@
-# Documento acumulativo — cierre del Paso 13
+# Documento acumulativo y reproducibilidad — Pasos 13 y 14
 
 La versión de cierre es `PFC4.tex` y su salida `PFC4.pdf`. El contenido de cierre se integró en los nombres originales. El informe usa evidencia del commit `6cfe0e8bac8d142b7986a4a3265721f404e84156`, consultado el 1 de septiembre de 2026; no supone que el árbol local coincida con él.
 
@@ -22,7 +22,59 @@ Alternativa con la imagen TeX Live ya disponible, desde la raíz del repositorio
 docker run --rm --network none --mount "type=bind,source=$($PWD.Path),target=/work" -w /work/docs/entrega4 texlive/texlive:latest sh -c "pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex && biber PFC4 && pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex && pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex"
 ```
 
-La compilación no inicia TiendaTech ni ejecuta experimentos. El cierre se compiló con TeX Live 2026 y Biber; la etiqueta Docker `latest` es mutable, por lo que para reproducibilidad estricta debe fijarse el digest de la imagen utilizada.
+La compilación no inicia TiendaTech ni ejecuta experimentos. El cierre se compiló
+con TeX Live 2026 y Biber. La comprobación del Paso 14 resolvió la imagen local
+`texlive/texlive:latest` como
+`sha256:8957c916b8160049f89c24d362a6d86c09d8a04095acde37e88404c4afed85b4`;
+se conserva el identificador porque la etiqueta `latest` es mutable.
+
+## Reproducción de extremo a extremo (objetivo: menos de 15 minutos)
+
+Los siguientes comandos parten de una clonación limpia y no requieren levantar los
+microservicios. Se validan con CPython 3.11.1; `run_paso8.py` y el cuaderno usan
+solo la biblioteca estándar. Matplotlib 3.9.0 está fijado para las figuras PNG.
+
+```powershell
+git clone https://github.com/JoseLozanoMorales/TiendaTech.git
+cd TiendaTech
+python -m venv .venv-repro
+.\.venv-repro\Scripts\python -m pip install --disable-pip-version-check matplotlib==3.9.0
+
+# Banco, generador, carga, inyector y oráculo
+Push-Location experiments/paso7
+..\..\.venv-repro\Scripts\python -m unittest -v test_coordination_lab.py
+Pop-Location
+
+# Matriz oficial ya ejecutada: regeneración determinista en un directorio temporal
+.\.venv-repro\Scripts\python experiments/paso8/run_paso8.py --output .repro-paso14 --repeticiones 5 --concurrencias 50 100 200 400 --fault-probability 0.10 --delay-seconds 0.05 --warmup-seconds 0 --seed 2026
+
+# Cuaderno de análisis y figuras del PDF
+.\.venv-repro\Scripts\python experiments/paso8/execute_notebook.py
+.\.venv-repro\Scripts\python docs/entrega4/cierre/generar_figuras.py
+
+# Documento acumulativo
+Set-Location docs/entrega4
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+biber PFC4
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+```
+
+La duración se mide desde el primer `python -m unittest` hasta la última pasada de
+pdfLaTeX. La descarga inicial de dependencias no se incluye porque depende de la red;
+sus versiones sí quedan fijadas en los comandos. La carpeta `.repro-paso14/` es salida
+temporal y puede eliminarse después de comparar su estructura y los invariantes con
+`experiments/paso8/resultados/`.
+
+### Resultado de la comprobación
+
+El 1 de septiembre de 2026 se ejecutó el procedimiento sobre una clonación local
+aislada del árbol candidato, con CPython 3.14.3 (compatible con la referencia 3.11.1)
+y TeX Live 2026. Las tres pruebas unitarias aprobaron; la matriz produjo 120 corridas,
+el oráculo aprobó 120/120 y no observó inconsistencias. El procesamiento completo,
+incluidas las figuras y la compilación de 39 páginas, tomó **623,55 segundos
+(10 min 23,55 s)**, por debajo del límite de quince minutos. La instalación o descarga
+de herramientas quedó fuera del cronómetro por depender de la red.
 
 ## Figuras reproducibles
 
@@ -50,4 +102,7 @@ Las conclusiones individuales proceden de los textos anteriores y se actualizaro
 
 ## Estado de publicación
 
-La migración no añade archivos a Git. El logo y `cierre/` siguen sin rastrear en este corte local; deben incorporarse si se desea compilar desde un clon. Los v2 se mantienen únicamente como respaldo temporal y no son dependencias del documento oficial.
+El logo, las imágenes, `cierre/`, los datos crudos, el banco experimental, el
+cuaderno y `CITATION.cff` forman el paquete que debe quedar rastreado por Git.
+Los archivos `PFC4v2.*` son respaldos locales y no son dependencias del documento
+oficial.

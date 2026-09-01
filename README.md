@@ -141,15 +141,41 @@ pdflatex PFC4.tex
 
 ## 7. Declaración de uso de IA generativa
 
-*(Pendiente de completar por el equipo)*
+El equipo declara el uso de **Claude** por Jhinson y Andy, y de **Codex** por
+Jeremy y José, como apoyo para análisis técnico, desarrollo, revisión y redacción.
+Cada integrante conserva la responsabilidad sobre la comprobación de su aporte:
+Jhinson revisó arquitectura y decisiones; Jeremy, implementación y banco de
+pruebas; Andy, calidad, CI y seguridad; y José, trazabilidad, fuentes, declaraciones
+y compilación documental. La declaración completa, con propósito y secciones
+afectadas, está en `docs/entrega4/PFC4.tex`, sección "Declaraciones".
 
-| Herramienta | Propósito | Alcance |
-|---|---|---|
-| | | |
+## 8. Paquete de reproducibilidad
+
+El paquete experimental está formado por:
+
+- `experiments/paso7/coordination_lab.py`: generador determinista, carga concurrente,
+  inyector de fallos y oráculo de consistencia.
+- `experiments/paso7/evidence/`: bancos de casos y salidas auditables del piloto.
+- `experiments/paso8/run_paso8.py`: ejecución de la matriz, análisis estadístico y
+  generación de figuras SVG.
+- `experiments/paso8/resultados/experimento_crudo.csv`: 120 corridas crudas, junto
+  con resúmenes, bases SQLite y metadatos.
+- `experiments/paso8/analisis.ipynb`: cuaderno de inspección independiente.
+- `experiments/paso8/execute_notebook.py`: ejecutor verificable del cuaderno sin
+  dependencias adicionales.
+- `docs/entrega4/cierre/generar_figuras.py`: regeneración de las figuras rasterizadas
+  del documento desde los CSV conservados.
+- `CITATION.cff`: autoría y forma de citar el software.
+
+Versiones de referencia: CPython 3.11.1, Matplotlib 3.9.0 (fijado en
+`experiments/requirements.txt`), TeX Live 2026 y Biber. El ejecutor experimental
+solo usa la biblioteca estándar. Desde una clonación limpia, los comandos exactos
+para comprobar el banco, regenerar resultados y figuras, ejecutar el cuaderno y
+compilar el PDF están en `docs/entrega4/README.md`.
 
 ---
 
-## 8. Trazabilidad con la rúbrica
+## 9. Trazabilidad con la rúbrica
 
 > **Cierre acumulativo del Paso 13 (1 de septiembre de 2026):** la versión actualizada es [PFC4.tex](docs/entrega4/PFC4.tex), con [PDF](docs/entrega4/PFC4.pdf) e [instrucciones de compilación con Biber](docs/entrega4/README.md). Las tablas históricas de esta sección no sustituyen el diagnóstico actualizado de esa memoria, que incorpora las evidencias posteriores y sus límites.
 
@@ -171,14 +197,13 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 
 ---
 
-## 9. Pendientes conocidos
+## 10. Pendientes conocidos
 
 - Contratos Pact (consumer-driven) entre clientes web/móvil y backend: no iniciados.
 - Falta ampliar la cobertura de `ordenes-proveedores-service` y `ventas-service`; ambos ya contienen pruebas unitarias.
 - No hay E2E con Playwright; sí existe el escenario de carga Locust en `tests/load/`.
 - Pipeline CI/CD cubre parcialmente los 7 jobs esperados por la rúbrica; falta `lint` dedicado para servicios Java y para la web (la web no tiene framework de pruebas configurado todavía).
 - Observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y evaluación ISO/IEC 25010: declaradas explícitamente fuera de alcance de esta entrega por restricción de tiempo del equipo — ver justificación completa en `docs/entrega4/PFC4.tex` §"Discusión".
-- Declaración de uso de IA generativa (Sección 7 de este README): pendiente de completar por el equipo.
 - Para producción deben sustituirse todos los valores de ejemplo y montarse los certificados del clúster administrado; el Compose local es autocontenido y no requiere sobrescribir `CRDB_DATASOURCE_URL`.
 # Paso 3 — TCP, gRPC y relojes de Lamport
 

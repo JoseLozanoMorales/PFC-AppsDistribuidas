@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "Si utiliza este software o sus artefactos experimentales, cite este repositorio."
+title: "TiendaTech: sistema distribuido de comercio electrónico"
+type: software
+version: "4.0.0"
+date-released: "2026-09-01"
+authors:
+  - family-names: "Aucatoma Celorio"
+    given-names: "Jhinson Stalyn"
+  - family-names: "Gaibor Rodríguez"
+    given-names: "Jeremy Ruperto"
+  - family-names: "Sánchez Pilaloa"
+    given-names: "Andy Paul"
+  - family-names: "Lozano Morales"
+    given-names: "José Alejandro"
+repository-code: "https://github.com/JoseLozanoMorales/TiendaTech"
+url: "https://github.com/JoseLozanoMorales/TiendaTech"
+keywords:
+  - sistemas distribuidos
+  - microservicios
+  - comercio electrónico
+  - reproducibilidad
+
