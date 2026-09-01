@@ -15,7 +15,7 @@ class PaginacionTest {
         Paginacion paginacion = Paginacion.de(null, null);
 
         assertThat(paginacion.page()).isZero();
-        assertThat(paginacion.size()).isEqualTo(21);
+        assertThat(paginacion.size()).isEqualTo(20);
     }
 
     @Test
