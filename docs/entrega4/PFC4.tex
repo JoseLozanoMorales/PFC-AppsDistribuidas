@@ -1,1088 +1,750 @@
-\PassOptionsToPackage{table}{xcolor}
-\documentclass[12pt]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
-\usepackage[margin=2.5cm]{geometry}
-\usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{enumitem}
-\usepackage{hyperref}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    urlcolor=blue,
-    citecolor=black
-}
-\usepackage{eso-pic}
-\usepackage{float}
-\usepackage{transparent}
-\usepackage{tikz}
-\usepackage[nottoc]{tocbibind}
-\usepackage{booktabs}
-\usepackage[style=ieee, backend=bibtex]{biblatex}
-\usepackage{csquotes}
-\usepackage{amsmath,amssymb}
-\usepackage{listings}
-\usepackage{xcolor}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{array}
-\usepackage{longtable}
-\usepackage{tabularx}
-\usepackage[most]{tcolorbox}
-\usepackage{newunicodechar}
-\newunicodechar{↔}{$\leftrightarrow$}
-\usepackage{seqsplit}
-\usepackage{microtype}
-\tolerance=2000
-\emergencystretch=2.5em
-\hbadness=10000
-
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
-
-\usepackage{titlesec}
-
-\titleformat{\paragraph}
-{\normalfont\normalsize\bfseries}
-{\theparagraph}
-{1em}
-{}
-
-\titlespacing*{\paragraph}
-{0pt}
-{1.5ex plus 1ex minus .2ex}
-{1ex}
-
-\usetikzlibrary{arrows.meta,positioning}
-
-\geometry{margin=2.5cm}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.8em}
-\renewcommand{\arraystretch}{1.25}
-
-\definecolor{verdeEncabezado}{HTML}{70AD47}
-\definecolor{verdeClaro}{HTML}{E2F0D9}
-\definecolor{amarilloEncabezado}{HTML}{FFC000}
-\definecolor{amarilloClaro}{HTML}{FFF2CC}
-\definecolor{codigoFondo}{HTML}{F7F7F7}
-
-\lstdefinestyle{yamlStyle}{
-    basicstyle=\ttfamily\small,
-    numbers=left,
-    numberstyle=\tiny\color{gray},
-    stepnumber=1,
-    numbersep=5pt,
-    backgroundcolor=\color{gray!10},
-    frame=single,
-    breaklines=true,
-    tabsize=2,
-    showstringspaces=false,
-    captionpos=b,
-    keywordstyle=\color{blue}\bfseries,
-    commentstyle=\color{green!50!black}\itshape,
-    stringstyle=\color{red},
-    morekeywords={
-        openapi,info,title,version,description,servers,url,paths,get,post,put,delete,
-        summary,tags,parameters,name,in,required,schema,type,responses,content,
-        application/json,requestBody,components,schemas,items,properties,format,ref
-    },
-    sensitive=false
-}
-
-\lstdefinestyle{codigo}{
-    backgroundcolor=\color{codigoFondo},
-    basicstyle=\ttfamily\small,
-    breaklines=true,
-    breakatwhitespace=false,
-    columns=fullflexible,
-    keepspaces=true,
-    showstringspaces=false,
-    frame=single,
-    rulecolor=\color{black!30},
-    xleftmargin=1em,
-    xrightmargin=1em
-}
-
-\lstdefinelanguage{Dockerfile}{
-    keywords={FROM,RUN,COPY,WORKDIR,ENV,EXPOSE,CMD,AS},
-    keywordstyle=\color{blue!70!black}\bfseries,
-    basicstyle=\ttfamily\small,
-    sensitive=true,
-    comment=[l]{\#},
-    commentstyle=\color{gray}\itshape,
-    stringstyle=\color{red!60!black},
-    morestring=[b]",
-}
-
-\lstdefinelanguage{yaml}{
-    keywords={true,false,null,y,n},
-    keywordstyle=\color{blue!70!black}\bfseries,
-    basicstyle=\ttfamily\small,
-    sensitive=false,
-    comment=[l]{\#},
-    commentstyle=\color{gray}\itshape,
-    stringstyle=\color{red!60!black},
-    morestring=[b]',
-    morestring=[b]"
-}
-
+\usepackage[spanish,es-tabla,es-noquoting]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx,booktabs,longtable,tabularx,array,amsmath,amssymb}
+\usepackage{float,subcaption,listings,xcolor,tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
 \addbibresource{../entrega3/referenciasPFC.bib}
-
+\usepackage{microtype}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue,pdftitle={TiendaTech: documento acumulativo de cierre},pdfauthor={Equipo AGLS}}
+\usepackage{xurl}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\setlength{\emergencystretch}{3em}
+\renewcommand{\arraystretch}{1.18}
+\setcounter{tocdepth}{2}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible,keepspaces=true,showstringspaces=false,captionpos=b}
+\newcommand{\repo}{https://github.com/JoseLozanoMorales/TiendaTech}
+\newcommand{\evidencia}[2]{\href{https://github.com/JoseLozanoMorales/TiendaTech/blob/6cfe0e8bac8d142b7986a4a3265721f404e84156/#1}{#2}}
+\newcommand{\seccion}[1]{\section{#1}}
 \begin{document}
-    \shorthandoff{"}
-
-    \begin{titlepage}
-        \setlength{\parskip}{0pt}
-        \AddToShipoutPicture* {
-            \AtPageCenter{%
-                \makebox(0,0){%
-                    \begin{tikzpicture}[remember picture,overlay]
-                    \IfFileExists{UteqLogo.png}{
-                        \node[opacity=0.08] at (current page.center) {
-                            \includegraphics[width=9cm]{UteqLogo.png}
-                        };
-                    }{}
-                    \end{tikzpicture}
-                }%
-            }
-        }
-
-        \centering
-        {\scshape\large Universidad Técnica Estatal de Quevedo \par}
-        {\scshape\large Facultad de Ciencias de la Computación \par}
-        \vspace{0.8cm}
-
-        {\large\textbf{PROYECTO FIN DE CURSO (PFC) --- ENTREGA 4}\par}
-        \vspace{0.8cm}
-
-        {\large\textbf{PROYECTO:}\par}
-        \vspace{0.2cm}
-        {\Large\textbf{TIENDATECH: CALIDAD, OBSERVABILIDAD Y EVALUACIÓN EXPERIMENTAL DEL SISTEMA DISTRIBUIDO}\par}
-        \vspace{0.7cm}
-
-        {\large\textbf{MATERIA:}\par}
-        \vspace{0.2cm}
-        {\large APLICACIONES DISTRIBUIDAS \par}
-        \vspace{0.7cm}
-
-        {\large\textbf{DOCENTE:}\par}
-        \vspace{0.2cm}
-        {\large ING. GUERRERO ULLOA GLEISTON CICERON \par}
-        \vspace{0.7cm}
-
-        {\large\textbf{CURSO / PERÍODO ACADÉMICO:}\par}
-        \vspace{0.2cm}
-        {\large 7mo A --- PERÍODO ACADÉMICO 2026 \par}
-
-        \vspace{1.0cm}
-
-        {\large\textbf{INTEGRANTES:}\par}
-        \vspace{0.25cm}
-        {\normalsize
-        Jhinson Stalyn Aucatoma Celorio \\
-        Jeremy Ruperto Gaibor Rodriguez \\
-        Andy Paul Sanchez Pilaloa \\
-        José Alejandro Lozano Morales \par}
-        \vspace{0.7cm}
-
-        {\large\textbf{FECHA DE ENTREGA:}\par}
-        \vspace{0.2cm}
-        {\large Martes 25 de agosto del 2026 \par}
-        \vspace{0.2cm}
-        {\large\textbf{FECHA PERMITIDO DE ÚLTIMO COMMIT:}\par}
-        {\large Viernes 28 de agosto del 2026 hasta Hora: 23h59\par}
-        \setlength{\parskip}{0.8em}
-    \end{titlepage}
-
-    \tableofcontents
-    \newpage
-
-    % ============================================================
-    % RESUMEN / ABSTRACT (bilingue)
-    % ============================================================
-    \section*{Resumen}
-    \addcontentsline{toc}{section}{Resumen}
-    \textbf{Objetivo:} cerrar, sobre el sistema distribuido \textbf{TiendaTech} validado en la Entrega 3, la brecha entre un sistema que funciona y uno que puede sostenerse, verificarse y evolucionar de forma controlada. \textbf{Método:} auditoría del código y ejecución de pruebas, cobertura, análisis PMD, integración, carga y controles de seguridad frente a la rúbrica de la Entrega 4. \textbf{Resultados:} los seis microservicios Java quedaron organizados en cuatro capas; los siete microservicios superan el 70\,\% de cobertura; el pipeline integra pruebas, análisis, construcción e integración; y el sistema expone logs JSON y métricas Prometheus para un dashboard Grafana. La evaluación ISO/IEC 25010 confirma la cobertura y la protección de ocho familias de endpoints, pero identifica complejidad ciclomática máxima de 20 frente al objetivo menor que 10; disponibilidad de una hora, P95 y tasa 5xx permanecen pendientes por falta de una corrida oficial con el stack completo. \textbf{Conclusiones:} TiendaTech avanzó hacia una operación verificable, manteniendo explícitas las mediciones aún no ejecutadas.
-
-    \vspace{1cm}
-    \textbf{Palabras clave:} Microservicios, Arquitectura en capas, Persistencia distribuida, CockroachDB, Calidad de software, CI/CD.
-
-    \newpage
-
-    \section*{Abstract}
-    \addcontentsline{toc}{section}{Abstract}
-    \textbf{Objective:} to evolve the \textbf{TiendaTech} distributed system from a functional deployment into a maintainable and verifiable system. \textbf{Method:} source-code audit and execution of tests, coverage gates, PMD analysis, integration flows, load tooling, and security checks against the Deliverable 4 rubric. \textbf{Results:} all seven microservices exceed 70\,\% coverage; the CI pipeline integrates testing, static analysis, image builds, and integration checks; and the services expose JSON logs and Prometheus metrics for a Grafana dashboard. The ISO/IEC 25010 assessment confirms coverage and protection of eight endpoint families, while cyclomatic complexity reaches 20 against a target below 10. One-hour availability, P95 latency, and 5xx rate remain pending because no official full-stack run was available. \textbf{Conclusions:} the system advanced toward verifiable operation while keeping unmeasured criteria explicitly pending.
-
-    \vspace{1cm}
-    \textbf{Keywords:} Microservices, Layered architecture, Distributed persistence, CockroachDB, Software quality, CI/CD.
-
-    \newpage
-
-    % ============================================================
-    % 1. INTRODUCCION -- responsable: Jeremy Ruperto Gaibor Rodriguez
-    % ============================================================
-    \section{Introducción}
-
-    La Entrega 3 de \textbf{TiendaTech} validó un despliegue contenerizado compuesto por un frontend y seis microservicios conectados a una base de datos distribuida CockroachDB, confirmando el flujo transaccional básico de carrito, orden, factura e inventario sobre esa infraestructura. Esa entrega dejó explícitamente fuera de su contribución delimitada el aislamiento de persistencia por servicio, la alta disponibilidad productiva, el motor de compatibilidad de componentes y el asistente conversacional, así como la calidad de código, la observabilidad y la evaluación experimental formal del sistema.
-
-    La Entrega 4 retoma el sistema en ese punto y se concentra en cerrar la brecha entre \emph{tener un sistema distribuido que funciona} y \emph{tener un sistema distribuido que puede sostenerse, verificarse y evolucionar de forma controlada}. En este período se completó la migración de los microservicios afectados hacia una organización en capas explícita (\texttt{\seqsplit{presentation/application/domain/infrastructure}}), se documentaron los patrones de diseño GoF aplicados, se aseguró la persistencia distribuida con una conexión cifrada por certificados (mTLS) hacia el clúster CockroachDB en lugar de la conexión directa sin cifrar heredada de E3, y se avanzó en la calidad de las aplicaciones cliente (web y móvil) y en la automatización del ciclo de integración continua.
-
-    \subsection{Alcance y contribución delimitada de la Entrega 4}
-
-    Siguiendo el mismo principio de honestidad de alcance aplicado en las entregas anteriores, esta sección declara explícitamente qué criterios de la Guía Integral de la Entrega 4 cubre este documento y cuáles quedan fuera.
-
-    Se abordan de forma directa: el refactor en capas y los patrones GoF con su respectivo registro de decisión arquitectónica (D1); el estado de las aplicaciones web y móvil, tanto en funcionalidad como en calidad de código (D2, D3); la persistencia distribuida operando de forma segura y, en la medida en que el tiempo del equipo lo permitió, los contratos de consumidor entre los clientes y el backend (D4); la pirámide de pruebas y el pipeline de integración continua (D5); la trazabilidad de la evolución del proyecto entre E1 y E4 (D8.3); y la reflexión ética, las amenazas a la validez y la reproducibilidad del entorno de despliegue (D9).
-
-    La observabilidad y la evaluación ISO/IEC 25010 se cubren de forma parcial y verificable. Se implementaron logs JSON, métricas Prometheus, scraping, configuración de Grafana Alloy, dashboard y prueba Locust; también se midieron cobertura, complejidad y seguridad. Quedan fuera del alcance verificado de este corte las trazas OpenTelemetry con \texttt{trace\_id}, la conexión efectiva con Grafana Cloud y las mediciones oficiales de disponibilidad, P95 y tasa 5xx, que requieren el stack completo operativo durante el protocolo definido en la Sección \ref{sec:iso25010}.
-
-    % ============================================================
-    % 2. TRABAJOS RELACIONADOS -
-    % ============================================================
-    \section{Trabajos relacionados}
-
-    Esta sección revisa siete fuentes indexadas --- dos ya citadas en \texttt{\seqsplit{docs/entrega3/PFC3.tex}} y reutilizadas aquí por seguir siendo pertinentes, y cinco incorporadas específicamente para esta entrega --- organizadas en los cuatro ejes que exige la rúbrica de la Entrega 4: bases de datos distribuidas, arquitectura de microservicios, ingeniería de aplicaciones móviles y calidad de software/CI-CD.
-
-    \subsection{Bases de datos distribuidas}
-
-    \textcite{taft2020} describen la arquitectura de CockroachDB --- el motor efectivamente usado por TiendaTech desde E3 --- detallando cómo fragmenta las tablas en rangos replicados por consenso Raft y las lecciones aprendidas al adaptar Raft a un sistema de producción (agrupar \emph{heartbeats}, pausar grupos Raft inactivos, reconfiguración por consenso conjunto). \textcite{ozsu2020} complementan esto con el marco formal de fragmentación horizontal primaria y derivada que TiendaTech ya usó para justificar el particionamiento de \texttt{pedidos.orden} por trimestre en E3 (ADR-003). Ninguna de las dos fuentes evalúa, sin embargo, el costo operativo de migrar una conexión insegura a una conexión mTLS con certificados cliente sobre un clúster ya desplegado --- que es exactamente el cambio de infraestructura documentado en la Sección \ref{sec:persistencia-distribuida} de esta entrega.
-
-    \subsection{Arquitectura de microservicios}
-
-    \textcite{marquez2018review} revisan sistemáticamente la literatura académica e industrial sobre patrones y tácticas arquitectónicas para microservicios, identificando 44 patrones en fuentes académicas y 74 en fuentes industriales, la mayoría asociados a escalabilidad, flexibilidad, capacidad de prueba, desempeño y elasticidad. \textcite{zhong2024domaindriven} investigan empíricamente --- combinando una revisión sistemática de 34 estudios con una encuesta a 63 profesionales --- el uso de \emph{Domain-Driven Design} para identificar los límites (\emph{bounded contexts}) de cada microservicio, un problema de diseño previo al que TiendaTech resolvió de forma pragmática y no formalizada al dividir el dominio en usuarios, productos, inventario, pedidos, órdenes a proveedores y ventas. Ninguna de las dos fuentes profundiza en el refactor interno de un microservicio ya existente hacia una arquitectura de puertos y adaptadores en cuatro capas --- que es precisamente lo que la Sección \ref{sec:arquitectura-sistema} documenta para los seis servicios Java de TiendaTech.
-
-    \subsection{Ingeniería de aplicaciones móviles}
-
-    \textcite{nawrocki2021comparison} comparan empíricamente aplicaciones idénticas desarrolladas con frameworks nativos y multiplataforma (Kotlin nativo frente a React Native y Flutter, entre otros), evaluando funcionalidad, esfuerzo de desarrollo y rendimiento; sus resultados muestran que el desarrollo nativo ofrece el mayor rendimiento y el acceso más directo a las capacidades del dispositivo, a costa de mayor esfuerzo de desarrollo por no compartir código entre plataformas. Este hallazgo es directamente relevante para TiendaTech: la aplicación móvil (Sección 6) se construyó en Kotlin nativo con Jetpack Compose precisamente para acceder sin capas intermedias a CameraX/ML Kit (escaneo de códigos de barras) y a la API de notificaciones del sistema operativo, las dos capacidades de dispositivo requeridas por la rúbrica --- una elección que este trabajo relacionado ayuda a justificar cuantitativamente, aunque TiendaTech mismo no ejecutó un benchmark comparativo propio frente a una alternativa multiplataforma.
-
-    \subsection{Calidad de software y CI/CD}
-
-    \textcite{shahin2017continuous} ofrecen la revisión sistemática de referencia sobre integración, entrega y despliegue continuos, clasificando enfoques, herramientas, desafíos y prácticas de la industria; su marco conceptual de \emph{pipeline} como \emph{quality gate} automatizado es el que se usa para evaluar, en la Sección 7.3, qué tan completo está el pipeline real de TiendaTech frente al ideal de siete \emph{jobs} de la rúbrica. \textcite{hui2025unveiling} aportan el estudio más reciente y más específico para este proyecto: un mapeo sistemático de métodos de prueba para sistemas basados en microservicios, que identifica nueve categorías de pruebas (incluidas pruebas unitarias, de contrato y extremo a extremo) y los desafíos de aplicarlas cuando los servicios se despliegan y actualizan de forma independiente --- exactamente la situación de TiendaTech, donde la cobertura de pruebas es desigual entre sus seis microservicios (Sección 7.1). Ninguna de las dos fuentes mide el costo de retrasar la adopción de pruebas de contrato (Pact) cuando el tiempo del equipo es limitado, que es la decisión de priorización que TiendaTech documenta explícitamente en la Sección 7.2.
-
-    \subsection{Matriz comparativa}
-
-    La Tabla \ref{tab:trabajos-relacionados-e4} condensa el aporte de cada fuente y la brecha que deja abierta respecto del trabajo realizado en TiendaTech.
-
-    \begin{table}[H]
-        \centering
-        \caption{Matriz comparativa de trabajos relacionados (Entrega 4).}
-        \label{tab:trabajos-relacionados-e4}
-        \small
-        \begin{tabularx}{\textwidth}{p{2.6cm} X X}
+\begin{titlepage}
+\centering
+\includegraphics[width=3.5cm]{UteqLogo.png}\par
+\vspace{0.4cm}
+{\Large Universidad Técnica Estatal de Quevedo\par}
+{\large Aplicaciones Distribuidas -- Séptimo A\par}
+\vspace{1cm}
+{\Huge\bfseries TiendaTech\par}
+\vspace{0.5cm}
+{\Large Documento acumulativo E1--E4\par}
+{\large Arquitectura, implementación y evaluación experimental\par}
+\vspace{1cm}
+{\large Proyecto Fin de Curso -- Paso 13\par}
+\vspace{0.8cm}
+\begin{tabular}{ll}
 \toprule
-\textbf{Referencia} & \textbf{Aporte principal} & \textbf{Brecha frente a TiendaTech E4} \\
+Integrante & Rol asignado\\
 \midrule
-\textcite{taft2020} & Arquitectura de CockroachDB y adaptación de Raft a producción. & No evalúa migrar una conexión insegura a mTLS sobre un clúster ya desplegado. \\
-\textcite{ozsu2020} & Marco formal de fragmentación horizontal primaria/derivada. & Supone conocida la carga de consultas desde el diseño inicial. \\
-\textcite{marquez2018review} & 44+74 patrones/tácticas arquitectónicas para microservicios. & No cubre el refactor interno de un servicio ya existente hacia capas. \\
-\textcite{zhong2024domaindriven} & DDD para identificar límites de microservicios (34 estudios, 63 encuestados). & No aborda la reestructuración posterior de un microservicio ya delimitado. \\
-\textcite{nawrocki2021comparison} & Comparación empírica nativo vs. multiplataforma (funcionalidad, esfuerzo, rendimiento). & TiendaTech no ejecutó un benchmark propio frente a una alternativa multiplataforma. \\
-\textcite{shahin2017continuous} & Revisión sistemática de CI/CD: enfoques, herramientas, prácticas. & No mide el costo de un pipeline parcialmente implementado bajo restricción de tiempo. \\
-\textcite{hui2025unveiling} & Mapeo sistemático de pruebas para sistemas basados en microservicios. & No mide el costo de retrasar la adopción de pruebas de contrato (Pact). \\
+Jhinson Stalyn Aucatoma Celorio & Arquitecto\\
+Jeremy Ruperto Gaibor Rodriguez & Desarrollador\\
+Andy Paul Sanchez Pilaloa & Responsable de Calidad\\
+José Alejandro Lozano Morales & Documentalista\\
 \bottomrule
-        \end{tabularx}
-    \end{table}
-
-    % ============================================================
-    % 3. FUNDAMENTO TEORICO -
-    % ============================================================
-    \section{Fundamento teórico}
-
-    \subsection{Arquitectura en capas y principios SOLID}
-
-    La arquitectura en capas separa un sistema en niveles con responsabilidades distintas y dependencias unidireccionales: presentación (adapta el mundo exterior al sistema), aplicación (orquesta casos de uso), dominio (reglas de negocio y contratos) e infraestructura (detalles técnicos concretos: bases de datos, HTTP, colas). En un sistema distribuido este patrón de \emph{N capas} se aplica dos veces: dentro de cada microservicio, para ordenar su propio código, y entre microservicios, donde la capa de infraestructura de un servicio suele ser, en realidad, la interfaz de red hacia otro servicio. Esta segunda aplicación exige más disciplina que la primera: si el dominio de un servicio depende directamente del cliente HTTP concreto de otro servicio, cualquier cambio de protocolo (de REST a gRPC, de síncrono a mensajería asíncrona) se propaga hasta la lógica de negocio en vez de quedar contenido en un adaptador.
-
-    Los principios SOLID --- responsabilidad única (SRP), abierto/cerrado (OCP), sustitución de Liskov (LSP), segregación de interfaces (ISP) e inversión de dependencias (DIP) --- son las restricciones que evitan ese acoplamiento. Aplicados a microservicios adquieren un matiz adicional frente a su lectura clásica dentro de un monolito: el SRP no solo separa responsabilidades dentro de una clase, sino que delimita qué lógica de negocio pertenece a un servicio y cuál a otro; y el DIP es el principio que hace posible sustituir un colaborador remoto --- por un doble de prueba, o por una implementación alternativa del mismo contrato --- sin modificar la capa de aplicación, siempre que esta dependa de una interfaz (un \emph{puerto}) y no de un cliente concreto. Este acoplamiento reducido se materializa en la práctica mediante \emph{inyección de dependencias}: un contenedor de inversión de control (IoC) --- Spring en el ecosistema Java, u otros equivalentes en otros \emph{frameworks} --- resuelve en tiempo de arranque qué implementación concreta satisface cada interfaz, de modo que ninguna clase de negocio instancia directamente a sus colaboradores \parencite{richardson2018microservices}. El uso disciplinado de SOLID es, en particular, el prerrequisito para que los patrones de diseño GoF aporten valor real: un patrón aplicado sobre un diseño que ya viola SOLID solo añade complejidad accidental.
-
-    \subsection{Patrones de diseño GoF}
-
-    El catálogo de patrones de diseño de Gamma, Helm, Johnson y Vlissides --- conocidos como el "Gang of Four" (GoF) --- documenta veintitrés soluciones recurrentes a problemas de diseño orientado a objetos, agrupadas en patrones creacionales, estructurales y de comportamiento \parencite{gamma1994patterns}. Su valor no está en aplicarlos por cumplir una cuota, sino en que cada patrón resuelve un problema de acoplamiento o variabilidad concreto.
-
-    En sistemas distribuidos, la literatura sobre microservicios señala un subconjunto recurrente de estos patrones --- junto con \emph{Repository}, atribuido a Fowler y no al catálogo GoF original, pero de adopción extendida en este contexto --- como los de mayor uso práctico \parencite{newman2021microservices}:
-
-    \begin{itemize}
-        \item \textbf{Repository} (Fowler): abstrae el acceso a los datos de un servicio detrás de una interfaz de dominio, de modo que la lógica de negocio no conoce si la persistencia ocurre en una base de datos relacional, documental o en memoria; es el patrón más común para satisfacer el DIP entre \texttt{application} e \texttt{infrastructure} descrito en la subsección anterior.
-        \item \textbf{Factory Method} (creacional): encapsula la construcción de un objeto --- típicamente un cliente remoto o una conexión --- detrás de un método que las subclases o la configuración pueden sobrescribir, evitando que el código que lo consume conozca su clase concreta ni sus parámetros de construcción.
-        \item \textbf{Proxy} (estructural): representa localmente un objeto remoto o costoso de crear; en microservicios es el patrón detrás de los \emph{stubs} HTTP/gRPC generados y de envoltorios que añaden \emph{circuit breaking} o caché sin que quien lo invoca note la diferencia frente a llamar al objeto real.
-        \item \textbf{Observer} (comportamiento): desacopla a un productor de eventos de sus consumidores, que se suscriben sin que el productor conozca su identidad ni su cantidad; es la base conceptual de la mensajería asíncrona y del patrón \emph{publish/subscribe} entre servicios.
-        \item \textbf{Strategy} (comportamiento): encapsula un algoritmo o una decisión de negocio intercambiable (por ejemplo, distintos proveedores de pago, notificación o explicación) detrás de una interfaz común, permitiendo elegir la implementación en tiempo de ejecución en vez de dispersar condicionales por el código.
-        \item \textbf{Decorator} (estructural): añade comportamiento --- registro, reintentos, cabeceras de autenticación --- a un objeto existente envolviéndolo, en vez de modificar su clase o crear una jerarquía de subclases para cada combinación posible de comportamientos.
-    \end{itemize}
-
-    Los seis comparten el mismo objetivo: introducir un punto de indirección (una interfaz) donde antes había una dependencia concreta, de modo que un cambio en el colaborador --- de protocolo, de proveedor, de algoritmo --- no obligue a modificar a quien lo consume. La auditoría de cuáles de estos patrones están genuinamente presentes en el código de TiendaTech --- y cuáles se evaluaron y se descartaron por no tener estructura GoF real --- se documenta con evidencia concreta en la Sección \ref{sec:arquitectura-sistema}, subsección "Patrones GoF aplicados (D1.2)", en vez de asumirse aquí.
-
-    \subsection{Pruebas en sistemas distribuidos}
-
-    En un sistema basado en microservicios no es conveniente depender de un solo tipo de prueba. Cada servicio puede funcionar correctamente por separado y, aun así, presentar fallos cuando se comunica con los demás. Por esta razón, la estrategia de pruebas se organiza como una pirámide formada por pruebas unitarias, de integración, de contrato y de extremo a extremo. La mayor cantidad corresponde a las pruebas unitarias, porque son rápidas y permiten revisar reglas de negocio o funciones aisladas. Las pruebas de integración comprueban el trabajo conjunto con elementos como la base de datos, el API Gateway u otros servicios. En los niveles superiores se encuentran las pruebas de contrato y las de extremo a extremo, que abarcan interacciones más completas, pero también requieren más tiempo y recursos para ejecutarse \parencite{winters2020software,richardson2018microservices}.
-
-    Las pruebas de contrato son especialmente útiles cuando un servicio consume la API de otro. Un cambio aparentemente pequeño, como modificar el nombre de un atributo o el formato de una respuesta, puede afectar al consumidor aunque el proveedor continúe funcionando. Pact aplica el enfoque \emph{Consumer-Driven Contract Testing}, en el cual el consumidor define las respuestas que espera y el proveedor verifica que puede cumplirlas. De esta manera, se pueden detectar incompatibilidades antes de desplegar una nueva versión del servicio \parencite{richardson2018microservices}.
-
-    Otro aspecto importante es conocer cómo responde el sistema cuando varias personas lo utilizan al mismo tiempo. Herramientas como Locust o k6 permiten simular usuarios concurrentes y registrar datos como el número de solicitudes atendidas, el tiempo de respuesta y la cantidad de errores. Estas pruebas ayudan a observar si el rendimiento se degrada al aumentar la carga y a identificar cuál servicio puede convertirse en un cuello de botella.
-
-    La cobertura de código sirve como apoyo para conocer qué partes del programa fueron ejecutadas durante las pruebas. Un porcentaje alto permite detectar menos zonas sin verificar, pero no garantiza por sí solo que el sistema esté libre de errores, ya que también importa la calidad de los casos diseñados. Por eso la cobertura debe analizarse junto con los resultados de las pruebas y no únicamente como una cifra que se debe alcanzar \parencite{winters2020software}.
-
-    Finalmente, las pruebas pueden complementarse con herramientas de análisis estático. SonarCloud permite revisar aspectos como duplicación, complejidad y posibles problemas de mantenibilidad; Pylint se utiliza en proyectos Python y ESLint en aplicaciones JavaScript o TypeScript. Estas herramientas examinan el código sin ejecutar el sistema y permiten detectar problemas que podrían pasar desapercibidos durante una prueba funcional. Su incorporación al proceso de integración continua ayuda a mantener criterios de calidad comunes entre los distintos componentes del proyecto \parencite{winters2020software}.
-
-    \subsection{Ingeniería de aplicaciones móviles}
-
-    El desarrollo móvil enfrenta retos que no existen (o existen de forma distinta) en el desarrollo web: heterogeneidad de dispositivos y versiones de sistema operativo, restricciones de batería y de red intermitente, un ciclo de vida de la aplicación gestionado por el sistema operativo (y no por el desarrollador), y ventanas de publicación controladas por tiendas de aplicaciones. La decisión entre desarrollo nativo (Kotlin/Swift) y multiplataforma (Flutter, React Native) no es una preferencia estética: tiene consecuencias medibles en rendimiento, acceso a APIs del dispositivo, tamaño del binario y tiempo de llegada al mercado, razón por la cual la rúbrica exige justificar la elección con al menos dos criterios cuantitativos.
-
-
-    \subsection{Integración y entrega continuas (CI/CD)}
-
-    DevOps es una cultura de desarrollo de software que integra los equipos de desarrollo y operaciones mediante la automatización, la colaboración y la entrega continua de software. Uno de sus pilares es el uso de pipelines \emph{CI/CD} (Continuous Integration y Continuous Delivery), los cuales permiten construir, probar y desplegar aplicaciones de manera repetible y confiable \cite{decan2022github,saroar2023survey}.
-
-    \subsubsection{Pipeline CI/CD}
-
-    Un pipeline CI/CD está compuesto por una secuencia de etapas automatizadas que validan el software antes de su liberación. Las fases más comunes son:
-
-    \begin{itemize}
-        \item \textbf{Build:} compila el proyecto y resuelve dependencias.
-        \item \textbf{Test:} ejecuta pruebas unitarias y de integración.
-        \item \textbf{Lint:} analiza el código para detectar errores de estilo y calidad.
-        \item \textbf{Publish:} genera y publica artefactos o imágenes Docker.
-        \item \textbf{Deploy:} despliega automáticamente hacia un entorno de pruebas o producción.
-    \end{itemize}
-
-    La automatización de estas etapas reduce errores humanos y acelera la entrega de nuevas versiones \cite{rostami2023cicd}.
-
-    \subsubsection{GitHub Actions y sintaxis YAML}
-
-    GitHub Actions implementa los pipelines mediante archivos YAML ubicados en el directorio \texttt{.github/workflows/}. Un workflow define los eventos que lo activan (\texttt{on}), los trabajos (\texttt{jobs}) y los pasos (\texttt{steps}) que ejecutarán acciones o comandos sobre un entorno virtual \cite{decan2022github}.
-
-    Los elementos principales de un workflow son:
-
-    \begin{itemize}
-        \item \textbf{Triggers:} eventos como \texttt{push}, \texttt{pull\_request} o ejecución manual.
-        \item \textbf{Jobs:} conjuntos de tareas que pueden ejecutarse en paralelo.
-        \item \textbf{Steps:} instrucciones individuales, comandos o acciones reutilizables.
-        \item \textbf{Marketplace Actions:} componentes reutilizables publicados por la comunidad para instalar dependencias, ejecutar pruebas o desplegar aplicaciones.
-    \end{itemize}
-
-    \subsubsection{Estrategias de despliegue}
-
-    Los pipelines modernos pueden implementar distintas estrategias de liberación para minimizar el riesgo durante una actualización:
-
-    \begin{itemize}
-        \item \textbf{Blue-Green:} mantiene dos entornos idénticos y redirige el tráfico al nuevo cuando es validado.
-        \item \textbf{Canary:} libera la nueva versión únicamente a un pequeño porcentaje de usuarios antes del despliegue completo.
-        \item \textbf{Rolling Update:} reemplaza progresivamente las instancias antiguas sin interrumpir el servicio.
-    \end{itemize}
-
-    Estas estrategias incrementan la disponibilidad y facilitan la recuperación ante fallos durante el despliegue \cite{valenzuela2024hidden}.
-
-    \subsubsection{Cobertura de código dentro del pipeline}
-
-    La cobertura de código mide el porcentaje de instrucciones ejecutadas por las pruebas automatizadas. Integrar herramientas de cobertura en el pipeline permite verificar la calidad del software en cada confirmación de cambios y evitar que nuevas versiones reduzcan el nivel de pruebas existente \cite{faqih2024empirical}.
-
-    \subsection{Observabilidad distribuida}
-
-    La observabilidad de un sistema distribuido se sustenta convencionalmente en tres señales complementarias: métricas (agregados numéricos con etiquetas, por ejemplo tasa de peticiones por ruta), registros o \emph{logs} (eventos discretos, idealmente estructurados) y trazas (secuencias de \emph{spans} correlacionados por un identificador común que permiten reconstruir el camino de una petición a través de varios servicios). El estándar OpenTelemetry busca unificar la instrumentación de estas señales de forma independiente del proveedor que las consuma. Esta instrumentación no es gratuita: un estudio sobre 70 API de microservicios y más de 5000 experimentos encontró diferencias significativas de latencia, tiempo de respuesta y \emph{throughput} entre ejecuciones instrumentadas y su línea base \parencite{hammad2025instrumentation}. Por ello, TiendaTech registra tanto métricas operativas como el costo potencial de observarlas.
-
-    Prometheus organiza las series temporales por nombre y etiquetas y distingue contadores, medidores e histogramas; Grafana consulta esas series para formar paneles y alertas. La medición de tiempos de ejecución en aplicaciones distribuidas Java/Spring mediante recolectores compatibles con Prometheus permite descomponer la respuesta y localizar comportamiento anómalo \parencite{gherghe2025performance}. Los registros complementan esa visión: centralizarlos reduce el tiempo invertido en reunir mensajes dispersos y facilita diagnosticar componentes ejecutados en entornos heterogéneos \parencite{striletchi2025logging}.
-
-    \subsection{Modelo de calidad ISO/IEC 25010:2023}
-
-    El modelo ISO/IEC 25010:2023 organiza la calidad de un producto de software en ocho características --- adecuación funcional, eficiencia de desempeño, compatibilidad, usabilidad, fiabilidad, seguridad, mantenibilidad y portabilidad --- cada una descompuesta en subcaracterísticas medibles mediante métricas objetivas. Una evaluación seria no describe la calidad de forma exclusivamente cualitativa: fija un umbral y reporta si el sistema lo alcanza. La literatura muestra esta operacionalización tanto para mantenibilidad de microservicios, mediante acoplamiento, cohesión, ciclos y herencia \parencite{gintoro2025maintainability}, como para calidad de servicios asíncronos mediante métricas y acuerdos de nivel de servicio alineados con ISO/IEC 25010 \parencite{oriol2024asyncsla}. En TiendaTech se seleccionan disponibilidad, rendimiento, fiabilidad, mantenibilidad y seguridad porque disponen de umbrales verificables y evidencia reproducible.
-
-    % ============================================================
-    % 4. ARQUITECTURA DEL SISTEMA -- Dimension D1 + D4.2
-    % ============================================================
-    \section{Arquitectura del sistema}
-    \label{sec:arquitectura-sistema}
-
-    \subsection{Vistas C4 y evolución respecto a E3}
-
-    Las vistas C4 de nivel 1 (contexto) y nivel 2 (contenedores) construidas en E3 --- frontend con Spring Cloud Gateway enrutando hacia los seis microservicios de Productos, Inventario, Pedidos, Órdenes y proveedores, Usuarios y Ventas --- se mantienen vigentes en su forma general: esta entrega no agrega ni elimina microservicios, refactoriza su interior y asegura su conexión a la base de datos distribuida. El cambio relevante a nivel de contenedor es que \textbf{todos} los microservicios usan ahora CockroachDB como base real (Sección \ref{sec:persistencia-distribuida}), mientras que en E3 esto era un perfil experimental paralelo a la base compartida usada para la validación funcional. La Figura \ref{fig:arquitectura-e4} consolida esta vista actualizada: capa de clientes (SPA web y app Android), capa de acceso y seguridad (Caddy y el Gateway con filtro JWT), los seis microservicios y \texttt{armado-ia} sobre la red interna de Docker, el clúster CockroachDB de tres nodos con replicación Raft, y los dos servicios externos (SMTP para OTP, Amazon Bedrock para las explicaciones de \texttt{armado-ia}).
-
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=\textwidth]{../diagrams/tiendatech-arquitectura-e4.drawio.png}
-        \caption{Arquitectura general de TiendaTech en la Entrega 4, con la persistencia distribuida ya unificada sobre CockroachDB.}
-        \label{fig:arquitectura-e4}
-    \end{figure}
-
-    \subsection{Refactor en capas y principios SOLID (D1.1)}
-
-    Los seis microservicios Java del backend (\texttt{usuarios}, \texttt{productos-service}, \texttt{inventario-service}, \texttt{pedidos-service}, \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service}) quedaron organizados en los cuatro paquetes exigidos: \texttt{presentation} (controladores REST y DTO de entrada/salida), \texttt{application} (servicios de caso de uso, sin acceso directo a JDBC ni a HTTP saliente), \texttt{domain} (entidades y \emph{puertos}, es decir, interfaces que declaran lo que el dominio necesita del exterior) e \texttt{infrastructure} (adaptadores concretos: repositorios JDBC, clientes HTTP, configuración de seguridad). El microservicio \texttt{armado-ia}, escrito en Python, mantiene una separación equivalente por responsabilidad (\texttt{clients/}, \texttt{explicacion/}, capa de servicio) sin adoptar literalmente la misma nomenclatura de paquetes Java.
-
-    El patrón de puerto y adaptador se aplica de forma consistente: \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service} declaran \texttt{InventarioPort} en \texttt{domain}, implementado por \texttt{InventarioClient} en \texttt{infrastructure}; \texttt{ventas-service} añade además \texttt{FacturaStore} y \texttt{FacturaOutboxStore} como puertos de persistencia; \texttt{pedidos-service} es el caso más extenso, con puertos dedicados para cada colaborador externo (\texttt{ProductoPort}, \texttt{UsuarioPort}, \texttt{FacturaPort}, \texttt{CrdbProbePort}, \texttt{CrdbRetryPort}, \texttt{CrdbMetricsPort}, \texttt{\seqsplit{BusinessMetricsPort}}); y \texttt{usuarios} generaliza la convención a \texttt{domain/port/out} (\texttt{TokenPort}, \texttt{\seqsplit{UsuarioRepositoryPort}}, \texttt{EmailPort}, \texttt{PasswordHasher}, \texttt{OtpStorePort}, entre otros), cada uno con su adaptador en \texttt{\seqsplit{infrastructure/persistence/adapter}} o \texttt{\seqsplit{infrastructure/security}}.
-
-    Esta organización materializa dos principios SOLID de forma verificable en el código. El \textbf{principio de responsabilidad única} (SRP) separa qué hace el sistema (\texttt{application}) de cómo lo hace (\texttt{infrastructure}): por ejemplo, \texttt{OrdenCompraService} orquesta la recepción de una orden de compra sin saber si el inventario se actualiza vía HTTP, cola de mensajes o llamada local. El \textbf{principio de inversión de dependencias} (DIP) se sostiene en que las clases de \texttt{application} dependen únicamente de las interfaces declaradas en \texttt{domain}, nunca de una clase concreta de \texttt{infrastructure}; Spring resuelve la implementación real (\texttt{InventarioClient}, \texttt{\seqsplit{JdbcOrdenCompraRepository}}, etc.) por inyección en tiempo de arranque. Esto permite, por ejemplo, sustituir \texttt{InventarioClient} por un doble de prueba sin tocar \texttt{OrdenCompraService}.
-
-    \subsection{Patrones GoF aplicados (D1.2)}
-
-    La documentación completa de esta decisión vive en \texttt{\seqsplit{docs/adr/ADR-005-patrones-gof.md}}. La auditoría registrada en ese ADR es deliberadamente conservadora: de los ocho servicios del backend, la mayoría implementa una arquitectura por capas limpia sin patrones GoF genuinos, y lo que a primera vista parece un patrón resulta ser inyección de dependencias de Spring, un \emph{Repository} (Fowler, no GoF) con una sola implementación, o un \emph{builder} de una librería de terceros. En vez de etiquetar falsamente esos casos, el equipo documenta cinco patrones GoF con evidencia real en el código:
-
-    \begin{enumerate}
-        \item \textbf{Strategy} (comportamiento): \texttt{ExplicacionClient} (\texttt{\seqsplit{services/armado-ia/app/explicacion/client.py}}) como interfaz, con dos estrategias intercambiables --- \texttt{\seqsplit{BedrockExplicacionClient}} (usa AWS Bedrock) y \texttt{\seqsplit{DeterministicExplicacionClient}} (redacción sin LLM) --- seleccionadas en runtime por \texttt{ExplicacionService}.
-        \item \textbf{Adapter} (estructural): \texttt{\seqsplit{BedrockExplicacionClient}} envuelve el SDK \texttt{boto3} y \texttt{ProductoClient} (\texttt{services/armado-ia/app/clients/producto\_client.py}) envuelve \texttt{httpx}, ambos traduciendo su fuente externa a tipos de dominio propios.
-        \item \textbf{Decorator} (estructural): \texttt{\seqsplit{TrustedUserHeaderRequest}}, clase interna de \texttt{JwtGatewayFilter} (\texttt{Apps/web/frontend}), extiende \texttt{\seqsplit{HttpServletRequestWrapper}} para inyectar cabeceras de identidad verificadas sin mutar la petición original.
-        \item \textbf{Chain of Responsibility} (comportamiento): \texttt{\seqsplit{ExplanationValidationHandler}} y sus implementaciones concretas (\texttt{\seqsplit{NonEmptyExplanationHandler}}, \texttt{\seqsplit{VerifiedHardwareTokenHandler}}) forman una cadena de validadores anti-alucinación sobre la respuesta del LLM.
-        \item \textbf{Template Method} (comportamiento): el método \texttt{validate()} de \texttt{\seqsplit{ExplanationValidationHandler}} fija el algoritmo común (ejecutar regla, devolver problema si existe, delegar al siguiente) y delega el paso variable a \texttt{\_validate\_current()} en cada subclase.
-    \end{enumerate}
-
-    El ADR también deja constancia explícita de los patrones evaluados y descartados por no tener estructura GoF real en este backend (Strategy sobre puertos con una sola implementación, Factory Method/Abstract Factory sobre \texttt{@Bean} sin jerarquía Creator, Builder de terceros, Observer, Facade, Command, State y Singleton), y documenta por separado --- sin mezclarlos con el catálogo GoF --- otros patrones legítimos presentes en el proyecto: \emph{Repository} (Fowler) en los seis servicios Java, \emph{Outbox} en \texttt{ventas-service} y \emph{Circuit Breaker}/\emph{Retry} (Nygard) en \texttt{pedidos-service}, \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{armado-ia}.
-
-    \subsection{Persistencia distribuida operando (D4.2)}
-    \label{sec:persistencia-distribuida}
-
-    El clúster CockroachDB de tres nodos heredado de la Entrega 3 (puertos \texttt{26257}/\texttt{26258}/\texttt{26259}) se mantiene operando y es el que sostiene la persistencia de los seis microservicios Java. Sobre esa base, esta entrega incorpora dos mejoras verificables en \texttt{docker-compose.yml}.
-
-    La primera es de \textbf{disponibilidad}: los siete servicios que dependen de una base de datos o exponen un endpoint HTTP (\texttt{pedidos}, \texttt{productos}, \texttt{inventario}, \texttt{ventas}, \texttt{\seqsplit{ordenes-proveedores}}, \texttt{usuarios} y \texttt{armado-ia}) ahora declaran un bloque \texttt{healthcheck:} contra \texttt{/actuator/health} (o el equivalente del servicio Python), con reintentos y periodo de arranque configurados; antes de esta entrega, \texttt{\seqsplit{tiendatech-ventas}} y \texttt{\seqsplit{tiendatech-ordenes-proveedores}} carecían de este chequeo, lo que impedía que \texttt{docker compose} reportara con precisión cuándo el sistema completo estaba realmente listo para recibir tráfico.
-
-    La segunda es de \textbf{seguridad de la conexión}: la cadena de conexión de los seis servicios Java se migró de \texttt{jdbc:postgresql:\allowbreak//<IP fija de AWS>:26257,...\allowbreak\&sslmode=disable} --- una conexión sin cifrar contra una dirección IP fija --- a \texttt{jdbc:postgresql:\allowbreak//host.docker.internal:26257,...\allowbreak\&sslmode=verify-ca\allowbreak\&sslrootcert=/app\allowbreak/crdb-certs/ca.crt\allowbreak\&sslcert=/app\allowbreak/crdb-certs/client.jhinson.crt\allowbreak\&sslkey=/app\allowbreak/crdb-certs/client.jhinson.key.pk8}, es decir, autenticación mutua por certificado (mTLS) en vez de una conexión abierta. Los tres archivos de certificado se montan como volúmenes de solo lectura (\texttt{\seqsplit{./Apps/web/infra/crdb-certs/*.crt|.key.pk8:...:ro}}) en cada contenedor. Este cambio requirió reconciliar manualmente un conflicto de fusión en \texttt{docker-compose.yml} porque ambas mejoras (healthchecks y mTLS) se desarrollaron en paralelo sobre los mismos bloques de servicio; el resultado final conserva ambas.
-
-    \subsection{Stack tecnológico}
-
-    La Tabla \ref{tab:stack-e4} consolida las versiones vigentes verificadas directamente en los archivos de build del repositorio (\texttt{pom.xml}, \texttt{package.json}, \texttt{libs.versions.toml}), actualizando la Tabla de herramientas de \texttt{\seqsplit{docs/entrega3/PFC3.tex}} con lo efectivamente usado en esta entrega.
-
-    \begin{table}[H]
-        \centering
-        \caption{Stack tecnológico consolidado por capa (Entrega 4).}
-        \label{tab:stack-e4}
-        \small
-        \begin{tabularx}{\textwidth}{>{\bfseries}l l >{\raggedright\arraybackslash}X}
-    \toprule
-    Capa & Tecnología & Versión verificada \\
-    \midrule
-    Backend (6 microservicios Java) & Java / Spring Boot & Java 21, Spring Boot 3.3.5 (\texttt{pom.xml} de \texttt{pedidos-service}) \\
-    Backend (armado-ia) & Python & FastAPI, \texttt{pytest} + \texttt{ruff} en CI \\
-    Persistencia distribuida & CockroachDB & v23.2.4 verificado en la prueba de integración con Testcontainers de \texttt{pedidos-service}; v23.1.13 en el nodo local de \texttt{\seqsplit{docker-compose.override.yml}} \\
-    Web (SPA) & React / TypeScript & React 18.3.1, \texttt{react-router-dom} 7.18.2, TypeScript 5.9.2, Vite 7.1.2 (\texttt{package.json}) \\
-    Web (Gateway) & Spring Cloud Gateway & Empaquetado junto al frontend, ver Dockerfile multi-stage (Sección 5.2) \\
-    Móvil & Kotlin / Jetpack Compose & Kotlin 2.2.10, Compose BOM 2026.02.01, Hilt 2.60.1, \texttt{compileSdk}/\texttt{targetSdk} 37, \texttt{minSdk} 26 (\texttt{libs.versions.toml}, \texttt{build.gradle.kts}) \\
-    Contenerización & Docker / Docker Compose & Build multi-stage por servicio; publicación multi-arquitectura \texttt{\seqsplit{linux/amd64,linux/arm64}} en \texttt{publish-images.yml} \\
-    CI/CD & GitHub Actions & \texttt{ci.yml} (3 jobs) + \texttt{publish-images.yml}, ver Sección 7.3 \\
-    \bottomrule
-        \end{tabularx}
-    \end{table}
-
-    % ============================================================
-    % 5. APLICACION WEB -- Dimension D2 -- responsable: Jeremy
-    % ============================================================
-    \section{Aplicación web}
-
-    \subsection{Funcionalidad (D2.1)}
-
-    La SPA (\texttt{\seqsplit{Apps/web/frontend/webapp}}), construida con React 18 y \texttt{react-router-dom}, expone doce rutas declaradas en \texttt{App.tsx}: catálogo (\texttt{/}), detalle de producto (\texttt{/producto/:id}), armado de PC (\texttt{/armado}), carrito (\texttt{/carrito}), pago (\texttt{/pago}), factura (\texttt{/factura/:id?}), autenticación (\texttt{/login}, \texttt{/registro}, \texttt{/recuperacion}), cuenta (\texttt{/cuenta}), panel de trabajador (\texttt{/trabajador}) y administración (\texttt{/admin}), superando ampliamente el mínimo de cinco exigido por la rúbrica.
-
-    La sesión se identifica mediante un token JWT emitido por \texttt{\seqsplit{tiendatech-usuarios}}. El módulo \texttt{\seqsplit{src/services/session.ts}} guarda el token exclusivamente en \texttt{sessionStorage} (nunca en \texttt{localStorage}: al cargar, el propio módulo purga activamente cualquier clave de sesión que hubiera quedado en \texttt{localStorage} de una versión anterior), cumpliendo la restricción explícita de la rúbrica sobre el manejo del token. La ruta \texttt{/admin} está protegida por un componente \texttt{AdminRoute} que valida el rol del usuario (\texttt{id\_rol === 1} o \texttt{rol === "admin"}) y redirige a \texttt{/login} si no se cumple. Adicionalmente, \texttt{App.tsx} implementa expiración de sesión por inactividad (30 minutos sin interacción del usuario cierran la sesión automáticamente).
-
-    La internacionalización declarada como deseable en la rúbrica (\texttt{react-i18next} con al menos español e inglés) no está implementada: toda la interfaz está codificada directamente en español. Se documenta aquí como brecha conocida en vez de omitirla.
-
-    \begin{figure}[H]
-        \centering
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/principal_web.jpeg}
-            \caption{Página principal (\texttt{/})}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/catalogo_web.jpeg}
-            \caption{Catálogo filtrado por categoría}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/armado_ia_web.jpeg}
-            \caption{Armado de PC (\texttt{/armado})}
-        \end{subfigure}
-
-        \vspace{0.4cm}
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/admin_resumen_web.jpeg}
-            \caption{Panel administrativo, resumen (\texttt{/admin})}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/usuarios_admin_web.jpeg}
-            \caption{Administración de usuarios}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/productos_admin_web.jpeg}
-            \caption{Administración de productos}
-        \end{subfigure}
-
-        \vspace{0.4cm}
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/facturacion_admin_web.jpeg}
-            \caption{Facturación}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/proveedores_admin_web.jpeg}
-            \caption{Administración de proveedores}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.30\textwidth}
-            \includegraphics[width=\textwidth]{img/ordenes_proveedores_admin_web.jpeg}
-            \caption{Órdenes a proveedores}
-        \end{subfigure}
-
-        \caption{Capturas de las rutas principales de la SPA (página principal, catálogo, armado de PC) y del panel de administración (\texttt{/admin}), que cubre las seis entidades de negocio del sistema. La interfaz está codificada íntegramente en español, consistente con la ausencia de \texttt{react-i18next} señalada arriba.}
-        \label{fig:web-rutas}
-    \end{figure}
-
-    \subsection{Calidad (D2.2)}
-
-    El \texttt{package.json} de la webapp no declara \texttt{eslint} ni \texttt{prettier} como dependencias de desarrollo, por lo que no hay una verificación de estilo o de reglas de código automatizada más allá de la que impone el propio compilador de TypeScript (\texttt{tsc -b}) durante el paso de \texttt{build}. Tampoco hay un framework de pruebas configurado (ni Vitest ni Jest aparecen en \texttt{devDependencies}), por lo que no existe cobertura de pruebas automatizada para la SPA en este momento; esta ausencia se retoma como brecha en la Sección \ref{sec:discusion}.
-
-    El empaquetado sí está resuelto correctamente: \texttt{\seqsplit{Apps/web/frontend/Dockerfile}} usa una construcción \emph{multi-stage} de tres etapas --- \texttt{node:22-alpine} para compilar la SPA con \texttt{npm run build}, \texttt{\seqsplit{maven:3.9-eclipse-temurin-17}} para empaquetar el frontend Spring Cloud Gateway junto con los estáticos ya compilados de React, y \texttt{\seqsplit{eclipse-temurin:17-jre}} como imagen final de ejecución --- lo que mantiene la imagen de producción libre de herramientas de compilación.
-
-    % ============================================================
-    % 6. APLICACION MOVIL -- Dimension D3 -- responsable: Andy
-    % ============================================================
-    \section{Aplicación móvil}
-
-    \subsection{Funcionalidad (D3.1)}
-
-    \texttt{Apps/mobile} es una aplicación Android nativa en Kotlin con Jetpack Compose, organizada por \emph{feature} (\texttt{auth}, \texttt{catalog}, \texttt{cart}, \texttt{orders}, \texttt{account}, \texttt{scanner}, \texttt{notifications}), cada una dividida internamente en \texttt{data}/\texttt{domain}/\texttt{ui}, con inyección de dependencias vía Hilt y comunicación HTTP con el backend mediante Retrofit y OkHttp. La capa \texttt{core/database} usa Room para cachear productos y categorías localmente (\texttt{ProductCacheDao}, \texttt{CategoryCacheDao}, \texttt{CacheMetadataDao}), permitiendo operar el catálogo con datos ya vistos aunque la conexión falle.
-
-    La aplicación utiliza dos capacidades del dispositivo, superando el mínimo exigido por la rúbrica. La primera es la \textbf{cámara}: la feature \texttt{scanner} usa CameraX (\texttt{\seqsplit{androidx.camera.core/camera2/lifecycle/view}}) junto con ML Kit Barcode Scanning para leer códigos de barras de productos y resolverlos contra el catálogo (\texttt{BarcodeAnalyzer}, \texttt{BarcodeLookup}). La segunda son las \textbf{notificaciones nativas}: \texttt{\seqsplit{AndroidOrderNotificationPublisher}} publica notificaciones reales del sistema operativo (API \texttt{\seqsplit{NotificationManager}}/\texttt{NotificationCompat}, con el permiso \texttt{POST\_NOTIFICATIONS} declarado en el manifiesto) para informar cambios de estado en las órdenes del usuario.
-
-    Los flujos de negocio cubiertos son autenticación (login/registro, \texttt{feature/auth}), catálogo y detalle de producto (\texttt{feature/catalog}), carrito (\texttt{feature/cart}), órdenes y su historial (\texttt{feature/orders}), y cuenta con checkout (\texttt{feature/account}, incluye \texttt{CheckoutScreen}). La sesión se protege de forma más estricta que en la web: el token no se guarda en texto plano sino cifrado mediante Android Keystore (\texttt{\seqsplit{AndroidKeystoreTokenCipher}}, \texttt{SecureSessionStore}), y \texttt{AuthInterceptor} lo adjunta automáticamente a las peticiones salientes de Retrofit.
-
-    \begin{figure}[H]
-        \centering
-        \begin{subfigure}[b]{0.22\textwidth}
-            \includegraphics[width=\textwidth]{img/interfaz_movil_1.jpeg}
-            \caption{Inicio de sesión}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.22\textwidth}
-            \includegraphics[width=\textwidth]{img/interfaz_movil_2.jpeg}
-            \caption{Escaneo de código de barras (CameraX + ML Kit)}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.22\textwidth}
-            \includegraphics[width=\textwidth]{img/interfaz_movil_3.jpeg}
-            \caption{Detalle de producto resuelto desde el escaneo}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.22\textwidth}
-            \includegraphics[width=\textwidth]{img/interfaz_movil_4.jpeg}
-            \caption{Catálogo con acceso a búsqueda y escaneo}
-        \end{subfigure}
-
-        \caption{Flujo de autenticación y evidencia visual de la capacidad de cámara (escaneo de código de barras vía CameraX y ML Kit) en la aplicación móvil nativa. La segunda capacidad usada, notificaciones nativas (\texttt{AndroidOrderNotificationPublisher}), no se ilustra aquí para evitar exponer datos personales reales de la cuenta de prueba visibles en esa pantalla.}
-        \label{fig:movil-flujos}
-    \end{figure}
-
-    \subsection{Calidad (D3.2)}
-
-    La aplicación cuenta con dos niveles de prueba verificados en el repositorio. Existen pruebas instrumentadas (\texttt{\seqsplit{app/src/androidTest}}) que corren sobre un dispositivo o emulador real: \texttt{\seqsplit{TiendaTechDatabaseTest}} valida el esquema Room y \texttt{\seqsplit{NotificationIntegrationTest}} valida la publicación de notificaciones nativas, además de la plantilla \texttt{\seqsplit{ExampleInstrumentedTest}} generada por Android Studio. Adicionalmente --- y a diferencia de lo que se había señalado como pendiente de confirmar en la auditoría interna previa a esta entrega --- sí existen pruebas unitarias reales sobre \texttt{app/src/test}: doce archivos que cubren \texttt{ViewModels} (\texttt{\seqsplit{ScannerViewModelTest}}, usando \texttt{\seqsplit{kotlinx.coroutines.test}} con \texttt{\seqsplit{StandardTestDispatcher}} y \texttt{runTest} para probar corrutinas de forma determinista), repositorios (\texttt{AuthRepositoryTest}, \texttt{CartContractTest}, \texttt{OrdersContractTest}), validadores (\texttt{AuthValidatorTest}), mapeadores (\texttt{CatalogMapperTest}) y almacenamiento seguro de sesión (\texttt{\seqsplit{SecureSessionStoreTest}}), todas con JUnit 4 y \texttt{\seqsplit{okhttp-mockwebserver}} para simular el backend.
-
-    El job \texttt{android-mobile} de \texttt{\seqsplit{.github/workflows/ci.yml}} ejecuta \texttt{\seqsplit{lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest}} en cada push y publica el APK de depuración y el APK de pruebas instrumentadas como artefactos descargables del pipeline, cumpliendo la exigencia de que el CI produzca un artefacto instalable de la app móvil.
-
-    % ============================================================
-    % 7. PRUEBAS Y CI/CD -- Dimension D4.1 + D5
-    % ============================================================
-    \section{Pruebas y CI/CD}
-
-    \subsection{Pirámide de pruebas (D5.1)}
-
-    A la fecha de cierre de esta sección, los seis microservicios Java cuentan con pruebas unitarias reales con JUnit 5 y superan el umbral mínimo de cobertura del 70\,\% exigido por la rúbrica, verificado automáticamente por \texttt{jacoco-maven-plugin} (objetivo \texttt{check}, ligado a la fase \texttt{test}, con regla \texttt{BUNDLE}/\texttt{LINE}/\texttt{COVEREDRATIO} $\geq 0.70$) sobre el paquete \texttt{application} de cada servicio. \texttt{\seqsplit{ordenes-proveedores-service}} y \texttt{ventas-service} --- que en un estado previo de este documento no tenían ninguna prueba --- incorporaron \texttt{\seqsplit{OrdenCompraServiceTest}}, \texttt{ProveedorServiceTest}, \texttt{FacturaServiceTest} e \texttt{\seqsplit{InventarioOutboxProcessorTest}} respectivamente, cerrando la brecha señalada anteriormente sobre la lógica de negocio más nueva de esta entrega (recepción parcial de órdenes de compra, recálculo de costo por promedio ponderado, auto-desactivación de productos). El microservicio Python \texttt{armado-ia} aplica el mismo criterio con \texttt{pytest-cov} (\texttt{--cov-fail-under=70}). La Tabla \ref{tab:cobertura-e4} resume la cobertura medida por servicio.
-
-    \begin{table}[H]
-        \centering
-        \caption{Cobertura de pruebas por microservicio (Entrega 4), verificada por el gate automático del pipeline (mínimo 70\,\%).}
-        \label{tab:cobertura-e4}
-        \small
-        \begin{tabularx}{\textwidth}{X c}
-\toprule
-\textbf{Servicio} & \textbf{Cobertura (líneas)} \\
-\midrule
-\texttt{inventario-service} & 100\,\% \\
-\texttt{productos-service} & 100\,\% \\
-\texttt{\seqsplit{ordenes-proveedores-service}} & 92.16\,\% \\
-\texttt{ventas-service} & 100\,\% \\
-\texttt{pedidos-service} & 80.62\,\% \\
-\texttt{usuarios} & 75.80\,\% \\
-\texttt{armado-ia} (Python) & 75\,\% \\
-\bottomrule
-        \end{tabularx}
-    \end{table}
-
-    Además de las pruebas unitarias, \texttt{pedidos-service} incluye la única prueba de \textbf{integración} real con base de datos del backend: \texttt{\seqsplit{CockroachDbIntegrationTest}}, que levanta un contenedor \texttt{\seqsplit{cockroachdb/cockroach:v23.2.4}} real vía Testcontainers (\texttt{@Testcontainers}, \texttt{@Container}) en lugar de simular la base de datos. A esto se suma \texttt{\seqsplit{GatewayIntegrationTest}} (11 pruebas, 0 fallos), que levanta el API Gateway completo (\texttt{@SpringBootTest} con puerto aleatorio) contra tres backends simulados y verifica tres flujos reales atravesando el Gateway (catálogo de productos, ubicaciones/usuarios, creación de pedidos), más el rechazo con \texttt{401} sin token JWT en las ocho familias de rutas protegidas --- cumpliendo así el mínimo de tres flujos de integración por Gateway exigido por la rúbrica.
-
-    Los Listados \ref{lst:lamport-clock-test}--\ref{lst:gateway-integration-test} ilustran, con código real del repositorio, los tres niveles de la pirámide efectivamente presentes en el backend: prueba unitaria pura, prueba de integración con base de datos real y prueba de integración a través del API Gateway.
-
-    \begin{lstlisting}[style=codigo, language=Java, caption={Prueba unitaria pura, sin colaboradores externos (\texttt{inventario-service}).}, label={lst:lamport-clock-test}]
-package com.tiendatech.inventario.application.reservation;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
-class LamportClockTest {
-    @Test
-    void avanzaElRelojAlMaximoEntreLocalYRemotoMasUno() {
-        var clock = new LamportClock();
-        assertEquals(0, clock.current());
-        assertEquals(6, clock.receive(5));
-        assertEquals(6, clock.current());
-        assertEquals(7, clock.receive(3));
-        assertEquals(7, clock.current());
-        assertEquals(20, clock.receive(19));
-        assertEquals(20, clock.current());
-    }
-}
-    \end{lstlisting}
-
-    \begin{lstlisting}[style=codigo, language=Java, caption={Prueba de integración con base de datos real vía Testcontainers (\texttt{pedidos-service}).}, label={lst:cockroachdb-integration-test}]
-package com.tiendatech.pedidos.integration;
-
-import org.junit.jupiter.api.Test;
-import org.testcontainers.cockroachdb.CockroachContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@Testcontainers(disabledWithoutDocker = true)
-class CockroachDbIntegrationTest {
-
-    @Container
-    static final CockroachContainer cockroach =
-            new CockroachContainer("cockroachdb/cockroach:v23.2.4")
-                    .withDatabaseName("tiendatech_test");
-
-    @Test
-    void ejecutaTransaccionSerializableConDriverPostgresql() throws Exception {
-        try (Connection connection = DriverManager.getConnection(
-                cockroach.getJdbcUrl(),
-                cockroach.getUsername(),
-                cockroach.getPassword())) {
-            connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            connection.setAutoCommit(false);
-
-            try (Statement statement = connection.createStatement()) {
-                statement.execute("""
-                        CREATE TABLE pedido_prueba (
-                            fecha DATE NOT NULL,
-                            orden_id INT8 NOT NULL,
-                            total DECIMAL(18,2) NOT NULL,
-                            PRIMARY KEY (fecha, orden_id)
-                        )
-                        """);
-                statement.executeUpdate("""
-                        INSERT INTO pedido_prueba (fecha, orden_id, total)
-                        VALUES (DATE '2026-07-28', 1, 125.50)
-                        """);
-            }
-            connection.commit();
-
-            try (Statement statement = connection.createStatement();
-                 ResultSet result = statement.executeQuery(
-                         "SELECT total FROM pedido_prueba WHERE orden_id = 1")) {
-                result.next();
-                assertEquals("125.50", result.getBigDecimal("total").toPlainString());
-            }
-        }
-    }
-}
-    \end{lstlisting}
-
-    \begin{lstlisting}[style=codigo, language=Java, caption={Extracto de la prueba de integración a través del API Gateway (\texttt{Apps/web/frontend}); se omiten por brevedad los métodos auxiliares que levantan los backends simulados.}, label={lst:gateway-integration-test}]
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class GatewayIntegrationTest {
-    private static final String SECRET = "TiendaTechDistribuidaJwtSecretKey2026Seguro";
-    private static final HttpServer PRODUCTOS = server("/api/productos/10", "{\"servicio\":\"productos\",\"id\":10}");
-    private static final HttpServer USUARIOS = server("/api/provincias", "[{\"id\":1,\"nombre\":\"Guayas\"}]");
-    private static final HttpServer PEDIDOS = server("/api/ordenes", "{\"servicio\":\"pedidos\",\"creada\":true}");
-
-    @LocalServerPort int gatewayPort;
-
-    @DynamicPropertySource
-    static void backends(DynamicPropertyRegistry registry) {
-        registry.add("tiendatech.security.jwt.secret", () -> SECRET);
-        registry.add("PRODUCTOS_SERVICE_URL", () -> url(PRODUCTOS));
-        registry.add("USUARIOS_SERVICE_URL", () -> url(USUARIOS));
-        registry.add("PEDIDOS_SERVICE_URL", () -> url(PEDIDOS));
-        registry.add("tiendatech.security.jwt.public-read-paths", () -> "/api/productos/**,/api/provincias/**");
-    }
-
-    @Test void flujoCatalogoAtraviesaGatewayHastaProductos() throws Exception {
-        var response = get("/api/productos/10");
-        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("productos"));
-    }
-
-    @Test void flujoUbicacionesAtraviesaGatewayHastaUsuarios() throws Exception {
-        var response = get("/api/provincias");
-        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("Guayas"));
-    }
-
-    @Test void flujoPedidosAtraviesaGatewayHastaElMicroservicio() throws Exception {
-        var response = get("/api/ordenes", token());
-        assertEquals(200, response.statusCode()); assertTrue(response.body().contains("creada"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {
-            "/api/usuarios/buscar", "/api/movimientos", "/api/carrito/1",
-            "/api/ordenes", "/api/proveedores", "/api/ordenes-compra",
-            "/api/facturas/1", "/api/armado/recomendar"
-    })
-    void todaFamiliaProtegidaRechazaSolicitudSinToken(String path) throws Exception {
-        assertEquals(401, get(path).statusCode(), path);
-    }
-    // ... helpers de infraestructura de prueba (get, token, gateway, server, respond) omitidos
-}
-    \end{lstlisting}
-
-    La raíz del repositorio incorpora \texttt{tests/load/} con Locust y el Gateway dispone de pruebas de integración para tres flujos y ocho familias protegidas. La SPA todavía no cuenta con Playwright ni otro framework dedicado de pruebas de interfaz; esa brecha se mantiene separada de la prueba de carga HTTP y de las pruebas móviles unitarias e instrumentadas detalladas en la Sección 6.2.
-
-    \subsection{Contratos de consumidor Pact (D4.1)}
-
-    Como capa de \emph{contrato} de la pirámide de pruebas, la rúbrica exige \emph{consumer-driven contract testing} con Pact entre los clientes (web y móvil, como consumidores) y el backend (como proveedor). A la fecha de cierre de esta sección no existe en el repositorio ninguna carpeta \texttt{tests/contract} ni configuración de Pact (no hay dependencias de \texttt{pact-jvm} en ningún \texttt{pom.xml} del backend, ni de un \emph{Pact broker} referenciado en el pipeline de CI/CD). Este criterio se declara explícitamente como \textbf{no cumplido} en el estado actual del proyecto. La razón no es desconocimiento de la herramienta, sino una decisión de priorización bajo el tiempo disponible del equipo: se optó por asegurar primero que la persistencia distribuida operara de forma segura (Sección \ref{sec:persistencia-distribuida}) y que la calidad de las aplicaciones cliente avanzara (Secciones 5 y 6), antes de introducir una herramienta de verificación de contratos que ninguno de los servicios consumidores tenía previamente. Queda como trabajo inmediato siguiente, con una ruta ya decidida en \texttt{\seqsplit{docs/plan-cierre-e4.md}}: priorizar el contrato \emph{web↔backend} (el cliente con más tráfico y más rutas) antes que el contrato del consumidor móvil, de modo que exista al menos un contrato verificado en verde en lugar de dos a medio terminar.
-
-    \subsection{Pipeline CI/CD end-to-end (D5.2)}
-
-    El repositorio incorporó en este ciclo un segundo workflow de GitHub Actions, \texttt{\seqsplit{.github/workflows/ci-cd.yml}} (\emph{CI-CD quality gate}), que corre en cada \emph{push} y \emph{pull request} contra \texttt{main} (además de \texttt{workflow\_dispatch} manual), con \texttt{concurrency} configurado para cancelar ejecuciones obsoletas del mismo \emph{ref}. Define seis jobs: \texttt{test-java} (matriz sobre los seis microservicios, ejecuta \texttt{mvn clean test} y aplica el gate de JaCoCo de la Tabla \ref{tab:cobertura-e4}), \texttt{test-python} (\texttt{pytest} con cobertura sobre \texttt{armado-ia}), \texttt{lint} (compilación de los seis servicios Java, \texttt{ruff} sobre \texttt{armado-ia} y build de TypeScript sobre la SPA), \texttt{integration-test} (\texttt{\seqsplit{GatewayIntegrationTest}} y \texttt{\seqsplit{CockroachDbIntegrationTest}}), \texttt{build} (matriz de \texttt{docker/build-push-action} que construye, sin publicar, las ocho imágenes del sistema con cacheo \texttt{type=gha}) y \texttt{coverage} (publica los reportes XML de JaCoCo y \texttt{pytest-cov} a Codecov). El job \texttt{build} depende explícitamente de que \texttt{test-java}, \texttt{test-python}, \texttt{lint} e \texttt{integration-test} hayan pasado (\texttt{needs}), de modo que no se construye ninguna imagen sobre código que no haya superado su quality gate. El workflow \texttt{\seqsplit{.github/workflows/ci.yml}} original se mantiene activo en paralelo (jobs \texttt{android-mobile}, \texttt{crdb-tests}, \texttt{armado-ia-tests}); su consolidación con \texttt{ci-cd.yml} en un único pipeline queda pendiente como limpieza técnica, declarada aquí en vez de resuelta en silencio.
-
-    Comparado contra los siete jobs que exige la rúbrica (\texttt{\seqsplit{lint, test-backend, test-web, test-mobile, build-images, build-mobile-apk, integration}}), el pipeline vigente cubre ahora \texttt{test-backend} (\texttt{test-java}, sobre los seis servicios y no solo \texttt{pedidos-service}), \texttt{integration} (\texttt{integration-test}, con dos flujos --- Gateway y base de datos --- en vez de uno), \texttt{build-images} (job \texttt{build} de \texttt{ci-cd.yml}, además de \texttt{publish-images.yml}), \texttt{test-mobile} y \texttt{build-mobile-apk} (ambos dentro de \texttt{android-mobile}, sin cambios respecto de la entrega anterior), y \texttt{lint} de forma parcial (compilación Java y \texttt{ruff} sí corren; no hay un linter de estilo dedicado tipo Checkstyle/ESLint, solo un build de TypeScript). Sigue sin job dedicado \texttt{test-web}, porque, como se documentó en la Sección 5.2, la SPA no tiene ningún framework de pruebas configurado. Como en la entrega anterior, \texttt{publish-images.yml} publica en Docker Hub y no en GHCR; el resultado funcional es equivalente.
-
-    La guía específica del Paso 2 (\emph{Pipeline CI/CD con GitHub Actions}) describe la misma exigencia con una nomenclatura más compacta, de cuatro jobs: \texttt{test} (ejecuta pruebas y cobertura), \texttt{lint} (análisis estático), \texttt{build} (construye la imagen Docker) e \texttt{integration-test} (levanta el entorno y ejecuta las pruebas de integración). La correspondencia con los seis jobs reales de \texttt{ci-cd.yml} es directa: \texttt{test} $\to$ \texttt{test-java} + \texttt{test-python} + \texttt{coverage} (pruebas y cobertura de los seis servicios Java y de \texttt{armado-ia}, con la publicación del reporte incluida); \texttt{lint}, \texttt{build} e \texttt{integration-test} conservan el mismo nombre. Se optó por mantener la separación en seis jobs --- en vez de fusionar \texttt{test-java}, \texttt{test-python} y \texttt{coverage} hasta calcar un único job \texttt{test} --- porque el pipeline ya estaba probado y en verde con esta estructura; fusionarlos habría exigido volver a validar el pipeline completo bajo la misma restricción de tiempo documentada en la Discusión (Sección \ref{sec:discusion}), a cambio de un beneficio puramente nominal. El Listado \ref{lst:ci-cd-yaml} reproduce el archivo completo tal como quedó configurado y verificado en verde.
-
-    \begin{lstlisting}[style=yamlStyle, language=yaml, caption={Archivo completo \texttt{.github/workflows/ci-cd.yml}.}, label={lst:ci-cd-yaml}]
-name: CI-CD quality gate
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-cd-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  test-java:
-    name: Test ${{ matrix.service }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        service:
-          - inventario-service
-          - productos-service
-          - ordenes-proveedores-service
-          - ventas-service
-          - pedidos-service
-          - usuarios
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-          cache-dependency-path: services/${{ matrix.service }}/pom.xml
-      - name: Unit tests and JaCoCo quality gate
-        working-directory: services/${{ matrix.service }}
-        run: mvn --batch-mode --no-transfer-progress clean test
-      - name: Preserve test and coverage reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: reports-${{ matrix.service }}
-          path: |
-            services/${{ matrix.service }}/target/surefire-reports/
-            services/${{ matrix.service }}/target/site/jacoco/jacoco.xml
-          if-no-files-found: warn
-
-  test-python:
-    name: Test armado-ia
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: |
-            services/armado-ia/requirements.txt
-            services/armado-ia/requirements-dev.txt
-      - name: Install dependencies
-        working-directory: services/armado-ia
-        run: pip install -r requirements.txt -r requirements-dev.txt
-      - name: Unit tests and coverage gate
-        working-directory: services/armado-ia
-        run: python -m pytest --junitxml=pytest-junit.xml --cov=app.domain --cov=app.explicacion --cov-report=xml:coverage.xml --cov-fail-under=70
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: reports-armado-ia
-          path: |
-            services/armado-ia/pytest-junit.xml
-            services/armado-ia/coverage.xml
-          if-no-files-found: warn
-
-  lint:
-    name: Static analysis
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: services/armado-ia/requirements-dev.txt
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: Apps/web/frontend/webapp/package-lock.json
-      - name: Check Java compilation
-        shell: bash
-        run: |
-          set -euo pipefail
-          for service in inventario-service productos-service ordenes-proveedores-service ventas-service pedidos-service usuarios; do
-            mvn -q -f "services/$service/pom.xml" -DskipTests compile
-          done
-      - name: Ruff static analysis
-        working-directory: services/armado-ia
-        run: |
-          pip install -r requirements.txt -r requirements-dev.txt
-          python -m ruff check app tests
-      - name: TypeScript static analysis
-        working-directory: Apps/web/frontend/webapp
-        run: |
-          npm ci
-          npm run build
-
-  integration-test:
-    name: Gateway and CockroachDB integration
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: maven
-      - name: Three flows through API Gateway
-        working-directory: Apps/web/frontend
-        run: mvn --batch-mode --no-transfer-progress -Dtest=GatewayIntegrationTest test
-      - name: CockroachDB integration through Testcontainers
-        working-directory: services/pedidos-service
-        run: mvn --batch-mode --no-transfer-progress -Dtest=CockroachDbIntegrationTest -Djacoco.skip=true test
-
-  build:
-    name: Build image ${{ matrix.image }}
-    needs: [test-java, test-python, lint, integration-test]
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { image: gateway, context: Apps/web/frontend, dockerfile: Apps/web/frontend/Dockerfile }
-          - { image: usuarios, context: services/usuarios, dockerfile: services/usuarios/Dockerfile }
-          - { image: productos, context: services/productos-service, dockerfile: services/productos-service/Dockerfile }
-          - { image: inventario, context: ., dockerfile: services/inventario-service/Dockerfile }
-          - { image: pedidos, context: ., dockerfile: services/pedidos-service/Dockerfile }
-          - { image: ordenes-proveedores, context: services/ordenes-proveedores-service, dockerfile: services/ordenes-proveedores-service/Dockerfile }
-          - { image: ventas, context: services/ventas-service, dockerfile: services/ventas-service/Dockerfile }
-          - { image: armado-ia, context: services/armado-ia, dockerfile: services/armado-ia/Dockerfile }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build without publishing
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.context }}
-          file: ${{ matrix.dockerfile }}
-          push: false
-          tags: tiendatech/${{ matrix.image }}:${{ github.sha }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
-
-  coverage:
-    name: Publish coverage
-    needs: [test-java, test-python]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: reports-*
-          path: reports
-          merge-multiple: false
-      - name: Upload XML reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: reports
-          fail_ci_if_error: false
-          verbose: true
-    \end{lstlisting}
-
-    La confirmación de que Codecov efectivamente recibe los reportes no fue automática: la primera versión del job \texttt{coverage} (sin la línea \texttt{token}) marcaba el job en verde igualmente, porque \texttt{fail\_ci\_if\_error: false} evita que un fallo de subida rompa el pipeline; solo al expandir el log del paso ``Upload coverage to Codecov'' se encontró el error real, \texttt{\{"message":"Token required - not valid tokenless upload"\}}, oculto detrás de un \emph{checkmark} verde. La causa fue doble: primero, la app de GitHub de Codecov solo estaba instalada sobre la cuenta personal de un integrante y no sobre la cuenta propietaria del repositorio, por lo que \texttt{TiendaTech} no aparecía en su panel; una vez el propietario del repositorio instaló la app y autorizó el acceso, siguió exigiéndose un \texttt{CODECOV\_TOKEN} explícito (Codecov v5 ya no acepta subidas sin token para repositorios privados), obtenido desde \emph{Settings $\to$ General $\to$ Repository Upload Token} en Codecov y agregado como secreto en \emph{Settings $\to$ Secrets and variables $\to$ Actions} del repositorio. Con el secreto referenciado en el paso (línea \texttt{token: \$\{\{ secrets.CODECOV\_TOKEN \}\}} del Listado \ref{lst:ci-cd-yaml}), el log del commit \texttt{dd72b3d4} confirma la subida real: \texttt{Your upload is now queued for processing}, con \texttt{status\_code=200}, y el panel de Codecov para ese mismo commit reporta \textbf{75.93\,\%} de cobertura agregada sobre \texttt{main}.
-
-    % ============================================================
-    % 8. OBSERVABILIDAD -- Dimension D6.
-    % ============================================================
-    \section{Observabilidad}
-    \label{sec:observabilidad}
-
-    La observabilidad queda \textbf{implementada parcialmente}. Los seis servicios Java usan Logback con codificación JSON y un filtro HTTP común; \texttt{armado-ia} implementa el mismo esquema en Python. Cada evento incluye fecha, servicio, método, ruta, estado y tiempo de respuesta. Los siete servicios exponen \texttt{/metrics} con \texttt{request\_count\_total}, \texttt{request\_duration\_seconds} y \texttt{active\_connections}. Prometheus los consulta cada 15 segundos desde \texttt{ops/observability/prometheus.yml}, mientras Grafana Alloy queda preparado para \emph{remote write} con credenciales externas no versionadas.
-
-    El dashboard importable \texttt{\seqsplit{ops/observability/grafana-dashboard.json}} define los paneles exigidos: solicitudes por segundo, P50/P95/P99, errores 4xx, errores 5xx y conexiones activas. La Figura \ref{fig:grafana-layout} documenta su distribución lógica. La conexión efectiva con Grafana Cloud y una captura con datos reales permanecen pendientes porque requieren credenciales del equipo; igualmente, las trazas OpenTelemetry y el campo \texttt{trace\_id} no se implementaron y no se presentan como cumplidos.
-
-    \begin{figure}[H]
-        \centering
-        \fbox{\begin{minipage}{0.92\textwidth}
-            \centering
-            \textbf{Dashboard TiendaTech -- distribución configurada}\\[0.5em]
-            \begin{tabular}{|p{0.27\textwidth}|p{0.27\textwidth}|p{0.27\textwidth}|}
-                \hline
-                Requests/s & Latencia P50 & Latencia P95/P99 \\ \hline
-                Errores 4xx & Errores 5xx & Conexiones activas \\ \hline
-            \end{tabular}\\[0.5em]
-            Fuente de datos: Prometheus; intervalo de scraping: 15 s. Esta figura representa la configuración importable, no una captura de métricas simuladas.
-        \end{minipage}}
-        \caption{Distribución de paneles del dashboard Grafana configurado para TiendaTech.}
-        \label{fig:grafana-layout}
-    \end{figure}
-
-    La carga oficial está automatizada en \texttt{tests/load/run-load-test.ps1} para 50 usuarios, rampa de cinco usuarios por segundo y 60 segundos. El intento documentado no produjo una corrida válida porque el daemon Docker no estaba disponible; por honestidad experimental no se sustituyeron P95 ni tasa 5xx con valores de otra prueba.
-
-    % ============================================================
-    % 9. EVALUACION ISO 25010 -- Dimension D7.
-    % ============================================================
-    \section{Evaluación ISO/IEC 25010}
-    \label{sec:iso25010}
-
-    El protocolo reproducible se encuentra en \texttt{\seqsplit{docs/experimentos/protocolo-iso25010.md}} y sus resultados consolidados en \texttt{\seqsplit{docs/experimentos/resultados/iso25010.csv}}. La cobertura de líneas supera el 70\,\% en los siete microservicios. PMD 7.17.0 recorrió todo \texttt{src/main/java} y encontró complejidad máxima de 20 en \texttt{\seqsplit{JdbcInventarioRepository.registrarItem}}, por lo que Mantenibilidad no cumple integralmente el doble umbral. Seguridad cumple: once casos sin fallos verifican, entre otros flujos, que ocho familias protegidas devuelven 401 sin JWT. Disponibilidad, Rendimiento y Fiabilidad continúan pendientes al no existir una ejecución oficial de una hora y de Locust con el stack operativo.
-
-    \begin{table}[H]
-        \centering
-        \caption{Evaluación honesta de cinco características ISO/IEC 25010:2023.}
-        \label{tab:iso25010-e4}
-        \small
-        \input{../experimentos/resultados/iso25010-booktabs.tex}
-    \end{table}
-
-    % ============================================================
-    % 10. DISCUSION Y AMENAZAS A LA VALIDEZ
-    % ============================================================
-    \section{Discusión y amenazas a la validez}
-    \label{sec:discusion}
-
-    \subsection{Interpretación de resultados y alcance no cubierto}
-
-    La Entrega 3 cerró declarando como trabajo posterior explícito la calidad de código, la observabilidad y la evaluación experimental formal del sistema (Sección 1). Frente a esa línea base, esta entrega avanza de forma desigual entre esos tres frentes, y esa desigualdad es en sí misma el hallazgo principal de la Discusión.
-
-    El avance más sólido es arquitectónico: los seis microservicios Java completaron el refactor en capas con puertos y adaptadores (Sección \ref{sec:arquitectura-sistema}), y la persistencia distribuida pasó de ser un perfil experimental paralelo en E3 a ser la base de datos real del sistema, ahora protegida con mTLS. Este resultado es consistente con la prioridad que el equipo declaró en \texttt{\seqsplit{docs/plan-cierre-e4.md}}: asegurar primero la infraestructura de la que todo lo demás depende.
-
-    El avance en calidad de código quedó cuantificado: los siete microservicios superan el umbral de cobertura del 70\,\%, incluidos órdenes a proveedores y ventas sobre la lógica nueva de recepción, costeo, facturación y \emph{outbox}. El pipeline ejecuta esas pruebas, integración, análisis y construcción antes de permitir el siguiente \emph{job}. La brecha principal de pruebas continúa siendo la ausencia de contratos Pact (Sección 7.2), mientras PMD identifica métodos concretos cuya complejidad debe reducirse.
-
-    La evaluación experimental avanzó desde su ausencia en E3 hasta contar con instrumentación, protocolo, cobertura, PMD y pruebas de seguridad. No obstante, configurar el recolector no equivale a medir el sistema: el daemon Docker no estuvo disponible durante el intento oficial, por lo que uptime, P95 y tasa 5xx permanecen pendientes. La misma distinción aplica a Grafana: existe un dashboard importable, pero no se presenta una captura con datos simulados. La ausencia de trazas OpenTelemetry limita además la correlación causal entre servicios.
-
-    \subsection{Amenazas a la validez (D9.3)}
-
-    Sobre las mediciones y verificaciones reportadas en la Sección 7, corresponde declarar tres amenazas a su validez siguiendo la clasificación estándar de estudios empíricos en ingeniería de software.
-
-    \textbf{Validez de constructo:} la cobertura se calculó desde los contadores de líneas de JaCoCo y \texttt{coverage.py}; no demuestra por sí sola que las aserciones sean suficientes ni que se cubran todas las combinaciones distribuidas. La complejidad PMD identifica cantidad de decisiones por método, pero no mide directamente comprensibilidad humana ni costo de cambio. Por ello ambas métricas se interpretan juntas y no como equivalentes completos de Mantenibilidad.
-
-    \textbf{Validez interna:} la única prueba de integración real contra una base de datos (\texttt{\seqsplit{CockroachDbIntegrationTest}} en \texttt{pedidos-service}) corre contra un contenedor CockroachDB de un solo nodo levantado por Testcontainers, mientras que el sistema en ejecución real usa un clúster de tres nodos con mTLS. El comportamiento verificado en la prueba automatizada no cubre escenarios de consenso Raft entre réplicas, conflictos de rango entre nodos, ni la ruta de conexión cifrada.
-
-    \textbf{Validez externa:} las pruebas manuales de extremo a extremo de esta entrega (recepción de órdenes, actualización de inventario, auto-desactivación de productos) se ejecutaron principalmente contra el entorno local descrito en la Sección \ref{sec:reproducibilidad}, con datos de catálogo sintéticos y volumen bajo. No hay evidencia todavía de que el mismo flujo se comporte igual bajo carga concurrente o con el volumen de datos del clúster de AWS, precisamente el tipo de medición que correspondería a una evaluación ISO/IEC 25010 (Sección \ref{sec:iso25010}).
-
-    \subsection{Reflexión ética (D9.2)}
-
-    Se toma como marco de referencia el \emph{ACM Code of Ethics and Professional Conduct} (2018), aplicado a tres decisiones de diseño concretas de \textbf{TiendaTech}, no como una discusión abstracta.
-
-    La primera es la protección de credenciales y datos personales (principio 1.6, \emph{Respect privacy}; principio 2.9, \emph{Design for security}). Las contraseñas se almacenan con \texttt{\seqsplit{BCryptPasswordEncoder}} de factor 12, nunca en texto plano; el token de sesión se guarda cifrado con Android Keystore en el cliente móvil y solo en \texttt{sessionStorage} (no en \texttt{localStorage} persistente) en el cliente web; y la conexión hacia la base de datos distribuida se cifra con autenticación mutua por certificado (mTLS) desde esta entrega, en lugar de la conexión sin cifrar heredada de E3.
-
-    La segunda es la decisión de auto-desactivar un producto cuando su costo recalculado supera su precio de venta (documentada en la Sección \ref{sec:arquitectura-sistema} y en el código de \texttt{inventario-service}/\texttt{productos-service}). Esta es una decisión automatizada con impacto económico directo sobre el catálogo visible al cliente, y por tanto queda dentro del alcance del principio 2.5 (\emph{Give comprehensive evaluation of computer systems... including analysis of possible risks}) y del principio 1.2 (\emph{Avoid harm}): vender por debajo del costo perjudicaría al negocio, pero desactivar un producto sin aviso también tiene un costo (pérdida de visibilidad, posible error de cálculo transitorio). Por eso la implementación no es una decisión silenciosa e irreversible: queda registrada en el log del servicio (\texttt{LOG.warn} con el producto, el costo recalculado y el precio vigente), es visible y reversible por un administrador humano, y la reactivación exige explícitamente que el precio ya no esté por debajo del costo antes de permitirla --- es decir, el sistema no permite reactivar "a ciegas" un producto que seguiría vendiéndose con pérdida.
-
-    La tercera es la honestidad en la comunicación de resultados, que el Code of Ethics exige en el principio 2.6 (\emph{Perform work only in areas of competence}) y en el compromiso general de integridad profesional: el documento diferencia configuración, ejecución y evidencia. No convierte un dashboard importable en una captura real, no transforma un ensayo fallido de Docker en datos de carga y mantiene como pendientes disponibilidad, P95 y tasa 5xx. De igual forma, registra el incumplimiento de complejidad en vez de ocultarlo detrás de la cobertura aprobada.
-
-    \subsection{Reproducibilidad (D9.4)}
-    \label{sec:reproducibilidad}
-
-    El sistema completo puede levantarse con \texttt{\seqsplit{docker compose up --build}} contra el clúster CockroachDB de AWS usando las credenciales por defecto embebidas en \texttt{docker-compose.yml}, pero esto ata cualquier prueba local a un recurso compartido por todo el equipo y a una base de datos que no se puede resetear libremente. Para resolver esto, \texttt{\seqsplit{docker-compose.override.yml}} --- que \texttt{docker compose} carga automáticamente junto al archivo principal, sin modificarlo --- añade un nodo CockroachDB local de un solo contenedor (\texttt{crdb-local}, modo \texttt{--insecure}, sin necesidad de certificados) y un segundo contenedor de inicialización (\texttt{crdb-local-init}) que carga, en orden, el esquema (\texttt{schema.sql}), los datos semilla (\texttt{seeds.sql}) y dos catálogos de referencia críticos para que el sistema funcione de punta a punta: \texttt{\seqsplit{product-management-reference.sql}} (categorías, marcas, IVA) y \texttt{\seqsplit{inventario-movimientos-reference.sql}} (tipos y subtipos de movimiento de inventario, cuya ausencia fue precisamente la causa raíz de un defecto de esta misma entrega, donde las recepciones de órdenes de compra no actualizaban el stock ni en el entorno local ni en AWS).
-
-    Esta reproducibilidad tiene un límite honesto que se documenta aquí en vez de omitirse: los servicios Java no apuntan automáticamente a \texttt{crdb-local} por defecto, sino al clúster mTLS de AWS (Sección \ref{sec:persistencia-distribuida}); para usar el entorno local hay que sobrescribir la variable de entorno \texttt{CRDB\_DATASOURCE\_URL} antes de levantar los contenedores (por ejemplo, \texttt{\$env:CRDB\_DATASOURCE\_URL} en PowerShell), y esa variable es de alcance de sesión de terminal --- si se abre una pestaña nueva sin volver a definirla, los contenedores reconstruidos en esa pestaña vuelven a apuntar por defecto a AWS mientras el resto del stack sigue apuntando a \texttt{crdb-local}, produciendo un entorno mixto (\emph{split-brain}) difícil de diagnosticar. El equipo confirmó este comportamiento durante las pruebas de esta entrega. La reproducibilidad "desde cero" en una máquina limpia es alcanzable pero no todavía a prueba de error humano; formalizar la variable en un archivo \texttt{.env} versionado (con placeholder) en vez de exportarla manualmente por sesión queda como mejora concreta pendiente.
-
-    % ============================================================
-    % 11. CONCLUSIONES Y TRABAJO FUTURO
-    % ============================================================
-    \section{Conclusiones y trabajo futuro}
-    \label{sec:conclusiones}
-
-    \subsection{Cierre del ciclo E1--E4}
-
-    La Tabla \ref{tab:trazabilidad-e1e4} resume el aporte específico de cada entrega, construida a partir de la lectura directa de \texttt{\seqsplit{docs/entrega1/entrega1.pdf}}, \texttt{\seqsplit{docs/entrega2/entrega2.pdf}}, \texttt{\seqsplit{docs/entrega3/PFC3.tex}} y la evidencia técnica en \texttt{docs/evidencias/}.
-
-    \begin{table}[H]
-        \centering
-        \caption{Trazabilidad de la evolución del proyecto entre E1 y E4.}
-        \label{tab:trazabilidad-e1e4}
-        \small
-        \begin{tabularx}{\textwidth}{>{\bfseries}p{1.6cm} p{2cm} X}
-\toprule
-\textbf{Entrega} & \textbf{Enfoque} & \textbf{Aporte específico} \\
-\midrule
-E1 (27 may. 2026) & Propuesta y análisis & Especificación del problema (brecha de requerimientos formales de compatibilidad de hardware), delimitación explícita de la contribución al núcleo transaccional (autenticación, carrito, motor de compatibilidad, interfaz base del asistente inteligente) y roles del equipo (Arquitecto, Líder de Desarrollo, Responsable de Calidad, Responsable de Documentación). \\
-E2 (6 jun. 2026) & Diseño arquitectónico & Diagramas C4 (contexto, contenedores, componentes), definición inicial de los servicios REST por dominio, contrato OpenAPI 3.0 y estrategia de contenerización con Docker para la arquitectura de microservicios propuesta. \\
-E3 (28 jul. 2026) & Implementación y validación & Despliegue contenerizado real del frontend y seis microservicios sobre una base compartida, validado con 10 casos funcionales y 210 solicitudes (100\,\% de éxito, p95 < 52\,ms). En paralelo, un perfil experimental desplegó un clúster CockroachDB de 3 nodos con fragmentación de \texttt{pedidos.orden} por trimestre (ADR-003) y factor de replicación 3 (ADR-004), verificado con pruebas de tolerancia a fallos documentadas en video (\texttt{docs/evidencias/tolerancia\_fallos.mp4}), además de un pipeline analítico PySpark sobre 600\,000 órdenes. \\
-E4 (esta entrega) & Calidad, observabilidad y cierre & CockroachDB opera como base distribuida con mTLS; los seis servicios Java usan arquitectura por capas; los siete microservicios superan 70\,\% de cobertura; CI/CD integra pruebas, análisis, construcción e integración; Prometheus, logs JSON, Alloy y el dashboard quedan configurados; e ISO/IEC 25010 cuantifica cobertura, complejidad y seguridad, manteniendo como pendientes las mediciones que requieren una corrida completa. \\
-\bottomrule
-        \end{tabularx}
-    \end{table}
-
-    Dos piezas de evidencia en \texttt{docs/evidencias/} documentan específicamente la transición entre el perfil experimental de E3 y el uso productivo de CockroachDB en E4: \texttt{\seqsplit{integracion-pedidos-crdb.md}} y \texttt{\seqsplit{colision-serializable-controlada.md}}, esta última relevante para el aislamiento \texttt{SERIALIZABLE} aplicado en \texttt{\seqsplit{ordenes-proveedores-service}} al enviar y cancelar órdenes de compra (Sección \ref{sec:arquitectura-sistema}).
-
-    \subsection{Conclusiones}
-
-    Contrastado contra el alcance declarado, el equipo completó el refactor en capas y patrones, consolidó la persistencia distribuida segura y superó el 70\,\% de cobertura en los siete microservicios. El pipeline aplica controles antes de construir imágenes; la observabilidad aporta logs JSON, métricas, Prometheus, Alloy y un dashboard importable; e ISO/IEC 25010 convirtió mantenibilidad y seguridad en resultados verificables. El estado no es enteramente satisfactorio: la complejidad máxima de 20 incumple el objetivo menor de 10; faltan Pact, trazas OpenTelemetry y las mediciones oficiales de disponibilidad, P95 y 5xx.
-
-    \subsection{Conclusiones individuales}
-
-    \subsubsection*{Jhinson Stalyn Aucatoma Celorio}
-    La evolución de TiendaTech me permitió comprender que una aplicación distribuida no se considera terminada únicamente porque sus servicios respondan y sus contenedores puedan levantarse. La Entrega 4 hizo visible la importancia de convertir decisiones técnicas en controles repetibles: una regla de negocio debe tener pruebas, una modificación debe atravesar un pipeline y un problema operativo debe poder observarse mediante datos. El refactor por capas fue especialmente valioso porque separó responsabilidades que antes estaban mezcladas y permitió probar la lógica sin depender de la base de datos o de otros servicios. También aprendí que la cobertura es útil como señal, pero no sustituye el diseño de casos relevantes; alcanzar el setenta por ciento tiene sentido solamente si se cubren decisiones que afectan inventario, órdenes, facturación y usuarios. La preparación de Prometheus, logs estructurados y Grafana mostró que medir un sistema requiere definir antes qué pregunta se desea responder. Finalmente, la evaluación ISO/IEC 25010 reforzó la necesidad de informar resultados honestos: una métrica pendiente debe conservarse como pendiente y no completarse con una estimación. Considero que el proyecto logró una base más mantenible y verificable, aunque todavía necesita ejecutar la observación prolongada, la carga concurrente y la validación en GitHub. Mi principal aprendizaje es que la calidad no es una actividad final, sino una propiedad que debe incorporarse al flujo normal de desarrollo.
-
-    \subsubsection*{Jeremy Ruperto Gaibor Rodriguez}
-    Durante este proyecto confirmé que el trabajo con microservicios exige coordinar elementos que en una aplicación monolítica suelen permanecer juntos. El API Gateway, los contratos HTTP, la autenticación y la persistencia distribuida forman una cadena: un error en cualquiera de esos puntos puede afectar un flujo completo aunque cada servicio funcione por separado. Las pruebas de integración añadidas ayudan a reducir esa incertidumbre porque verifican recorridos reales hacia productos, usuarios y pedidos, mientras que las pruebas de seguridad comprueban que las rutas protegidas no queden expuestas accidentalmente. El pipeline representa otro cambio importante en la forma de trabajar. Ya no basta con que una modificación compile en la computadora de un integrante; las mismas pruebas, reglas de cobertura y construcciones deben ejecutarse en un ambiente reproducible. También comprendí el valor de hacer depender el build de los controles anteriores, pues publicar una imagen cuando existen pruebas fallidas trasladaría el riesgo hacia producción. La evaluación ISO reveló además que aprobar cobertura no implica aprobar mantenibilidad: PMD encontró complejidad de 20 y señaló métodos concretos por refactorizar. Por ello, mi conclusión es que el proyecto avanzó de una demostración funcional hacia un producto con mecanismos de control, aunque su validación final depende de conservar evidencias reales, completar las mediciones operativas pendientes y reducir la complejidad detectada.
-
-    \subsubsection*{Andy Paul Sanchez Pilaloa}
-    El desarrollo de TiendaTech me ayudó a relacionar conceptos de arquitectura, pruebas y operación que anteriormente podía considerar independientes. La arquitectura en capas facilitó localizar la lógica de negocio y diseñar pruebas unitarias con dependencias simuladas. Esa separación también disminuye el costo de reemplazar una implementación de persistencia o comunicación, porque el dominio no necesita conocer detalles de infraestructura. La parte de observabilidad resultó igualmente significativa: un contador permite conocer la demanda, un histograma permite analizar percentiles y un gauge representa valores que suben y bajan, como las conexiones activas. Estas diferencias son esenciales para construir un dashboard que sirva para tomar decisiones y no sea solamente decorativo. La instrumentación desarrollada deja logs JSON y métricas homogéneas en siete servicios, además de Prometheus y Alloy como componentes de recolección. Sin embargo, configurar herramientas no equivale a completar la observabilidad: la correlación por trazas y la captura de Grafana con datos reales continúan pendientes. La guía ISO/IEC 25010 aportó criterios objetivos para expresar esa diferencia mediante umbrales y evidencia. El aprendizaje más importante fue reconocer que documentar una limitación también es una práctica profesional. Un reporte técnico útil distingue con claridad lo implementado, lo ejecutado y lo todavía pendiente, permitiendo que otra persona continúe el trabajo sin depender de afirmaciones imposibles de reproducir.
-
-    \subsubsection*{José Alejandro Lozano Morales}
-    La construcción acumulativa del PFC permitió observar cómo una propuesta inicial se transforma mediante decisiones arquitectónicas, implementación, validación y operación. En esta última etapa entendí que la documentación debe evolucionar junto con el código. Un diagrama, una tabla o una conclusión pierde valor cuando describe un estado anterior del repositorio; por esa razón fue necesario actualizar la evidencia de pruebas, pipeline, observabilidad e ISO/IEC 25010 sin ocultar los elementos pendientes. También considero importante la reflexión ética aplicada al proyecto. Los datos de usuarios, credenciales y tokens no pueden tratarse como simples detalles técnicos: deben protegerse, excluirse del repositorio y evitarse en logs y capturas. De igual manera, reportar una disponibilidad o latencia no medida sería una forma de desinformación, incluso si el valor pareciera razonable. La automatización reduce algunos riesgos al ejecutar pruebas y conservar reportes de manera consistente. El documento final debe funcionar como evidencia profesional y no solo como requisito académico; por eso integra los resultados favorables y el incumplimiento de complejidad, junto con planes concretos de mejora. Mi conclusión personal es que un producto profesional necesita ingeniería verificable y comunicación transparente. Ambas responsabilidades pertenecen al equipo completo y deben mantenerse durante la defensa, cuando cada integrante tendrá que explicar tanto los logros como los límites reales del sistema.
-
-    El resultado neto es un sistema que evolucionó genuinamente en la dirección que E3 dejó pendiente --- de \emph{funciona} a \emph{se puede sostener y verificar} --- pero que no alcanzó a cubrir la totalidad de esa transición en el tiempo disponible. Esta entrega documenta esa transición de forma honesta antes que completa: cada sección declara explícitamente su estado real, sin inflar lo logrado ni ocultar lo pendiente, siguiendo el mismo estándar de honestidad de alcance aplicado en las entregas anteriores del proyecto.
-
-    \subsection{Trabajo futuro}
-
-    Se declara como trabajo pendiente, en orden de prioridad: ejecutar la hora de disponibilidad y la carga oficial de 50 usuarios con captura de Grafana; refactorizar los métodos señalados por PMD hasta reducir su complejidad; incorporar OpenTelemetry y \texttt{trace\_id}; cerrar el contrato Pact web--backend; consolidar los workflows y añadir pruebas de la SPA; e implementar internacionalización. Cada medición nueva deberá actualizar el CSV ISO y esta memoria sin sustituir evidencia ausente por estimaciones.
-
-    % ============================================================
-    % BIBLIOGRAFIA
-    % ============================================================
-    \newpage
-    \printbibliography[title={Referencias}]
-
+\end{tabular}
+\vfill
+Docente: Gleiston Cicerón Guerrero Ulloa\par
+Período académico 2026\par
+Corte documental: 1 de septiembre de 2026\par
+\vspace{0.4cm}
+{\large\textbf{FECHA PERMITIDO DE ÚLTIMO COMMIT:}\par}
+{\large Martes 1 de septiembre del 2026 hasta Hora: 18h00\par}
+\url{https://github.com/JoseLozanoMorales/TiendaTech}\par
+\end{titlepage}
+\pagenumbering{roman}
+\begingroup\setlength{\parskip}{0pt}\tableofcontents\endgroup
+\clearpage\listoffigures
+\clearpage\listoftables
+\clearpage
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+\textbf{Objetivo:} consolidar la evolución de TiendaTech y evaluar qué propiedades de su arquitectura distribuida quedan respaldadas por evidencia. \textbf{Método:} revisión del repositorio y de las incidencias, análisis de mediciones de CockroachDB y Spark, y síntesis de 120 ejecuciones de un laboratorio de coordinación con dos estrategias, cuatro concurrencias y tres condiciones de fallo. \textbf{Resultados:} el laboratorio registró cero violaciones en sus cuatro comprobaciones; sin fallos y con concurrencia 400, la mediana del percentil 95 fue 3401,944 ms para la implementación denominada 2PC y 24712,718 ms para Saga. Ambas comparten SQLite y un bloqueo global, por lo que la comparación no demuestra el comportamiento de coordinadores distribuidos reales. Spark sin particionamiento JDBC no aceleró T1 al pasar de uno a cuatro ejecutores. Los informes de calidad registran complejidades máximas inferiores a diez y coberturas superiores al 70\,\% en el alcance instrumentado, no en todos los componentes. La revisión cruzada conserva diez incidencias abiertas. \textbf{Contribución:} una memoria trazable que separa implementación, medición y limitaciones, e identifica los controles necesarios para extender los resultados a producción. No se acreditan una hora de disponibilidad, una comparación reglas--RAG ni una medición final de carga del sistema desplegado.
+
+\textbf{Palabras clave:} sistemas distribuidos, coordinación, CockroachDB, Spark, calidad, reproducibilidad.
+\clearpage
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+\textbf{Objective:} to consolidate TiendaTech's evolution and determine which distributed-system properties are supported by evidence. \textbf{Method:} repository and issue review, analysis of CockroachDB and Spark measurements, and synthesis of 120 coordination-laboratory runs covering two strategies, four concurrency levels and three fault conditions. \textbf{Results:} the laboratory reported no violations of its four checks. At concurrency 400 without faults, median run-level p95 latency was 3401.944 ms for the implementation named 2PC and 24712.718 ms for Saga. Both share SQLite and a global lock; therefore, this comparison does not demonstrate the behavior of real distributed coordinators. Spark without JDBC partitioning did not accelerate T1 when increasing from one to four executors. Quality reports show maximum method complexity below ten and coverage above 70 percent within the instrumented scope, not across every component. Ten cross-review issues remain open. \textbf{Contribution:} a traceable cumulative report separating implementation, measurement and limitations, and identifying the controls required before extrapolating to production. One-hour availability, a rules-versus-RAG comparison and a final deployed-system load measurement are not established.
+
+\textbf{Keywords:} distributed systems, coordination, CockroachDB, Spark, quality, reproducibility.
+\clearpage\pagenumbering{arabic}
+\section{Introducción}
+TiendaTech es un proyecto académico de comercio electrónico de componentes de computación. Integra clientes web y móvil, autenticación, catálogo, inventario, pedidos, ventas, compras a proveedores y un asistente de armado. El problema técnico consiste en conservar reglas de negocio cuando la información cruza procesos y se presentan reintentos, fallos de comunicación o indisponibilidad de datos. Una compra no debe confirmar un pago distinto del esperado, descontar inventario indebidamente ni permanecer en un estado parcial sin una política de recuperación.
+
+La cuantificación disponible corresponde al entorno experimental, no a pérdidas comerciales de una empresa. El conjunto analítico histórico incluye 600\,000 pedidos y detalles, 10\,000 usuarios y 570\,000 filas tras el filtrado y unión. El ensayo de coordinación comprende 24 condiciones y cinco repeticiones por condición, con concurrencias nominales entre 50 y 400. Estos tamaños delimitan la evaluación: no se dispone de una línea base de incidentes ni de clientes reales que permita estimar impacto económico. La ausencia de esos datos no se reemplaza por cifras supuestas.
+
+\subsection{Objetivos y alcance}
+El objetivo general es documentar y evaluar una implementación distribuida reproducible, identificando sus garantías y límites. Los objetivos específicos son: describir las fronteras y decisiones arquitectónicas; relacionar consistencia, replicación y fallos con agregados del negocio; presentar mediciones de procesamiento y coordinación; contrastar calidad y revisión cruzada con evidencia; y responder las preguntas del banco experimental sin extrapolar más allá de su implementación.
+
+La memoria acumula E1 (propuesta y decisiones), E2 (modelo y distribución de datos), E3 (integración y análisis) y E4 (refactor, seguridad, pruebas y evaluación). El nombre anterior del repositorio fue \texttt{PFC-AppsDistribuidas}; la denominación adoptada es TiendaTech. Esta aclaración conserva la interpretación de rutas y mensajes históricos.
+
+\subsection{Corte de evidencia y organización}
+El corte de código publicado es \texttt{6cfe0e8}, identificado por su hash completo en los enlaces de evidencia. La carpeta local conserva modificaciones no integradas y no se considera idéntica a esa revisión. Los resultados presentados proceden de artefactos existentes: durante el cierre documental no se ejecutaron nuevas pruebas de carga ni se modificó producción. El cierre de esta memoria no equivale a declarar aprobados todos los pasos técnicos.
+
+El texto avanza desde el estado del arte y el diseño hasta la implementación; define después el estudio, presenta resultados separados de su discusión y examina amenazas, calidad y revisión cruzada. Las conclusiones responden las preguntas experimentales; las reflexiones individuales, ética y declaraciones explicitan la responsabilidad del equipo. La bibliografía sigue estilo IEEE con Biber. Los identificadores de evidencias permiten localizar el dato original y diferenciarlo de su interpretación.
+
+\seccion{Estado del arte}
+\subsection{Consistencia, orden y datos distribuidos}
+Özsu y Valduriez \cite{ozsu2020principles} proporcionan el marco de fragmentación, replicación y procesamiento distribuido. En TiendaTech se usa para distinguir un esquema lógico de una distribución física: crear esquemas por servicio no demuestra que los datos estén fragmentados entre nodos. Taft et al.\ \cite{taft2020cockroachdb} describen CockroachDB como SQL distribuido resiliente; su pertinencia está en conectar transacciones y réplica, no en trasladar resultados de esa publicación a un clúster académico.
+
+Gilbert y Lynch \cite{gilbert2002} formalizan el conflicto entre consistencia y disponibilidad bajo particiones. Brewer \cite{brewer2012cap} revisita su interpretación y evita tratar CAP como una elección estática de dos letras para todo el producto. Abadi \cite{abadi2012consistency} añade que también existen compromisos de latencia y consistencia durante el funcionamiento normal. En consecuencia, esta memoria separa la escritura de inventario, que requiere control de concurrencia, de la lectura de catálogo y de los resultados analíticos que admiten desfase.
+
+Lamport \cite{lamport1978} fundamenta el orden causal mediante relojes lógicos. Su aplicación al intercambio de reservas permite ordenar eventos relacionados, pero no convierte un timestamp en un mecanismo de exclusión mutua ni en consenso. Un reloj creciente tampoco evita por sí solo que el receptor aplique dos veces una operación. Esta distinción explica por qué la idempotencia de extremo a extremo permanece como deuda separada.
+
+\subsection{Procesamiento paralelo y verificación de consultas}
+Amdahl \cite{amdahl1967validity} establece un límite para acelerar una carga fija cuando existe una parte serial. Gustafson \cite{gustafson1988reevaluating} cambia el planteamiento al considerar cargas escaladas. No son predicciones intercambiables: los CSV del proyecto mantienen el conjunto de datos y por ello el análisis principal es de escalabilidad fuerte. Si Spark tarda más con más ejecutores, aumentar artificialmente la carga para obtener otra conclusión alteraría la pregunta inicial.
+
+Rigger y Su \cite{rigger2020querypartitioning} proponen particionar consultas para encontrar errores lógicos en motores de bases de datos. Esta partición de predicados no equivale a fragmentar físicamente tablas ni a dividir lecturas JDBC. Su aporte metodológico al proyecto es la necesidad de comprobar resultados equivalentes al comparar planes, no asumir que una consulta rápida es correcta. Los conteos y agregados deben conservarse antes de atribuir una ventaja al tiempo de ejecución.
+
+\subsection{Microservicios y clientes}
+Márquez et al.\ \cite{marquez2018review} revisan patrones y tácticas de microservicios; Zhong et al.\ \cite{zhong2024domaindriven} investigan diseño guiado por dominio. Ambas perspectivas orientan a justificar límites por responsabilidad y dependencia, no solo por el número de carpetas o contenedores. Para TiendaTech, pedidos y ventas tienen fronteras conceptuales distintas, aunque compartir una base física conserve acoplamientos operativos.
+
+Nawrocki et al.\ \cite{nawrocki2021comparison} comparan enfoques nativos y multiplataforma para aplicaciones móviles. El proyecto utiliza un cliente Android y debe juzgar esa decisión según integración con el dispositivo, mantenibilidad y pruebas, sin atribuirle superioridad universal. Las capturas muestran interfaces, mientras que una garantía de compatibilidad requiere ejecutar sobre dispositivos y versiones concretos.
+
+\subsection{Pruebas y entrega continua}
+Shahin et al.\ \cite{shahin2017continuous} distinguen integración, entrega y despliegue continuos. La distinción impide presentar cualquier workflow exitoso como una publicación segura del producto. Rostami Mazrae et al.\ \cite{rostami2023cicd} estudian uso y migración de herramientas CI/CD; para el proyecto, el valor está en conservar controles y artefactos verificables, no en acumular proveedores de automatización.
+
+Hui et al.\ \cite{hui2025unveiling} sintetizan desafíos y brechas de prueba de microservicios. Este marco explica por qué una alta cobertura unitaria del dominio no reemplaza contratos entre servicios, pruebas de recuperación o recorridos de usuario. La síntesis de estas quince fuentes conduce a un criterio transversal: una decisión debe tener una justificación y una evidencia del mismo nivel de abstracción. Ni una prueba local demuestra disponibilidad distribuida ni una captura de pantalla demuestra corrección transaccional.
+
+\subsection{Criterio bibliográfico}
+Las quince fuentes académicas anteriores disponen de DOI. Las normas ISO y el código de ética se citan adicionalmente por su identificador y sitio institucional, sin inventar un DOI. Por tanto, se cumple el mínimo de literatura académica con DOI, pero la lectura literal de que \emph{toda} referencia debe tenerlo exige una excepción para estas fuentes normativas solicitadas por la propia guía. La verificación bibliográfica identifica el trabajo; no implica que se haya reproducido su experimento.
+
+\seccion{Diseño del sistema}
+\subsection{Contexto y contenedores}
+Las figuras \ref{fig:contexto} y \ref{fig:contenedores} son vistas propias, reconstruidas para este corte. La primera delimita el sistema respecto de sus usuarios; la segunda representa unidades desplegables y sus dependencias. Se evita representar una pasarela bancaria real como integrada: los pagos del banco experimental son simulados.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[b/.style={draw,rounded corners,align=center,text width=4cm,minimum height=1.1cm},>=Stealth]
+\node[b] (c) at (0,0) {Cliente\\Compra y consulta compatibilidad};
+\node[b,fill=blue!8] (s) at (6,0) {TiendaTech\\Sistema de comercio de hardware};
+\node[b] (a) at (6,3) {Administrador\\Catálogo, ventas y proveedores};
+\draw[->] (c)--node[above,font=\scriptsize,text width=1.5cm,align=center]{Web / Android}(s);
+\draw[->] (a)--node[right,font=\small]{Gestión autenticada}(s);
+\end{tikzpicture}
+\caption{C4 nivel 1: contexto del sistema implementado. Elaboración propia.}\label{fig:contexto}
+\end{figure}
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[b/.style={draw,rounded corners,align=center,text width=4.1cm,minimum height=1.0cm,font=\small},>=Stealth]
+\node[b] (u) at (0,4.8) {SPA web / aplicación Android};
+\node[b,fill=blue!8] (g) at (0,2.9) {Gateway\\Enrutamiento y control JWT};
+\node[b] (s) at (-3,0.5) {Servicios Java\\Usuarios, productos, pedidos, inventario, ventas, proveedores};
+\node[b] (i) at (3,0.5) {armado-ia\\API Python de compatibilidad};
+\node[b,fill=green!8] (d) at (0,-2) {CockroachDB\\Persistencia lógica por dominio};
+\draw[->] (u)--node[right]{HTTPS}(g);
+\draw[->] (g)--(s);
+\draw[->] (g)--(i);
+\draw[->] (s)--node[left]{SQL}(d);
+\draw[->] (i)--node[right]{Datos del catálogo}(d);
+\end{tikzpicture}
+\caption{C4 nivel 2: contenedores lógicos de aplicación. La agrupación Java resume seis servicios independientes.}\label{fig:contenedores}
+\end{figure}
+
+\subsection{Fronteras de dominio}
+La tabla \ref{tab:fronteras} describe la responsabilidad principal. Los nombres cortos son lógicos; no sustituyen los nombres concretos de Compose. Separar responsabilidades no garantiza aislamiento físico, puesto que las conexiones dependen del clúster compartido. Un cambio de clave en pedidos puede propagarse a consumidores aunque cada servicio tenga su propio paquete.
+
+\begin{table}[H]\centering\small
+\caption{Fronteras y restricciones del sistema.}\label{tab:fronteras}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule Servicio & Responsabilidad & Restricción relevante\\\midrule
+Usuarios & Identidad y autenticación & No publicar claves ni tokens en evidencia.\\
+Productos & Catálogo, precios y medios & No es propietario del saldo de inventario.\\
+Inventario & Stock y reservas & Debe impedir descuentos duplicados y negativos.\\
+Pedidos & Carrito y órdenes & Coordina solicitudes; no equivale a transacción global.\\
+Ventas & Registro comercial y facturación & Debe preservar importes y referencias.\\
+Órdenes a proveedores & Abastecimiento & No confundir compra al proveedor con venta al cliente.\\
+armado-ia & Reglas y asistencia de armado & Resultado sujeto a catálogo y reglas disponibles.\\
+Gateway & Acceso y rutas & Es control de entrada, no regla de negocio.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Componentes y capas}
+La figura \ref{fig:componentes} presenta la reserva de stock como una vista de componentes; no pretende mostrar todas las clases del sistema. El contrato compartido define el mensaje mientras que aplicación y dominio conservan las reglas. El refactor Java organiza \texttt{presentation}, \texttt{application}, \texttt{domain} e \texttt{infrastructure}. En Python se documenta la correspondencia de responsabilidades con sus convenciones de módulos, sin afirmar que todos los directorios tengan los mismos nombres.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[b/.style={draw,align=center,text width=5.1cm,minimum height=0.9cm,font=\small},>=Stealth]
+\node[b] (p) at (0,5) {Pedidos: caso de uso del carrito};
+\node[b] (a) at (0,3.5) {Adaptador de reserva TCP / gRPC};
+\node[b] (t) at (0,2) {Inventario: receptor y decodificación};
+\node[b] (s) at (0,0.5) {Servicio de aplicación\\Validación de cantidad y stock};
+\node[b] (r) at (0,-1) {Puerto / adaptador de persistencia};
+\draw[->] (p)--(a);
+\draw[->] (a)--node[right,font=\small]{Contrato de reserva}(t);
+\draw[->] (t)--(s);
+\draw[->] (s)--(r);
+\end{tikzpicture}
+\caption{C4 nivel 3: componentes del recorrido de reserva; vista propia de responsabilidades.}\label{fig:componentes}
+\end{figure}
+
+\subsection{Despliegue y decisiones}
+La figura \ref{fig:despliegue} separa aplicación, persistencia y observabilidad. Los tres nodos del ensayo local no son tres centros de datos ni tres dominios de fallo independientes. La conexión segura del despliegue no debe confundirse con el entorno de pruebas de integración, que puede usar un único contenedor temporal.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[b/.style={draw,align=center,text width=3.5cm,minimum height=1cm,font=\small},>=Stealth]
+\node[b] (e) at (0,4) {Entrada HTTP(S)\\Proxy y gateway};
+\node[b] (s) at (0,2) {Red Docker\\Servicios de TiendaTech};
+\node[b] (o) at (5,2) {Logs / métricas\\Alloy, Prometheus, Grafana};
+\node[b] (d1) at (-4,-0.5) {CockroachDB\\Nodo 1};
+\node[b] (d2) at (0,-0.5) {CockroachDB\\Nodo 2};
+\node[b] (d3) at (4,-0.5) {CockroachDB\\Nodo 3};
+\draw[->] (e)--(s);
+\draw[->] (s)--(o);
+\draw[->] (s)--(d2);
+\draw[<->] (d1)--(d2);
+\draw[<->] (d2)--(d3);
+\end{tikzpicture}
+\caption{Vista de despliegue por responsabilidades. Réplica entre nodos; ensayo de clúster en un mismo equipo.}\label{fig:despliegue}
+\end{figure}
+
+Los \evidencia{docs/adr}{ADR versionados} conservan contexto, decisión y consecuencias. ADR-003 explica la fragmentación temporal de pedidos; ADR-004 aborda Raft; ADR-005 registra patrones de diseño; ADR-007 centraliza JWT; ADR-008 describe capas Python y el límite de confianza de armado-ia. ADR-009 recupera la decisión de microservicios, ADR-010 el gateway y ADR-011 el motor de compatibilidad. ADR-012 fragmenta el índice del catálogo por categoría sin cambiar su clave primaria. Las decisiones móviles están en los registros 001 y 002.
+
+No todas las consecuencias previstas en E1 se convirtieron en resultados medidos. Escalar un servicio por separado es una posibilidad arquitectónica; demostrar que mejora latencia o disponibilidad requiere un experimento. Asimismo, un ADR que justifica JWT en el gateway no hace seguro un servicio accesible directamente desde redes no confiables. Su validez depende de la exposición real y de pruebas negativas de acceso.
+
+\seccion{Propiedades distribuidas}
+\subsection{Consistencia por agregado}
+La tabla \ref{tab:cap} formula la política requerida y su límite de evidencia. CAP se interpreta ante particiones de red: la réplica por quórum puede rechazar o demorar escrituras cuando no dispone de mayoría. No se promete disponibilidad total junto con consistencia fuerte durante cualquier partición \cite{gilbert2002,brewer2012cap,abadi2012consistency}.
+
+\begin{table}[H]\centering\small
+\caption{Consistencia, réplica y límites por agregado.}\label{tab:cap}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule Agregado & Política & Límite\\\midrule
+Inventario & Serializar cambios y comprobar stock; réplica del motor. & Atomicidad local no prueba idempotencia entre servicios.\\
+Pedido y pago & Confirmar solo con condiciones satisfechas; compensar fallo. & El laboratorio no implementa commit distribuido real.\\
+Usuarios & Preservar identidad y validar autorización. & JWT no replica estado ni revoca instantáneamente por sí solo.\\
+Catálogo & Lectura consistente según consulta; réplica física. & No se midió un contrato de frescura de caché.\\
+Analítica & Instantánea o extracción identificable. & Resultados derivados pueden quedar desfasados respecto de ventas.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Fragmentación y réplica}
+Pedidos utiliza límites temporales de rangos; el catálogo divide el índice secundario por categoría. ADR-012 documenta un conjunto sintético de 150 productos y diez rangos, con réplicas votantes en los nodos 1, 2 y 3. Es fragmentación del índice, no una demostración de partición exclusiva de todo el agregado por nodo. El identificador del producto se mantiene para no romper referencias desde carrito, medios e inventario.
+
+La tolerancia depende de la mayoría disponible y del tipo de fallo. Perder un nodo de tres permite conservar mayoría en la configuración ensayada, pero una caída del equipo anfitrión puede afectar los tres simultáneamente. La replicación tampoco reemplaza copias de seguridad: una modificación lógica incorrecta puede replicarse. La evidencia de reintegración se presenta en resultados sin convertirla en un porcentaje de disponibilidad anual.
+
+\subsection{Modelo de fallos y orden}
+Se consideran omisión de respuesta, demora, caída de proceso y reintentos. El laboratorio del Paso 8 representa omisión y demora mediante excepciones locales; no corta paquetes en una red real. No se simularon nodos maliciosos, pérdida total del anfitrión, corrupción persistente ni recuperación de un coordinador tras reiniciar durante un commit.
+
+El reloj lógico cumple la regla de recepción
+\begin{equation}
+L_{\mathrm{nuevo}}=\max(L_{\mathrm{local}},L_{\mathrm{recibido}})+1.
+\label{eq:lamport}
+\end{equation}
+La ecuación \ref{eq:lamport} establece un orden compatible con causalidad \cite{lamport1978}; no mide duración física. Para medir latencia se emplea un reloj monotónico local. La deduplicación requiere un identificador de operación persistente y una política de reintento, además del reloj.
+
+\seccion{Implementación}
+\subsection{Comunicación y contratos}
+La reserva TCP utiliza longitud de cuatro bytes en orden de red seguida por el JSON. Tanto emisor como receptor deben completar la lectura; una sola llamada no garantiza recibir un mensaje íntegro. La variante gRPC define el contrato en \evidencia{contracts/stock_reservation.proto}{stock\_reservation.proto}. Los stubs deben regenerarse durante la compilación.
+
+La disponibilidad de ambas rutas no demuestra que una sea más rápida. Los ficheros del experimento TCP/gRPC deben contener observaciones y no solo cabeceras antes de usar sus percentiles. El banco de coordinación es un experimento distinto y no completa esa comparación de transportes.
+
+\subsection{Acceso a datos y control de transacciones}
+El extracto \ref{lst:lab} procede del laboratorio, no del servicio productivo. Hace visible la serialización local que condiciona los resultados. Saga también conserva el mismo bloqueo global durante su recorrido; las diferencias incluyen cantidad de operaciones SQL y commits locales.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=Python,caption={Extracto de E-2PC local: bloqueo compartido y transacción SQLite.},label={lst:lab}]
+def two_phase_commit(self, tx, case, started):
+    with self.db_lock, closing(self.connect()) as db:
+        db.execute("BEGIN IMMEDIATE")
+        try:
+            # Lineas omitidas: stock, votos e inyector.
+            ...
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
+\end{lstlisting}
+\end{minipage}
+Los puntos suspensivos identifican líneas omitidas; el código completo está en \evidencia{experiments/paso7/coordination_lab.py}{coordination\_lab.py}. No existen en este recorrido tres gestores transaccionales independientes ni recuperación durable del coordinador comparable a un protocolo 2PC distribuido.
+
+\subsection{Procesamiento distribuido}
+El pipeline analítico calcula transformaciones equivalentes con Pandas y PySpark. La comparación conserva tarea, tamaño y resultado lógico. La lectura JDBC sin particiones limita el paralelismo de entrada; añadir ejecutores no garantiza aprovecharlos. Una variante particionada se conserva como ensayo diferente, con tres repeticiones, y no se mezcla con las cinco del escenario inicial.
+
+La fragmentación de CockroachDB organiza rangos del motor; la partición JDBC determina cómo Spark solicita datos en paralelo. Los tiempos incluyen planificación, comunicación y materialización. Para reproducir se deben conservar consulta, recursos, número de ejecutores y criterio de finalización.
+
+\subsection{Interfaces y capas}
+Las figuras \ref{fig:web} y \ref{fig:movil} conservan evidencia visual de E4. No son pruebas de aceptación nuevas ni mediciones de disponibilidad. La SPA permite consultar catálogo y armado; el panel administrativo organiza usuarios, productos y operaciones comerciales. Android ofrece otro punto de entrada a los servicios.
+
+\begin{figure}[H]\centering
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{img/catalogo_web.jpeg}\caption{Catálogo.}\end{subfigure}\hfill
+\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{img/armado_ia_web.jpeg}\caption{Armado asistido.}\end{subfigure}
+\caption{Interfaces web conservadas de la entrega anterior.}\label{fig:web}
+\end{figure}
+\begin{figure}[H]\centering
+\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{img/interfaz_movil_1.jpeg}\caption{Vista inicial.}\end{subfigure}\hspace{1cm}
+\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{img/interfaz_movil_2.jpeg}\caption{Navegación.}\end{subfigure}
+\caption{Interfaces Android conservadas como evidencia de implementación.}\label{fig:movil}
+\end{figure}
+
+La separación de capas permite probar reglas sin desplegar la interfaz ni el motor de datos. Sin embargo, excluir adaptadores del informe de cobertura cambia el denominador y debe declararse. Persisten observaciones sobre DTO y reutilización de lógica de órdenes; el refactor no ha eliminado todo acoplamiento.
+
+\subsection{Instrumentación}
+El extracto \ref{lst:medicion} identifica las unidades medidas. La memoria no es el consumo residente del contenedor, y los segundos de CPU no son un porcentaje.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=Python,caption={Instrumentación del ejecutor del Paso 8.},label={lst:medicion}]
+tracemalloc.start()
+cpu_0 = time.process_time()
+t0 = time.perf_counter()
+with ThreadPoolExecutor(max_workers=concurrencia) as pool:
+    rows = list(pool.map(lab.purchase, cases))
+duracion = time.perf_counter() - t0
+cpu = time.process_time() - cpu_0
+_, peak = tracemalloc.get_traced_memory()
+tracemalloc.stop()
+\end{lstlisting}
+\end{minipage}
+La reproducción debe partir del hash indicado, no de una mezcla de archivos locales y remotos. Compilar esta memoria no ejecuta experimentos ni modifica la base.
+
+\seccion{Diseño del estudio}
+\subsection{Preguntas}
+Se formulan cinco preguntas operativas para responder los requisitos del banco del Paso 7:
+\begin{enumerate}
+\item ¿Las estrategias conservan pago exacto, descuento único, stock no negativo y compensación completa en los casos observados?
+\item ¿Cómo varían latencia y confirmaciones por segundo entre E-2PC y E-Saga, concurrencias y modos de fallo?
+\item ¿Qué recuperación puede observarse al fallar la pasarela y qué queda fuera del modelo?
+\item ¿El banco determinista de compatibilidad valida el asistente real y permite comparar reglas con RAG?
+\item ¿Los instrumentos permiten reproducir el experimento distribuido exigido o solamente una aproximación local?
+\end{enumerate}
+Se añaden dos estudios acumulados: escalabilidad analítica y comportamiento del clúster. No se combinan estadísticamente con el laboratorio de coordinación.
+
+\subsection{Factores, unidad experimental y procedimiento}
+La matriz contiene dos estrategias, concurrencias 50, 100, 200 y 400, y modos \texttt{none}, \texttt{omission}, \texttt{timing}. Cada una de las 24 condiciones tiene cinco repeticiones. La unidad resumida es la ejecución; cada ejecución lanza un lote finito de tantas compras como concurrencia nominal. No es una carga sostenida de usuarios navegando por el sistema.
+
+El ejecutor reinicia una base por repetición, establece stock inicial \(3c+10\), genera casos y obtiene el reporte del oráculo. La semilla base es 2026, pero su cálculo incorpora la longitud del nombre de estrategia y modo; las estrategias no reciben necesariamente el mismo conjunto de fallos. La comparación no es un diseño emparejado perfecto.
+
+\begin{table}[H]\centering\small
+\caption{Protocolo solicitado y configuración realmente ejecutada.}\label{tab:protocolo}
+\begin{tabularx}{\textwidth}{lXX}
+\toprule Aspecto & Referencia de la guía & Evidencia del corte\\\midrule
+Repeticiones & Cinco por condición & Cinco; 120 ejecuciones.\\
+Retardo & Cinco segundos & 0,05 segundos.\\
+Calentamiento & Sesenta segundos & Cero; el parámetro solo espera, no genera tráfico.\\
+Duración & Corridas sostenidas sugeridas & Lote finito de 50--400 operaciones.\\
+Pasarela & Intermediario y fallo de respuesta & Función local con excepción.\\
+Coordinación & Participantes distribuidos & Una SQLite y bloqueo global.\\
+CPU y memoria & Porcentaje y MiB operativos & Segundos CPU y asignaciones Python.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+La tabla \ref{tab:protocolo} distingue parametrización de ejecución. Cambiar demora y espera no transforma el simulador en un ensayo distribuido ni implementa calentamiento bajo carga.
+
+\subsection{Variables e invariantes}
+Se miden percentiles de duración de compra, confirmaciones por segundo, abortos, violaciones del oráculo, tiempo hasta compensación, CPU y memoria rastreada. Aunque algunas columnas se denominan \texttt{latencia\_pago}, el código obtiene el tiempo de \texttt{lab.purchase}; se interpreta como compra local y no como pago aislado.
+
+El oráculo consulta pagos de órdenes confirmadas, suma de movimientos, mínimos históricos y restauración de órdenes compensadas. La comprobación de descuento único verifica un saldo neto igual a la cantidad negativa, no un único movimiento: duplicados que se cancelen podrían pasar. Tampoco enumera exhaustivamente estados pendientes u operaciones desaparecidas tras rollback. Es una verificación más débil que una prueba completa de las invariantes en producción.
+
+\begin{equation}
+R=\frac{N_{\mathrm{confirmadas}}}{t_{\mathrm{fin}}-t_{\mathrm{inicio}}},\qquad
+r_a=\frac{N_{\mathrm{abortadas}}}{N_{\mathrm{operaciones}}}.
+\label{eq:tasas}
+\end{equation}
+La ecuación \ref{eq:tasas} explicita denominadores. Sumar violaciones de distintas consultas y dividir por operaciones no siempre produce una proporción binomial: una operación podría violar más de una regla. Los intervalos publicados de inconsistencia se interpretan con esa reserva.
+
+\subsection{Análisis estadístico}
+Se calcula mediana de los cinco p95 e intervalo bootstrap percentil del 95\,\% con mil remuestreos. No es el p95 de todas las operaciones mezcladas. Para abortos y compatibilidad se emplea Wilson; para latencias se publican Mann--Whitney U aproximado y tamaño de efecto:
+\begin{equation}
+\widehat A_{12}=
+\frac{\sum_{i=1}^{n_1}\sum_{j=1}^{n_2}
+[\mathbb{1}(x_i>y_j)+\tfrac12\mathbb{1}(x_i=y_j)]}{n_1n_2}.
+\label{eq:a12}
+\end{equation}
+En \ref{eq:a12}, \(x\) es 2PC y \(y\) es Saga. Cero significa que ningún p95 observado de 2PC supera al de Saga; no implica certeza poblacional. Se conservan doce comparaciones sin ajuste múltiple, con cinco observaciones por grupo. Los valores p son aproximaciones normales, no pruebas exactas; el script no incorpora todas las correcciones de empates o continuidad. La inferencia es exploratoria y el orden fijo de ejecución limita una atribución causal.
+
+\subsection{Datos y paralelismo}
+Para Spark se comparan tiempos de la misma tarea y lectura:
+\begin{equation}
+S(N)=\frac{T(1)}{T(N)},\quad E(N)=\frac{S(N)}{N},\quad
+S_{\mathrm{Amdahl}}(N)=\frac{1}{(1-f)+f/N}.
+\label{eq:amdahl}
+\end{equation}
+La ecuación \ref{eq:amdahl} usa \(f\) como fracción paralelizable \cite{amdahl1967validity}. Despejar la parte no escalable \(q=(1/S-1/N)/(1-1/N)\) puede producir valores superiores a uno cuando hay desaceleración: no son fracciones físicas, sino señal de sobrecostes fuera del modelo simple.
+
+Los ensayos del clúster comparan planes y una secuencia de caída/reintegración, sin repeticiones suficientes para estimar una mejora general. Se conservan observaciones individuales, convirtiendo unidades explícitamente.
+
+\seccion{Resultados}
+\subsection{Coordinación local}
+La tabla \ref{tab:coordinacion} transcribe las 24 condiciones de \evidencia{experiments/paso8/resultados/experimento_resumen.csv}{experimento\_resumen.csv}. Cada fila resume cinco ejecuciones. La figura \ref{fig:boxplot} representa los p95 por ejecución sin mezclar niveles de concurrencia. No se excluyeron ejecuciones al generar la figura.
+
+{\small
+\begin{longtable}{lllrrr}
+\caption{Latencia de compra local y confirmaciones por segundo. IC del 95\,\% del p95 mediano.}\label{tab:coordinacion}\\
+\toprule Estrategia & Conc. & Fallo & p95 (ms) & IC (ms) & Órdenes/s\\\midrule\endfirsthead
+\toprule Estrategia & Conc. & Fallo & p95 (ms) & IC (ms) & Órdenes/s\\\midrule\endhead
+2PC & 50 & none & 371.9 & [364.1; 374.0] & 123.12 \\
+2PC & 50 & omission & 346.7 & [331.2; 372.9] & 114.57 \\
+2PC & 50 & timing & 783.7 & [524.4; 876.2] & 50.42 \\
+2PC & 100 & none & 773.1 & [646.7; 988.6] & 111.33 \\
+2PC & 100 & omission & 714.3 & [685.9; 795.3] & 112.98 \\
+2PC & 100 & timing & 1199.8 & [929.7; 1347.3] & 69.63 \\
+2PC & 200 & none & 1656.8 & [1507.7; 1864.5] & 108.61 \\
+2PC & 200 & omission & 1447.0 & [1406.0; 1626.1] & 113.99 \\
+2PC & 200 & timing & 2621.2 & [2288.6; 2771.6] & 64.61 \\
+2PC & 400 & none & 3401.9 & [3158.9; 3636.8] & 108.07 \\
+2PC & 400 & omission & 3085.3 & [2927.9; 3139.0] & 107.05 \\
+2PC & 400 & timing & 5311.8 & [4791.1; 5706.5] & 61.14 \\
+SAGA & 50 & none & 2017.0 & [1876.5; 2175.6] & 23.38 \\
+SAGA & 50 & omission & 1871.5 & [1860.4; 1976.3] & 22.26 \\
+SAGA & 50 & timing & 2286.0 & [2211.4; 2402.9] & 18.31 \\
+SAGA & 100 & none & 3585.9 & [3389.5; 3880.0] & 26.37 \\
+SAGA & 100 & omission & 3946.0 & [3754.5; 4079.4] & 20.97 \\
+SAGA & 100 & timing & 4752.6 & [4603.1; 6325.6] & 17.72 \\
+SAGA & 200 & none & 8088.5 & [7075.8; 8708.8] & 23.45 \\
+SAGA & 200 & omission & 11740.4 & [9903.3; 12212.3] & 14.31 \\
+SAGA & 200 & timing & 12948.6 & [12370.4; 13302.2] & 13.02 \\
+SAGA & 400 & none & 24712.7 & [23577.9; 27393.2] & 15.32 \\
+SAGA & 400 & omission & 22578.9 & [22065.3; 23499.9] & 14.97 \\
+SAGA & 400 & timing & 25660.3 & [24655.9; 26674.3] & 13.14 \\
+\bottomrule\end{longtable}}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{cierre/boxplot-p95.png}
+\caption{Distribución de p95 de compra por ejecución: cinco repeticiones en cada caja; bigotes mínimo--máximo. Elaboración propia desde el CSV crudo.}\label{fig:boxplot}
+\end{figure}
+
+Las 120 ejecuciones registran \texttt{oracle\_pass=True} y cero violaciones en las consultas del oráculo. El informe de compatibilidad registra 120 aciertos sobre 120 casos, cero falsos positivos y cero falsos negativos; el intervalo Wilson de exactitud es [0,968981; 1]. Esta evaluación corresponde a reglas locales de socket, RAM y potencia, tal como las implementa el evaluador del experimento.
+
+Las doce comparaciones de p95 registran \(U=0\), \(p_{\mathrm{aprox}}=0,009023\) y \(\widehat A_{12}=0\). Los datos y resultados de cada contraste están en \evidencia{experiments/paso8/resultados/comparaciones_mann_whitney.csv}{comparaciones\_mann\_whitney.csv}. La tabla \ref{tab:recursos} muestra métricas auxiliares de condiciones seleccionadas; no son medidas de recursos de producción.
+
+\begin{table}[H]\centering\small
+\caption{Recursos y abortos de condiciones sin fallo, medianas de recursos.}\label{tab:recursos}
+\begin{tabular}{llrrr}
+\toprule Estrategia & Concurrencia & CPU (s) & Memoria Python (MiB) & Tasa abortos\\\midrule
+2PC & 50 & 0.141 & 0.266 & 0.0 \\
+2PC & 400 & 1.641 & 2.193 & 0.0 \\
+SAGA & 50 & 0.750 & 0.266 & 0.0 \\
+SAGA & 400 & 6.078 & 2.221 & 0.0 \\
+\bottomrule\end{tabular}
+\end{table}
+
+
+\begin{table}[H]\centering\small
+\caption{Concurrencia 400: medianas entre ejecuciones de p50, p99 y tiempo hasta compensación, en ms.}\label{tab:colas}
+\begin{tabular}{llrrr}
+\toprule Estrategia & Fallo & p50 & p99 & Hasta compensación\\\midrule
+2PC & none & 1799,648 & 3534,757 & --\\
+2PC & omission & 1557,841 & 3252,304 & --\\
+2PC & timing & 3001,869 & 5633,613 & --\\
+Saga & none & 12630,484 & 25661,211 & --\\
+Saga & omission & 12141,354 & 23441,936 & 21795,425\\
+Saga & timing & 13085,967 & 26835,680 & 23846,341\\\bottomrule
+\end{tabular}
+\end{table}
+La tabla \ref{tab:colas} se calcula desde el CSV crudo. El guion indica que no hay evento de compensación; el script guarda cero en esos casos, que no se interpreta como recuperación instantánea. La última columna resume el p95 del tiempo acumulado hasta el evento, calculado en cada ejecución.
+
+\subsection{Procesamiento analítico}
+La tabla \ref{tab:spark} recoge medias de T1 en \evidencia{resultados/tiempos_resumen.csv}{tiempos\_resumen.csv}. La lectura particionada tiene tres repeticiones y las demás cinco. La figura \ref{fig:spark} visualiza esas observaciones agregadas, no una simulación.
+
+\begin{table}[H]\centering\small
+\caption{Tiempo de T1 por motor y modalidad.}\label{tab:spark}
+\begin{tabular}{llrr}
+\toprule Motor / lectura & Ejecutores & Repeticiones & Media (s)\\\midrule
+Pandas / SQL directo & -- & 5 & 2,847172\\
+Spark / JDBC sin partición & 1 & 5 & 14,557712\\
+Spark / JDBC sin partición & 2 & 5 & 17,115246\\
+Spark / JDBC sin partición & 4 & 5 & 19,132645\\
+Spark / JDBC particionado & 1 & 3 & 17,966838\\
+Spark / JDBC particionado & 2 & 3 & 16,799444\\
+Spark / JDBC particionado & 4 & 3 & 17,175005\\\bottomrule
+\end{tabular}
+\end{table}
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\textwidth]{cierre/spark-t1.png}
+\caption{T1: media e intervalo del 95\,\% publicados, por modalidad y ejecutores. Elaboración propia.}\label{fig:spark}
+\end{figure}
+Para Spark sin particionamiento, \(S(4)=0,760884\) y \(E(4)=0,190221\), calculados a partir de las medias. T5 registra 3,526321 s para Pandas y 33,166240, 35,589197 y 37,834008 s para Spark con uno, dos y cuatro ejecutores, respectivamente.
+
+\subsection{Persistencia y tolerancia a fallos}
+La comparación de planes conserva los tiempos individuales de la tabla \ref{tab:planes}. No se calculan intervalos al no disponer aquí de repeticiones homogéneas de esas consultas.
+
+\begin{table}[H]\centering\small
+\caption{Tiempos registrados en comparación de planes, normalizados a milisegundos.}\label{tab:planes}
+\begin{tabular}{lrr}
+\toprule Consulta & Clúster 3 nodos & Nodo único\\\midrule
+Historial de usuario & 3 & 3\\
+Top 10 trimestral & 625 & 1100\\
+Cabecera y detalle & 11 & 78\\
+Catálogo & 44 & 2000\\
+Reporte trimestral & 4000 & 8000\\\bottomrule
+\end{tabular}
+\end{table}
+En el ensayo de fallo, las consultas tardaron 464,01 ms antes de la caída, 4919,55 ms inmediatamente después, 428,94 ms después de treinta segundos y 918,4 ms tras la reintegración. Las cuatro conservaron el resultado 1644 y estado satisfactorio. El tiempo registrado de reintegración fue 3,62 s. Las rutas de los ficheros originales se conservan en el inventario de cierre.
+
+\seccion{Discusión}
+\subsection{Qué permite concluir la comparación}
+En las condiciones observadas, la implementación E-2PC presenta p95 menores que E-Saga. No se concluye que el protocolo 2PC sea generalmente superior: ambas rutas están serializadas por un bloqueo y se ejecutan en un motor local. E-Saga realiza más confirmaciones individuales; el coste de esas operaciones puede dominar la diferencia. Para evaluar coordinación distribuida habría que separar participantes, persistir decisiones y estudiar recuperación de procesos, incertidumbre de respuesta y reintentos.
+
+El cero de violaciones es un resultado del oráculo, no una demostración de corrección. El saldo neto de movimientos es más débil que la unicidad de descuento, y las órdenes revertidas pueden no dejar las mismas huellas que las compensadas. Se recomienda fortalecer los controles con identificadores únicos, seguimiento de todos los casos emitidos y fallos deliberados que el oráculo deba detectar. Esa recomendación no se presenta como implementada.
+
+La compatibilidad perfecta describe un evaluador local que replica reglas usadas por el banco sintético. No invoca el servicio real de armado ni un recuperador/generador RAG. Por tanto, no puede justificar precisión del asistente ni una ventaja de IA. La validación futura debe separar generador de etiquetas y sistema evaluado, incluir incompatibilidades de catálogo y registrar respuestas reales sobre un conjunto reservado.
+
+\subsection{Paralelismo y motor de datos}
+La desaceleración de T1 al añadir ejecutores es compatible con sobrecostes y entrada poco paralela. Es una interpretación, no un perfil causal exhaustivo. La variante JDBC particionada cambia el acceso y muestra un patrón diferente, pero no supera automáticamente el tiempo de Pandas. Para este tamaño y entorno, la complejidad operativa de Spark no se justifica por una mejora de T1 observada.
+
+Aplicar Amdahl como ajuste mecánico produciría una fracción no escalable superior a uno para la serie sin partición. Eso no significa que exista más de un cien por ciento de trabajo serial: el modelo omite sobrecostes dependientes del número de ejecutores. Gustafson plantea otra pregunta para cargas crecientes \cite{gustafson1988reevaluating}; no corrige retrospectivamente el resultado de carga fija.
+
+La caída de un nodo mostró un pico de latencia con resultado conservado. Es evidencia puntual de continuidad del clúster en ese escenario, no disponibilidad sostenida. El ensayo comparte anfitrión y no cubre partición prolongada ni corrupción. Los planes con tiempos menores en clúster tampoco aíslan por sí solos diferencias de caché, índices y recursos.
+
+\subsection{Decisiones de cierre}
+El cierre mantiene arquitectura y evidencias existentes, y registra deuda en lugar de modificar apresuradamente el producto. Las prioridades son idempotencia y validación de contratos, luego pruebas de recuperación y una medición oficial con recursos y tráfico definidos. La revisión bibliográfica se corrigió porque un DOI existente puede apuntar a un trabajo distinto: comprobar que el enlace abre no basta; debe coincidir con título y autores.
+
+El producto posee instrumentos de calidad y observabilidad antes ausentes. Sin embargo, instalar Prometheus o aprobar CI no acredita un objetivo operacional. La memoria distingue esas capas para que el lector pueda reconocer el avance sin asumir garantías todavía no medidas.
+
+\seccion{Amenazas a la validez}
+\subsection{Validez interna}
+\textbf{Contención del anfitrión.} Todas las ejecuciones comparten máquina y pueden sufrir carga externa. Mitigación: conservar repeticiones y recursos, aislar futuras corridas y aleatorizar orden. No se supone aislamiento retroactivo.
+
+\textbf{Serialización e implementación.} SQLite y el bloqueo común confunden estrategia con coste de commits. Mitigación: restringir conclusiones al laboratorio y repetir con participantes separados antes de elegir protocolo productivo.
+
+\textbf{Semillas y orden.} El cálculo de semillas varía entre estrategias y las condiciones se recorren en orden fijo. Mitigación: utilizar listas idénticas de operaciones/fallos y orden aleatorio balanceado en una réplica. Las comparaciones actuales son no emparejadas.
+
+\textbf{Configuración abreviada.} Demora de 0,05 s y calentamiento cero difieren de la guía. Mitigación: publicar metadatos y no afirmar cumplimiento de las condiciones de cinco segundos y sesenta segundos; la futura espera deberá generar carga efectiva.
+
+\subsection{Validez externa}
+\textbf{Carga sintética concentrada.} Compras sobre un producto no representan navegación, usuarios heterogéneos ni distribución real de demanda. Mitigación: añadir perfiles mixtos y más productos con tamaños declarados; limitar el alcance actual a contención local.
+
+\textbf{Topología y pasarela.} Un anfitrión y una función de pago no modelan latencia geográfica ni fallos bancarios. Mitigación: ensayar red y participantes independientes sin usar credenciales ni pagos reales; no extrapolar los percentiles a producción.
+
+\textbf{Catálogo artificial.} Casos generados por reglas próximas al evaluador favorecen resultados perfectos. Mitigación: etiquetas independientes, conjunto reservado y llamadas al asistente real antes de evaluar reglas frente a RAG.
+
+\subsection{Validez de constructo}
+\textbf{Latencia mal rotulada.} Una columna de pago mide compra completa. Mitigación aplicada: nombrarla latencia de compra en el informe y conservar el nombre original en datos para trazabilidad.
+
+\textbf{Oráculo incompleto.} El saldo neto no demuestra unicidad ni recuperación de todos los estados pendientes. Mitigación: declarar el alcance, usar historiales completos y pruebas que muten intencionalmente cada invariante.
+
+\textbf{Recursos parciales.} CPU en segundos y memoria Python no equivalen a porcentaje CPU/RSS. Mitigación aplicada: unidades explícitas; futura instrumentación a nivel de proceso o contenedor.
+
+\subsection{Validez de conclusión}
+Cinco réplicas producen intervalos sensibles al ruido y doce pruebas aumentan el riesgo de falsos positivos. Mitigación: interpretar exploratoriamente, incrementar réplicas y predefinir corrección por comparaciones múltiples. No se afirma significación familiar al 5\,\%.
+
+La suma de violaciones no es necesariamente binomial y un cero observado no prueba riesgo nulo. Mitigación: definir una variable binaria por operación para cada invariante y reportar su intervalo por separado. Los ensayos puntuales del clúster tampoco permiten inferir disponibilidad sostenida; se mantienen como observaciones descriptivas.
+
+\seccion{Calidad del producto}
+\subsection{Modelo y criterios}
+ISO/IEC 25010:2023 organiza nueve características de calidad del producto; ISO/IEC 25023:2016 aporta medidas \cite{iso25010_2023,iso25023_2016}. Las normas no imponen los umbrales académicos de cobertura o complejidad usados aquí. Esos objetivos proceden de la guía y deben interpretarse según alcance y método.
+
+La tabla \ref{tab:iso} distingue evidencia favorable, parcial y ausente. No se declara certificación ISO ni conformidad integral por disponer de un CSV. La seguridad requiere pruebas y configuración coherentes, mientras que la mantenibilidad requiere que el código sea comprensible además de superar un umbral.
+
+\begin{table}[H]\centering\small
+\caption{Evaluación por características ISO/IEC 25010:2023.}\label{tab:iso}
+\begin{tabularx}{\textwidth}{lX}
+\toprule Característica & Evidencia y límite\\\midrule
+Adecuación funcional & Flujos y pruebas implementados; no aceptación completa de todos los recorridos.\\
+Eficiencia & Mediciones de laboratorio y Spark; sin p95 oficial de producción.\\
+Compatibilidad & Contratos HTTP/gRPC; Pact y ensayo completo entre consumidores no acreditados.\\
+Capacidad de interacción & Interfaces web/Android; sin estudio formal de usuarios.\\
+Fiabilidad & Ensayo de caída y comprobaciones de salud; falta hora de disponibilidad.\\
+Seguridad & JWT, restricciones de exposición y pruebas negativas; no auditoría integral.\\
+Mantenibilidad & Cobertura acotada y PMD menor que diez; persisten DTO y acoplamientos.\\
+Flexibilidad & Contenedores y configuración; no ensayo multientorno exhaustivo.\\
+Seguridad operacional & Riesgos de stock/pago identificados; no análisis completo de daño operacional.\\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Cobertura y complejidad}
+La tabla \ref{tab:cobertura} procede de los informes de cobertura y sus notas de alcance. Las líneas corresponden a clases instrumentadas, en particular lógica de negocio; no incluyen necesariamente controladores, infraestructura, entidades, SPA o código generado. Un 100\,\% de ocho líneas no prueba todo el servicio.
+
+\begin{table}[H]\centering\small
+\caption{Cobertura en el alcance de los informes disponibles.}\label{tab:cobertura}
+\begin{tabular}{lrrr}
+\toprule Módulo & Cubiertas & Medidas & Porcentaje\\\midrule
+Inventario & 8 & 8 & 100,00\\
+Órdenes a proveedores & 47 & 51 & 92,16\\
+Pedidos & 104 & 129 & 80,62\\
+Productos & 23 & 23 & 100,00\\
+Usuarios & 321 & 358 & 89,66\\
+Ventas & 27 & 27 & 100,00\\
+armado-ia & 405 & 540 & 75,00\\\bottomrule
+\end{tabular}
+\end{table}
+
+El informe específico reciente de \evidencia{docs/experimentos/resultados/iso25010/complejidad/summary.csv}{complejidad} registra máximos por método de 7 en gateway, 8 en inventario, 9 en órdenes a proveedores, 7 en pedidos, 8 en productos, 9 en usuarios y 7 en ventas. Sustituye en esta memoria la afirmación antigua de máximo 20, que aún aparece en resúmenes anteriores. Los siete valores son inferiores a diez; no se extiende esa medición PMD al servicio Python.
+
+\subsection{CI, carga y observabilidad}
+Se verificaron ejecuciones de GitHub Actions: \href{https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33554959074}{quality gate fallido} y \href{https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557136678}{quality gate posterior satisfactorio}. En el corte, \href{https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557751416}{CI} y \href{https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557751365}{quality gate} aparecen satisfactorios. Son ejecuciones de CI, no solicitudes de incorporación de cambios. La publicación de imágenes en Docker Hub pertenece a otro workflow; no se deduce de estos estados que toda publicación esté condicionada por el mismo control.
+
+La prueba de carga previa registró 1911 solicitudes y 862 fallos. El diagnóstico relaciona parte del problema con respuestas de productos y con limitación de solicitudes por IP; no constituye aprobación de rendimiento. Un generador de cincuenta usuarios desde una sola IP puede activar la política de 300 solicitudes por minuto y debe distinguir 429 de errores 5xx. No se dispone de una repetición oficial posterior sobre el despliegue que permita declarar resuelto el objetivo de carga.
+
+El repositorio contiene métricas Prometheus, logs JSON, recolección Alloy y configuración de Grafana. Esto acredita instrumentación, no una observación prolongada. No se acredita trazabilidad distribuida completa con OpenTelemetry ni una captura final del dashboard con la prueba oficial. Permanecen sin medir disponibilidad de una hora, p95 productivo y tasa final de errores; tampoco se infiere cobertura E2E o de la SPA a partir de pruebas unitarias Java.
+
+\seccion{Gestión de la revisión cruzada}
+\subsection{Criterio de respuesta}
+La tabla \ref{tab:issues} recoge las incidencias 16--78 recuperadas en el corte: 63 registros, de los cuales 50 figuran cerrados y 13 abiertos. Diez abiertos corresponden al trabajo pendiente identificado en el proyecto actual; otros tres, 40, 46 y 48, tienen títulos duplicados de 41, 47 y 49 y carecen de respuesta en el registro consultado. No se cierran automáticamente ni se ocultan en esta memoria.
+
+AC significa aceptar y corregir según la respuesta publicada; AD significa aceptar y diferir en este cierre documental; R significa rebatir con justificación. El estado de GitHub y la acción documental son columnas distintas. Las respuestas enlazadas contienen la justificación y, cuando existen, referencias a commits. Un cierre administrativo no constituye por sí solo prueba de ejecución ni invalida los límites de las secciones de calidad y método.
+
+Los abiertos con corrección parcial o pendiente se incorporan como deuda explícita; AD no significa que se haya publicado una nueva respuesta o alterado el proyecto. El registro de tres duplicados se conserva para evitar contar dos veces una misma corrección y para permitir una consolidación administrativa posterior.
+
+
+{\small\begin{longtable}{p{0.6cm}p{6.8cm}p{1.7cm}p{1.1cm}p{2.8cm}}
+\caption{Respuesta y evidencia individual de revisión cruzada.}\label{tab:issues}\\
+\toprule N.º & Observación & Estado & Acción & Evidencia\\\midrule\endfirsthead
+\toprule N.º & Observación & Estado & Acción & Evidencia\\\midrule\endhead
+16 & Aplicar framework para el frontend & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/16#issuecomment-5499536102}{Respuesta 16} \\
+17 & Aplicar temas de tareas formativas al proyecto & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/17#issuecomment-5499878376}{Respuesta 17} \\
+18 & Investigación de temas de la materia aplicables al proyecto & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/18#issuecomment-5499810621}{Respuesta 18} \\
+19 & Hacer que usuarios no dañe todo el proyecto & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/19#issuecomment-5499881456}{Respuesta 19} \\
+20 & Primera versión de aplicación móvil & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/20#issuecomment-5499700698}{Respuesta 20} \\
+21 & Primera versión de la IA asistente & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/21#issuecomment-5499702639}{Respuesta 21} \\
+22 & Aplicación móvil finalizada & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/22#issuecomment-5499884436}{Respuesta 22} \\
+23 & Asistente de IA finalizado & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/23#issuecomment-5499887488}{Respuesta 23} \\
+24 & Arreglar estructura del proyecto & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/24#issuecomment-5499806741}{Respuesta 24} \\
+25 & Implementar validación JWT en el API Gateway & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/25#issuecomment-5499444070}{Respuesta 25} \\
+26 & Configurar JWT\_SECRET compartido entre Gateway y usuarios-service & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/26#issuecomment-5499490631}{Respuesta 26} \\
+27 & Definir rutas públicas del API Gateway & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/27#issuecomment-5499481993}{Respuesta 27} \\
+28 & Crear patrón reutilizable de validación JWT & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/28#issuecomment-5499483824}{Respuesta 28} \\
+29 & Cerrar exposición pública de los puertos 8081--8086 & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/29#issuecomment-5499486242}{Respuesta 29} \\
+30 & Agregar healthcheck a usuarios-service & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/30#issuecomment-5499570043}{Respuesta 30} \\
+31 & Consolidar manejadores globales de excepciones de usuarios-service & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/31#issuecomment-5499572163}{Respuesta 31} \\
+32 & Unificar rutas de creación de usuarios & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/32#issuecomment-5499574333}{Respuesta 32} \\
+33 & Corregir respuesta HTTP al crear usuarios & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/33#issuecomment-5499576455}{Respuesta 33} \\
+34 & Documentar política común de autenticación y autorización & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/34#issuecomment-5499578395}{Respuesta 34} \\
+35 & Verificar integraciones internas con protección JWT & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/35#issuecomment-5499580121}{Respuesta 35} \\
+36 & Incorporar validación JWT en ventas-service y añadir healthcheck & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/36#issuecomment-5499544030}{Respuesta 36} \\
+37 & Configurar timeouts explícitos en InventarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/37#issuecomment-5499542065}{Respuesta 37} \\
+38 & Implementar el patrón outbox al generar una factura & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/38#issuecomment-5499545660}{Respuesta 38} \\
+39 & Guardar la factura y el evento outbox dentro de la misma transacción de base de datos & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/39#issuecomment-5499547112}{Respuesta 39} \\
+40 & Crear el proceso que reintente eventos pendientes y marque un evento como procesado solo después de la confirmación de inventario & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/40}{Véase 41} \\
+41 & Crear el proceso que reintente eventos pendientes y marque un evento como procesado solo después de la confirmación de inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/41#issuecomment-5499549164}{Respuesta 41} \\
+42 & Añadir Circuit Breaker y reintentos seguros alrededor de la comunicación con inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/42#issuecomment-5499562481}{Respuesta 42} \\
+43 & Coordinar con José la idempotencia del descuento de existencias & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/43#issuecomment-5499955308}{Respuesta 43} \\
+44 & Reemplazar Map String,Integer  por GenerarFacturaRequest y aplicar @Valid. & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/44#issuecomment-5499551129}{Respuesta 44} \\
+45 & Crear DTO de salida para facturas y dejar de exponer directamente la entidad JPA & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/45#issuecomment-5499553220}{Respuesta 45} \\
+46 & Incorporar validación JWT en ordenes-proveedores-service. y añadir healthcheck & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/46}{Véase 47} \\
+47 & Incorporar validación JWT en ordenes-proveedores-service y añadir healthcheck & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/47#issuecomment-5499564428}{Respuesta 47} \\
+48 & Configurar timeouts explícitos en InventarioClient & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/48}{Véase 49} \\
+49 & Configurar timeouts explícitos en InventarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/49#issuecomment-5499565384}{Respuesta 49} \\
+50 & Añadir Circuit Breaker y reintentos seguros para la comunicación con inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/50#issuecomment-5499566316}{Respuesta 50} \\
+51 & Crear OrdenCompraResponseDTO y ProveedorResponseDTO & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/51#issuecomment-5499567221}{Respuesta 51} \\
+52 & Verificar que las transiciones enviar y cancelar sean idempotentes o rechacen correctamente las repeticiones & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/52#issuecomment-5499568157}{Respuesta 52} \\
+53 & Si se aprueba gRPC: implementar el cliente suscriptor de alertas de inventario y evitar órdenes duplicadas ante reconexiones o mensajes repetidos & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/53#issuecomment-5499957575}{Respuesta 53} \\
+54 & Documentar por qué /enviar y /cancelar representan transiciones de negocio en lugar de un PATCH genérico & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/54#issuecomment-5499890678}{Respuesta 54} \\
+55 & Incorporar validación JWT en pedidos-service & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/55#issuecomment-5499893613}{Respuesta 55} \\
+56 & Reutilizar OrdenCompraService como punto único de lógica al recibir alertas & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/56#issuecomment-5499959748}{Respuesta 56} \\
+57 & Añadir healthcheck & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/57#issuecomment-5499896900}{Respuesta 57} \\
+58 & Configurar connect timeout y read timeout en FacturaClient, ProductoClient y UsuarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/58#issuecomment-5499900322}{Respuesta 58} \\
+59 & Crear un ApiExceptionHandler global para respuestas de error uniformes & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/59#issuecomment-5499903875}{Respuesta 59} \\
+60 & Verificar que cualquier reintento de una operación de escritura sea idempotente o utilice una clave contra duplicados & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/60#issuecomment-5499907106}{Respuesta 60} \\
+61 & Añadir Circuit Breaker y reintentos controlados en los clientes internos donde sean seguros & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/61#issuecomment-5499917467}{Respuesta 61} \\
+62 & Cambiar operaciones void por respuestas HTTP explícitas, normalmente 204 No Content & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/62#issuecomment-5499921148}{Respuesta 62} \\
+63 & Corregir códigos HTTP de creación & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/63#issuecomment-5499923933}{Respuesta 63} \\
+64 & Reemplazar mapas y entidades expuestas por DTO & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/64#issuecomment-5499962026}{Respuesta 64} \\
+65 & Añadir un estado formal del pedido solo si se implementará seguimiento en tiempo real & Cerrado & R & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/65#issuecomment-5499926865}{Respuesta 65} \\
+66 & Mantener TCP/WebSocket como funcionalidad separada de las correcciones urgentes & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/66#issuecomment-5499930050}{Respuesta 66} \\
+67 & Validación JWT para productos e inventario. & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/67#issuecomment-5499814085}{Respuesta 67} \\
+68 & Healthcheck para productos e inventario. & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/68#issuecomment-5499537229}{Respuesta 68} \\
+69 & Idempotencia para inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/69#issuecomment-5499933929}{Respuesta 69} \\
+70 & Respuesta ante eventos repetidos & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/70#issuecomment-5499937655}{Respuesta 70} \\
+71 & Mejora de productos para respuestas incorrectas & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/71#issuecomment-5499803326}{Respuesta 71} \\
+72 & Reivisón de códigos HTTP en productos & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/72#issuecomment-5499539698}{Respuesta 72} \\
+73 & Preparación de inventario como servidor & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/73#issuecomment-5499964342}{Respuesta 73} \\
+74 & Creación de contrato .proto & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/74#issuecomment-5499966747}{Respuesta 74} \\
+75 & Pruebas de conexión & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/75#issuecomment-5499968939}{Respuesta 75} \\
+76 & Exponer entidades & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/76#issuecomment-5499971165}{Respuesta 76} \\
+77 & Revisión de rutas & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/77#issuecomment-5499973475}{Respuesta 77} \\
+78 & Telemetría UDP & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/78#issuecomment-5499975479}{Respuesta 78} \\
+\bottomrule\end{longtable}}
+\subsection{Justificación y coste de la deuda}
+La idempotencia del receptor no garantiza que ventas y proveedores propaguen una misma clave en cada reintento. Por eso el issue 43 permanece abierto aunque 69 y 70 estén cerrados. Las reservas gRPC tampoco implementan el canal de alertas solicitado por 53 y 73--75. Estos alcances distintos justifican no colapsar observaciones relacionadas como si fueran equivalentes.
+
+La tabla \ref{tab:deuda} aporta estimaciones documentales, no horas ejecutadas ni compromisos aceptados por los integrantes. Los costes de los grupos compartidos no deben sumarse por cada issue, porque corresponden a una misma funcionalidad.
+
+\begin{table}[H]\centering\small
+\caption{Deuda aceptada para continuidad y coste orientativo de resolución.}\label{tab:deuda}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule Issues & Motivo y coste de mantener la deuda & Estimación\\\midrule
+43 & Clave idempotente de extremo a extremo; riesgo de descuentos duplicados. & 6--10 h\\
+53, 56, 73--75 & Alertas, suscripción y reconexión no completas; abastecimiento sigue manual. & 20--32 h\\
+64, 76 & DTO parciales; acoplamiento y validación inconsistente de entradas/salidas. & 8--12 h\\
+77 & Rutas y contratos por conciliar; riesgo de documentación divergente. & 3--5 h\\
+78 & UDP opcional; canal y mantenimiento adicionales sin beneficio urgente demostrado. & 8--12 h\\
+40, 46, 48 & Duplicados aparentes; falta consolidación, sin presumir trabajo técnico adicional. & Revisión\\\bottomrule
+\end{tabularx}
+\end{table}
+El issue 65 se rebate porque condicionaba el estado formal al seguimiento en tiempo real, que no se acredita como implementado. Esta justificación no elimina la necesidad de estados de negocio en el laboratorio; son alcances diferentes. Los costes técnicos reales deberán reestimarse al ejecutar cada cambio y sus pruebas.
+
+\seccion{Conclusiones}
+\subsection{Respuestas a las preguntas del banco}
+\textbf{Pregunta 1: invariantes.} Las 120 ejecuciones superaron las cuatro consultas del oráculo. La respuesta es afirmativa solo para esas comprobaciones y casos: no acredita unicidad estricta de movimientos, recuperación de todo pendiente ni ausencia universal de inconsistencias. Se requiere un oráculo más fuerte para asegurar las invariantes completas.
+
+\textbf{Pregunta 2: rendimiento.} E-2PC registró menores p95 que E-Saga en las doce comparaciones de concurrencia y fallo. A concurrencia 400 sin fallo, las medianas fueron 3401,944 y 24712,718 ms. La respuesta no establece superioridad general del protocolo: el resultado pertenece a implementaciones SQLite serializadas y a semillas no perfectamente emparejadas.
+
+\textbf{Pregunta 3: recuperación.} El laboratorio modela rollback y compensación ante una excepción de autorización. No prueba respuesta perdida después de un pago externo exitoso, caída del coordinador ni recuperación durable distribuida. La convergencia registrada usa tiempo desde el inicio de la operación hasta el evento de compensación, no tiempo de reparación aislado de una pasarela real.
+
+\textbf{Pregunta 4: compatibilidad y RAG.} El evaluador obtuvo 120/120 aciertos, pero ejecuta reglas locales del propio banco. La respuesta es negativa respecto de validar el asistente desplegado o comparar reglas con RAG. No se dispone de respuestas de ambos enfoques sobre el mismo conjunto independiente.
+
+\textbf{Pregunta 5: reproducibilidad distribuida.} Los scripts, datos y semillas permiten examinar el laboratorio; la configuración ejecutada no satisface íntegramente demora, calentamiento, duración, independencia de participantes y recursos solicitados. La respuesta es parcial, no un cumplimiento completo del banco distribuido.
+
+\subsection{Balance acumulativo}
+TiendaTech pasó de la propuesta arquitectónica a una implementación con clientes, servicios, datos distribuidos e instrumentos de prueba. Se documentaron decisiones de fragmentación, capas y autenticación; se incorporaron CI, cobertura, métricas y evidencia de revisión. El avance es verificable, pero no elimina las diez incidencias funcionales abiertas ni las mediciones operativas ausentes.
+
+El análisis de Spark no mostró aceleración de T1 sin particionamiento JDBC al aumentar ejecutores. El clúster conservó una consulta durante el fallo ensayado, con un pico de latencia. Ambas conclusiones son útiles aunque no sean una confirmación de las expectativas iniciales: permiten priorizar medición y coste frente a complejidad arquitectónica.
+
+El Paso 13 queda atendido como consolidación documental con límites explícitos. No se declara que el proyecto cumpla todos los requisitos técnicos ni que se haya obtenido aprobación de similitud, autoría o evaluación docente. La continuidad requiere resolver la deuda registrada y sustituir cada resultado parcial por evidencia del mismo alcance.
+
+\seccion{Conclusiones individuales}
+Las siguientes reflexiones conservan y actualizan los textos individuales de la memoria anterior según las evidencias del corte. Su inclusión no representa firma ni aprobación personal nueva; cada integrante mantiene la responsabilidad de revisar su texto antes de la entrega institucional.
+
+\subsection{Jhinson Stalyn Aucatoma Celorio}
+La evolución de TiendaTech me permitió comprender que una aplicación distribuida no se considera terminada únicamente porque sus servicios respondan y sus contenedores puedan levantarse. La Entrega 4 hizo visible la importancia de convertir decisiones técnicas en controles repetibles: una regla de negocio debe tener pruebas, una modificación debe atravesar un pipeline y un problema operativo debe poder observarse mediante datos. El refactor por capas fue especialmente valioso porque separó responsabilidades que antes estaban mezcladas y permitió probar la lógica sin depender de la base de datos o de otros servicios. También aprendí que la cobertura es útil como señal, pero no sustituye el diseño de casos relevantes; alcanzar el setenta por ciento tiene sentido solamente si se cubren decisiones que afectan inventario, órdenes, facturación y usuarios. La preparación de Prometheus, logs estructurados y Grafana mostró que medir un sistema requiere definir antes qué pregunta se desea responder. Finalmente, la evaluación ISO/IEC 25010 reforzó la necesidad de informar resultados honestos: una métrica pendiente debe conservarse como pendiente y no completarse con una estimación. Considero que el proyecto logró una base más mantenible y verificable, aunque todavía necesita ejecutar la observación prolongada, la carga oficial del despliegue, aunque las últimas ejecuciones de CI ya fueron verificadas. Mi principal aprendizaje es que la calidad no es una actividad final, sino una propiedad que debe incorporarse al flujo normal de desarrollo. En este cierre también reconozco que las mediciones del laboratorio no equivalen a producción: el uso de una base SQLite y un bloqueo compartido limita la comparación de estrategias. Mantener esa distinción evita atribuir garantías distribuidas a controles locales y permite orientar una siguiente iteración verificable.
+
+\subsection{Jeremy Ruperto Gaibor Rodriguez}
+Durante este proyecto confirmé que el trabajo con microservicios exige coordinar elementos que en una aplicación monolítica suelen permanecer juntos. El API Gateway, los contratos HTTP, la autenticación y la persistencia distribuida forman una cadena: un error en cualquiera de esos puntos puede afectar un flujo completo aunque cada servicio funcione por separado. Las pruebas de integración añadidas ayudan a reducir esa incertidumbre porque verifican recorridos reales hacia productos, usuarios y pedidos, mientras que las pruebas de seguridad comprueban que las rutas protegidas no queden expuestas accidentalmente. El pipeline representa otro cambio importante en la forma de trabajar. Ya no basta con que una modificación compile en la computadora de un integrante; las mismas pruebas, reglas de cobertura y construcciones deben ejecutarse en un ambiente reproducible. También comprendí el valor de hacer depender el build de los controles anteriores, pues publicar una imagen cuando existen pruebas fallidas trasladaría el riesgo hacia producción. La evaluación ISO reveló además que aprobar cobertura no implica aprobar mantenibilidad: el diagnóstico inicial de PMD encontró complejidad de 20, mientras que los informes posteriores registran máximos entre siete y nueve. Por ello, mi conclusión es que el proyecto avanzó de una demostración funcional hacia un producto con mecanismos de control, aunque su validación final depende de conservar evidencias reales, completar las mediciones operativas pendientes y mantener bajo control la complejidad después del refactor. En este cierre también reconozco que las mediciones del laboratorio no equivalen a producción: el uso de una base SQLite y un bloqueo compartido limita la comparación de estrategias. Mantener esa distinción evita atribuir garantías distribuidas a controles locales y permite orientar una siguiente iteración verificable.
+
+\subsection{Andy Paul Sanchez Pilaloa}
+El desarrollo de TiendaTech me ayudó a relacionar conceptos de arquitectura, pruebas y operación que anteriormente podía considerar independientes. La arquitectura en capas facilitó localizar la lógica de negocio y diseñar pruebas unitarias con dependencias simuladas. Esa separación también disminuye el costo de reemplazar una implementación de persistencia o comunicación, porque el dominio no necesita conocer detalles de infraestructura. La parte de observabilidad resultó igualmente significativa: un contador permite conocer la demanda, un histograma permite analizar percentiles y un gauge representa valores que suben y bajan, como las conexiones activas. Estas diferencias son esenciales para construir un dashboard que sirva para tomar decisiones y no sea solamente decorativo. La instrumentación desarrollada deja logs JSON y métricas homogéneas en siete servicios, además de Prometheus y Alloy como componentes de recolección. Sin embargo, configurar herramientas no equivale a completar la observabilidad: la correlación por trazas y la captura de Grafana con datos reales continúan pendientes. El modelo ISO/IEC 25010 y los umbrales académicos aportaron criterios para expresar esa diferencia mediante evidencia. El aprendizaje más importante fue reconocer que documentar una limitación también es una práctica profesional. Un reporte técnico útil distingue con claridad lo implementado, lo ejecutado y lo todavía pendiente, permitiendo que otra persona continúe el trabajo sin depender de afirmaciones imposibles de reproducir. En este cierre también reconozco que las mediciones del laboratorio no equivalen a producción: el uso de una base SQLite y un bloqueo compartido limita la comparación de estrategias. Mantener esa distinción evita atribuir garantías distribuidas a controles locales y permite orientar una siguiente iteración verificable.
+
+\subsection{José Alejandro Lozano Morales}
+La construcción acumulativa del PFC permitió observar cómo una propuesta inicial se transforma mediante decisiones arquitectónicas, implementación, validación y operación. En esta última etapa entendí que la documentación debe evolucionar junto con el código. Un diagrama, una tabla o una conclusión pierde valor cuando describe un estado anterior del repositorio; por esa razón fue necesario actualizar la evidencia de pruebas, pipeline, observabilidad e ISO/IEC 25010 sin ocultar los elementos pendientes. También considero importante la reflexión ética aplicada al proyecto. Los datos de usuarios, credenciales y tokens no pueden tratarse como simples detalles técnicos: deben protegerse, excluirse del repositorio y evitarse en logs y capturas. De igual manera, reportar una disponibilidad o latencia no medida sería una forma de desinformación, incluso si el valor pareciera razonable. La automatización reduce algunos riesgos al ejecutar pruebas y conservar reportes de manera consistente. El documento final debe funcionar como evidencia profesional y no solo como requisito académico; por eso integra los resultados favorables y las limitaciones del experimento local, junto con planes concretos de mejora. Mi conclusión personal es que un producto profesional necesita ingeniería verificable y comunicación transparente. Ambas responsabilidades pertenecen al equipo completo y deben mantenerse durante la defensa, cuando cada integrante tendrá que explicar tanto los logros como los límites reales del sistema. En este cierre también reconozco que las mediciones del laboratorio no equivalen a producción: el uso de una base SQLite y un bloqueo compartido limita la comparación de estrategias. Mantener esa distinción evita atribuir garantías distribuidas a controles locales y permite orientar una siguiente iteración verificable.
+
+
+\seccion{Reflexión ética}
+El Código de Ética y Práctica Profesional de Ingeniería de Software de ACM/IEEE-CS \cite{acmieee} sitúa el interés público, la calidad del producto y el juicio profesional como responsabilidades del desarrollo. En TiendaTech se traducen en decisiones concretas: no presentar pagos simulados como integración bancaria, no convertir un porcentaje de cobertura acotado en garantía de todo el sistema y no ocultar fallos para obtener una evaluación más favorable.
+
+Las reservas y pagos tienen consecuencias potenciales para usuarios. Un reintento sin deduplicación puede descontar existencias de nuevo; una compensación incompleta puede mostrar una compra fallida con efectos persistentes. Aunque el proyecto sea académico, su documentación debe distinguir esos riesgos y explicar por qué no se recomienda usar un ensayo local como certificación productiva. Informar de un resultado negativo es una contribución técnica cuando impide una decisión basada en confianza falsa.
+
+El manejo de credenciales y datos personales exige mínima exposición. Los secretos se suministran por configuración y no deben aparecer en commits, capturas ni logs. Antes de compartir evidencias se revisan tokens, direcciones y otros identificadores. Los datos sintéticos se rotulan como tales para evitar que se interpreten como transacciones de personas o estadísticas de un negocio real. La replicación no es una excusa para conservar innecesariamente información sensible.
+
+La honestidad bibliográfica requiere comprobar que cada identificador corresponde a la obra citada. Reutilizar una referencia sin verificarla puede atribuir a un autor resultados que nunca publicó. Esta revisión corrigió la selección de fuentes académicas y mantuvo los estándares mediante enlaces institucionales, sin inventar DOI para cumplir una casilla formal.
+
+El uso de IA generativa no transfiere la autoría ni la responsabilidad al asistente. Las sugerencias deben contrastarse con código y resultados; una redacción convincente puede ocultar supuestos incorrectos. Tampoco es admisible atribuir experiencias personales, firmas o aceptación a otros integrantes sin su revisión. Las reflexiones individuales se presentan para revisión y no sustituyen ese consentimiento.
+
+Finalmente, la urgencia de entrega no justifica cambiar datos ni cerrar incidencias sin evidencia. Este informe conserva trabajo pendiente, acota estimaciones y no declara un porcentaje de similitud que no se ha medido. La obligación profesional es comunicar lo conocido y lo desconocido con suficiente claridad para que otra persona pueda evaluar el producto y continuar sin repetir errores.
+
+\seccion{Declaraciones}
+\subsection{Autoría y contribución}
+El equipo AGLS está compuesto por los cuatro integrantes de la portada, con roles asignados desde la primera entrega. La tabla \ref{tab:contribuciones} resume responsabilidades y evidencia de trabajo colectivo, sin asignar porcentajes ni afirmar exclusividad sobre archivos desarrollados conjuntamente.
+
+\begin{table}[H]\centering\small
+\caption{Contribuciones por rol, sujetas a revisión final de sus autores.}\label{tab:contribuciones}
+\begin{tabularx}{\textwidth}{lX}
+\toprule Integrante & Contribución documentada\\\midrule
+Jhinson Aucatoma & Arquitectura, ADR, modelo y distribución de datos; organización de evidencias de clúster y decisiones.\\
+Jeremy Gaibor & Desarrollo e integración de servicios, comunicaciones y banco experimental; scripts y resultados incorporados al repositorio.\\
+Andy Sanchez & Pruebas, cobertura, complejidad, CI, seguridad, carga e instrumentación; informes con alcance y límites.\\
+José Lozano & Denominación y trazabilidad, revisión documental y de incidencias, consolidación bibliográfica y cierre acumulativo.\\\bottomrule
+\end{tabularx}
+\end{table}
+La contribución de una persona no excluye ayuda de otra. Los commits y las respuestas de revisión constituyen evidencia de evolución, no una medición automática de esfuerzo individual. Esta memoria no añade firmas digitales ni certifica una aprobación que no haya sido comunicada.
+
+\subsection{Uso de inteligencia artificial generativa}
+Las herramientas declaradas por el documentalista para el equipo son Claude para Jhinson y Andy, y Codex para Jeremy y José. No se incorporan otras herramientas generativas por suposición. Su uso se declara como apoyo a análisis técnico, desarrollo y redacción; no como sustitución del trabajo ni de la responsabilidad humana.
+
+En este cierre, Codex asistió a José en la inspección de evidencias, conciliación de resultados, preparación de tablas y figuras, revisión bibliográfica, edición de LaTeX y comprobación del PDF. Las secciones afectadas abarcan la consolidación de arquitectura, estudio, resultados, calidad, revisión y conclusiones. No se atribuye a los demás integrantes un modelo, versión, prompt o procedimiento de validación específico que no se haya aportado.
+
+Los textos individuales requieren lectura de cada autor antes de su presentación como declaración personal. La generación asistida no demuestra ausencia de errores: las afirmaciones se mantienen vinculadas a archivos, y los resultados faltantes se declaran como no medidos. La comprobación institucional de similitud inferior al 15\,\% no se ejecutó en este cierre y no se certifica.
+
+\subsection{Reproducibilidad documental}
+La fuente principal es \path{docs/entrega4/PFC4.tex} y utiliza la bibliografía compartida \path{docs/entrega3/referenciasPFC.bib}. La compilación se realiza desde \path{docs/entrega4/} mediante pdfLaTeX, Biber y dos pasadas adicionales de pdfLaTeX, según las instrucciones del README principal. Las imágenes se resuelven con rutas relativas y los diagramas C4 se generan desde TikZ.
+
+Para reproducir el PDF desde un clon deben estar incluidos el logo \path{UteqLogo.png}, las imágenes utilizadas de \path{img/} y las dos figuras \path{cierre/boxplot-p95.png} y \path{cierre/spark-t1.png}. Regenerar estas últimas requiere además el script y sus CSV. Su presencia local no implica que estén versionados: antes de publicar, debe comprobarse que esas dependencias estén incorporadas al repositorio.
+
+El hash enlazado identifica las fuentes remotas de las mediciones. El cierre se integra en los nombres originales del documento y la bibliografía; las versiones anteriores permanecen consultables en el historial de Git.
+
+\clearpage
+\printbibliography[heading=bibnumbered,title={Bibliografía}]
 \end{document}

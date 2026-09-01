@@ -64,7 +64,7 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 | JDK | 21 (microservicios backend); el módulo `frontend` compila con Java 17 |
 | Maven | 3.9 (embebido en las imágenes de build Docker) |
 | Android Studio / SDK | Para compilar la app móvil desde fuente (el CI publica el APK como artefacto) |
-| LaTeX | `pdflatex` + `biblatex` (backend `bibtex`), paquetes `tikz`, `tabularx`, `booktabs`, `subcaption` |
+| LaTeX | `pdflatex` + `biblatex` (backend `biber`), paquetes `tikz`, `tabularx`, `booktabs`, `subcaption` |
 
 ---
 
@@ -124,12 +124,12 @@ Compilación (desde `docs/entrega4/`):
 
 ```bash
 pdflatex PFC4.tex
-bibtex PFC4
+biber PFC4
 pdflatex PFC4.tex
 pdflatex PFC4.tex
 ```
 
-**Advertencia:** las rutas de figuras (`\includegraphics{../diagrams/...}`, `\includegraphics{img/...}`) son relativas a `docs/entrega4/`. Si se compila en Overleaf, hay que subir también `docs/diagrams/` y `docs/entrega4/img/` con esa misma estructura relativa.
+**Advertencia:** las imágenes son relativas a `docs/entrega4/`. Para compilar desde un clon u Overleaf se necesitan `UteqLogo.png`, las imágenes utilizadas en `img/`, las dos figuras PNG de `cierre/` y la bibliografía `../entrega3/referenciasPFC.bib`, conservando esa estructura. Los diagramas C4 se generan desde TikZ. La presencia local de estos archivos no implica que estén rastreados por Git.
 
 ---
 
@@ -144,6 +144,8 @@ pdflatex PFC4.tex
 ---
 
 ## 8. Trazabilidad con la rúbrica
+
+> **Cierre acumulativo del Paso 13 (1 de septiembre de 2026):** la versión actualizada es [PFC4.tex](docs/entrega4/PFC4.tex), con [PDF](docs/entrega4/PFC4.pdf) e [instrucciones de compilación con Biber](docs/entrega4/README.md). Las tablas históricas de esta sección no sustituyen el diagnóstico actualizado de esa memoria, que incorpora las evidencias posteriores y sus límites.
 
 Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de cierre del ciclo de las 4 entregas, y la Tabla 4 de `RÚBRICA FINAL PFC.pdf` (dimensiones D1-D9) para los pesos exactos de evaluación. Resumen por dimensión:
 
@@ -208,3 +210,17 @@ mediana, desviación estándar y percentil 95, y genera
 `experiments/figures/latency_boxplot.png` a 300 DPI. Los identificadores deben
 existir en la base desplegada; los CSV incluidos solo contienen la cabecera hasta
 ejecutar el experimento real y no constituyen resultados fabricados.
+
+### Compilar el documento acumulativo
+
+Desde la raíz del repositorio, con TeX Live y Biber:
+
+```powershell
+cd docs/entrega4
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+biber PFC4
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
+```
+
+La bibliografía es `docs/entrega3/referenciasPFC.bib`. Para compilar desde un clon también deben versionarse el logo y las figuras utilizadas; los archivos v2 no son necesarios.
