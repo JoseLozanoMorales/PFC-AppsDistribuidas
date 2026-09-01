@@ -1,0 +1,82 @@
+# Standalone Spark local para Fase 2 del Paso 6 (E4).
+# Solo para medir consumo real de master + N workers (ejecutores reales,
+# JVMs separadas) frente a local[N]. No toca el cluster de AWS.
+# Nombres con prefijo e4-spark para no confundirse con contenedores remotos.
+# Archivo de prueba, no pensado para commit todavia.
+services:
+  e4-spark-master:
+    image: tiendatech-spark:3.5.5
+    container_name: e4-spark-master
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+      --host 0.0.0.0 --port 7077 --webui-port 8080
+    ports:
+      - "127.0.0.1:18080:8080"
+    mem_limit: 768m
+    cpus: 1.0
+    networks:
+      - tiendatech_default
+
+  e4-spark-worker-1:
+    image: tiendatech-spark:3.5.5
+    container_name: e4-spark-worker-1
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://e4-spark-master:7077 --cores 1 --memory 1g
+    depends_on:
+      - e4-spark-master
+    volumes:
+      - ${WORKSPACE_ROOT}:/workspace
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - tiendatech_default
+
+  e4-spark-worker-2:
+    image: tiendatech-spark:3.5.5
+    container_name: e4-spark-worker-2
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://e4-spark-master:7077 --cores 1 --memory 1g
+    depends_on:
+      - e4-spark-master
+    volumes:
+      - ${WORKSPACE_ROOT}:/workspace
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - tiendatech_default
+
+  e4-spark-worker-3:
+    image: tiendatech-spark:3.5.5
+    container_name: e4-spark-worker-3
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://e4-spark-master:7077 --cores 1 --memory 1g
+    depends_on:
+      - e4-spark-master
+    volumes:
+      - ${WORKSPACE_ROOT}:/workspace
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - tiendatech_default
+
+  e4-spark-worker-4:
+    image: tiendatech-spark:3.5.5
+    container_name: e4-spark-worker-4
+    command: >
+      /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker
+      spark://e4-spark-master:7077 --cores 1 --memory 1g
+    depends_on:
+      - e4-spark-master
+    volumes:
+      - ${WORKSPACE_ROOT}:/workspace
+    mem_limit: 1g
+    cpus: 1.0
+    networks:
+      - tiendatech_default
+
+networks:
+  tiendatech_default:
+    external: true
