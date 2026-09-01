@@ -26,7 +26,7 @@ public class FacturaController {
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> generarDesdeOrden(@Valid @RequestBody GenerarFacturaRequest request) {
-        Integer facturaId = facturaService.generarDesdeOrden(request.getOrdenId());
+        Integer facturaId = facturaService.generar(request.toDomain());
         Factura factura = facturaService.obtenerPorId(facturaId);
         return ResponseEntity.created(URI.create("/api/facturas/" + facturaId))
                 .body(Map.of("facturaId", facturaId, "numero", factura.getNumero(), "total", factura.getTotal()));

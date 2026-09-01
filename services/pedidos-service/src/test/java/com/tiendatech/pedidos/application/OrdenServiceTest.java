@@ -5,6 +5,7 @@ import com.tiendatech.pedidos.domain.FacturaPort;
 import com.tiendatech.pedidos.domain.IdempotenciaRepository;
 import com.tiendatech.pedidos.domain.Orden;
 import com.tiendatech.pedidos.domain.OrdenRepository;
+import com.tiendatech.pedidos.domain.PageResponse;
 import com.tiendatech.pedidos.domain.SolicitudIdempotente;
 import com.tiendatech.pedidos.domain.CrdbRetryPort;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HexFormat;
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -66,6 +68,8 @@ class OrdenServiceTest {
     private static final Integer METODOPAGO_ID = 2;
 
     private OrdenService servicioConIdempotencia(boolean habilitada) {
+        org.mockito.Mockito.lenient().when(ordenRepository.obtenerDetalle(any(), any(), any()))
+                .thenReturn(new PageResponse<>(List.of(), 0, 100, 0, 0));
         Optional<IdempotenciaRepository> repo = habilitada ? Optional.of(idempotenciaRepository) : Optional.empty();
         return new OrdenService(ordenRepository, facturaClient, crdbRetryExecutor, repo, businessMetrics);
     }
@@ -96,14 +100,14 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
         Orden creada = ordenDe(55, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenReturn(900);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(900);
 
         Orden resultado = servicioConIdempotencia(false)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null);
 
         assertThat(resultado).isSameAs(creada);
         verify(ordenRepository).crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null);
-        verify(facturaClient).generarFactura(55);
+        verify(facturaClient).generarFactura(eq(creada), any());
         verify(businessMetrics).registrarCheckoutCompletado();
         verify(businessMetrics, never()).registrarCheckoutFallido(any());
     }
@@ -117,7 +121,7 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
         Orden creada = ordenDe(55, new BigDecimal("246.75"), new BigDecimal("283.76"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenReturn(900);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(900);
 
         Orden resultado = servicioConIdempotencia(false)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null);
@@ -144,7 +148,7 @@ class OrdenServiceTest {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("vacío");
 
-        verify(facturaClient, never()).generarFactura(any());
+        verify(facturaClient, never()).generarFactura(any(), any());
         verify(businessMetrics).registrarCheckoutFallido("carrito_vacio");
         verify(businessMetrics, never()).registrarCheckoutCompletado();
     }
@@ -162,7 +166,7 @@ class OrdenServiceTest {
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        verify(facturaClient, never()).generarFactura(any());
+        verify(facturaClient, never()).generarFactura(any(), any());
         verify(businessMetrics).registrarCheckoutFallido("validacion");
     }
 
@@ -185,7 +189,7 @@ class OrdenServiceTest {
 
         assertThat(resultado).isSameAs(existente);
         verify(ordenRepository, never()).crear(any(), any(), any(), any(), any());
-        verify(facturaClient, never()).generarFactura(any());
+        verify(facturaClient, never()).generarFactura(any(), any());
         // Replay idempotente: no es un checkout NUEVO, no debe sumar ni a
         // completado ni a fallido -- ver nota de diseño en el mensaje al usuario.
         verify(businessMetrics, never()).registrarCheckoutCompletado();
@@ -207,7 +211,7 @@ class OrdenServiceTest {
                 .isEqualTo(HttpStatus.CONFLICT);
 
         verify(ordenRepository, never()).crear(any(), any(), any(), any(), any());
-        verify(facturaClient, never()).generarFactura(any());
+        verify(facturaClient, never()).generarFactura(any(), any());
         verify(businessMetrics).registrarCheckoutFallido("idempotencia_conflicto");
     }
 
@@ -220,7 +224,7 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
         Orden creada = ordenDe(55, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenReturn(900);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(900);
 
         Orden resultado = servicioConIdempotencia(false)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, "esta-clave-se-debe-ignorar");
@@ -245,14 +249,14 @@ class OrdenServiceTest {
         when(idempotenciaRepository.buscarPorUsuarioYClave(USUARIO_ID, clave)).thenReturn(Optional.empty());
         Orden creada = ordenDe(56, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, clave, hashEsperado)).thenReturn(creada);
-        when(facturaClient.generarFactura(56)).thenReturn(901);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(901);
 
         Orden resultado = servicioConIdempotencia(true)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, clave);
 
         assertThat(resultado).isSameAs(creada);
         verify(ordenRepository).crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, clave, hashEsperado);
-        verify(facturaClient).generarFactura(56);
+        verify(facturaClient).generarFactura(eq(creada), any());
         verify(businessMetrics).registrarCheckoutCompletado();
     }
 
@@ -261,7 +265,7 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
         Orden creada = ordenDe(55, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenReturn(900);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(900);
 
         servicioConIdempotencia(true)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, "   ");
@@ -276,7 +280,7 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(null);
         Orden creada = ordenDe(55, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenThrow(new RuntimeException("ventas-service no responde"));
+        when(facturaClient.generarFactura(eq(creada), any())).thenThrow(new RuntimeException("ventas-service no responde"));
 
         assertThatThrownBy(() -> servicioConIdempotencia(false)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null))
@@ -303,7 +307,7 @@ class OrdenServiceTest {
         when(crdbRetryExecutor.getIfAvailable()).thenReturn(retryPort);
         Orden creada = ordenDe(55, new BigDecimal("100.00"), new BigDecimal("115.00"));
         when(ordenRepository.crear(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null, null)).thenReturn(creada);
-        when(facturaClient.generarFactura(55)).thenReturn(900);
+        when(facturaClient.generarFactura(eq(creada), any())).thenReturn(900);
 
         Orden resultado = servicioConIdempotencia(false)
                 .generarOrdenDesdeCarrito(USUARIO_ID, DIRECCION_ID, METODOPAGO_ID, null);

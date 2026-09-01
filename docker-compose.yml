@@ -6,9 +6,11 @@ services:
     image: tiendatech/pedidos:local
     container_name: tiendatech-pedidos
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
       SERVER_PORT: 8083
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       CRDB_RETRY_MAX_ATTEMPTS: 3
@@ -19,6 +21,8 @@ services:
       RESERVATION_TCP_HOST: tiendatech-inventario
       RESERVATION_TCP_PORT: 9091
     depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
       tiendatech-ventas:
         condition: service_started
       tiendatech-productos:
@@ -28,10 +32,6 @@ services:
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8083/health"]
       interval: 10s
@@ -45,17 +45,19 @@ services:
     image: tiendatech/productos:local
     container_name: tiendatech-productos
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
+      VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       SERVER_PORT: 8081
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
+    depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   # tiendatech-armado-ia: sin datasource propio (servicio de calculo puro sobre
   # el catalogo de tiendatech-productos via HTTP, no persiste nada). Las
@@ -68,6 +70,7 @@ services:
     image: tiendatech/armado-ia:local
     container_name: tiendatech-armado-ia
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
       SERVER_PORT: 8087
       PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
@@ -94,22 +97,23 @@ services:
     image: tiendatech/inventario:local
     container_name: tiendatech-inventario
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
       SERVER_PORT: 8082
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       RESERVATION_TCP_PORT: 9091
       RESERVATION_GRPC_PORT: 9092
+    depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
     ports:
       - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9091:9091"
       - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9092:9092"
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   tiendatech-ventas:
     build:
@@ -117,21 +121,21 @@ services:
     image: tiendatech/ventas:local
     container_name: tiendatech-ventas
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
       SERVER_PORT: 8086
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
       tiendatech-inventario:
         condition: service_started
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8086/health"]
       interval: 10s
@@ -145,21 +149,21 @@ services:
     image: tiendatech/ordenes-proveedores:local
     container_name: tiendatech-ordenes-proveedores
     environment:
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
       SERVER_PORT: 8084
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
     depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
       tiendatech-inventario:
         condition: service_started
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8084/health"]
       interval: 10s
@@ -174,7 +178,7 @@ services:
     container_name: tiendatech-usuarios
     environment:
       SERVER_PORT: 8085
-      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:26257,host.docker.internal:26258,host.docker.internal:26259/tiendatech?sslmode=verify-ca&sslrootcert=/app/crdb-certs/ca.crt&sslcert=/app/crdb-certs/client.jhinson.crt&sslkey=/app/crdb-certs/client.jhinson.key.pk8&targetServerType=any&loadBalanceHosts=true}"
+      CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
       CRDB_DATASOURCE_PASSWORD: ${CRDB_DATASOURCE_PASSWORD:-}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
@@ -190,6 +194,9 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT: ${MAIL_WRITE_TIMEOUT_MS:-5000}
       COOKIE_SECURE: "false"
       OTP_MAIL_FALLBACK_ENABLED: ${OTP_MAIL_FALLBACK_ENABLED:-true}
+    depends_on:
+      tiendatech-crdb-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/health"]
       interval: 10s
@@ -199,10 +206,6 @@ services:
     networks:
       - default
       - tiendatech-net
-    volumes:
-      - ./Apps/web/infra/crdb-certs/ca.crt:/app/crdb-certs/ca.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.crt:/app/crdb-certs/client.jhinson.crt:ro
-      - ./Apps/web/infra/crdb-certs/client.jhinson.key.pk8:/app/crdb-certs/client.jhinson.key.pk8:ro
 
   tiendatech-gateway:
     build:
@@ -213,6 +216,9 @@ services:
       - "0.0.0.0:8180:8080"
     environment:
       SERVER_PORT: 8080
+      GATEWAY_RATE_LIMIT_REQUESTS: ${GATEWAY_RATE_LIMIT_REQUESTS:-300}
+      GATEWAY_RATE_LIMIT_WINDOW_SECONDS: ${GATEWAY_RATE_LIMIT_WINDOW_SECONDS:-60}
+      GATEWAY_RATE_LIMIT_MAX_CLIENTS: ${GATEWAY_RATE_LIMIT_MAX_CLIENTS:-10000}
       USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
       PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       INVENTARIO_SERVICE_URL: http://tiendatech-inventario:8082
@@ -239,6 +245,52 @@ services:
     networks:
       - default
       - tiendatech-net
+
+  tiendatech-crdb-1:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-1
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-1:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    ports:
+      - "127.0.0.1:26257:26257"
+      - "127.0.0.1:8088:8080"
+    volumes:
+      - crdb-1-data:/cockroach/cockroach-data
+    networks: [tiendatech-net]
+
+  tiendatech-crdb-2:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-2
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-2:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    volumes:
+      - crdb-2-data:/cockroach/cockroach-data
+    networks: [tiendatech-net]
+
+  tiendatech-crdb-3:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-3
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-3:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    volumes:
+      - crdb-3-data:/cockroach/cockroach-data
+    networks: [tiendatech-net]
+
+  tiendatech-crdb-init:
+    image: cockroachdb/cockroach:v23.2.4
+    container_name: tiendatech-crdb-init
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        sleep 5;
+        cockroach init --insecure --host=tiendatech-crdb-1:26257 || true;
+        until cockroach sql --insecure --host=tiendatech-crdb-1:26257 --execute='SELECT 1'; do sleep 2; done;
+        cockroach sql --insecure --host=tiendatech-crdb-1:26257 --file=/schema.sql
+    volumes:
+      - ./docs/db/schema.sql:/schema.sql:ro
+    depends_on:
+      - tiendatech-crdb-1
+      - tiendatech-crdb-2
+      - tiendatech-crdb-3
+    networks: [tiendatech-net]
+    restart: "no"
 
   tiendatech-prometheus:
     image: prom/prometheus:v3.5.0
@@ -284,3 +336,6 @@ networks:
 
 volumes:
   prometheus-data:
+  crdb-1-data:
+  crdb-2-data:
+  crdb-3-data:

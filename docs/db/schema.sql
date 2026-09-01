@@ -42,8 +42,6 @@ CREATE TABLE IF NOT EXISTS pedidos.orden (
     estado STRING NOT NULL DEFAULT 'CREADA',
     creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT pk_orden PRIMARY KEY (fecha, orden_id),
-    CONSTRAINT fk_orden_usuario
-        FOREIGN KEY (usuario_id) REFERENCES usuarios.usuario (usuario_id),
     CONSTRAINT ck_orden_total_no_negativo CHECK (total >= 0),
     UNIQUE INDEX uq_orden_id (orden_id),
     INDEX idx_orden_usuario_fecha (usuario_id, fecha DESC)
@@ -65,8 +63,6 @@ CREATE TABLE IF NOT EXISTS pedidos.carrito_de_compra (
     habilitado BOOL NOT NULL DEFAULT true,
     creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT pk_carrito PRIMARY KEY (carrito_id),
-    CONSTRAINT fk_carrito_usuario
-        FOREIGN KEY (usuario_id) REFERENCES usuarios.usuario (usuario_id),
     INDEX idx_carrito_usuario_habilitado (usuario_id, habilitado)
 );
 
@@ -253,13 +249,17 @@ CREATE TABLE IF NOT EXISTS inventario.subtipo_movimiento (
 
 CREATE TABLE IF NOT EXISTS inventario.inventario_producto (
     producto_id INT8 NOT NULL,
+    nombre STRING NOT NULL,
     stock INT4 NOT NULL DEFAULT 0,
     stock_minimo INT4 NOT NULL DEFAULT 0,
+    costo DECIMAL(18,2) NOT NULL DEFAULT 0,
+    precio_referencia DECIMAL(18,2) NOT NULL DEFAULT 0,
+    habilitado BOOL NOT NULL DEFAULT true,
     valor_inventario DECIMAL(18,2) NOT NULL DEFAULT 0,
     actualizado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT pk_inventario_producto PRIMARY KEY (producto_id),
-    CONSTRAINT fk_inventario_producto FOREIGN KEY (producto_id)
-        REFERENCES productos.producto (producto_id)
+    CONSTRAINT ck_inventario_stock CHECK (stock >= 0),
+    CONSTRAINT ck_inventario_costo CHECK (costo >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS inventario.movimiento_inventario (
@@ -273,8 +273,6 @@ CREATE TABLE IF NOT EXISTS inventario.movimiento_inventario (
     producto_id INT8 NOT NULL,
     subtipo_id INT8 NOT NULL,
     CONSTRAINT pk_movimiento_inventario PRIMARY KEY (movimiento_id),
-    CONSTRAINT fk_movimiento_producto FOREIGN KEY (producto_id)
-        REFERENCES productos.producto (producto_id),
     CONSTRAINT fk_movimiento_subtipo FOREIGN KEY (subtipo_id)
         REFERENCES inventario.subtipo_movimiento (subtipo_id),
     INDEX idx_movimiento_producto_fecha (producto_id, fecha DESC)
@@ -302,8 +300,6 @@ CREATE TABLE IF NOT EXISTS inventario.kardex_inventario (
     saldo_total DECIMAL(18,2) NOT NULL,
     producto_id INT8 NOT NULL,
     CONSTRAINT pk_kardex_inventario PRIMARY KEY (kardex_id),
-    CONSTRAINT fk_kardex_producto FOREIGN KEY (producto_id)
-        REFERENCES productos.producto (producto_id),
     INDEX idx_kardex_producto_fecha (producto_id, fecha DESC)
 );
 
@@ -335,8 +331,6 @@ CREATE TABLE IF NOT EXISTS ordenes_proveedores.orden_compra (
     CONSTRAINT pk_orden_compra PRIMARY KEY (orden_compra_id),
     CONSTRAINT fk_orden_compra_proveedor FOREIGN KEY (proveedor_id)
         REFERENCES ordenes_proveedores.proveedor (proveedor_id),
-    CONSTRAINT fk_orden_compra_usuario FOREIGN KEY (usuario_id)
-        REFERENCES usuarios.usuario (usuario_id),
     CONSTRAINT ck_orden_compra_estado CHECK (estado IN
         ('PENDIENTE', 'ENVIADA', 'RECIBIDA_PARCIAL', 'RECIBIDA', 'CANCELADA')),
     INDEX idx_orden_compra_estado_fecha (estado, fecha_emision DESC)
@@ -354,8 +348,6 @@ CREATE TABLE IF NOT EXISTS ordenes_proveedores.detalle_orden_compra (
     CONSTRAINT uq_detalle_orden_producto UNIQUE (orden_compra_id, producto_id),
     CONSTRAINT fk_detalle_orden FOREIGN KEY (orden_compra_id)
         REFERENCES ordenes_proveedores.orden_compra (orden_compra_id) ON DELETE CASCADE,
-    CONSTRAINT fk_detalle_producto FOREIGN KEY (producto_id)
-        REFERENCES productos.producto (producto_id),
     CONSTRAINT ck_detalle_cantidad CHECK (cantidad_pedida > 0),
     CONSTRAINT ck_detalle_recibida CHECK
         (cantidad_recibida >= 0 AND cantidad_recibida <= cantidad_pedida),
@@ -380,9 +372,6 @@ CREATE TABLE IF NOT EXISTS pedidos.metodopago (
     CONSTRAINT pk_metodopago PRIMARY KEY (metodopago_id),
     CONSTRAINT fk_metodopago_tipo
         FOREIGN KEY (tipo_id) REFERENCES pedidos.tipo_metodopago (tipo_id),
-    CONSTRAINT fk_metodopago_usuario
-        FOREIGN KEY (usuario_id) REFERENCES usuarios.usuario (usuario_id)
-        ON DELETE CASCADE,
     INDEX idx_metodopago_usuario (usuario_id, habilitado)
 );
 
@@ -421,8 +410,6 @@ CREATE TABLE IF NOT EXISTS pedidos.solicitud_idempotente (
      orden_id      INT8        NOT NULL,
      creado_en     TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT pk_solicitud_idempotente PRIMARY KEY (usuario_id, clave),
-    CONSTRAINT fk_solicitud_idempotente_usuario
-    FOREIGN KEY (usuario_id) REFERENCES usuarios.usuario (usuario_id),
     CONSTRAINT fk_solicitud_idempotente_orden
     FOREIGN KEY (orden_id) REFERENCES pedidos.orden (orden_id)
 );
@@ -443,10 +430,7 @@ CREATE TABLE IF NOT EXISTS ventas.factura_encabezado (
     numero STRING NOT NULL,
     CONSTRAINT pk_factura PRIMARY KEY (factura_id),
     CONSTRAINT uq_factura_orden UNIQUE (orden_id),
-    CONSTRAINT uq_factura_numero UNIQUE (numero),
-    CONSTRAINT fk_factura_orden
-        FOREIGN KEY (fecha_orden, orden_id)
-        REFERENCES pedidos.orden (fecha, orden_id)
+    CONSTRAINT uq_factura_numero UNIQUE (numero)
 );
 
 CREATE TABLE IF NOT EXISTS ventas.factura_cuerpo (

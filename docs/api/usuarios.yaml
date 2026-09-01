@@ -1,0 +1,192 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TiendaTech usuarios",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/login": {
+      "post": {
+        "summary": "Crear o procesar /api/login",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/usuarios": {
+      "get": {
+        "summary": "Consultar /api/usuarios",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/usuarios/{id}": {
+      "get": {
+        "summary": "Consultar /api/usuarios/{id}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Crear o procesar /auth/refresh",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/provincias": {
+      "get": {
+        "summary": "Consultar /api/provincias",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/ciudades": {
+      "get": {
+        "summary": "Consultar /api/ciudades",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "data",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "data": {
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
+

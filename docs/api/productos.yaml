@@ -1,0 +1,200 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TiendaTech productos",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/productos": {
+      "post": {
+        "summary": "Crear o procesar /api/productos",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/productos/{id}": {
+      "get": {
+        "summary": "Consultar /api/productos/{id}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/productos/mas-vendidos": {
+      "get": {
+        "summary": "Consultar /api/productos/mas-vendidos",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/categorias": {
+      "get": {
+        "summary": "Consultar /api/categorias",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/marcas": {
+      "get": {
+        "summary": "Consultar /api/marcas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    },
+    "/api/gamas": {
+      "get": {
+        "summary": "Consultar /api/gamas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Respuesta uniforme",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "JWT ausente, inválido o expirado"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "required": [
+          "status",
+          "data",
+          "message",
+          "timestamp"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "data": {
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
+

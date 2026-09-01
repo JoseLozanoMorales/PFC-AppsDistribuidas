@@ -61,17 +61,20 @@ public class JdbcProductoRepository implements ProductoRepository {
                 safeSize, safePage * safeSize);
     }
 
-    public List<Map<String, Object>> masVendidos(int limite) {
-        return jdbc.queryForList("""
-                SELECT p.producto_id, p.nombre, p.preciounitario AS precio,
-                       sum(fc.cantidad) AS unidades
-                FROM ventas.factura_cuerpo fc
-                JOIN productos.producto p ON p.producto_id = fc.producto_id
-                WHERE p.habilitado
-                GROUP BY p.producto_id, p.nombre, p.preciounitario
-                ORDER BY unidades DESC, p.producto_id
-                LIMIT ?
-                """, Math.max(limite, 1));
+    public List<Map<String, Object>> resumirVentas(List<Map<String, Object>> ventas) {
+        return ventas.stream().map(venta -> {
+            long id = ((Number) venta.get("productoId")).longValue();
+            List<Map<String, Object>> producto = jdbc.queryForList("""
+                    SELECT producto_id AS "productoId", nombre,
+                           preciounitario AS precio
+                    FROM productos.producto
+                    WHERE producto_id = ? AND habilitado
+                    """, id);
+            if (producto.isEmpty()) return null;
+            Map<String, Object> resultado = new LinkedHashMap<>(producto.getFirst());
+            resultado.put("unidades", venta.get("unidades"));
+            return resultado;
+        }).filter(java.util.Objects::nonNull).toList();
     }
 
     public List<Map<String, Object>> recientesMenu(int limit) {

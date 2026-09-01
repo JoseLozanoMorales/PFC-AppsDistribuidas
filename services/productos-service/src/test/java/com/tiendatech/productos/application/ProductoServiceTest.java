@@ -8,11 +8,14 @@ import static org.mockito.Mockito.*;
 
 class ProductoServiceTest {
     private final ProductoRepository repository = mock(ProductoRepository.class);
-    private final ProductoService service = new ProductoService(repository);
+    private final VentasPort ventas = mock(VentasPort.class);
+    private final ProductoService service = new ProductoService(repository, ventas);
 
     @Test void delegaLecturasDelCatalogo() {
         when(repository.listar(0, 20)).thenReturn(List.of());
-        when(repository.masVendidos(5)).thenReturn(List.of(Map.of("id", 1)));
+        var ranking = List.<Map<String, Object>>of(Map.of("productoId", 1, "unidades", 2));
+        when(ventas.masVendidos(5)).thenReturn(ranking);
+        when(repository.resumirVentas(ranking)).thenReturn(List.of(Map.of("id", 1)));
         when(repository.recientesMenu(4)).thenReturn(List.of(Map.of("id", 2)));
         when(repository.categorias()).thenReturn(List.of(Map.of("nombre", "CPU")));
         when(repository.marcas()).thenReturn(List.of()); when(repository.gamas()).thenReturn(List.of());

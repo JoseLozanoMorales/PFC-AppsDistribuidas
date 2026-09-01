@@ -4,6 +4,8 @@ import com.tiendatech.ventas.domain.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -13,9 +15,11 @@ class FacturaServiceTest {
 
     @Test void generaObtieneYListaFacturas() {
         var factura = new Factura(); factura.setFacturaId(9);
-        when(store.generarDesdeOrden(4)).thenReturn(9); when(store.obtenerPorId(9)).thenReturn(factura);
+        var draft = new FacturaDraft(4, LocalDate.of(2026, 8, 31), 8,
+                new BigDecimal("10.00"), new BigDecimal("11.50"), List.of());
+        when(store.generar(draft)).thenReturn(9); when(store.obtenerPorId(9)).thenReturn(factura);
         when(store.listar(2)).thenReturn(List.of(factura));
-        assertEquals(9, service.generarDesdeOrden(4)); assertSame(factura, service.obtenerPorId(9));
+        assertEquals(9, service.generar(draft)); assertSame(factura, service.obtenerPorId(9));
         assertEquals(List.of(factura), service.listar(2));
     }
 

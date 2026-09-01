@@ -4,6 +4,7 @@ import time
 from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI
+from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Gauge, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -15,8 +16,8 @@ from app.explicacion.bedrock_client import BedrockExplicacionClient
 from app.explicacion.client import ExplicacionClient
 from app.explicacion.fallback_client import DeterministicExplicacionClient
 from app.explicacion.service import ExplicacionService
-from app.schemas import AnalizarRequest, AnalizarResponse
-from app.security import IdentidadOpcional, identidad_opcional
+from app.schemas import AnalizarRequest
+from app.security import IdentidadOpcional, identidad_requerida
 
 
 class JsonFormatter(logging.Formatter):
@@ -55,6 +56,27 @@ request_duration_seconds = Histogram(
 
 app = FastAPI(title="tiendatech-armado-ia")
 registrar_exception_handlers(app)
+
+
+@app.middleware("http")
+async def respuesta_uniforme(request, call_next):
+    response = await call_next(request)
+    if request.url.path in {"/metrics", "/actuator/health", "/openapi.json", "/docs"}:
+        return response
+    content_type = response.headers.get("content-type", "")
+    if "application/json" not in content_type:
+        return response
+    raw = b"".join([chunk async for chunk in response.body_iterator])
+    try:
+        data = json.loads(raw or b"null")
+    except json.JSONDecodeError:
+        data = None
+    message = data.get("message", data.get("detail", "OK")) if isinstance(data, dict) else "OK"
+    return JSONResponse(
+        status_code=response.status_code,
+        content={"status": response.status_code, "data": data, "message": message,
+                 "timestamp": datetime.now(UTC).isoformat()},
+    )
 
 # D6.1: expone /metrics con http_requests_total y http_request_duration_seconds
 # (nombres literales, sin traducir -- a diferencia del lado Java con Micrometer,
@@ -124,6 +146,6 @@ def circuitbreakers():
 # Identidad opcional (ver security.py): el gateway protege /api/** asi que en
 # la practica siempre llega, pero este endpoint no persiste nada por usuario
 # y no bloquea si faltara. Si viene, se usa en el log.
-@app.post("/api/armado/analizar", response_model=AnalizarResponse, response_model_by_alias=True)
-def analizar(request: AnalizarRequest, identidad: IdentidadOpcional = Depends(identidad_opcional)):
+@app.post("/api/armado/analizar")
+def analizar(request: AnalizarRequest, identidad: IdentidadOpcional = Depends(identidad_requerida)):
     return armado_service.analizar(request, identidad, explicacion_service)

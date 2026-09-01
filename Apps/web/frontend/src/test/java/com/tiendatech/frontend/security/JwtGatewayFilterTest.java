@@ -83,6 +83,32 @@ class JwtGatewayFilterTest {
         assertEquals(200, response.getStatus());
     }
 
+    @Test
+    void rechazaTokenCaducado() throws Exception {
+        Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        String expired = Jwts.builder().setSubject("42")
+                .setExpiration(new Date(System.currentTimeMillis() - 60_000))
+                .signWith(key, SignatureAlgorithm.HS256).compact();
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/ordenes");
+        request.addHeader("Authorization", "Bearer " + expired);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter().doFilter(request, response, (req, res) -> {
+            throw new AssertionError("No debe reenviar un token caducado");
+        });
+        assertEquals(401, response.getStatus());
+    }
+
+    @Test
+    void rechazaTokenMalformado() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/ordenes");
+        request.addHeader("Authorization", "Bearer invalid");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter().doFilter(request, response, (req, res) -> {
+            throw new AssertionError("No debe reenviar un token invalido");
+        });
+        assertEquals(401, response.getStatus());
+    }
+
     private String token() {
         Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()

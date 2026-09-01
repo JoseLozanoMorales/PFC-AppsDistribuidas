@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtGatewayFilter extends OncePerRequestFilter {
 
     private static final String BEARER = "Bearer ";
@@ -142,7 +142,8 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write("{\"success\":false,\"message\":\"" + message + "\"}");
+        response.getWriter().write("{\"status\":401,\"data\":null,\"message\":\"" + message
+                + "\",\"timestamp\":\"" + java.time.Instant.now() + "\"}");
     }
 
     private static final class TrustedUserHeaderRequest extends HttpServletRequestWrapper {
