@@ -1,0 +1,23 @@
+{
+  "matriz": "2 estrategias x 4 concurrencias x 3 modos de pasarela x 5 repeticiones",
+  "coords": [
+    "2pc",
+    "saga"
+  ],
+  "concurrencias": [
+    50,
+    100,
+    200,
+    400
+  ],
+  "fallos": [
+    "none",
+    "omission",
+    "timing"
+  ],
+  "repeticiones": 5,
+  "fault_probability": 0.1,
+  "delay_seconds": 0.05,
+  "warmup_seconds": 0.0,
+  "seed": 2026
+}

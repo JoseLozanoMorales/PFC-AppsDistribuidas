@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="550.0" y="32" text-anchor="middle" font-family="Arial" font-size="22">Boxplot ordenes_confirmadas_por_segundo</text>
+<line x1="70" y1="450" x2="1030" y2="450" stroke="#222"/>
+<line x1="70" y1="70" x2="70" y2="450" stroke="#222"/>
+<line x1="150.0" y1="173.71292393538323" x2="150.0" y2="70.0" stroke="#555"/>
+<rect x="120.0" y="80.14660211074465" width="60" height="65.31652114798771" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="120.0" y1="107.75358361384247" x2="180.0" y2="107.75358361384247" stroke="#c43" stroke-width="3"/>
+<text x="150.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc none</text>
+<line x1="310.0" y1="170.1870945587914" x2="310.0" y2="94.3375498941553" stroke="#555"/>
+<rect x="280.0" y="104.07874187966343" width="60" height="25.7444204162652" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="280.0" y1="114.56862665362308" x2="340.0" y2="114.56862665362308" stroke="#c43" stroke-width="3"/>
+<text x="310.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc omission</text>
+<line x1="470.0" y1="356.65551413504346" x2="470.0" y2="168.0237451245569" stroke="#555"/>
+<rect x="440.0" y="257.09152820506864" width="60" height="39.13217506937792" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="440.0" y1="278.1308289991633" x2="500.0" y2="278.1308289991633" stroke="#c43" stroke-width="3"/>
+<text x="470.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc timing</text>
+<line x1="630.0" y1="444.50524629185776" x2="630.0" y2="397.5006759530495" stroke="#555"/>
+<rect x="600.0" y="405.7932038938296" width="60" height="17.255229545791792" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="600.0" y1="412.1886400674788" x2="660.0" y2="412.1886400674788" stroke="#c43" stroke-width="3"/>
+<text x="630.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga none</text>
+<line x1="790.0" y1="443.6332610132349" x2="790.0" y2="409.82899282269454" stroke="#555"/>
+<rect x="760.0" y="417.63536378246926" width="60" height="23.992955662403688" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="760.0" y1="430.7830795198854" x2="820.0" y2="430.7830795198854" stroke="#c43" stroke-width="3"/>
+<text x="790.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga omission</text>
+<line x1="950.0" y1="450.0" x2="950.0" y2="424.6005591255504" stroke="#555"/>
+<rect x="920.0" y="431.01205970023" width="60" height="16.059361713289604" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="920.0" y1="444.0680640708204" x2="980.0" y2="444.0680640708204" stroke="#c43" stroke-width="3"/>
+<text x="950.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga timing</text>
+<text x="18" y="260.0" transform="rotate(-90 18 260.0)" text-anchor="middle" font-family="Arial" font-size="14">ordenes_confirmadas_por_segundo</text>
+</svg>

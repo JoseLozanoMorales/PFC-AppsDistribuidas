@@ -12,6 +12,7 @@ import sqlite3
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -75,7 +76,7 @@ class Lab:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         if self.db_path.exists():
             self.db_path.unlink()
-        with self.connect() as db:
+        with closing(self.connect()) as db:
             db.executescript(SCHEMA)
             db.execute("INSERT INTO inventory VALUES (1, ?, ?)", (initial_stock, initial_stock))
 
@@ -102,7 +103,7 @@ class Lab:
 
     def two_phase_commit(self, tx: str, case: Case, started: float) -> None:
         # BEGIN IMMEDIATE representa el bloqueo conservado desde PREPARE hasta COMMIT/ROLLBACK.
-        with self.db_lock, self.connect() as db:
+        with self.db_lock, closing(self.connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
                 stock = db.execute("SELECT stock FROM inventory WHERE product_id=?", (case.product_id,)).fetchone()
@@ -127,7 +128,7 @@ class Lab:
 
     def saga(self, tx: str, case: Case, started: float) -> None:
         # Cada paso confirma inmediatamente; los ya confirmados se deshacen en orden inverso.
-        with self.db_lock, self.connect() as db:
+        with self.db_lock, closing(self.connect()) as db:
             stock = db.execute("SELECT stock FROM inventory WHERE product_id=?", (case.product_id,)).fetchone()
             if stock is None or stock[0] < case.quantity:
                 raise ValueError("stock insuficiente")
@@ -159,7 +160,7 @@ class Lab:
 
 def oracle(db_path: Path) -> dict:
     checks = []
-    with sqlite3.connect(db_path) as db:
+    with closing(sqlite3.connect(db_path)) as db:
         queries = [
             ("pago_exacto", """SELECT count(*) FROM orders o LEFT JOIN payments p USING(tx_id)
                WHERE o.status='CONFIRMED' AND (p.status!='CAPTURED' OR p.amount!=o.amount OR p.tx_id IS NULL)"""),

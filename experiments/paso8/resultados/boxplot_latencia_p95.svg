@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+<rect width="100%" height="100%" fill="white"/>
+<text x="550.0" y="32" text-anchor="middle" font-family="Arial" font-size="22">Boxplot latencia_pago_p95_ms</text>
+<line x1="70" y1="450" x2="1030" y2="450" stroke="#222"/>
+<line x1="70" y1="70" x2="70" y2="450" stroke="#222"/>
+<line x1="150.0" y1="449.5374355445153" x2="150.0" y2="403.5834079025979" stroke="#555"/>
+<rect x="120.0" y="423.92510178815473" width="60" height="22.601129299409536" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="120.0" y1="437.12361366942565" x2="180.0" y2="437.12361366942565" stroke="#c43" stroke-width="3"/>
+<text x="150.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc none</text>
+<line x1="310.0" y1="450.0" x2="310.0" y2="410.57339404113975" stroke="#555"/>
+<rect x="280.0" y="427.2464050076254" width="60" height="18.870715186500036" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="280.0" y1="439.1946364227328" x2="340.0" y2="439.1946364227328" stroke="#c43" stroke-width="3"/>
+<text x="310.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc omission</text>
+<line x1="470.0" y1="447.28708516504713" x2="470.0" y2="374.52042503150534" stroke="#555"/>
+<rect x="440.0" y="408.6424486166773" width="60" height="33.14111017597759" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="440.0" y1="429.1233141359972" x2="500.0" y2="429.1233141359972" stroke="#c43" stroke-width="3"/>
+<text x="470.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">2pc timing</text>
+<line x1="630.0" y1="428.3007534377983" x2="630.0" y2="70.0" stroke="#555"/>
+<rect x="600.0" y="280.1661119053341" width="60" height="131.1503803771535" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="600.0" y1="377.7303909439656" x2="660.0" y2="377.7303909439656" stroke="#c43" stroke-width="3"/>
+<text x="630.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga none</text>
+<line x1="790.0" y1="428.5264329936404" x2="790.0" y2="124.66962268395548" stroke="#555"/>
+<rect x="760.0" y="248.57979232792383" width="60" height="159.59276553235657" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="760.0" y1="356.47843137602683" x2="820.0" y2="356.47843137602683" stroke="#c43" stroke-width="3"/>
+<text x="790.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga omission</text>
+<line x1="950.0" y1="423.5978088608684" x2="950.0" y2="80.09507396472878" stroke="#555"/>
+<rect x="920.0" y="228.00691450711417" width="60" height="169.73064938669916" fill="#8fb6d9" stroke="#1f4e79"/>
+<line x1="920.0" y1="323.3875486621727" x2="980.0" y2="323.3875486621727" stroke="#c43" stroke-width="3"/>
+<text x="950.0" y="492" text-anchor="middle" font-family="Arial" font-size="12">saga timing</text>
+<text x="18" y="260.0" transform="rotate(-90 18 260.0)" text-anchor="middle" font-family="Arial" font-size="14">latencia_pago_p95_ms</text>
+</svg>
