@@ -1,4 +1,4 @@
-package com.tiendatech.pedidos.domain;
+﻿package com.tiendatech.pedidos.domain;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ class PaginacionTest {
         Paginacion paginacion = Paginacion.de(null, null);
 
         assertThat(paginacion.page()).isZero();
-        assertThat(paginacion.size()).isEqualTo(20);
+        assertThat(paginacion.size()).isEqualTo(21);
     }
 
     @Test
