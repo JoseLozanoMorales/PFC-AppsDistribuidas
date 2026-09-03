@@ -2,6 +2,12 @@ server:
   port: ${SERVER_PORT:8080}
 
 tiendatech:
+  services:
+    usuarios: ${USUARIOS_SERVICE_URL:http://localhost:8085}
+    pedidos: ${PEDIDOS_SERVICE_URL:http://localhost:8083}
+    inventario: ${INVENTARIO_SERVICE_URL:http://localhost:8082}
+    ventas: ${VENTAS_SERVICE_URL:http://localhost:8086}
+    crdb: ${CRDB_HEALTH_URL:http://localhost:8088}
   security:
     jwt:
       # Debe ser el mismo AUTH_JWT_SECRET usado por usuarios-service para firmar tokens.

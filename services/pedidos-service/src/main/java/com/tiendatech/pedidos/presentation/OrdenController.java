@@ -16,17 +16,26 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/ordenes")
 public class OrdenController {
 
     private final OrdenService ordenService;
+    private final TransactionObservationStore observations;
 
     @Autowired
-    public OrdenController(OrdenService ordenService) {
+    public OrdenController(OrdenService ordenService, TransactionObservationStore observations) {
         this.ordenService = ordenService;
+        this.observations = observations;
+    }
+
+    // Conserva la construcción directa usada por las pruebas unitarias existentes.
+    OrdenController(OrdenService ordenService) {
+        this(ordenService, new TransactionObservationStore("2pc"));
     }
 
     // Lista TODAS las ordenes de TODOS los usuarios: no es un endpoint de "orden
@@ -83,15 +92,37 @@ public class OrdenController {
     @PostMapping("/checkout")
     public ResponseEntity<OrdenResponse> checkout(@RequestBody Map<String, Object> body,
                                            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+                                           @RequestHeader(value = "X-Trace-Id", required = false) String incomingTraceId,
+                                           @RequestHeader(value = "X-Failure-Mode", defaultValue = "none") String failureMode,
                                            @AuthUsuario AuthenticatedUser usuario) {
+        long started = System.nanoTime();
+        String traceId = incomingTraceId == null || incomingTraceId.isBlank()
+                ? UUID.randomUUID().toString() : incomingTraceId.trim();
         Integer direccionId = (Integer) body.get("direccionId");
         Integer metodopagoId = (Integer) body.get("metodopagoId");
-        Orden orden = ordenService.generarOrdenDesdeCarrito(usuario.userId(), direccionId, metodopagoId, idempotencyKey);
-        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/api/ordenes/{id}")
-                .buildAndExpand(orden.getOrdenId())
-                .toUri();
-        return ResponseEntity.created(location).body(OrdenResponse.from(orden));
+        Orden orden = null;
+        try {
+            orden = ordenService.generarOrdenDesdeCarrito(usuario.userId(), direccionId, metodopagoId, idempotencyKey);
+            observations.add(orden.getOrdenId(), traceId, "COMPLETADA", elapsedMillis(started), failureMode, Instant.now());
+            URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/ordenes/{id}")
+                    .buildAndExpand(orden.getOrdenId()).toUri();
+            return ResponseEntity.created(location).header("X-Trace-Id", traceId).body(OrdenResponse.from(orden));
+        } catch (RuntimeException exception) {
+            observations.add(orden == null ? null : orden.getOrdenId(), traceId, "FALLIDA", elapsedMillis(started),
+                    "none".equalsIgnoreCase(failureMode) ? exception.getClass().getSimpleName() : failureMode, Instant.now());
+            throw exception;
+        }
+    }
+
+    @GetMapping("/transacciones")
+    public java.util.List<TransactionObservationStore.TransactionObservation> transacciones(
+            @AuthUsuario AuthenticatedUser usuario) {
+        if (!usuario.esAdmin()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Requiere rol administrador");
+        return observations.recent();
+    }
+
+    private static long elapsedMillis(long started) {
+        return Math.max(0, (System.nanoTime() - started) / 1_000_000);
     }
 
     private static PageResponse<OrdenResponse> mapOrdenes(PageResponse<Orden> pagina) {

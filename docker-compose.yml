@@ -9,6 +9,7 @@ services:
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
       INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:-TiendaTechInternalServiceToken2026}
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
+      COORD: ${COORD:-2pc}
       SERVER_PORT: 8083
       CRDB_DATASOURCE_URL: "${CRDB_DATASOURCE_URL:-jdbc:postgresql://tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257/tiendatech?sslmode=disable&targetServerType=any&loadBalanceHosts=true}"
       CRDB_DATASOURCE_USERNAME: ${CRDB_DATASOURCE_USERNAME:-root}
@@ -226,6 +227,8 @@ services:
       ORDENES_PROVEEDORES_SERVICE_URL: http://tiendatech-ordenes-proveedores:8084
       VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       ARMADO_IA_SERVICE_URL: http://tiendatech-armado-ia:8087
+      CRDB_HEALTH_URL: http://tiendatech-crdb-1:8080
+      COORD: ${COORD:-2pc}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
     depends_on:
       tiendatech-usuarios:

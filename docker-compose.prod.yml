@@ -165,6 +165,7 @@ services:
       <<: *crdb-environment
       SERVER_PORT: "8083"
       PEDIDOS_IDEMPOTENCIA_ENABLED: "true"
+      COORD: ${COORD:-2pc}
       VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       PRODUCTOS_SERVICE_URL: http://tiendatech-productos:8081
       USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
@@ -201,6 +202,8 @@ services:
       ORDENES_PROVEEDORES_SERVICE_URL: http://tiendatech-ordenes-proveedores:8084
       VENTAS_SERVICE_URL: http://tiendatech-ventas:8086
       ARMADO_IA_SERVICE_URL: http://tiendatech-armado-ia:8087
+      CRDB_HEALTH_URL: http://tiendatech-crdb-1:8080
+      COORD: ${COORD:-2pc}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?AUTH_JWT_SECRET debe existir en .env}
     depends_on:
       tiendatech-pedidos:
