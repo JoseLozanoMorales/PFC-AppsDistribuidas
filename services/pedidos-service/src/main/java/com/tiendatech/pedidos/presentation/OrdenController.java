@@ -6,6 +6,7 @@ import com.tiendatech.pedidos.domain.PageResponse;
 import com.tiendatech.pedidos.domain.Paginacion;
 import com.tiendatech.pedidos.infrastructure.config.AuthUsuario;
 import com.tiendatech.pedidos.infrastructure.config.AuthenticatedUser;
+import com.tiendatech.pedidos.infrastructure.observability.TraceContext;
 import com.tiendatech.pedidos.presentation.dto.DetalleOrdenResponse;
 import com.tiendatech.pedidos.presentation.dto.OrdenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,7 @@ public class OrdenController {
         Integer direccionId = (Integer) body.get("direccionId");
         Integer metodopagoId = (Integer) body.get("metodopagoId");
         Orden orden = null;
+        TraceContext.set(traceId, failureMode);
         try {
             orden = ordenService.generarOrdenDesdeCarrito(usuario.userId(), direccionId, metodopagoId, idempotencyKey);
             observations.add(orden.getOrdenId(), traceId, "COMPLETADA", elapsedMillis(started), failureMode, Instant.now());
@@ -111,6 +113,8 @@ public class OrdenController {
             observations.add(orden == null ? null : orden.getOrdenId(), traceId, "FALLIDA", elapsedMillis(started),
                     "none".equalsIgnoreCase(failureMode) ? exception.getClass().getSimpleName() : failureMode, Instant.now());
             throw exception;
+        } finally {
+            TraceContext.clear();
         }
     }
 

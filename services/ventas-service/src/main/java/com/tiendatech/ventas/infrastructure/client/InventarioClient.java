@@ -12,6 +12,8 @@ import com.tiendatech.ventas.domain.InventarioPort;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Component
 public class InventarioClient implements InventarioPort {
@@ -33,8 +35,21 @@ public class InventarioClient implements InventarioPort {
         this.restClient = restClientBuilder
                 .baseUrl(inventarioBaseUrl)
                 .defaultHeader("X-Internal-Token", internalToken)
+                .requestInterceptor((request, body, execution) -> {
+                    if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes attributes) {
+                        copyHeader(attributes, request, "X-Trace-Id");
+                        copyHeader(attributes, request, "X-Failure-Mode");
+                    }
+                    return execution.execute(request, body);
+                })
                 .requestFactory(requestFactory)
                 .build();
+    }
+
+    private static void copyHeader(ServletRequestAttributes attributes, org.springframework.http.HttpRequest target,
+                                   String name) {
+        String value = attributes.getRequest().getHeader(name);
+        if (value != null && !value.isBlank()) target.getHeaders().set(name, value);
     }
 
     /** Descuenta stock por cada línea de la factura recién generada. */

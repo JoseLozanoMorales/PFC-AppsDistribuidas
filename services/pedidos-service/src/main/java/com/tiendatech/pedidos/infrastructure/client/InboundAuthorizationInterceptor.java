@@ -1,5 +1,6 @@
 package com.tiendatech.pedidos.infrastructure.client;
 
+import com.tiendatech.pedidos.infrastructure.observability.TraceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -27,6 +28,12 @@ public class InboundAuthorizationInterceptor implements ClientHttpRequestInterce
         String authorization = currentAuthorization();
         if (authorization != null && !authorization.isBlank()) {
             request.getHeaders().set(HttpHeaders.AUTHORIZATION, authorization);
+        }
+        if (TraceContext.traceId() != null) {
+            request.getHeaders().set("X-Trace-Id", TraceContext.traceId());
+        }
+        if (TraceContext.failureMode() != null) {
+            request.getHeaders().set("X-Failure-Mode", TraceContext.failureMode());
         }
         return execution.execute(request, body);
     }

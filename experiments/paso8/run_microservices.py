@@ -41,14 +41,15 @@ def warmup(gateway: str, admin_token: str, seconds: float) -> None:
         request(f"{gateway}/api/admin/system", admin_token, timeout=10)
 
 
-def checkout(gateway: str, case: dict, timeout: float) -> dict:
+def checkout(gateway: str, case: dict, failure_mode: str, timeout: float) -> dict:
     trace_id = str(case.get("traceId") or uuid.uuid4())
     started = time.perf_counter()
     try:
         status, response, headers = request(
             f"{gateway}/api/ordenes/checkout", str(case["token"]), "POST",
             {"direccionId": int(case["direccionId"]), "metodopagoId": int(case["metodopagoId"])},
-            {"X-Trace-Id": trace_id, "Idempotency-Key": str(case.get("idempotencyKey") or trace_id)}, timeout)
+            {"X-Trace-Id": trace_id, "X-Failure-Mode": failure_mode,
+             "Idempotency-Key": str(case.get("idempotencyKey") or trace_id)}, timeout)
         message = str(response.get("message", "")) if isinstance(response, dict) else ""
         return {"case_id": case["caseId"], "trace_id": headers.get("X-Trace-Id", trace_id),
                 "http_status": status, "success": 200 <= status < 300,
@@ -68,6 +69,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=Path(__file__).parent / "resultados-microservicios")
     parser.add_argument("--concurrencia", type=int, default=50)
     parser.add_argument("--repeticion", type=int, default=1)
+    parser.add_argument("--failure-mode", choices=("none", "omission", "timing"), default="none")
     parser.add_argument("--warmup-seconds", type=float, default=60.0)
     parser.add_argument("--timeout-seconds", type=float, default=30.0)
     args = parser.parse_args()
@@ -92,15 +94,18 @@ def main() -> int:
     selected = cases[:args.concurrencia]
     started_at = time.time()
     with ThreadPoolExecutor(max_workers=args.concurrencia) as pool:
-        rows = list(pool.map(lambda case: checkout(gateway, case, args.timeout_seconds), selected))
+        rows = list(pool.map(
+            lambda case: checkout(gateway, case, args.failure_mode, args.timeout_seconds), selected))
     args.output.mkdir(parents=True, exist_ok=True)
-    output = args.output / f"microservices-c{args.concurrencia}-r{args.repeticion}.csv"
+    output = args.output / (
+        f"microservices-{args.failure_mode}-c{args.concurrencia}-r{args.repeticion}.csv")
     with output.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
     metadata = {"gateway": gateway, "coord_declarada": data.get("coordination"),
                 "coord_source": data.get("coordinationSource"), "concurrencia": args.concurrencia,
-                "repeticion": args.repeticion, "warmup_seconds": args.warmup_seconds,
+                "repeticion": args.repeticion, "failure_mode": args.failure_mode,
+                "warmup_seconds": args.warmup_seconds,
                 "started_at_epoch": started_at, "operations": len(rows),
                 "successful": sum(bool(row["success"]) for row in rows),
                 "note": "COORD es configuración declarada; validar por separado que gobierne el coordinador productivo."}

@@ -1,6 +1,9 @@
 import unittest
 
-from run_paso8 import exact_mann_whitney_p, mann_whitney_u
+try:
+    from .run_paso8 import exact_mann_whitney_p, mann_whitney_u
+except ImportError:  # permite ejecutar también: python test_statistics.py
+    from run_paso8 import exact_mann_whitney_p, mann_whitney_u
 
 
 class ExactMannWhitneyTest(unittest.TestCase):

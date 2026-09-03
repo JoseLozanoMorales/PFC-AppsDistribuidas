@@ -4,7 +4,7 @@ Este paso ejecuta el experimento propio de TiendaTech sobre el banco construido
 en `experiments/paso7`: confirmacion en dos fases (`2pc`) frente a saga con
 compensacion (`saga`), bajo fallos de pasarela.
 
-## Matriz ejecutada
+## Matriz corregida por ejecutar
 
 - Estrategias: `2pc`, `saga`.
 - Concurrencia: `50`, `100`, `200`, `400` compradores simultaneos.
@@ -39,9 +39,10 @@ py experiments/paso8/run_paso8.py `
   --warmup-seconds 60
 ```
 
-## Evidencia generada
+## Evidencia inicial (no sustituye la nueva corrida)
 
-- `resultados/experimento_crudo.csv`: 120 corridas completas.
+- `resultados/experimento_crudo.csv`: 120 corridas iniciales; deben regenerarse
+  las 288 corridas con la configuración corregida.
 - `resultados/experimento_resumen.csv`: 24 condiciones con mediana, IC95%,
   tasas e intervalos binomiales.
 - `resultados/comparaciones_mann_whitney.csv`: comparacion 2PC vs Saga por
@@ -66,19 +67,25 @@ a un usuario sintético con carrito preparado.
 python3 experiments/paso8/run_microservices.py \
   --admin-token "$ADMIN_JWT" \
   --request-bank /tmp/compradores-sinteticos.json \
-  --concurrencia 50 --repeticion 1
+  --concurrencia 50 --repeticion 1 --failure-mode timing
 ```
+
+Para habilitar los fallos controlados, el stack experimental se levanta con
+`EXPERIMENT_FAULT_INJECTION_ENABLED=true`. `timing` retrasa la respuesta cinco
+segundos; `omission` excede el timeout de siete segundos del cliente y no devuelve
+una respuesta útil. El mecanismo permanece desactivado por defecto.
 
 La salida conserva `trace_id`, estado HTTP, éxito, latencia y error por compra.
 Para comparar estrategias hay que reiniciar el stack con cada valor de `COORD` y
 verificar en los metadatos cuál quedó activo. El ejecutor no afirma que esa variable
 altere el flujo productivo: esa conmutación debe existir en el coordinador real.
 
-## Resultados principales
+## Resultados de la corrida inicial invalidada
 
-- El oraculo de consistencia paso en las 120 corridas: no se observaron pagos
+- El oraculo de consistencia pasó en las 120 corridas iniciales: no se observaron pagos
   incompletos, descuentos dobles, stock negativo ni compensaciones incompletas.
-- La tasa de inconsistencia observable fue `0.0` en todas las condiciones.
+- La tasa de inconsistencia observable fue `0.0` en todas las condiciones, pero
+  ese valor no es una conclusión vigente porque el candado global impedía medirla.
 - Con fallo `omission` y `timing`, la tasa de abortos se mantuvo cerca de la
   probabilidad de fallo configurada (`0.10`), con variacion esperada por semilla.
 - En todas las comparaciones de latencia p95, `2pc` tuvo menor latencia que
@@ -86,3 +93,6 @@ altere el flujo productivo: esa conmutación debe existir en el coordinador real
   `A12=0.0` para 2PC mayor que Saga).
 - En el banco de compatibilidad se evaluaron 120 casos: 120 aciertos, 0 falsos
   positivos y 0 falsos negativos; IC95% binomial de exactitud `[0.968981, 1.0]`.
+
+Estos valores se conservan solamente como trazabilidad. La conclusión final se
+redactará después de generar y analizar las 288 corridas corregidas.

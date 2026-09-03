@@ -63,13 +63,24 @@ public class HttpObservabilityFilter extends OncePerRequestFilter {
     }
 
     private void registrarLog(RequestLabels labels, long elapsedNanos) {
+        String traceId = currentTraceId();
         MDC.put("service", service);
+        MDC.put("trace_id", traceId);
         MDC.put("method", labels.method());
         MDC.put("route", labels.route());
         MDC.put("status", labels.status());
         MDC.put("response_time_ms", Long.toString(TimeUnit.NANOSECONDS.toMillis(elapsedNanos)));
         LOG.info("http_request_completed");
         MDC.clear();
+    }
+
+    private String currentTraceId() {
+        var attributes = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        if (attributes instanceof org.springframework.web.context.request.ServletRequestAttributes servlet) {
+            String value = servlet.getRequest().getHeader("X-Trace-Id");
+            return value == null || value.isBlank() ? "untracked" : value;
+        }
+        return "untracked";
     }
 
     private record RequestLabels(String method, String route, String status) {
