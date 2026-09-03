@@ -91,7 +91,7 @@ def bootstrap_median_ci(values: list[float], seed: int = 2026, samples: int = 10
     return percentile(medians, 0.025), percentile(medians, 0.975)
 
 
-def mann_whitney_u(a: list[float], b: list[float]) -> dict[str, float]:
+def mann_whitney_u(a: list[float], b: list[float]) -> dict[str, object]:
     combined = [(x, 0) for x in a] + [(x, 1) for x in b]
     combined.sort(key=lambda item: item[0])
     ranks = [0.0] * len(combined)
@@ -111,7 +111,34 @@ def mann_whitney_u(a: list[float], b: list[float]) -> dict[str, float]:
     std = math.sqrt(n1 * n2 * (n1 + n2 + 1) / 12)
     z = 0.0 if std == 0 else (u1 - mean) / std
     p_two_sided = math.erfc(abs(z) / math.sqrt(2))
-    return {"u": round(u1, 6), "z_aprox": round(z, 6), "p_aprox": round(p_two_sided, 6)}
+    exact = exact_mann_whitney_p(a, b, int(round(u1)))
+    return {"u": round(u1, 6), "z_aprox": round(z, 6), "p_aprox": round(p_two_sided, 6),
+            "p_exacto": "" if exact is None else round(exact, 9)}
+
+
+def exact_mann_whitney_p(a: list[float], b: list[float], observed_u: int) -> float | None:
+    """Probabilidad bilateral exacta sin corrección asintótica; empates => no definida."""
+    combined = a + b
+    if len(set(combined)) != len(combined):
+        return None
+    n1, n2 = len(a), len(b)
+    max_u = n1 * n2
+    # dp[i][j][u]: secuencias con i elementos A, j elementos B y U=u.
+    dp = [[[0] * (max_u + 1) for _ in range(n2 + 1)] for _ in range(n1 + 1)]
+    dp[0][0][0] = 1
+    for i in range(n1 + 1):
+        for j in range(n2 + 1):
+            if i == 0 and j == 0:
+                continue
+            for u in range(max_u + 1):
+                if i > 0 and u >= j:
+                    dp[i][j][u] += dp[i - 1][j][u - j]
+                if j > 0:
+                    dp[i][j][u] += dp[i][j - 1][u]
+    tail = min(observed_u, max_u - observed_u)
+    distribution = dp[n1][n2]
+    total = sum(distribution)
+    return min(1.0, 2 * sum(distribution[:tail + 1]) / total)
 
 
 def vargha_delaney_a12(a: list[float], b: list[float]) -> float:
@@ -251,6 +278,7 @@ def analyze(raw_rows: list[dict]) -> tuple[list[dict], list[dict]]:
         })
 
     comparisons = []
+    comparison_count = len({int(row["concurrencia"]) for row in raw_rows}) * len(FALLOS)
     for concurrencia in sorted({int(row["concurrencia"]) for row in raw_rows}):
         for fallo in FALLOS:
             a = [float(row["latencia_pago_p95_ms"]) for row in raw_rows if row["coord"] == "2pc" and int(row["concurrencia"]) == concurrencia and row["fallo"] == fallo]
@@ -263,6 +291,10 @@ def analyze(raw_rows: list[dict]) -> tuple[list[dict], list[dict]]:
                     "grupo_b": f"saga-c{concurrencia}-{fallo}",
                     **mw,
                     "a12_a_mayor_b": vargha_delaney_a12(a, b),
+                    "numero_comparaciones": comparison_count,
+                    "umbral_bonferroni": round(0.05 / comparison_count, 9),
+                    "significativo_bonferroni": mw["p_exacto"] != "" and
+                        float(mw["p_exacto"]) < 0.05 / comparison_count,
                 })
     return summary, comparisons
 
