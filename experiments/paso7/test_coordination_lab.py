@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import sqlite3
 from pathlib import Path
 
 from coordination_lab import Case, FaultInjector, Lab, compatibility_cases, make_cases, oracle
@@ -30,6 +31,17 @@ class CoordinationLabTest(unittest.TestCase):
         self.assertEqual(120, len(make_cases(120, 99)))
         self.assertEqual(compatibility_cases(120, 99), compatibility_cases(120, 99))
         self.assertEqual(120, len(compatibility_cases(120, 99)))
+
+    def test_oracle_detects_lost_stock_update(self):
+        with tempfile.TemporaryDirectory() as directory:
+            lab = Lab(Path(directory) / "lab.db", "saga", FaultInjector("none", 0, 7))
+            lab.reset(10)
+            with sqlite3.connect(lab.db_path) as db:
+                db.execute("UPDATE inventory SET stock=9 WHERE product_id=1")
+            report = oracle(lab.db_path)
+            check = next(item for item in report["checks"] if item["check"] == "stock_cuadra_con_movimientos")
+            self.assertFalse(check["pass"])
+            self.assertFalse(report["pass"])
 
 
 if __name__ == "__main__":

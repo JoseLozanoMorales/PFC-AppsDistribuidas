@@ -9,8 +9,8 @@ compensacion (`saga`), bajo fallos de pasarela.
 - Estrategias: `2pc`, `saga`.
 - Concurrencia: `50`, `100`, `200`, `400` compradores simultaneos.
 - Fallos de pasarela: `none`, `omission`, `timing`.
-- Repeticiones: `5` por condicion.
-- Total: `2 x 4 x 3 x 5 = 120` corridas.
+- Repeticiones: `12` por condicion.
+- Total: `2 x 4 x 3 x 12 = 288` corridas.
 - Probabilidad de fallo: `0.10`.
 
 Comando usado para la corrida local:
@@ -18,23 +18,21 @@ Comando usado para la corrida local:
 ```powershell
 py experiments/paso8/run_paso8.py `
   --output experiments/paso8/resultados `
-  --repeticiones 5 `
+  --repeticiones 12 `
   --concurrencias 50 100 200 400 `
   --fault-probability 0.10 `
-  --delay-seconds 0.05 `
-  --warmup-seconds 0
+  --delay-seconds 5 `
+  --warmup-seconds 60
 ```
 
-La rubrica describe temporizacion de cinco segundos y descarte de sesenta
-segundos de calentamiento. La ejecucion local versionada acelera esos dos
-parametros para terminar en una ventana razonable de laboratorio; los valores
-reales usados quedan en `resultados/metadata.json` y se declaran como amenaza a
-la validez interna. Para ejecutar la configuracion literal de rubrica:
+El ejecutor usa por defecto la temporización de cinco segundos y sesenta
+segundos de carga real descartada. El calentamiento se ejecuta sobre una base
+separada para que sus operaciones no contaminen la corrida medida.
 
 ```powershell
 py experiments/paso8/run_paso8.py `
   --output experiments/paso8/resultados-rubrica `
-  --repeticiones 5 `
+  --repeticiones 12 `
   --concurrencias 50 100 200 400 `
   --fault-probability 0.10 `
   --delay-seconds 5 `
@@ -54,6 +52,27 @@ py experiments/paso8/run_paso8.py `
 - `resultados/boxplot_latencia_p95.svg` y `resultados/boxplot_throughput.svg`.
 - `resultados/amenazas_validez.md`: cuatro categorias de amenazas.
 - `resultados/db/*.db`: base SQLite auditable por corrida.
+
+## Validación complementaria contra microservicios reales
+
+`run_microservices.py` ejecuta compradores sintéticos contra
+`Gateway -> Pedidos -> Ventas/Inventario -> CockroachDB`. Antes de medir comprueba
+que los seis componentes estén disponibles y realiza 60 segundos de calentamiento
+de conectividad descartado. El banco JSON no se versiona porque contiene JWT efímeros; cada
+caso requiere `caseId`, `token`, `direccionId` y `metodopagoId`, y debe corresponder
+a un usuario sintético con carrito preparado.
+
+```bash
+python3 experiments/paso8/run_microservices.py \
+  --admin-token "$ADMIN_JWT" \
+  --request-bank /tmp/compradores-sinteticos.json \
+  --concurrencia 50 --repeticion 1
+```
+
+La salida conserva `trace_id`, estado HTTP, éxito, latencia y error por compra.
+Para comparar estrategias hay que reiniciar el stack con cada valor de `COORD` y
+verificar en los metadatos cuál quedó activo. El ejecutor no afirma que esa variable
+altere el flujo productivo: esa conmutación debe existir en el coordinador real.
 
 ## Resultados principales
 

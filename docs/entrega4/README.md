@@ -46,7 +46,7 @@ Push-Location experiments/paso7
 Pop-Location
 
 # Matriz oficial ya ejecutada: regeneración determinista en un directorio temporal
-.\.venv-repro\Scripts\python experiments/paso8/run_paso8.py --output .repro-paso14 --repeticiones 5 --concurrencias 50 100 200 400 --fault-probability 0.10 --delay-seconds 0.05 --warmup-seconds 0 --seed 2026
+.\.venv-repro\Scripts\python experiments/paso8/run_paso8.py --output .repro-paso14 --repeticiones 12 --concurrencias 50 100 200 400 --fault-probability 0.10 --delay-seconds 5 --warmup-seconds 60 --seed 2026
 
 # Cuaderno de análisis y figuras del PDF
 .\.venv-repro\Scripts\python experiments/paso8/execute_notebook.py

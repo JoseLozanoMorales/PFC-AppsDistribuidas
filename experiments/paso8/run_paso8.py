@@ -154,7 +154,20 @@ def run_condition(
     ]
 
     if args.warmup_seconds > 0:
-        time.sleep(args.warmup_seconds)
+        # Calentamiento real y descartado: usa otra base para no contaminar la medición.
+        warmup_path = output / "warmup" / f"{coord}-{fallo}-c{concurrencia}-r{repeticion}.db"
+        warmup_lab = Lab(warmup_path, coord, FaultInjector("none", 0.0, seed, args.delay_seconds))
+        warmup_lab.reset(initial_stock=1_000_000_000)
+        deadline = time.monotonic() + args.warmup_seconds
+        warmup_round = 0
+        warmup_workers = min(concurrencia, args.warmup_workers)
+        while time.monotonic() < deadline:
+            warmup_round += 1
+            warmup_cases = [Case(i + 1, 1, 1, 1000, "none", 0.0,
+                                 seed * 1_000_000 + warmup_round * warmup_workers + i)
+                            for i in range(warmup_workers)]
+            with ThreadPoolExecutor(max_workers=warmup_workers) as pool:
+                list(pool.map(warmup_lab.purchase, warmup_cases))
 
     tracemalloc.start()
     cpu_0 = time.process_time()
@@ -334,8 +347,9 @@ def write_threats(path: Path, args: argparse.Namespace) -> None:
 ## Interna
 
 - El banco se ejecuta en una sola maquina y comparte CPU con el sistema operativo.
-- La ejecucion local usa `warmup_seconds={args.warmup_seconds}` y `delay_seconds={args.delay_seconds}`. La configuracion de rubrica queda parametrizada, pero la evidencia local puede acelerar el retardo para caber en la ventana disponible.
+- La ejecucion usa `warmup_seconds={args.warmup_seconds}` de carga real descartada y `delay_seconds={args.delay_seconds}` para el fallo de temporizacion.
 - SQLite modela los datos aislados de Inventario, Pagos y Ordenes; no sustituye una medicion de red real entre microservicios.
+- Se eliminó el candado global de Python. SQLite conserva únicamente sus bloqueos transaccionales propios; el oráculo comprueba además que el stock global cuadre con todos los movimientos para detectar actualizaciones perdidas.
 
 ## Externa
 
@@ -349,7 +363,7 @@ def write_threats(path: Path, args: argparse.Namespace) -> None:
 
 ## De Conclusion
 
-- Se usan cinco repeticiones por condicion; los intervalos son informativos, pero siguen siendo sensibles al ruido local.
+- Se usan {args.repeticiones} repeticiones por condicion. Con 12 repeticiones, la prueba U exacta puede superar el umbral Bonferroni de 0.05/12 bajo separación extrema.
 - Mann-Whitney U y A12 comparan tendencia de latencias entre 2PC y Saga; no prueban causalidad fuera del banco definido.
 """
     path.write_text(text, encoding="utf-8")
@@ -358,11 +372,13 @@ def write_threats(path: Path, args: argparse.Namespace) -> None:
 def parser() -> argparse.ArgumentParser:
     cli = argparse.ArgumentParser()
     cli.add_argument("--output", type=Path, default=ROOT / "experiments" / "paso8" / "resultados")
-    cli.add_argument("--repeticiones", type=int, default=5)
+    cli.add_argument("--repeticiones", type=int, default=12)
     cli.add_argument("--concurrencias", type=int, nargs="+", default=CONCURRENCIAS)
     cli.add_argument("--fault-probability", type=float, default=0.10)
-    cli.add_argument("--delay-seconds", type=float, default=0.05)
-    cli.add_argument("--warmup-seconds", type=float, default=0.0)
+    cli.add_argument("--delay-seconds", type=float, default=5.0)
+    cli.add_argument("--warmup-seconds", type=float, default=60.0)
+    cli.add_argument("--warmup-workers", type=int, default=8,
+                     help="máximo de compradores del calentamiento descartado")
     cli.add_argument("--seed", type=int, default=2026)
     cli.add_argument("--compatibility-cases", type=Path, default=ROOT / "experiments" / "paso7" / "evidence" / "compatibility-case-bank.json")
     return cli
@@ -404,7 +420,7 @@ def main() -> int:
     write_boxplot_svg(args.output / "boxplot_throughput.svg", raw_rows, "ordenes_confirmadas_por_segundo")
     write_threats(args.output / "amenazas_validez.md", args)
     metadata = {
-        "matriz": "2 estrategias x 4 concurrencias x 3 modos de pasarela x 5 repeticiones",
+        "matriz": f"2 estrategias x {len(args.concurrencias)} concurrencias x 3 modos de pasarela x {args.repeticiones} repeticiones",
         "coords": COORDS,
         "concurrencias": args.concurrencias,
         "fallos": FALLOS,

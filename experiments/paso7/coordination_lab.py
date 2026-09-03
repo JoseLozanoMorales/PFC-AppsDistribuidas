@@ -9,7 +9,6 @@ import json
 import os
 import random
 import sqlite3
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
@@ -64,7 +63,6 @@ class Lab:
         if coord not in {"2pc", "saga"}:
             raise ValueError("COORD debe ser 2pc o saga")
         self.db_path, self.coord, self.injector = db_path, coord, injector
-        self.db_lock = threading.Lock()
 
     def connect(self) -> sqlite3.Connection:
         connection = sqlite3.connect(self.db_path, timeout=30, isolation_level=None)
@@ -103,7 +101,7 @@ class Lab:
 
     def two_phase_commit(self, tx: str, case: Case, started: float) -> None:
         # BEGIN IMMEDIATE representa el bloqueo conservado desde PREPARE hasta COMMIT/ROLLBACK.
-        with self.db_lock, closing(self.connect()) as db:
+        with closing(self.connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
                 stock = db.execute("SELECT stock FROM inventory WHERE product_id=?", (case.product_id,)).fetchone()
@@ -128,7 +126,7 @@ class Lab:
 
     def saga(self, tx: str, case: Case, started: float) -> None:
         # Cada paso confirma inmediatamente; los ya confirmados se deshacen en orden inverso.
-        with self.db_lock, closing(self.connect()) as db:
+        with closing(self.connect()) as db:
             stock = db.execute("SELECT stock FROM inventory WHERE product_id=?", (case.product_id,)).fetchone()
             if stock is None or stock[0] < case.quantity:
                 raise ValueError("stock insuficiente")
@@ -167,6 +165,9 @@ def oracle(db_path: Path) -> dict:
             ("stock_una_vez", """SELECT count(*) FROM orders o WHERE o.status='CONFIRMED' AND
                (SELECT COALESCE(sum(delta),0) FROM stock_movements m WHERE m.tx_id=o.tx_id)!=-o.quantity"""),
             ("stock_nunca_negativo", "SELECT count(*) FROM stock_movements WHERE stock_after < 0"),
+            ("stock_cuadra_con_movimientos", """SELECT count(*) FROM inventory i WHERE i.stock !=
+               i.initial_stock + (SELECT COALESCE(sum(delta),0) FROM stock_movements m
+                                  WHERE m.product_id=i.product_id)"""),
             ("compensacion_completa", """SELECT count(*) FROM orders o WHERE o.status IN ('COMPENSATED','CANCELLED') AND
                ((SELECT COALESCE(sum(delta),0) FROM stock_movements m WHERE m.tx_id=o.tx_id)!=0 OR
                 EXISTS(SELECT 1 FROM payments p WHERE p.tx_id=o.tx_id AND p.status IN ('PENDING','CAPTURED')))"""),
