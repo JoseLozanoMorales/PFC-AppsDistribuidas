@@ -1,0 +1,19 @@
+\subsection{Actualización de evidencia del 3 de septiembre de 2026}\label{sec:actualizacion-evidencias}
+La revisión del commit \href{https://github.com/JoseLozanoMorales/TiendaTech/commit/dbe0d772fe36b9a4a836dc9101eeb0c6cb6c25d9}{\texttt{dbe0d77}} incorpora un piloto posterior al corte de los resultados anteriores. No reemplaza las 120 corridas históricas del Paso 8. Se conservaron copias exactas del CSV, los dos informes del oráculo y las dos bases SQLite en \path{cierre/actualizacion-20260903/}, con procedencia y sumas SHA-256. La comprobación documental consultó esas bases en modo de solo lectura; no ejecutó una campaña nueva.
+
+El código revisado elimina el candado Python compartido y añade la comprobación \texttt{stock\_cuadra\_con\_movimientos}. El piloto contiene 120 operaciones por estrategia, 240 en total, con doce trabajadores, stock inicial 500, semilla 2026, probabilidad de fallo 0,35 y demora 0,01 s según el comando registrado en el README del Paso 7. Son operaciones de un piloto, no 240 repeticiones independientes de la matriz experimental.
+
+\begin{table}[htbp]\centering
+\caption{Comprobación del stock en las bases del piloto posterior.}\label{tab:piloto-posterior}
+\begin{tabular}{lrrr}\toprule
+Implementación & Stock inicial & Stock final & Inicial más movimientos\\\midrule
+E-2PC & 500 & 319 & 319\\
+E-Saga & 500 & 490 & 319\\\bottomrule
+\end{tabular}
+\end{table}
+
+La tabla \ref{tab:piloto-posterior} reproduce una consulta sobre inventario y suma de movimientos. El informe de E-2PC aprueba sus cinco comprobaciones; E-Saga falla la nueva comprobación con una fila de inventario discordante. Esa unidad de conteo no equivale a una compra fallida ni permite calcular una tasa de inconsistencias por operación. Los otros cuatro controles pasan en ambos informes. El hallazgo muestra una anomalía del estado final de esta implementación de Saga y concuerda con el riesgo de actualización perdida de su lectura seguida de escritura; no establece que toda Saga tenga ese comportamiento. E-2PC conserva \texttt{BEGIN IMMEDIATE} sobre SQLite: retirar el candado Python no introduce por sí solo participantes distribuidos ni recuperación durable de un coordinador.
+
+También se inspeccionaron las correcciones del ejecutor: doce repeticiones por condición, demora de cinco segundos, calentamiento mediante carga sobre una base separada y cálculo U exacto sin empates con ajuste de Bonferroni. El README remoto identifica la matriz de 288 corridas como pendiente; sus CSV y metadatos históricos no cambiaron respecto del commit evaluado. Por ello, los percentiles y contrastes anteriores siguen siendo antecedentes, no resultados del banco corregido.
+
+Los commits posteriores añaden propagación de \texttt{X-Trace-Id}, observaciones recientes de compras, consulta de salud e inyección de fallos, junto con \path{experiments/paso8/run_microservices.py}. Son avances de implementación. El registro de observaciones conserva como máximo 200 entradas en memoria; el ejecutor mide respuestas HTTP y latencia, y su calentamiento consulta salud. Ni ese registro ni un HTTP exitoso sustituyen una traza distribuida exportada o un oráculo sobre datos persistidos. La etiqueta \texttt{COORD} declara configuración y debe verificarse contra la selección efectiva del protocolo. En los cambios inspeccionados no aparece una nueva campaña de microservicios, captura bajo carga ni comprobación de arranque limpio. Estos entregables siguen pendientes.

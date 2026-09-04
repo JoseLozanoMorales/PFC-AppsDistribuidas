@@ -1,12 +1,12 @@
 % Copiar dentro de un entorno table. Requiere booktabs y tabularx.
-\begin{tabularx}{\textwidth}{p{2.4cm} X p{2.2cm} p{1.8cm} p{2cm}}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.2cm} X >{\raggedright\arraybackslash}p{2cm} >{\raggedright\arraybackslash}p{2.1cm} X}
 \toprule
-Característica & Valor medido & Objetivo & Estado & Plan técnico \\
+Caracterís\-tica & Valor medido & Objetivo & Estado & Plan técnico \\
 \midrule
-Disponibilidad & PENDIENTE & Uptime $\geq 99.5\,\%$ en 1 h & PENDIENTE & Ejecutar 3600 s con stack y targets verificados. \\
-Rendimiento & PENDIENTE & P95 $<500$ ms; 50 usuarios & PENDIENTE & Ejecutar Locust 60 s y optimizar el endpoint dominante. \\
-Fiabilidad & PENDIENTE & 5xx $<1\,\%$ & PENDIENTE & Calcular 5xx sobre la misma carga y corregir la causa dominante. \\
-Mantenibilidad & Todos $>70\,\%$; mínimo Java $75.80\,\%$; complejidad máxima 20 & Cobertura $\geq70\,\%$; complejidad $<10$ & NO CUMPLE & Extraer decisiones de los cinco métodos señalados por PMD y repetir el análisis. \\
-Seguridad & 8/8 familias; 11 casos; 0 fallos & 100\,\% retorna 401 sin JWT & CUMPLE & Mantener la prueba parametrizada en CI. \\
+Disponibi\-lidad & Pendiente & Uptime $\geq 99{,}5$ por ciento en 1 h & Pendiente & Ejecutar 3600 s con stack y targets verificados. \\
+Rendimiento & Pendiente & P95 $<500$ ms; 50 usuarios & Pendiente & Ejecutar Locust 60 s y optimizar el endpoint dominante. \\
+Fiabilidad & Pendiente & 5xx $<1$ por ciento & Pendiente & Calcular 5xx sobre la misma carga y corregir la causa dominante. \\
+Manteni\-bilidad & Todos $>70$ por ciento; mínimo Java $75{,}80$ por ciento; complejidad máxima 20 & Cobertura $\geq70$ por ciento; complejidad $<10$ & No cumple & Extraer decisiones de los cinco métodos señalados por PMD y repetir el análisis. \\
+Seguridad & 8/8 familias; 11 casos; 0 fallos & 100 por ciento retorna 401 sin JWT & Cumple & Mantener la prueba parametrizada en CI. \\
 \bottomrule
 \end{tabularx}

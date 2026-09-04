@@ -1,0 +1,187 @@
+[
+  {
+    "key": "garciamolina1987sagas",
+    "verified_on": "2026-09-03",
+    "metadata_source": "https://api.crossref.org/works/10.1145/38713.38742",
+    "doi": "10.1145/38713.38742",
+    "title": [
+      "Sagas"
+    ],
+    "author": [
+      {
+        "given": "Hector",
+        "family": "Garcia-Molina"
+      },
+      {
+        "given": "Kenneth",
+        "family": "Salem"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          1987
+        ]
+      ]
+    },
+    "container": [
+      "Proceedings of the 1987 ACM SIGMOD international conference on Management of data  - SIGMOD '87"
+    ],
+    "volume": null,
+    "issue": null,
+    "page": "249-259",
+    "content_source": "https://www.cs.princeton.edu/techreports/1987/070.pdf",
+    "consultation_scope": "Resumen editorial de ACM; informe institucional escaneado localizado. Uso limitado a definición, intercalación y compensación."
+  },
+  {
+    "key": "gray2006commit",
+    "verified_on": "2026-09-03",
+    "metadata_source": "https://api.crossref.org/works/10.1145/1132863.1132867",
+    "doi": "10.1145/1132863.1132867",
+    "title": [
+      "Consensus on transaction commit"
+    ],
+    "author": [
+      {
+        "given": "Jim",
+        "family": "Gray"
+      },
+      {
+        "given": "Leslie",
+        "family": "Lamport"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2006,
+          3
+        ]
+      ]
+    },
+    "container": [
+      "ACM Transactions on Database Systems"
+    ],
+    "volume": "31",
+    "issue": "1",
+    "page": "133-160",
+    "content_source": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-2003-96.pdf",
+    "consultation_scope": "Versión previa de autor MSR-TR-2003-96, resumen e introducción; metadatos de la publicación final de 2006. No se atribuye reproducción de sus pruebas formales."
+  },
+  {
+    "key": "stefanko2019saga",
+    "verified_on": "2026-09-03",
+    "metadata_source": "https://api.crossref.org/works/10.5220/0007918704830490",
+    "doi": "10.5220/0007918704830490",
+    "title": [
+      "The Saga Pattern in a Reactive Microservices Environment"
+    ],
+    "author": [
+      {
+        "given": "Martin",
+        "family": "Štefanko"
+      },
+      {
+        "given": "Ondřej",
+        "family": "Chaloupka"
+      },
+      {
+        "given": "Bruno",
+        "family": "Rossi"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2019
+        ]
+      ]
+    },
+    "container": [
+      "Proceedings of the 14th International Conference on Software Technologies"
+    ],
+    "volume": null,
+    "issue": null,
+    "page": "483-490",
+    "content_source": "https://www.scitepress.org/PublishedPapers/2019/79187/79187.pdf",
+    "consultation_scope": "PDF editorial, secciones 1, 2, 3.5 y cierre: alcance y límites de la evaluación de frameworks."
+  },
+  {
+    "key": "durr2022saga",
+    "verified_on": "2026-09-03",
+    "metadata_source": "https://api.crossref.org/works/10.5220/0010999400003200",
+    "doi": "10.5220/0010999400003200",
+    "title": [
+      "Saga Pattern Technologies: A Criteria-based Evaluation"
+    ],
+    "author": [
+      {
+        "given": "Karolin",
+        "family": "Dürr"
+      },
+      {
+        "given": "Robin",
+        "family": "Lichtenthäler"
+      },
+      {
+        "given": "Guido",
+        "family": "Wirtz"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2022
+        ]
+      ]
+    },
+    "container": [
+      "Proceedings of the 12th International Conference on Cloud Computing and Services Science"
+    ],
+    "volume": null,
+    "issue": null,
+    "page": "141-148",
+    "content_source": "https://www.scitepress.org/PublishedPapers/2022/109994/109994.pdf",
+    "consultation_scope": "PDF editorial, introducción, catálogo de criterios y discusión/conclusiones; selección de tecnologías, no comparación de protocolos."
+  },
+  {
+    "key": "daraghmi2022saga",
+    "verified_on": "2026-09-03",
+    "metadata_source": "https://api.crossref.org/works/10.3390/app12126242",
+    "doi": "10.3390/app12126242",
+    "title": [
+      "Enhancing Saga Pattern for Distributed Transactions within a Microservices Architecture"
+    ],
+    "author": [
+      {
+        "given": "Eman",
+        "family": "Daraghmi"
+      },
+      {
+        "given": "Cheng-Pu",
+        "family": "Zhang"
+      },
+      {
+        "given": "Shyan-Ming",
+        "family": "Yuan"
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          6,
+          19
+        ]
+      ]
+    },
+    "container": [
+      "Applied Sciences"
+    ],
+    "volume": "12",
+    "issue": "12",
+    "page": "6242",
+    "content_source": "https://scholar.nycu.edu.tw/en/publications/enhancing-saga-pattern-for-distributed-transactions-within-a-micr/",
+    "consultation_scope": "Resumen de autores en registro institucional y página editorial indexada; texto completo no accesible. No se utilizan cifras ni garantías generales."
+  }
+]

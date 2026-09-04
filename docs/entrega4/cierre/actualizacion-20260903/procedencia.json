@@ -1,0 +1,32 @@
+{
+  "commit": "dbe0d772fe36b9a4a836dc9101eeb0c6cb6c25d9",
+  "retrieved_on": "2026-09-03",
+  "files": [
+    {
+      "source": "experiments/paso7/evidence/pilot.csv",
+      "copy": "pilot.csv",
+      "sha256": "c7f3afa502bd74d7a3f5c6dc6fc7447e429f571086019929290a9003941344b3"
+    },
+    {
+      "source": "experiments/paso7/evidence/oracle-2pc.json",
+      "copy": "oracle-2pc.json",
+      "sha256": "87ed1e37366b43c4301f6d2ce7c6513e2e82af61b0c9b00afde70b9277c8bd0a"
+    },
+    {
+      "source": "experiments/paso7/evidence/oracle-saga.json",
+      "copy": "oracle-saga.json",
+      "sha256": "d320570d3e203ed952fd33ee1816e6f16cf8e267efe16c9f090e6a756b1396dc"
+    },
+    {
+      "source": "experiments/paso7/evidence/pilot-2pc.db",
+      "copy": "pilot-2pc.db",
+      "sha256": "c2b04db67ec3d9d7c81eab6ee33512ddc8ada780061ac9aff70c406cd1bb9dcb"
+    },
+    {
+      "source": "experiments/paso7/evidence/pilot-saga.db",
+      "copy": "pilot-saga.db",
+      "sha256": "e7041fd7e73ee5da5f67b136289ee8447139849f58954be11b1677cf648073f2"
+    }
+  ],
+  "scope": "Copias exactas del piloto remoto; no se ejecut\u00f3 una campa\u00f1a nueva durante la revisi\u00f3n documental."
+}

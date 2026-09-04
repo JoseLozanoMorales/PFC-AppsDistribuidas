@@ -1,6 +1,28 @@
 # Documento acumulativo y reproducibilidad — Pasos 13 y 14
 
+El estado de las correcciones y los paquetes pendientes por recibir se detalla en
+[Cierre documental de las observaciones](CIERRE-DOCUMENTAL-OBSERVACIONES.md),
+actualizado el 3 de septiembre de 2026. `CIERRE-PASO13.md` conserva el corte histórico.
+
+La actualización remota inspeccionada en `dbe0d772fe36b9a4a836dc9101eeb0c6cb6c25d9`
+se incorpora mediante `actualizacion-evidencias.tex` (dependencia adicional).
+El piloto y su procedencia se conservan en `cierre/actualizacion-20260903/`.
+Esta adición no sustituye los resultados históricos ni incorpora código remoto al árbol local.
+
 La versión de cierre es `PFC4.tex` y su salida `PFC4.pdf`. El contenido de cierre se integró en los nombres originales. El informe usa evidencia del commit `6cfe0e8bac8d142b7986a4a3265721f404e84156`, consultado el 1 de septiembre de 2026; no supone que el árbol local coincida con él.
+
+La revisión documental de Observaciones 2 (2 de septiembre de 2026) incorpora
+`registro-cambios.tex` y `trazabilidad-temas.tex` mediante `\input`; ambos archivos
+deben acompañar a la fuente principal. La tabla de temas fija sus 27 localizaciones
+al commit evaluado `96a350b12377b537f979910324ba2fb6c6ee9ba2` y conserva el inventario
+en `cierre/trazabilidad-temas.csv`. La tabla de deuda distingue esfuerzo de
+resolución, coste de arrastre y evidencia pendiente. El PDF revisado tiene 52
+páginas; no sustituye datos experimentales ni estados de issues. Las consultas
+preparadas para ampliar la bibliografía están en `busquedas-2pc-saga.md` y no
+constituyen por sí mismas referencias. La ampliación del 3 de septiembre incorpora
+cinco fuentes sobre 2PC y Saga mediante `estado-arte-2pc-saga.tex`, que también debe
+acompañar a la fuente principal. La bibliografía contiene veinte fuentes académicas
+y tres referencias normativas o éticas.
 
 ## Compilación exacta
 
@@ -28,7 +50,7 @@ con TeX Live 2026 y Biber. La comprobación del Paso 14 resolvió la imagen loca
 `sha256:8957c916b8160049f89c24d362a6d86c09d8a04095acde37e88404c4afed85b4`;
 se conserva el identificador porque la etiqueta `latest` es mutable.
 
-## Reproducción de extremo a extremo (objetivo: menos de 15 minutos)
+## Reproducción de extremo a extremo
 
 Los siguientes comandos parten de una clonación limpia y no requieren levantar los
 microservicios. Se validan con CPython 3.11.1; `run_paso8.py` y el cuaderno usan
@@ -45,7 +67,7 @@ Push-Location experiments/paso7
 ..\..\.venv-repro\Scripts\python -m unittest -v test_coordination_lab.py
 Pop-Location
 
-# Matriz oficial ya ejecutada: regeneración determinista en un directorio temporal
+# Matriz corregida pendiente: nueva campaña, no reproducción de las 120 corridas históricas
 .\.venv-repro\Scripts\python experiments/paso8/run_paso8.py --output .repro-paso14 --repeticiones 12 --concurrencias 50 100 200 400 --fault-probability 0.10 --delay-seconds 5 --warmup-seconds 60 --seed 2026
 
 # Cuaderno de análisis y figuras del PDF
@@ -59,6 +81,8 @@ biber PFC4
 pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 ```
+
+El tiempo histórico inferior a quince minutos corresponde al banco anterior del commit `96a350b`. No se extiende a la campaña corregida de 288 corridas del comando actual. Para repetir exactamente el ensayo histórico se requiere aquel commit y sus parámetros originales.
 
 La duración se mide desde el primer `python -m unittest` hasta la última pasada de
 pdfLaTeX. La descarga inicial de dependencias no se incluye porque depende de la red;
@@ -92,6 +116,7 @@ El script solo lee los CSV incluidos. No genera mediciones, no cambia sus valore
 - `cierre/tiempos_resumen.csv`: copia de `resultados/tiempos_resumen.csv` del mismo commit.
 - `cierre/issues-corte.json`: estado y última respuesta de los issues 16–78; 63 registros, 50 cerrados y 13 abiertos. Tres abiertos son duplicados aparentes.
 - `cierre/doi-verificados.json`: metadatos consultados en Crossref de las quince fuentes académicas seleccionadas. Se contrastaron título, autores y DOI; las normas y el código ético se citan mediante URL institucional.
+- `cierre/bibliografia-2pc-saga.json`: metadatos y alcance de lectura de las cinco fuentes adicionales. La consulta de Daraghmi et al. se limita al resumen de autores; no se trasladan cifras del artículo.
 - Planes SQL: `docs/evidencias/resultados-planes-e4/comparativa-planes.csv` en el commit de corte.
 - Tolerancia: `docs/evidencias/resultados-tolerancia-e4/mediciones.csv` y `tiempo-reintegracion.csv` en el mismo commit.
 - Calidad: `docs/evidencias/cobertura/` y `docs/experimentos/resultados/iso25010/complejidad/summary.csv` del mismo commit.

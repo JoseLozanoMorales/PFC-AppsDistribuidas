@@ -1,0 +1,241 @@
+case_id,tx_id,coord,success,fault,elapsed_ms,error
+1,seed-2026000-case-1,2pc,True,none,339.442,
+4,seed-2026003-case-4,2pc,True,none,9.47,
+7,seed-2026006-case-7,2pc,True,none,639.771,
+10,seed-2026009-case-10,2pc,True,none,440.685,
+13,seed-2026012-case-13,2pc,True,none,739.514,
+16,seed-2026015-case-16,2pc,True,none,540.086,
+19,seed-2026018-case-19,2pc,True,none,1139.505,
+22,seed-2026021-case-22,2pc,True,none,838.121,
+25,seed-2026024-case-25,2pc,True,none,939.753,
+28,seed-2026027-case-28,2pc,True,none,1241.106,
+31,seed-2026030-case-31,2pc,True,none,1340.688,
+34,seed-2026033-case-34,2pc,True,none,1038.049,
+37,seed-2026036-case-37,2pc,True,none,7.925,
+40,seed-2026039-case-40,2pc,True,none,6.599,
+43,seed-2026042-case-43,2pc,True,none,8.709,
+46,seed-2026045-case-46,2pc,True,none,7.493,
+49,seed-2026048-case-49,2pc,True,none,12.557,
+52,seed-2026051-case-52,2pc,True,none,7.475,
+55,seed-2026054-case-55,2pc,True,none,9.274,
+58,seed-2026057-case-58,2pc,True,none,7.414,
+61,seed-2026060-case-61,2pc,True,none,8.621,
+64,seed-2026063-case-64,2pc,True,none,7.482,
+67,seed-2026066-case-67,2pc,True,none,9.028,
+70,seed-2026069-case-70,2pc,True,none,7.601,
+73,seed-2026072-case-73,2pc,True,none,9.622,
+76,seed-2026075-case-76,2pc,True,none,7.9,
+79,seed-2026078-case-79,2pc,True,none,8.671,
+82,seed-2026081-case-82,2pc,True,none,7.471,
+85,seed-2026084-case-85,2pc,True,none,10.32,
+88,seed-2026087-case-88,2pc,True,none,7.173,
+91,seed-2026090-case-91,2pc,True,none,7.42,
+94,seed-2026093-case-94,2pc,True,none,7.433,
+97,seed-2026096-case-97,2pc,True,none,6.863,
+100,seed-2026099-case-100,2pc,True,none,7.287,
+103,seed-2026102-case-103,2pc,True,none,9.225,
+106,seed-2026105-case-106,2pc,True,none,7.562,
+109,seed-2026108-case-109,2pc,True,none,9.393,
+112,seed-2026111-case-112,2pc,True,none,8.573,
+115,seed-2026114-case-115,2pc,True,none,7.613,
+118,seed-2026117-case-118,2pc,True,none,7.061,
+2,seed-2026001-case-2,2pc,False,omission,4.616,pasarela sin respuesta
+5,seed-2026004-case-5,2pc,False,omission,638.186,pasarela sin respuesta
+8,seed-2026007-case-8,2pc,True,omission,345.541,
+11,seed-2026010-case-11,2pc,True,omission,247.564,
+14,seed-2026013-case-14,2pc,False,omission,21.003,pasarela sin respuesta
+17,seed-2026016-case-17,2pc,True,omission,51.353,
+20,seed-2026019-case-20,2pc,True,omission,748.824,
+23,seed-2026022-case-23,2pc,False,omission,20.289,pasarela sin respuesta
+26,seed-2026025-case-26,2pc,True,omission,444.335,
+29,seed-2026028-case-29,2pc,True,omission,547.161,
+32,seed-2026031-case-32,2pc,True,omission,9.851,
+35,seed-2026034-case-35,2pc,True,omission,653.194,
+38,seed-2026037-case-38,2pc,True,omission,846.264,
+41,seed-2026040-case-41,2pc,True,omission,7.922,
+44,seed-2026043-case-44,2pc,True,omission,15.189,
+47,seed-2026046-case-47,2pc,False,omission,79.435,pasarela sin respuesta
+50,seed-2026049-case-50,2pc,False,omission,180.936,pasarela sin respuesta
+53,seed-2026052-case-53,2pc,True,omission,257.132,
+56,seed-2026055-case-56,2pc,True,omission,7.331,
+59,seed-2026058-case-59,2pc,False,omission,0.725,pasarela sin respuesta
+62,seed-2026061-case-62,2pc,True,omission,9.504,
+65,seed-2026064-case-65,2pc,True,omission,7.654,
+68,seed-2026067-case-68,2pc,False,omission,0.824,pasarela sin respuesta
+71,seed-2026070-case-71,2pc,False,omission,0.631,pasarela sin respuesta
+74,seed-2026073-case-74,2pc,True,omission,8.638,
+77,seed-2026076-case-77,2pc,False,omission,0.779,pasarela sin respuesta
+80,seed-2026079-case-80,2pc,False,omission,0.61,pasarela sin respuesta
+83,seed-2026082-case-83,2pc,True,omission,9.257,
+86,seed-2026085-case-86,2pc,False,omission,1.089,pasarela sin respuesta
+89,seed-2026088-case-89,2pc,True,omission,89.407,
+92,seed-2026091-case-92,2pc,True,omission,10.602,
+95,seed-2026094-case-95,2pc,False,omission,0.822,pasarela sin respuesta
+98,seed-2026097-case-98,2pc,True,omission,10.982,
+101,seed-2026100-case-101,2pc,True,omission,12.398,
+104,seed-2026103-case-104,2pc,True,omission,10.319,
+107,seed-2026106-case-107,2pc,False,omission,0.894,pasarela sin respuesta
+110,seed-2026109-case-110,2pc,True,omission,7.259,
+113,seed-2026112-case-113,2pc,False,omission,1.116,pasarela sin respuesta
+116,seed-2026115-case-116,2pc,True,omission,10.674,
+119,seed-2026118-case-119,2pc,False,omission,0.711,pasarela sin respuesta
+3,seed-2026002-case-3,2pc,True,timing,560.682,
+6,seed-2026005-case-6,2pc,True,timing,73.563,
+9,seed-2026008-case-9,2pc,True,timing,8.281,
+12,seed-2026011-case-12,2pc,True,timing,541.717,
+15,seed-2026014-case-15,2pc,False,timing,33.596,respuesta posterior al timeout
+18,seed-2026017-case-18,2pc,True,timing,452.433,
+21,seed-2026020-case-21,2pc,False,timing,1049.207,respuesta posterior al timeout
+24,seed-2026023-case-24,2pc,True,timing,639.924,
+27,seed-2026026-case-27,2pc,True,timing,956.797,
+30,seed-2026029-case-30,2pc,True,timing,242.634,
+33,seed-2026032-case-33,2pc,True,timing,745.417,
+36,seed-2026035-case-36,2pc,False,timing,849.247,respuesta posterior al timeout
+39,seed-2026038-case-39,2pc,True,timing,13.307,
+42,seed-2026041-case-42,2pc,True,timing,441.332,
+45,seed-2026044-case-45,2pc,False,timing,10.812,respuesta posterior al timeout
+48,seed-2026047-case-48,2pc,True,timing,13.639,
+51,seed-2026050-case-51,2pc,True,timing,451.295,
+54,seed-2026053-case-54,2pc,True,timing,13.333,
+57,seed-2026056-case-57,2pc,False,timing,15.528,respuesta posterior al timeout
+60,seed-2026059-case-60,2pc,False,timing,16.614,respuesta posterior al timeout
+63,seed-2026062-case-63,2pc,True,timing,18.922,
+66,seed-2026065-case-66,2pc,False,timing,10.933,respuesta posterior al timeout
+69,seed-2026068-case-69,2pc,False,timing,15.97,respuesta posterior al timeout
+72,seed-2026071-case-72,2pc,True,timing,18.496,
+75,seed-2026074-case-75,2pc,False,timing,10.77,respuesta posterior al timeout
+78,seed-2026077-case-78,2pc,False,timing,11.585,respuesta posterior al timeout
+81,seed-2026080-case-81,2pc,True,timing,18.966,
+84,seed-2026083-case-84,2pc,True,timing,10.649,
+87,seed-2026086-case-87,2pc,False,timing,197.911,respuesta posterior al timeout
+90,seed-2026089-case-90,2pc,True,timing,11.221,
+93,seed-2026092-case-93,2pc,False,timing,10.9,respuesta posterior al timeout
+96,seed-2026095-case-96,2pc,True,timing,17.099,
+99,seed-2026098-case-99,2pc,True,timing,17.731,
+102,seed-2026101-case-102,2pc,True,timing,19.665,
+105,seed-2026104-case-105,2pc,False,timing,13.379,respuesta posterior al timeout
+108,seed-2026107-case-108,2pc,False,timing,10.857,respuesta posterior al timeout
+111,seed-2026110-case-111,2pc,False,timing,19.695,respuesta posterior al timeout
+114,seed-2026113-case-114,2pc,True,timing,15.776,
+117,seed-2026116-case-117,2pc,False,timing,11.508,respuesta posterior al timeout
+120,seed-2026119-case-120,2pc,False,timing,10.852,respuesta posterior al timeout
+1,seed-2026000-case-1,saga,True,none,1180.733,
+4,seed-2026003-case-4,saga,True,none,57.225,
+7,seed-2026006-case-7,saga,True,none,1905.759,
+10,seed-2026009-case-10,saga,True,none,173.771,
+13,seed-2026012-case-13,saga,True,none,1605.613,
+16,seed-2026015-case-16,saga,True,none,2010.99,
+19,seed-2026018-case-19,saga,True,none,1287.269,
+22,seed-2026021-case-22,saga,True,none,1787.55,
+25,seed-2026024-case-25,saga,True,none,1477.563,
+28,seed-2026027-case-28,saga,True,none,1376.291,
+31,seed-2026030-case-31,saga,True,none,1748.091,
+34,seed-2026033-case-34,saga,True,none,1418.722,
+37,seed-2026036-case-37,saga,True,none,49.408,
+40,seed-2026039-case-40,saga,True,none,32.425,
+43,seed-2026042-case-43,saga,True,none,1573.731,
+46,seed-2026045-case-46,saga,True,none,37.002,
+49,seed-2026048-case-49,saga,True,none,57.151,
+52,seed-2026051-case-52,saga,True,none,33.993,
+55,seed-2026054-case-55,saga,True,none,37.742,
+58,seed-2026057-case-58,saga,True,none,32.35,
+61,seed-2026060-case-61,saga,True,none,34.446,
+64,seed-2026063-case-64,saga,True,none,39.124,
+67,seed-2026066-case-67,saga,True,none,37.086,
+70,seed-2026069-case-70,saga,True,none,35.018,
+73,seed-2026072-case-73,saga,True,none,33.025,
+76,seed-2026075-case-76,saga,True,none,29.457,
+79,seed-2026078-case-79,saga,True,none,31.537,
+82,seed-2026081-case-82,saga,True,none,29.82,
+85,seed-2026084-case-85,saga,True,none,31.546,
+88,seed-2026087-case-88,saga,True,none,48.556,
+91,seed-2026090-case-91,saga,True,none,35.569,
+94,seed-2026093-case-94,saga,True,none,32.288,
+97,seed-2026096-case-97,saga,True,none,34.378,
+100,seed-2026099-case-100,saga,True,none,27.214,
+103,seed-2026102-case-103,saga,True,none,31.474,
+106,seed-2026105-case-106,saga,True,none,38.647,
+109,seed-2026108-case-109,saga,True,none,38.444,
+112,seed-2026111-case-112,saga,True,none,36.46,
+115,seed-2026114-case-115,saga,True,none,48.102,
+118,seed-2026117-case-118,saga,True,none,45.836,
+2,seed-2026001-case-2,saga,False,omission,1571.704,pasarela sin respuesta
+5,seed-2026004-case-5,saga,False,omission,37.459,pasarela sin respuesta
+8,seed-2026007-case-8,saga,True,omission,1769.81,
+11,seed-2026010-case-11,saga,True,omission,1675.067,
+14,seed-2026013-case-14,saga,False,omission,1262.343,pasarela sin respuesta
+17,seed-2026016-case-17,saga,True,omission,82.161,
+20,seed-2026019-case-20,saga,True,omission,250.702,
+23,seed-2026022-case-23,saga,False,omission,463.967,pasarela sin respuesta
+26,seed-2026025-case-26,saga,True,omission,666.041,
+29,seed-2026028-case-29,saga,True,omission,127.403,
+32,seed-2026031-case-32,saga,True,omission,1452.276,
+35,seed-2026034-case-35,saga,True,omission,1360.544,
+38,seed-2026037-case-38,saga,True,omission,1259.499,
+41,seed-2026040-case-41,saga,True,omission,122.402,
+44,seed-2026043-case-44,saga,True,omission,33.054,
+47,seed-2026046-case-47,saga,False,omission,1059.432,pasarela sin respuesta
+50,seed-2026049-case-50,saga,False,omission,862.095,pasarela sin respuesta
+53,seed-2026052-case-53,saga,True,omission,51.987,
+56,seed-2026055-case-56,saga,True,omission,36.144,
+59,seed-2026058-case-59,saga,False,omission,31.566,pasarela sin respuesta
+62,seed-2026061-case-62,saga,True,omission,28.84,
+65,seed-2026064-case-65,saga,True,omission,32.939,
+68,seed-2026067-case-68,saga,False,omission,162.881,pasarela sin respuesta
+71,seed-2026070-case-71,saga,False,omission,30.604,pasarela sin respuesta
+74,seed-2026073-case-74,saga,True,omission,35.771,
+77,seed-2026076-case-77,saga,False,omission,30.706,pasarela sin respuesta
+80,seed-2026079-case-80,saga,False,omission,71.381,pasarela sin respuesta
+83,seed-2026082-case-83,saga,True,omission,518.416,
+86,seed-2026085-case-86,saga,False,omission,61.498,pasarela sin respuesta
+89,seed-2026088-case-89,saga,True,omission,165.864,
+92,seed-2026091-case-92,saga,True,omission,35.921,
+95,seed-2026094-case-95,saga,False,omission,27.997,pasarela sin respuesta
+98,seed-2026097-case-98,saga,True,omission,37.348,
+101,seed-2026100-case-101,saga,True,omission,371.113,
+104,seed-2026103-case-104,saga,True,omission,32.217,
+107,seed-2026106-case-107,saga,False,omission,36.435,pasarela sin respuesta
+110,seed-2026109-case-110,saga,True,omission,34.868,
+113,seed-2026112-case-113,saga,False,omission,36.09,pasarela sin respuesta
+116,seed-2026115-case-116,saga,True,omission,33.69,
+119,seed-2026118-case-119,saga,False,omission,30.461,pasarela sin respuesta
+3,seed-2026002-case-3,saga,True,timing,66.607,
+6,seed-2026005-case-6,saga,True,timing,472.598,
+9,seed-2026008-case-9,saga,True,timing,36.658,
+12,seed-2026011-case-12,saga,True,timing,1078.462,
+15,seed-2026014-case-15,saga,False,timing,280.831,respuesta posterior al timeout
+18,seed-2026017-case-18,saga,True,timing,1689.395,
+21,seed-2026020-case-21,saga,False,timing,2175.061,respuesta posterior al timeout
+24,seed-2026023-case-24,saga,True,timing,130.733,
+27,seed-2026026-case-27,saga,True,timing,1966.813,
+30,seed-2026029-case-30,saga,True,timing,2053.317,
+33,seed-2026032-case-33,saga,True,timing,1849.827,
+36,seed-2026035-case-36,saga,False,timing,1760.826,respuesta posterior al timeout
+39,seed-2026038-case-39,saga,True,timing,133.435,
+42,seed-2026041-case-42,saga,True,timing,35.621,
+45,seed-2026044-case-45,saga,False,timing,1107.682,respuesta posterior al timeout
+48,seed-2026047-case-48,saga,True,timing,667.185,
+51,seed-2026050-case-51,saga,True,timing,30.509,
+54,seed-2026053-case-54,saga,True,timing,36.447,
+57,seed-2026056-case-57,saga,False,timing,177.259,respuesta posterior al timeout
+60,seed-2026059-case-60,saga,False,timing,50.573,respuesta posterior al timeout
+63,seed-2026062-case-63,saga,True,timing,39.212,
+66,seed-2026065-case-66,saga,False,timing,172.498,respuesta posterior al timeout
+69,seed-2026068-case-69,saga,False,timing,938.657,respuesta posterior al timeout
+72,seed-2026071-case-72,saga,True,timing,32.043,
+75,seed-2026074-case-75,saga,False,timing,79.277,respuesta posterior al timeout
+78,seed-2026077-case-78,saga,False,timing,900.43,respuesta posterior al timeout
+81,seed-2026080-case-81,saga,True,timing,52.664,
+84,seed-2026083-case-84,saga,True,timing,34.778,
+87,seed-2026086-case-87,saga,False,timing,46.836,respuesta posterior al timeout
+90,seed-2026089-case-90,saga,True,timing,30.368,
+93,seed-2026092-case-93,saga,False,timing,224.073,respuesta posterior al timeout
+96,seed-2026095-case-96,saga,True,timing,42.846,
+99,seed-2026098-case-99,saga,True,timing,45.045,
+102,seed-2026101-case-102,saga,True,timing,48.039,
+105,seed-2026104-case-105,saga,False,timing,79.385,respuesta posterior al timeout
+108,seed-2026107-case-108,saga,False,timing,577.762,respuesta posterior al timeout
+111,seed-2026110-case-111,saga,False,timing,225.296,respuesta posterior al timeout
+114,seed-2026113-case-114,saga,True,timing,38.533,
+117,seed-2026116-case-117,saga,False,timing,54.095,respuesta posterior al timeout
+120,seed-2026119-case-120,saga,False,timing,114.48,respuesta posterior al timeout
