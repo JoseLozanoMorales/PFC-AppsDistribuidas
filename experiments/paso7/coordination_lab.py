@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Banco reproducible para comparar 2PC y Saga en el checkout de TiendaTech."""
+"""Piloto local reproducible de 2PC y Saga; no modela el stack distribuido.
+
+La evidencia principal contra microservicios y CockroachDB se obtiene con
+``experiments/paso8/run_real_experiment.py``. SQLite impone un único escritor,
+por lo que los resultados de este archivo no sustentan C2, C3 ni C6.
+"""
 
 from __future__ import annotations
 

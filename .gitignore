@@ -10,6 +10,7 @@
 .venv-*/
 __pycache__/
 *.py[cod]
+**/node_modules/
 
 **/target/
 spark/out/
@@ -23,4 +24,6 @@ Apps/web/infra/crdb-certs/
 experiments/generated/
 
 tests/load/results/
+tests/e2e-web/playwright-report/
+tests/e2e-web/test-results/
 __pycache__/

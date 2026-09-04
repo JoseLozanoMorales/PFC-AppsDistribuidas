@@ -1,0 +1,2 @@
+"run_kind","gateway_url","started_at","ended_at","requested_duration_seconds","elapsed_seconds","samples_total","samples_successful","uptime_percent","objective_percent","status"
+"OFICIAL","http://localhost:8180","2026-09-04T14:02:34.8995496+00:00","2026-09-04T15:02:35.3083329+00:00","3600","3600.409","3588","3588","100","99.5","CUMPLE"

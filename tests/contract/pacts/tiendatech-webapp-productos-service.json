@@ -1,0 +1,128 @@
+{
+  "consumer": {
+    "name": "tiendatech-webapp"
+  },
+  "interactions": [
+    {
+      "description": "una solicitud de la primera pagina del catalogo",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "existen productos habilitados"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/productos",
+        "query": {
+          "page": [
+            "0"
+          ],
+          "size": [
+            "12"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "habilitado": true,
+              "nombre": "Procesador Ryzen 7",
+              "preciounitario": 349.99,
+              "producto_id": 1,
+              "stock": 10
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].habilitado": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].nombre": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].preciounitario": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$[*].producto_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].stock": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "15.0.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "productos-service"
+  }
+}

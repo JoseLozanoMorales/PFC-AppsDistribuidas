@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Ejecuta y analiza el experimento del Paso 8 para TiendaTech.
+"""Ejecuta y analiza el piloto local histórico del Paso 8 para TiendaTech.
+
+Este ejecutor usa SQLite y no es la evidencia principal de C2, C3 o C6. Para
+la campaña contra microservicios y CockroachDB use ``run_real_experiment.py``.
 
 Usa el banco de Paso 7 como sistema bajo prueba: E-2PC y E-SAGA, inyector de
 fallos de pasarela y oraculo de consistencia. No depende de paquetes externos.
