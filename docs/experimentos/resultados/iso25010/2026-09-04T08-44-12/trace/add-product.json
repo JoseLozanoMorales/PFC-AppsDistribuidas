@@ -1,0 +1,1 @@
+{"status":409,"data":{"accepted":false,"message":"Invalid UUID string: iso25010-20260904-product4","reservedQuantity":0,"availableStock":0,"lamportTimestamp":0,"winningDeviceId":"","replayed":false},"message":"Error","timestamp":"2026-09-04T14:16:40.131665419Z"}

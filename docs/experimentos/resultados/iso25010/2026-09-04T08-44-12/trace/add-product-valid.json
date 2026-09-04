@@ -1,0 +1,1 @@
+{"status":200,"data":{"accepted":true,"message":"Reserva reconciliada","reservedQuantity":1,"availableStock":124,"lamportTimestamp":5,"winningDeviceId":"iso25010-session","replayed":false},"message":"OK","timestamp":"2026-09-04T14:18:10.013549456Z"}

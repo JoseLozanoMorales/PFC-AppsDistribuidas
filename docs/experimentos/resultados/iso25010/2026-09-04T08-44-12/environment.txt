@@ -1,0 +1,14 @@
+run_started_local=2026-09-04T08:44:12-05:00
+timezone=America/Guayaquil
+commit=77b4c70a08566584b6366cb3bbada3fff33d0bab
+host=IdeaPad-5-15ITL05
+os=Linux 7.0.0-30-generic x86_64
+cpu_logical=8
+memory_total=10GiB
+docker_client=29.7.2
+docker_server=29.7.2
+java_host=OpenJDK 25.0.4
+python_host=3.14.4
+topology=gateway + 7 Java domain services + armado-ia + Prometheus; CockroachDB configured through the active team environment
+load_profile=50 users, spawn rate 5 users/s, duration 60s
+availability_profile=3600 seconds, interval 1 second

@@ -36,10 +36,8 @@ public class JdbcProductoRepository implements ProductoRepository {
         return jdbc.query("""
                 select producto_id, nombre, preciounitario, enlace, fecha, stock,
                        marca_id, gama_id, iva_id, costo, habilitado,
-                       (SELECT g.galeria_id FROM productos.galeria_productos_v2 g
-                        WHERE g.producto_id = p.producto_id AND g.habilitado
-                        ORDER BY g.es_portada DESC, g.para_menu DESC,
-                                 g.posicion_galeria, g.galeria_id LIMIT 1) AS galeria_id
+                       (SELECT MIN(g.galeria_id) FROM productos.galeria_productos_v2 g
+                        WHERE g.producto_id = p.producto_id AND g.habilitado) AS galeria_id
                 from productos.producto p
                 where p.habilitado
                 order by producto_id

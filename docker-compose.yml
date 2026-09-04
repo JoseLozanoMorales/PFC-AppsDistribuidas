@@ -22,6 +22,14 @@ services:
       USUARIOS_SERVICE_URL: http://tiendatech-usuarios:8085
       RESERVATION_TCP_HOST: tiendatech-inventario
       RESERVATION_TCP_PORT: 9091
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
+      OTEL_SERVICE_NAME: tiendatech-pedidos
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tiendatech-jaeger:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+    volumes:
+      - ./ops/observability/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar:ro
     depends_on:
       tiendatech-crdb-init:
         condition: service_completed_successfully
@@ -133,6 +141,14 @@ services:
       EXPERIMENT_FAULT_INJECTION_ENABLED: ${EXPERIMENT_FAULT_INJECTION_ENABLED:-false}
       EXPERIMENT_FAULT_DELAY_MS: ${EXPERIMENT_FAULT_DELAY_MS:-5000}
       EXPERIMENT_OMISSION_DELAY_MS: ${EXPERIMENT_OMISSION_DELAY_MS:-9000}
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
+      OTEL_SERVICE_NAME: tiendatech-ventas
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tiendatech-jaeger:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+    volumes:
+      - ./ops/observability/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar:ro
     depends_on:
       tiendatech-crdb-init:
         condition: service_completed_successfully
@@ -234,6 +250,14 @@ services:
       CRDB_HEALTH_URL: http://tiendatech-crdb-1:8080
       COORD: ${COORD:-2pc}
       AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:-TiendaTechDistribuidaJwtSecretKey2026Seguro}
+      JAVA_TOOL_OPTIONS: -javaagent:/otel/opentelemetry-javaagent.jar
+      OTEL_SERVICE_NAME: tiendatech-gateway
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tiendatech-jaeger:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+    volumes:
+      - ./ops/observability/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar:ro
     depends_on:
       tiendatech-usuarios:
         condition: service_started
@@ -248,6 +272,8 @@ services:
       tiendatech-ventas:
         condition: service_started
       tiendatech-armado-ia:
+        condition: service_started
+      tiendatech-jaeger:
         condition: service_started
     networks:
       - default
@@ -318,6 +344,47 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+
+  tiendatech-grafana:
+    image: grafana/grafana:12.1.1
+    container_name: tiendatech-grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_RENDERING_SERVER_URL: http://tiendatech-grafana-renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://tiendatech-grafana:3000/
+    volumes:
+      - ./ops/observability/grafana-provisioning:/etc/grafana/provisioning:ro
+      - ./ops/observability/grafana-dashboard.json:/var/lib/grafana/dashboards/tiendatech.json:ro
+    networks:
+      - tiendatech-net
+    depends_on:
+      tiendatech-prometheus:
+        condition: service_healthy
+      tiendatech-grafana-renderer:
+        condition: service_started
+
+  tiendatech-grafana-renderer:
+    image: grafana/grafana-image-renderer:3.12.9
+    container_name: tiendatech-grafana-renderer
+    networks:
+      - tiendatech-net
+
+  tiendatech-jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: tiendatech-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "127.0.0.1:16686:16686"
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+    networks:
+      - tiendatech-net
 
   tiendatech-alloy:
     image: grafana/alloy:v1.10.2

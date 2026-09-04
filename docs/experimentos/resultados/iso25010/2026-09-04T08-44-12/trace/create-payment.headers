@@ -1,0 +1,6 @@
+HTTP/1.1 201 
+Location: http://tiendatech-pedidos:8083/api/metodopago/740
+Date: Fri, 04 Sep 2026 14:23:39 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+
