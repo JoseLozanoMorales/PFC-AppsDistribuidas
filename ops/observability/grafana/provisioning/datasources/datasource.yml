@@ -1,0 +1,12 @@
+# Datasource de Grafana provisionado como codigo (item 5, Paso 10).
+# Apunta al Prometheus local del propio docker compose; no requiere alta
+# manual en la UI de Grafana.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://tiendatech-prometheus:9090
+    isDefault: true
+    editable: false

@@ -5,6 +5,14 @@ from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME as OTEL_SERVICE_NAME_KEY
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from prometheus_client import Counter, Gauge, Histogram
 from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -29,6 +37,15 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
+        # Paso 10: mismo par trace_id/span_id que Micrometer Tracing agrega a
+        # los logs JSON de los seis microservicios Java (via MDC). Aqui se lee
+        # del span OTel activo, si lo hay (fuera de una peticion instrumentada
+        # -- por ejemplo en el arranque -- no hay span y se omiten los campos).
+        span = trace.get_current_span()
+        span_context = span.get_span_context()
+        if span_context.is_valid:
+            payload["trace_id"] = format(span_context.trace_id, "032x")
+            payload["span_id"] = format(span_context.span_id, "016x")
         for field in ("method", "route", "status", "response_time_ms"):
             value = getattr(record, field, None)
             if value is not None:
@@ -56,6 +73,25 @@ request_duration_seconds = Histogram(
 
 app = FastAPI(title="tiendatech-armado-ia")
 registrar_exception_handlers(app)
+
+# Paso 10: trazado distribuido. Mismo colector (Jaeger local via OTLP/HTTP,
+# ver docker-compose.yml) que reciben los seis microservicios Java a traves
+# de Micrometer Tracing -- el estandar W3C Trace Context (cabecera
+# "traceparent") es el mismo de ambos lados, asi que una compra que pasa por
+# Java y por este servicio Python queda en una sola traza, no en dos.
+# FastAPIInstrumentor crea el span de cada peticion entrante (y lee/propaga
+# "traceparent" si ya viene de otro servicio); HTTPXClientInstrumentor hace lo
+# mismo en cada llamada saliente a productos-service (ver
+# app/clients/producto_client.py, que usa httpx sin cambios propios).
+_tracer_provider = TracerProvider(
+    resource=Resource.create({OTEL_SERVICE_NAME_KEY: "tiendatech-armado-ia"})
+)
+_tracer_provider.add_span_processor(
+    BatchSpanProcessor(OTLPSpanExporter(endpoint=settings.otlp_tracing_endpoint))
+)
+trace.set_tracer_provider(_tracer_provider)
+FastAPIInstrumentor.instrument_app(app)
+HTTPXClientInstrumentor().instrument()
 
 
 @app.middleware("http")

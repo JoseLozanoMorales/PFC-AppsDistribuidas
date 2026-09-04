@@ -1,0 +1,16 @@
+# Proveedor de dashboards de Grafana provisionado como codigo (item 5, Paso 10).
+# Carga por archivo el panel versionado en ops/observability/grafana-dashboard.json
+# (montado dentro del contenedor en la carpeta indicada abajo); no depende de
+# una importacion manual desde la UI.
+apiVersion: 1
+
+providers:
+  - name: TiendaTech
+    orgId: 1
+    folder: ""
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/dashboards

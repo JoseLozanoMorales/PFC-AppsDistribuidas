@@ -20,6 +20,22 @@ docker compose ps
 
 Prometheus queda disponible en `http://localhost:9090`. En **Status > Targets** deben aparecer siete targets `UP`.
 
+## Grafana local (item 5, Paso 10)
+
+```powershell
+docker compose up -d tiendatech-grafana
+```
+
+Grafana queda disponible en `http://localhost:3000` (usuario/clave por defecto
+`admin`/`admin`, variables `GRAFANA_ADMIN_USER`/`GRAFANA_ADMIN_PASSWORD` en
+`.env`). El datasource de Prometheus y el dashboard **se cargan solos por
+provisioning** desde `ops/observability/grafana/provisioning/` y
+`ops/observability/grafana-dashboard.json` — no hace falta importarlo a mano;
+el panel abre directamente en **Dashboards > TiendaTech - Observabilidad
+distribuida**. Antes de una corrida de carga, abrir el dashboard con rango
+`Last 15 minutes` (o el que use la prueba) y capturar la pantalla con datos
+reales una vez termine, como evidencia del item 5.
+
 ## Grafana Cloud
 
 Crear un stack gratuito y copiar las credenciales de Prometheus Remote Write en variables locales, sin guardarlas en Git:

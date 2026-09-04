@@ -126,5 +126,12 @@ class Settings(BaseSettings):
     productos_service_base_url: str = Field(default="http://localhost:8081", alias="PRODUCTOS_SERVICE_URL")
     server_port: int = Field(default=8087, alias="SERVER_PORT")
 
+    # Trazado distribuido (Paso 10): mismo nombre de variable y mismo destino
+    # por defecto (Jaeger local via OTLP/HTTP) que usan los seis
+    # microservicios Java, para que una compra completa quede en una sola
+    # traza sin importar el stack de cada servicio.
+    otlp_tracing_endpoint: str = Field(
+        default="http://tiendatech-jaeger:4318/v1/traces", alias="OTLP_TRACING_ENDPOINT"
+    )
 
 settings = Settings()

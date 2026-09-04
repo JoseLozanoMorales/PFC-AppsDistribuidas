@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tiendatech.inventario.application.reservation.StockReservationService;
 import com.tiendatech.inventario.domain.reservation.ReservationCommand;
 import com.tiendatech.inventario.domain.reservation.ReservationResult;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +17,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,17 +29,22 @@ public class TcpReservationServer implements SmartLifecycle {
     private final int readTimeoutMs;
     private final ObjectMapper mapper;
     private final StockReservationService service;
+    private final Tracer tracer;
+    private final Propagator propagator;
     private final ExecutorService clients = Executors.newVirtualThreadPerTaskExecutor();
     private volatile boolean running;
     private ServerSocket serverSocket;
 
     public TcpReservationServer(@Value("${reservation.tcp.port:9091}") int port,
                                 @Value("${reservation.tcp.read-timeout-ms:5000}") int readTimeoutMs,
-                                ObjectMapper mapper, StockReservationService service) {
+                                ObjectMapper mapper, StockReservationService service,
+                                Tracer tracer, Propagator propagator) {
         this.port = port;
         this.readTimeoutMs = readTimeoutMs;
         this.mapper = mapper;
         this.service = service;
+        this.tracer = tracer;
+        this.propagator = propagator;
     }
 
     @Override public void start() {
@@ -65,17 +75,45 @@ public class TcpReservationServer implements SmartLifecycle {
             socket.setSoTimeout(readTimeoutMs);
             byte[] payload;
             while ((payload = LengthPrefixedJson.read(input)) != null) {
-                ReservationResult result;
-                try {
-                    ReservationCommand command = mapper.readValue(payload, ReservationCommand.class);
-                    result = service.reconcile(command);
-                } catch (Exception error) {
-                    result = new ReservationResult(false, error.getMessage(), 0, 0, 0, "", false);
-                }
-                LengthPrefixedJson.write(output, mapper.writeValueAsBytes(result));
+                LengthPrefixedJson.write(output, mapper.writeValueAsBytes(handleOne(payload)));
             }
         } catch (Exception error) {
             LOG.debug("Conexión TCP cerrada: {}", error.getMessage());
+        }
+    }
+
+    /**
+     * Deserializa el sobre de transporte (comando + traceparent opcional),
+     * extrae el contexto de traza propagado manualmente por
+     * LengthPrefixedTcpReservationClient (pedidos-service) y procesa la
+     * reserva dentro de un span SERVER "reservation.tcp.reconcile", hijo de
+     * ese contexto -- asi la reserva de stock queda en la misma traza que el
+     * resto de la compra en Jaeger.
+     */
+    private ReservationResult handleOne(byte[] payload) {
+        WireEnvelope envelope;
+        ReservationCommand command;
+        try {
+            envelope = mapper.readValue(payload, WireEnvelope.class);
+            command = envelope.command();
+        } catch (Exception malformed) {
+            return new ReservationResult(false, malformed.getMessage(), 0, 0, 0, "", false);
+        }
+        Map<String, String> carrier = envelope.traceparent() == null
+                ? Collections.emptyMap() : Map.of("traceparent", envelope.traceparent());
+        Span span = propagator.extract(carrier, Map::get)
+                .name("reservation.tcp.reconcile").kind(Span.Kind.SERVER).start();
+        span.tag("reservation.cartId", String.valueOf(command.cartId()));
+        span.tag("reservation.productId", String.valueOf(command.productId()));
+        try (Tracer.SpanInScope ignored = tracer.withSpan(span)) {
+            ReservationResult result = service.reconcile(command);
+            if (!result.accepted()) span.tag("reservation.rejected", result.message());
+            return result;
+        } catch (Exception error) {
+            span.error(error);
+            return new ReservationResult(false, error.getMessage(), 0, 0, 0, "", false);
+        } finally {
+            span.end();
         }
     }
 
@@ -87,4 +125,7 @@ public class TcpReservationServer implements SmartLifecycle {
     @Override public boolean isRunning() { return running; }
     @Override public boolean isAutoStartup() { return true; }
     @Override public int getPhase() { return Integer.MIN_VALUE + 100; }
+
+    /** Sobre de transporte simetrico al de LengthPrefixedTcpReservationClient en pedidos-service. */
+    private record WireEnvelope(ReservationCommand command, String traceparent) {}
 }

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tiendatech.pedidos.domain.ReservationCommand;
 import com.tiendatech.pedidos.domain.ReservationPort;
 import com.tiendatech.pedidos.domain.ReservationResult;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.propagation.Propagator;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,7 +16,19 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * El canal de reservas de stock es un socket TCP crudo, fuera del alcance de
+ * la auto-instrumentacion HTTP de Micrometer/OTel (que solo envuelve
+ * RestClient/RestTemplate). Este cliente abre un span manual
+ * "reservation.tcp.reconcile" (CLIENT) y propaga el contexto de traza dentro
+ * del propio mensaje -- campo "traceparent" del sobre JSON -- porque no hay
+ * headers HTTP donde llevarlo. Ver TcpReservationServer en
+ * inventario-service para el lado que extrae ese contexto y abre el span
+ * SERVER correspondiente, bajo el mismo trace ID.
+ */
 @Component
 public class LengthPrefixedTcpReservationClient implements ReservationPort {
     private static final int MAX_MESSAGE_BYTES = 64 * 1024;
@@ -22,6 +37,8 @@ public class LengthPrefixedTcpReservationClient implements ReservationPort {
     private final int connectTimeoutMs;
     private final int readTimeoutMs;
     private final ObjectMapper mapper;
+    private final Tracer tracer;
+    private final Propagator propagator;
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
@@ -30,27 +47,42 @@ public class LengthPrefixedTcpReservationClient implements ReservationPort {
             @Value("${reservation.tcp.port:9091}") int port,
             @Value("${reservation.tcp.connect-timeout-ms:2000}") int connectTimeoutMs,
             @Value("${reservation.tcp.read-timeout-ms:5000}") int readTimeoutMs,
-            ObjectMapper mapper) {
+            ObjectMapper mapper, Tracer tracer, Propagator propagator) {
         this.host = host; this.port = port; this.connectTimeoutMs = connectTimeoutMs;
         this.readTimeoutMs = readTimeoutMs; this.mapper = mapper;
+        this.tracer = tracer; this.propagator = propagator;
     }
 
     @Override
     public synchronized ReservationResult reconcile(ReservationCommand command) {
-        try {
-            return exchange(command);
-        } catch (IOException firstFailure) {
-            close();
-            try { return exchange(command); }
-            catch (IOException retryFailure) {
-                throw new IllegalStateException("Canal TCP de reservas no disponible", retryFailure);
+        Span span = tracer.spanBuilder().name("reservation.tcp.reconcile").kind(Span.Kind.CLIENT).start();
+        span.tag("net.transport", "tcp");
+        span.tag("net.peer.name", host);
+        span.tag("net.peer.port", String.valueOf(port));
+        span.tag("reservation.cartId", String.valueOf(command.cartId()));
+        span.tag("reservation.productId", String.valueOf(command.productId()));
+        try (Tracer.SpanInScope ignored = tracer.withSpan(span)) {
+            try {
+                return exchange(command, span);
+            } catch (IOException firstFailure) {
+                close();
+                try {
+                    return exchange(command, span);
+                } catch (IOException retryFailure) {
+                    span.error(retryFailure);
+                    throw new IllegalStateException("Canal TCP de reservas no disponible", retryFailure);
+                }
             }
+        } finally {
+            span.end();
         }
     }
 
-    private ReservationResult exchange(ReservationCommand command) throws IOException {
+    private ReservationResult exchange(ReservationCommand command, Span span) throws IOException {
         ensureConnected();
-        byte[] payload = mapper.writeValueAsBytes(command);
+        Map<String, String> carrier = new HashMap<>();
+        propagator.inject(span.context(), carrier, Map::put);
+        byte[] payload = mapper.writeValueAsBytes(new WireEnvelope(command, carrier.get("traceparent")));
         output.writeInt(payload.length);
         output.write(payload);
         output.flush();
@@ -76,4 +108,7 @@ public class LengthPrefixedTcpReservationClient implements ReservationPort {
         try { if (socket != null) socket.close(); } catch (IOException ignored) {}
         socket = null; input = null; output = null;
     }
+
+    /** Sobre de transporte: agrega el traceparent sin tocar el record de dominio ReservationCommand. */
+    private record WireEnvelope(ReservationCommand command, String traceparent) {}
 }

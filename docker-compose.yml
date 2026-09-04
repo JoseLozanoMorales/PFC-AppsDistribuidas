@@ -31,6 +31,8 @@ services:
         condition: service_started
       tiendatech-usuarios:
         condition: service_started
+      tiendatech-jaeger:
+        condition: service_started
     networks:
       - default
       - tiendatech-net
@@ -57,6 +59,8 @@ services:
     depends_on:
       tiendatech-crdb-init:
         condition: service_completed_successfully
+      tiendatech-jaeger:
+        condition: service_started
     networks:
       - default
       - tiendatech-net
@@ -81,6 +85,8 @@ services:
       BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
     depends_on:
       tiendatech-productos:
+        condition: service_started
+      tiendatech-jaeger:
         condition: service_started
     networks:
       - default
@@ -110,6 +116,8 @@ services:
     depends_on:
       tiendatech-crdb-init:
         condition: service_completed_successfully
+      tiendatech-jaeger:
+        condition: service_started
     ports:
       - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9091:9091"
       - "${RESERVATION_BIND_ADDRESS:-127.0.0.1}:9092:9092"
@@ -138,6 +146,8 @@ services:
         condition: service_completed_successfully
       tiendatech-inventario:
         condition: service_started
+      tiendatech-jaeger:
+        condition: service_started
     networks:
       - default
       - tiendatech-net
@@ -165,6 +175,8 @@ services:
       tiendatech-crdb-init:
         condition: service_completed_successfully
       tiendatech-inventario:
+        condition: service_started
+      tiendatech-jaeger:
         condition: service_started
     networks:
       - default
@@ -202,6 +214,8 @@ services:
     depends_on:
       tiendatech-crdb-init:
         condition: service_completed_successfully
+      tiendatech-jaeger:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8085/health"]
       interval: 10s
@@ -249,14 +263,23 @@ services:
         condition: service_started
       tiendatech-armado-ia:
         condition: service_started
+      tiendatech-jaeger:
+        condition: service_started
     networks:
       - default
       - tiendatech-net
 
+  # --max-offset=5s en los 3 nodos: CockroachDB por defecto exige que el reloj
+  # de cada nodo (y del cliente que ejecuta sql/schema.sql) no diverja mas de
+  # 500ms del resto del cluster, algo que el reloj del host bajo WSL2/Docker
+  # Desktop supera con facilidad (ya se vio el mismo "remote wall time is too
+  # far ahead" en el nodo unico del Paso 5.6, resuelto igual). No introduce
+  # sesgo en las mediciones de latencia de otros pasos: solo amplia la
+  # tolerancia de desfase aceptada, no altera como se miden los tiempos.
   tiendatech-crdb-1:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-1
-    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-1:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-1:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257 --max-offset=5s
     ports:
       - "127.0.0.1:26257:26257"
       - "127.0.0.1:8088:8080"
@@ -267,7 +290,7 @@ services:
   tiendatech-crdb-2:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-2
-    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-2:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-2:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257 --max-offset=5s
     volumes:
       - crdb-2-data:/cockroach/cockroach-data
     networks: [tiendatech-net]
@@ -275,7 +298,7 @@ services:
   tiendatech-crdb-3:
     image: cockroachdb/cockroach:v23.2.4
     container_name: tiendatech-crdb-3
-    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-3:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257
+    command: start --insecure --store=/cockroach/cockroach-data --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --advertise-addr=tiendatech-crdb-3:26257 --join=tiendatech-crdb-1:26257,tiendatech-crdb-2:26257,tiendatech-crdb-3:26257 --max-offset=5s
     volumes:
       - crdb-3-data:/cockroach/cockroach-data
     networks: [tiendatech-net]
@@ -318,6 +341,57 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+
+  # tiendatech-grafana: renderiza el panel versionado como codigo en
+  # ops/observability/grafana-dashboard.json (item 5 del Paso 10). El
+  # datasource de Prometheus y el propio dashboard se cargan por
+  # provisioning (ops/observability/grafana/provisioning/), no por
+  # importacion manual desde la UI: el panel sigue siendo codigo
+  # versionado en el repo, este contenedor solo lo hace visible con datos
+  # reales durante una prueba de carga. No sustituye al perfil opcional
+  # grafana-cloud (remote write a un stack externo); este es 100% local.
+  tiendatech-grafana:
+    image: grafana/grafana:11.3.1
+    container_name: tiendatech-grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./ops/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./ops/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./ops/observability:/etc/grafana/dashboards:ro
+    depends_on:
+      tiendatech-prometheus:
+        condition: service_healthy
+    networks:
+      - tiendatech-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # tiendatech-jaeger: colector y UI de trazado distribuido para el Paso 10.
+  # jaegertracing/all-in-one (v1) quedo descontinuado por el proyecto Jaeger
+  # (a partir de la v2.14 del binario unificado ya no se publica); el
+  # reemplazo oficial para uso local/desarrollo es esta imagen "jaeger" v2,
+  # que combina agente + colector + almacenamiento in-memory + UI en un solo
+  # contenedor y trae el receptor OTLP habilitado por defecto (sin variables
+  # de entorno adicionales). Recibe OTLP/HTTP en 4318 (los 6 microservicios
+  # Java via Micrometer Tracing, el gateway igual, y armado-ia via el SDK de
+  # Python) y OTLP/gRPC en 4317 (sin uso actual, expuesto por si se
+  # necesita). UI de consulta de trazas en 16686, usada para exportar la
+  # evidencia real del camino de compra.
+  tiendatech-jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.20.0
+    container_name: tiendatech-jaeger
+    ports:
+      - "127.0.0.1:16686:16686"
+    networks:
+      - tiendatech-net
 
   tiendatech-alloy:
     image: grafana/alloy:v1.10.2
