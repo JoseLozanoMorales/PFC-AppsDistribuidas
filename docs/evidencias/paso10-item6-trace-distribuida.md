@@ -79,19 +79,61 @@ antes/después (`2-agregar-ANTES...json` vs `3-agregar-DESPUES...json`)
 documenta el hallazgo, el diagnóstico y la corrección con datos reales, no
 solo la afirmación de que "ahora funciona".
 
+## Actualización 2026-09-04: el `X-Trace-Id` de negocio también cruza el canal TCP
+
+El punto 1 original de "Pendiente" (más abajo) quedó resuelto el mismo día,
+tras integrar en `main` el trabajo paralelo de otro integrante del equipo
+(Jeremy, observabilidad con OTel javaagent) y descubrir el hueco real al
+revisar el código: ninguno de los tres endpoints que disparan el canal TCP
+(`CarritoController#agregarProducto`, `#quitarProducto`, `#actualizarCantidad`)
+generaba ni aceptaba un `X-Trace-Id` -- ese header solo existía en
+`OrdenController#checkout`.
+
+Se corrigió en tres archivos:
+
+- **`CarritoController.java`**: los tres endpoints ahora aceptan el header
+  `X-Trace-Id` entrante o generan uno con `UUID.randomUUID()` (mismo patrón
+  que `checkout`), lo publican en `TraceContext` y lo devuelven en la
+  respuesta.
+- **`LengthPrefixedTcpReservationClient.java`**: el `WireEnvelope` ahora lleva
+  un tercer campo, `businessTraceId`, leído de `TraceContext.traceId()`,
+  además del `traceparent` de OTel que ya viajaba.
+- **`TcpReservationServer.java`** (inventario-service): extrae ese
+  `businessTraceId` y lo publica en el MDC con las claves `service`/`trace_id`
+  -- las mismas que usa `HttpObservabilityFilter` en toda la aplicación --
+  alrededor de la llamada a `StockReservationService.reconcile(...)`. Se
+  agregó además una línea de log real (`reservation_tcp_completed` /
+  `reservation_tcp_failed`), inexistente hasta ahora en ese flujo: sin ella,
+  poner el trace ID en el MDC no tenía ningún log que lo mostrara.
+  `logback-spring.xml` de inventario-service ya tenía `includeMdc=true` con
+  `LogstashEncoder`, así que el campo aparece como JSON real, no solo en
+  memoria.
+
+Verificación real, no solo compilación: se corrió `capturar-trace-agregar.ps1`
+contra el stack levantado con las imágenes reconstruidas
+(`docker compose build tiendatech-pedidos tiendatech-inventario`, ambas sin
+errores) y se confirmó en el log de `tiendatech-inventario`:
+
+```json
+{"...","message":"reservation_tcp_completed accepted=true cartId=1 productId=1",
+ "logger_name":"com.tiendatech.inventario.infrastructure.reservation.TcpReservationServer",
+ "trace_id":"8a53205d-707b-4afd-ba50-e9667ec4aa2b","service":"tiendatech-inventario", ...}
+```
+
+El campo `trace_id` es el `X-Trace-Id` de negocio generado por
+`CarritoController` para ese request en `pedidos-service`, correlacionado
+ahora en el log JSON de `inventario-service` pese a que la reserva viaja por
+un socket TCP crudo, no por HTTP. (Nota: `traceId`/`spanId` en camelCase que
+aparecen en la misma línea son del contexto OTel, un identificador distinto
+que ya viajaba desde antes -- ambos coexisten sin pisarse.)
+
 ## Pendiente / fuera de alcance de este cambio
 
-1. La propagación agregada es del contexto real de OpenTelemetry
-   (`traceparent`), no del `X-Trace-Id` de correlación manual de negocio
-   (`HttpObservabilityFilter`, Andy) -- ese header sigue sin cruzar el canal
-   TCP hacia los logs de `inventario`. No se verificó si esto es necesario
-   para el ítem 2 de la rúbrica (correlación en logs) además del ítem 6
-   (traza).
-2. El servicio `tiendatech-grpc` de reservas (`GrpcReservationEndpoint.java`,
+1. El servicio `tiendatech-grpc` de reservas (`GrpcReservationEndpoint.java`,
    puerto 9092) existe en el código pero no se usa en el flujo actual
    (`pedidos` habla con `inventario` solo por el puerto TCP 9091); no se
    instrumentó porque no está en la ruta de ejecución real.
-3. Los cambios de `docker-compose.yml`/`.env.example` de Grafana (ítem 5) y
-   estos dos archivos de instrumentación TCP (ítem 6) siguen sin commitear,
-   misma decisión de equipo pendiente que ya se documentó en
-   `arranque-limpio-paso15.md` y `paso10-item5-grafana-carga.md`.
+2. ~~Los cambios de `docker-compose.yml`/`.env.example` de Grafana (ítem 5) y
+   estos dos archivos de instrumentación TCP (ítem 6) siguen sin commitear~~
+   -- resuelto: todo quedó commiteado y pusheado a `main` (commit `b690470`,
+   fusionado con el trabajo paralelo de Jeremy) el mismo 2026-09-04.

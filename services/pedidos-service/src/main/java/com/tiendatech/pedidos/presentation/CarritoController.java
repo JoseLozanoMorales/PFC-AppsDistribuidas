@@ -7,6 +7,7 @@ import com.tiendatech.pedidos.domain.PageResponse;
 import com.tiendatech.pedidos.domain.Paginacion;
 import com.tiendatech.pedidos.infrastructure.config.AuthUsuario;
 import com.tiendatech.pedidos.infrastructure.config.AuthenticatedUser;
+import com.tiendatech.pedidos.infrastructure.observability.TraceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,37 +47,72 @@ public class CarritoController {
         return carritoService.listarDetalle(carritoId, Paginacion.de(page, size));
     }
 
+    // X-Trace-Id: mismo patron que OrdenController#checkout -- se acepta el
+    // header entrante o se genera uno nuevo, se publica en TraceContext (leido
+    // por LengthPrefixedTcpReservationClient para viajar dentro del sobre TCP
+    // hacia inventario-service) y se devuelve en la respuesta para que el
+    // llamador pueda correlacionar. Antes, ninguno de estos tres endpoints
+    // -- los unicos que disparan el canal TCP de reservas -- generaba o
+    // propagaba un X-Trace-Id.
     @PostMapping("/{carritoId}/agregar")
     public ResponseEntity<?> agregarProducto(@PathVariable Integer carritoId, @RequestBody Map<String, Object> body,
+                                                 @RequestHeader(value = "X-Trace-Id", required = false) String incomingTraceId,
                                                  @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
-        Integer productoId = (Integer) body.get("productoId");
-        Integer cantidad = (Integer) body.get("cantidad");
-        var result = carritoService.agregarProducto(carritoId, usuario.userId(), productoId, cantidad,
-                text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
-                text(body, "operationId", UUID.randomUUID().toString()));
-        return result.accepted() ? ResponseEntity.ok(result) : ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+        String traceId = traceId(incomingTraceId);
+        TraceContext.set(traceId, "none");
+        try {
+            Integer productoId = (Integer) body.get("productoId");
+            Integer cantidad = (Integer) body.get("cantidad");
+            var result = carritoService.agregarProducto(carritoId, usuario.userId(), productoId, cantidad,
+                    text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
+                    text(body, "operationId", UUID.randomUUID().toString()));
+            HttpStatus status = result.accepted() ? HttpStatus.OK : HttpStatus.CONFLICT;
+            return ResponseEntity.status(status).header("X-Trace-Id", traceId).body(result);
+        } finally {
+            TraceContext.clear();
+        }
     }
 
     @DeleteMapping("/{carritoId}/quitar/{productoId}")
     public ResponseEntity<Void> quitarProducto(@PathVariable Integer carritoId, @PathVariable Integer productoId,
+                                                @RequestHeader(value = "X-Trace-Id", required = false) String incomingTraceId,
                                                 @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
-        carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, 0,
-                "legacy-web", 0, UUID.randomUUID().toString());
-        return ResponseEntity.noContent().build();
+        String traceId = traceId(incomingTraceId);
+        TraceContext.set(traceId, "none");
+        try {
+            carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, 0,
+                    "legacy-web", 0, UUID.randomUUID().toString());
+            return ResponseEntity.noContent().header("X-Trace-Id", traceId).build();
+        } finally {
+            TraceContext.clear();
+        }
     }
 
     @PutMapping("/{carritoId}/actualizar/{productoId}")
     public ResponseEntity<?> actualizarCantidad(@PathVariable Integer carritoId, @PathVariable Integer productoId,
                                                     @RequestBody Map<String, Object> body,
+                                                    @RequestHeader(value = "X-Trace-Id", required = false) String incomingTraceId,
                                                     @AuthUsuario AuthenticatedUser usuario) {
         verificarPropietarioDeCarrito(carritoId, usuario);
-        Integer cantidad = (Integer) body.get("cantidad");
-        var result = carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, cantidad,
-                text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
-                text(body, "operationId", UUID.randomUUID().toString()));
-        return result.accepted() ? ResponseEntity.ok(result) : ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+        String traceId = traceId(incomingTraceId);
+        TraceContext.set(traceId, "none");
+        try {
+            Integer cantidad = (Integer) body.get("cantidad");
+            var result = carritoService.actualizarCantidad(carritoId, usuario.userId(), productoId, cantidad,
+                    text(body, "deviceId", "legacy-web"), number(body, "lamportTimestamp", 0),
+                    text(body, "operationId", UUID.randomUUID().toString()));
+            HttpStatus status = result.accepted() ? HttpStatus.OK : HttpStatus.CONFLICT;
+            return ResponseEntity.status(status).header("X-Trace-Id", traceId).body(result);
+        } finally {
+            TraceContext.clear();
+        }
+    }
+
+    private static String traceId(String incomingTraceId) {
+        return incomingTraceId == null || incomingTraceId.isBlank()
+                ? UUID.randomUUID().toString() : incomingTraceId.trim();
     }
 
     private void verificarPropioUsuario(Integer usuarioId, AuthenticatedUser usuario) {

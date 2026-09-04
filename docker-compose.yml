@@ -64,6 +64,12 @@ services:
     networks:
       - default
       - tiendatech-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   # tiendatech-armado-ia: sin datasource propio (servicio de calculo puro sobre
   # el catalogo de tiendatech-productos via HTTP, no persiste nada). Las
@@ -124,6 +130,12 @@ services:
     networks:
       - default
       - tiendatech-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8082/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   tiendatech-ventas:
     build:
@@ -268,6 +280,12 @@ services:
     networks:
       - default
       - tiendatech-net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
 
   # --max-offset=5s en los 3 nodos: CockroachDB por defecto exige que el reloj
   # de cada nodo (y del cliente que ejecuta sql/schema.sql) no diverja mas de

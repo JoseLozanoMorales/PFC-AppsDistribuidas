@@ -90,7 +90,7 @@ class CarritoControllerTest {
         Carrito ajeno = new Carrito(5, 99, BigDecimal.ZERO, true);
         when(carritoService.obtenerCarritoPorId(5)).thenReturn(ajeno);
 
-        assertThatThrownBy(() -> controller.agregarProducto(5, Map.of("productoId", 1, "cantidad", 2), CLIENTE))
+        assertThatThrownBy(() -> controller.agregarProducto(5, Map.of("productoId", 1, "cantidad", 2), null, CLIENTE))
                 .isInstanceOf(ResponseStatusException.class);
 
         verify(carritoService, never()).agregarProducto(any(), any(), any());
