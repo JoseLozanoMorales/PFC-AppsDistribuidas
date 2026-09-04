@@ -3,20 +3,21 @@
 **Asignatura:** Aplicaciones Distribuidas (ISR-701)
 **Carrera:** Ingeniería de Software, séptimo semestre
 **Institución:** Universidad Técnica Estatal de Quevedo (UTEQ)
-**Docente:** Ing. Gleiston C. Guerrero-Ulloa, Mgs.
+**Docente:** Prof. PhD. Gleiston C. Guerrero-Ulloa
 **Período académico:** 2026-2027
 **Entrega vigente:** Entrega 4 (E4) — refactor en capas, calidad de software, aplicaciones cliente y persistencia distribuida
 **Denominación anterior:** este repositorio se denominó `PFC-AppsDistribuidas` hasta la adopción de `TiendaTech` en la Entrega Final TA-PFC-E4; ambos nombres corresponden al mismo proyecto y equipo.
+**Comprobación del nombre:** las tres capturas incorporadas el 26 de agosto de 2026 están en [el registro de búsqueda de TiendaTech](docs/nombre/README.md). Hay coincidencias en el buscador general y GitHub; el cero de SourceForge corresponde a una búsqueda con filtro Windows. La evidencia documenta la búsqueda, no acredita exclusividad del nombre.
 **Rama de trabajo:** `main` (fusionada desde `feature/entrega-4` por PR con revisión cruzada)
 
 ## Equipo
 
 | Integrante | Rol | Usuario Git |
 |---|---|---|
-| Jhinson Stalyn Aucatoma Celorio | Integrante | `JhinsonAucatoma` |
-| Jeremy Ruperto Gaibor Rodríguez | Integrante | `JeremyGaibor` |
-| Andy Paul Sánchez Pilaloa | Integrante | `AndySanchez2004` |
-| José Alejandro Lozano Morales | Integrante | `JoseLozanoMorales` |
+| Jhinson Stalyn Aucatoma Celorio | Arquitecto | `JhinsonAucatoma` |
+| Jeremy Ruperto Gaibor Rodríguez | Líder de Desarrollo | `JeremyGaibor` |
+| Andy Paul Sánchez Pilaloa | Responsable de Calidad | `AndySanchez2004` |
+| José Alejandro Lozano Morales | Responsable de Documentación | `JoseLozanoMorales` |
 
 ---
 
@@ -26,21 +27,24 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 
 | Frente | Alcance | Estado | Evidencia |
 |---|---|---|---|
-| Arquitectura en capas | Refactor de los 6 microservicios Java a `domain`/`application`/`infrastructure`/`presentation`, con patrones GoF (Repository, Factory Method, Strategy, Observer, Decorator) | ✅ Completo | `docs/entrega4/PFC4.tex` §"Arquitectura del sistema", código en `*-service/src/main/java/org/example/` |
+| Arquitectura en capas | Refactor de los 6 microservicios Java a `domain`/`application`/`infrastructure`/`presentation`, con patrones GoF (Repository, Factory Method, Strategy, Observer, Decorator) | ✅ Completo | `docs/entrega4/PFC4.tex` §"Arquitectura del sistema", código bajo `services/*/src/main/java/com/tiendatech/` |
 | Persistencia distribuida | Clúster CockroachDB de 3 nodos; cada microservicio es dueño de su esquema y no consulta esquemas ajenos | ✅ Completo | `docker-compose.yml`, `.env.example`, `docs/db/schema.sql` |
 | Aplicación web | SPA con 12 rutas documentadas, panel de administración completo | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación web", capturas en `docs/entrega4/img/` |
 | Aplicación móvil | App Android con 2 capacidades de dispositivo (caché local Room/SQLite + funcionalidad adicional documentada), pruebas unitarias e instrumentadas | ✅ Completo | `docs/entrega4/PFC4.tex` §"Aplicación móvil" |
 | Contratos Pact (consumidor-proveedor) | Verificación de contratos web↔backend y móvil↔backend | ⬜ No implementado | Declarado explícitamente en `docs/entrega4/PFC4.tex` §"Pruebas y CI/CD" |
-| Pirámide de pruebas backend | Los 6 microservicios Java contienen pruebas; `pedidos-service` incluye integración con CockroachDB vía Testcontainers | ✅ Completo para Paso 4 | Código bajo `services/*/src/test/` |
+| Pirámide de pruebas | Los 6 microservicios Java contienen pruebas y `pedidos-service` incluye integración con CockroachDB vía Testcontainers; faltan contratos Pact y pruebas E2E de los clientes | 🟨 Parcial | Código bajo `services/*/src/test/`, escenario Locust en `tests/load/` |
 | Pruebas de carga | Escenario Locust versionado | ✅ Implementado | `tests/load/` |
 | CI/CD | `.github/workflows/ci.yml` (3 jobs: `android-mobile`, `crdb-tests`, `armado-ia-tests`) + `.github/workflows/publish-images.yml` (build multi-arquitectura de 8 imágenes) | 🟨 Parcial — cubre ~4 de los 7 jobs esperados por la rúbrica (falta `lint` Java/web dedicado y `test-web`, porque la web aún no tiene framework de pruebas configurado) | `.github/workflows/` |
-| Observabilidad (OpenTelemetry, Prometheus, Grafana) | Instrumentación de métricas, logs estructurados y trazas | ⬜ No implementado, declarado fuera de alcance por decisión consciente del equipo | `docs/entrega4/PFC4.tex` §"Observabilidad" y §"Discusión" |
-| Evaluación ISO/IEC 25010 | Medición formal de 5 características con intervalo de confianza 95% | ⬜ No implementado (depende de la observabilidad, que no se hizo) | `docs/entrega4/PFC4.tex` §"Evaluación ISO/IEC 25010" |
+| Observabilidad | Métricas Prometheus, logs JSON, recolección Alloy y dashboard de Grafana versionados; faltan trazas distribuidas completas y una observación prolongada | 🟨 Parcial | `ops/observability/`, `docker-compose.yml` y `docs/entrega4/PFC4.tex` §"CI, carga y observabilidad" |
+| Evaluación ISO/IEC 25010 | Evaluación documentada de cinco características con cobertura, complejidad y resultados disponibles; permanecen sin medir disponibilidad prolongada y p95 productivo | 🟨 Parcial | `docs/experimentos/resultados/`, `docs/entrega4/PFC4.tex` §"Evaluación de calidad" |
 | Manuscrito completo | Introducción, arquitectura, apps web/móvil, persistencia, calidad/CI-CD, observabilidad, ISO 25010, discusión y amenazas a la validez, ética, reproducibilidad, trazabilidad E1-E4, conclusiones | ✅ Completo | `docs/entrega4/PFC4.tex` |
 
-> **Nota de honestidad académica:** las secciones "Observabilidad", "Evaluación ISO/IEC 25010" y "Pirámide de pruebas" del manuscrito declaran sus propios vacíos con el mismo nivel de detalle que este README, en vez de reportar el proyecto como completo cuando no lo está. Ver `docs/entrega4/PFC4.tex` §"Discusión y amenazas a la validez" para la justificación de cada decisión de alcance.
+> **Nota de honestidad académica:** las secciones de observabilidad, evaluación ISO/IEC 25010 y pruebas del manuscrito distinguen lo implementado de las mediciones y recorridos todavía pendientes. Ver `docs/entrega4/PFC4.tex` para el alcance y las amenazas a la validez.
 
-### Qué está operativo hoy
+### Servicios definidos en `docker-compose.yml`
+
+La tabla describe la configuración versionada. Para afirmar que el despliegue está
+operativo debe ejecutarse la comprobación de salud indicada en el arranque rápido.
 
 | Servicio | Puerto | Persistencia | Comunicación saliente |
 |---|---:|---|---|
@@ -52,7 +56,7 @@ El manuscrito (`docs/entrega4/PFC4.tex`) documenta el estado real del proyecto s
 | `usuarios-service` | 8085 | CockroachDB, esquema `usuarios` | — |
 | `ventas-service` | 8086 | CockroachDB, esquema `ventas` | `inventario-service` (asíncrono, patrón Outbox) |
 | `armado-ia` (Python/FastAPI) | 8087 | — | `productos-service`, Amazon Bedrock (Nova Lite) |
-| `tiendatech-crdb-1` / `tiendatech-crdb-2` / `tiendatech-crdb-3` | SQL 26257-26259, consola 8091-8093 | CockroachDB local de 3 nodos, `num_replicas = 3`, modo desarrollo sin TLS | — |
+| `tiendatech-crdb-1` / `tiendatech-crdb-2` / `tiendatech-crdb-3` | Nodo 1: SQL 26257 y consola 8088; nodos 2 y 3 solo en la red interna | CockroachDB local de 3 nodos, `num_replicas = 3`, modo desarrollo sin TLS | — |
 
 ---
 
@@ -81,7 +85,7 @@ clúster CockroachDB de tres nodos; no necesita certificados ni una base externa
 En producción, `CRDB_DATASOURCE_URL` y `CRDB_CERTS_DIR` deben apuntar al clúster
 y certificados administrados por el equipo.
 
-Levantar el stack completo (gateway + 7 microservicios + `armado-ia`):
+Levantar el stack completo (gateway + 7 microservicios, incluido `armado-ia`):
 
 ```bash
 cp .env.example .env
@@ -105,10 +109,10 @@ El sistema se organiza como un API Gateway (Spring Cloud Gateway) que enruta hac
 
 ### Diagramas disponibles (`docs/diagrams/`)
 
-- `tiendatech-arquitectura-e4.drawio` / `.png` — Arquitectura general consolidada de la Entrega 4 (nueva, reemplaza la referencia a regenerar diagramas C4 de E3).
-- `tiendatech-c4-l1.drawio` / `.png`, `tiendatech-c4-l2.drawio` / `.png`, `tiendatech-c4-l3-checkout.drawio` / `.png` — Vistas C4 heredadas de E3.
-- `tiendatech-despliegue.drawio` / `.png` — Diagrama de despliegue.
-- `db-schema.drawio` / `.png` — Esquema de base de datos.
+- `tiendatech-arquitectura-e4.drawio` / `tiendatech-arquitectura-e4.drawio.png` — Arquitectura general consolidada de la Entrega 4.
+- `tiendatech-c4-l1.drawio` / `tiendatech-c4-l1.drawio.png`, `tiendatech-c4-l2.drawio` / `tiendatech-c4-l2.drawio.png`, `tiendatech-c4-l3-checkout.drawio` / `tiendatech-c4-l3-checkout.drawio.png` — Vistas C4 heredadas de E3.
+- `tiendatech-despliegue.drawio` / `tiendatech-despliegue.drawio.png` — Diagrama de despliegue.
+- `db-schema.drawio` / `db-schema.drawio.png` — Esquema de base de datos.
 
 ---
 
@@ -135,7 +139,7 @@ pdflatex PFC4.tex
 pdflatex PFC4.tex
 ```
 
-**Advertencia:** las imágenes son relativas a `docs/entrega4/`. Para compilar desde un clon u Overleaf se necesitan `UteqLogo.png`, las imágenes utilizadas en `img/`, las dos figuras PNG de `cierre/` y la bibliografía `../entrega3/referenciasPFC.bib`, conservando esa estructura. Los diagramas C4 se generan desde TikZ. La presencia local de estos archivos no implica que estén rastreados por Git.
+**Advertencia:** las imágenes son relativas a `docs/entrega4/`. Para compilar desde un clon u Overleaf deben conservarse `UteqLogo.png`, las imágenes de `img/`, las figuras PNG de `cierre/` y la bibliografía `../entrega3/referenciasPFC.bib` en su estructura versionada. Los diagramas C4 del manuscrito se generan desde TikZ.
 
 ---
 
@@ -179,7 +183,7 @@ compilar el PDF están en `docs/entrega4/README.md`.
 
 > **Cierre acumulativo del Paso 13 (1 de septiembre de 2026):** la versión actualizada es [PFC4.tex](docs/entrega4/PFC4.tex), con [PDF](docs/entrega4/PFC4.pdf) e [instrucciones de compilación con Biber](docs/entrega4/README.md). Las tablas históricas de esta sección no sustituyen el diagnóstico actualizado de esa memoria, que incorpora las evidencias posteriores y sus límites.
 
-Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de cierre del ciclo de las 4 entregas, y la Tabla 4 de `RÚBRICA FINAL PFC.pdf` (dimensiones D1-D9) para los pesos exactos de evaluación. Resumen por dimensión:
+Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de cierre del ciclo de las cuatro entregas y `docs/auditoria-rubrica-e4.md` para la auditoría interna de requisitos. Resumen por dimensión:
 
 | Dimensión | Estado |
 |---|---|
@@ -188,10 +192,10 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 | D3 — Aplicación móvil | ✅ Completo |
 | D4.1 — Contratos Pact | ⬜ No implementado |
 | D4.2 — Persistencia distribuida | ✅ Completo (clúster de 3 nodos y propiedad por esquema) |
-| D5.1 — Pirámide de pruebas | 🟨 Parcial (4/6 microservicios Java, sin E2E ni carga) |
+| D5.1 — Pirámide de pruebas | 🟨 Parcial (6/6 microservicios Java con pruebas y escenario de carga; faltan Pact y E2E de clientes) |
 | D5.2 — Pipeline CI/CD | 🟨 Parcial (~4/7 jobs esperados) |
-| D6 — Observabilidad | ⬜ No implementado, fuera de alcance declarado |
-| D7 — Evaluación ISO/IEC 25010 | ⬜ No implementado, fuera de alcance declarado |
+| D6 — Observabilidad | 🟨 Parcial (métricas, logs, Prometheus, Alloy y dashboard versionados; faltan trazas completas y observación prolongada) |
+| D7 — Evaluación ISO/IEC 25010 | 🟨 Parcial (cinco características documentadas; faltan mediciones operativas finales) |
 | D8 — Documentación y reproducibilidad | ✅ Completo |
 | D9 — Ética, discusión y defensa oral | ✅ Completo (defensa oral pendiente de presentar) |
 
@@ -203,9 +207,11 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 - Falta ampliar la cobertura de `ordenes-proveedores-service` y `ventas-service`; ambos ya contienen pruebas unitarias.
 - No hay E2E con Playwright; sí existe el escenario de carga Locust en `tests/load/`.
 - Pipeline CI/CD cubre parcialmente los 7 jobs esperados por la rúbrica; falta `lint` dedicado para servicios Java y para la web (la web no tiene framework de pruebas configurado todavía).
-- Observabilidad distribuida (OpenTelemetry, Prometheus, Grafana) y evaluación ISO/IEC 25010: declaradas explícitamente fuera de alcance de esta entrega por restricción de tiempo del equipo — ver justificación completa en `docs/entrega4/PFC4.tex` §"Discusión".
+- Observabilidad y evaluación ISO/IEC 25010 tienen evidencia parcial; siguen pendientes las trazas distribuidas completas, la observación de una hora, el p95 productivo y la tasa final de errores.
 - Para producción deben sustituirse todos los valores de ejemplo y montarse los certificados del clúster administrado; el Compose local es autocontenido y no requiere sobrescribir `CRDB_DATASOURCE_URL`.
-# Paso 3 — TCP, gRPC y relojes de Lamport
+---
+
+## 11. Paso 3 — TCP, gRPC y relojes de Lamport
 
 El carrito reserva stock mediante un canal TCP persistente entre `pedidos-service`
 y `inventario-service`. Cada mensaje usa un encabezado de 4 bytes, entero sin
@@ -254,4 +260,4 @@ pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 ```
 
-La bibliografía es `docs/entrega3/referenciasPFC.bib`. Para compilar desde un clon también deben versionarse el logo y las figuras utilizadas; los archivos v2 no son necesarios.
+La bibliografía es `docs/entrega3/referenciasPFC.bib`. El logo y las figuras utilizadas ya forman parte de la estructura versionada; los archivos v2 no son necesarios.

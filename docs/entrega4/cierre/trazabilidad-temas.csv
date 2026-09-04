@@ -1,0 +1,28 @@
+tema,archivo,linea_inicio,linea_fin,alcance,commit
+Microservicios y C4,docs/adr/ADR-009-arquitectura-microservicios.md,7,33,Decisión y fronteras; vistas C4 en Diseño del sistema.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Capas y SOLID,services/armado-ia/app/domain/catalogo_provider.py,1,20,Puerto segregado; inversión de dependencias documentada en ADR-008.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Separación de aplicación y persistencia,services/productos-service/src/main/java/com/tiendatech/productos/application/ProductoService.java,1,35,Servicio dependiente del puerto de dominio; no equivale a validar todo SOLID.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+GoF: Strategy,services/armado-ia/app/explicacion/service.py,19,53,Selección de explicación y fallback bajo una interfaz común.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+GoF: Adapter,services/armado-ia/app/explicacion/bedrock_client.py,32,51,Adapta el SDK a la interfaz de explicación.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+GoF: Decorator,Apps/web/frontend/src/main/java/com/tiendatech/frontend/security/JwtGatewayFilter.java,149,185,Envuelve la petición y expone cabeceras verificadas.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+GoF: Chain of Responsibility y Template Method,services/armado-ia/app/explicacion/validation.py,31,82,Cinco patrones GoF con los tres anteriores; Repository no se cuenta como GoF.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+HTTP y contrato OpenAPI,docs/api/productos.yaml,1,40,Contrato REST; rutas heredadas pendientes en issue 77.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+RPC y gRPC,contracts/stock_reservation.proto,1,31,Contrato de reservas; no acredita streaming de alertas.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Orden causal: Lamport,services/inventario-service/src/main/java/com/tiendatech/inventario/application/reservation/LamportClock.java,1,18,Reloj lógico; no aporta exclusión mutua ni consenso.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+"Fallos, timeouts y Circuit Breaker",services/ventas-service/src/main/java/com/tiendatech/ventas/infrastructure/client/InventarioClient.java,17,65,Control de llamadas remotas; idempotencia entre servicios aún pendiente.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Propiedad de datos por servicio,docs/db/migrations/V006__eliminar_fks_entre_esquemas.sql,1,24,Migración de referencias entre esquemas y consulta de comprobación.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Fragmentación horizontal,docs/adr/ADR-003-fragmentacion-pedidos.md,16,34,"Rangos temporales de pedidos, índice por usuario; distingue SPLIT de particiones Enterprise.",96a350b12377b537f979910324ba2fb6c6ee9ba2
+Fragmentación del catálogo,docs/adr/ADR-012-fragmentacion-catalogo.md,21,55,Decisión y álgebra por categoría sobre índice; conserva la clave primaria.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+"Réplica, consenso y quórum",docs/adr/ADR-004-consenso-raft.md,9,35,Raft del motor y mayoría; no se implementa consenso propio.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+CAP por agregado,docs/entrega4/PFC4.tex,210,223,"Política de inventario, pedidos, catálogo y analítica; no validada por el banco local.",96a350b12377b537f979910324ba2fb6c6ee9ba2
+Tolerancia a fallos del clúster,docs/evidencias/probar-tolerancia-fallos-e4.ps1,1,35,Procedimiento de caída/reintegración; resultados en Persistencia y tolerancia a fallos.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Procesamiento distribuido: Spark,spark/pipeline.py,185,244,"Transformaciones, filtros, joins y agregaciones; resultados separados por lectura.",96a350b12377b537f979910324ba2fb6c6ee9ba2
+Amdahl y escalabilidad,spark/analizar_experimento.py,275,308,Curva teórica frente a speedup observado; no se supone aceleración.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Coordinación 2PC y Saga,experiments/paso7/coordination_lab.py,63,164,Modelo SQLite con candado global; no son coordinadores distribuidos reales.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Oráculo e invariantes,experiments/paso7/coordination_lab.py,167,186,Consultas finales; no prueban unicidad estricta ni todos los estados pendientes.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Diseño y estadística experimental,experiments/paso8/run_paso8.py,94,123,U aproximada y A12; límites exactos discutidos en Amenazas a la validez.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Pruebas y cobertura,docs/experimentos/resultados/iso25010/cobertura-summary.csv,1,8,Resumen de alcance parcial; Python figura pendiente de XML en este corte.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+CI/CD y quality gates,.github/workflows/ci-cd.yml,17,77,Pruebas y conservación de reportes; configuración distinta de evidencia de ejecución.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Demostración rojo/verde,docs/evidencias/paso9-ci-rojo-verde.md,1,19,"Registro existente con redacción contradictoria sobre links; requiere conciliar run, commit y resultado.",96a350b12377b537f979910324ba2fb6c6ee9ba2
+Observabilidad,ops/observability/prometheus.yml,1,19,Scraping configurado; falta traza completa y panel con la carga oficial.,96a350b12377b537f979910324ba2fb6c6ee9ba2
+Seguridad y JWT,Apps/web/frontend/src/main/java/com/tiendatech/frontend/security/JwtGatewayFilter.java,90,116,Validación y propagación de identidad en gateway; no prueba seguridad integral.,96a350b12377b537f979910324ba2fb6c6ee9ba2
