@@ -194,12 +194,12 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 | D1 — Arquitectura y decisiones | ✅ Completo |
 | D2 — Aplicación web | ✅ Completo |
 | D3 — Aplicación móvil | ✅ Completo |
-| D4.1 — Contratos Pact | ⬜ No implementado |
+| D4.1 — Contratos Pact | ✅ Implementado para login móvil y catálogo web; ver `tests/contract/` |
 | D4.2 — Persistencia distribuida | ✅ Completo (clúster de 3 nodos y propiedad por esquema) |
-| D5.1 — Pirámide de pruebas | 🟨 Parcial (6/6 microservicios Java con pruebas y escenario de carga; faltan Pact y E2E de clientes) |
-| D5.2 — Pipeline CI/CD | 🟨 Parcial (~4/7 jobs esperados) |
-| D6 — Observabilidad | 🟨 Parcial (métricas, logs, Prometheus, Alloy y dashboard versionados; faltan trazas completas y observación prolongada) |
-| D7 — Evaluación ISO/IEC 25010 | 🟨 Parcial (cinco características documentadas; faltan mediciones operativas finales) |
+| D5.1 — Pirámide de pruebas | ✅ Unitarias, integración, Pact, E2E web y carga versionadas |
+| D5.2 — Pipeline CI/CD | ✅ CI y quality gate incluyen contratos y E2E; la publicación se condiciona a ambos |
+| D6 — Observabilidad | ✅ Métricas, logs, Grafana bajo carga y trazas distribuidas, incluido el canal TCP |
+| D7 — Evaluación ISO/IEC 25010 | ✅ Cinco características medidas; rendimiento no cumple su objetivo y conserva plan técnico |
 | D8 — Documentación y reproducibilidad | ✅ Completo |
 | D9 — Ética, discusión y defensa oral | ✅ Completo (defensa oral pendiente de presentar) |
 
@@ -207,11 +207,11 @@ Ver `docs/entrega4/PFC4.tex` §"Trazabilidad E1-E4" para la tabla completa de ci
 
 ## 10. Pendientes conocidos
 
-- Contratos Pact (consumer-driven) entre clientes web/móvil y backend: no iniciados.
 - Falta ampliar la cobertura de `ordenes-proveedores-service` y `ventas-service`; ambos ya contienen pruebas unitarias.
-- No hay E2E con Playwright; sí existe el escenario de carga Locust en `tests/load/`.
-- Pipeline CI/CD cubre parcialmente los 7 jobs esperados por la rúbrica; falta `lint` dedicado para servicios Java y para la web (la web no tiene framework de pruebas configurado todavía).
-- Observabilidad y evaluación ISO/IEC 25010 tienen evidencia parcial; siguen pendientes las trazas distribuidas completas, la observación de una hora, el p95 productivo y la tasa final de errores.
+- Los contratos Pact cubren dos interacciones y los E2E web dos recorridos; ampliar casos si cambian esos contratos o rutas.
+- La campaña distribuida completó 120 corridas, pero solo tres checkouts fueron confirmados; no permite elegir entre 2PC y Saga.
+- La carga ISO obtuvo p95 de 610 ms frente al objetivo menor a 500 ms; requiere optimización y repeticiones para estimar un intervalo del p95.
+- No se ejecutó una comparación del asistente basado en reglas frente a RAG sobre un conjunto independiente.
 - Para producción deben sustituirse todos los valores de ejemplo y montarse los certificados del clúster administrado; el Compose local es autocontenido y no requiere sobrescribir `CRDB_DATASOURCE_URL`.
 ---
 
