@@ -10,6 +10,65 @@ permissions:
   contents: read
 
 jobs:
+  contract-tests:
+    name: Pact consumer contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: tests/contract/package-lock.json
+      - name: Install contract-test dependencies
+        working-directory: tests/contract
+        run: npm ci
+      - name: Generate and validate Pact contracts
+        working-directory: tests/contract
+        run: npm test
+      - name: Upload Pact contracts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pact-contracts
+          path: tests/contract/pacts/*.json
+          if-no-files-found: error
+
+  e2e-web:
+    name: Playwright web E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            Apps/web/frontend/webapp/package-lock.json
+            tests/e2e-web/package-lock.json
+      - name: Install webapp dependencies
+        working-directory: Apps/web/frontend/webapp
+        run: npm ci
+      - name: Install E2E dependencies
+        working-directory: tests/e2e-web
+        run: npm ci
+      - name: Install Chromium
+        working-directory: tests/e2e-web
+        run: npx playwright install --with-deps chromium
+      - name: Run browser journeys
+        working-directory: tests/e2e-web
+        run: npm test
+      - name: Upload Playwright evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            tests/e2e-web/playwright-report/
+            tests/e2e-web/test-results/
+          if-no-files-found: ignore
+
   android-mobile:
     name: Android mobile quality
     runs-on: ubuntu-latest

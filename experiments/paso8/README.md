@@ -1,10 +1,20 @@
-# Paso 8 - ejecucion y analisis del experimento
+# Paso 8 - ejecución y análisis del experimento
 
-Este paso ejecuta el experimento propio de TiendaTech sobre el banco construido
+> **Alcance vigente:** la evidencia principal del Paso 8 es la campaña contra
+> microservicios y CockroachDB conservada en
+> `resultados-reales/oficial-v4-20260904/`. Este documento describe además el
+> piloto local histórico. `run_paso8.py` y `coordination_lab.py` usan SQLite y
+> se conservan únicamente para reproducibilidad; no sustentan C2, C3 ni C6.
+
+La campaña real ejecutó 120 corridas (24 condiciones × 5 repeticiones), con
+60 segundos de calentamiento y 90 de medición. Su informe y sus límites están
+en `resultados-reales/oficial-v4-20260904/analisis/informe_final.md`.
+
+El piloto local ejecuta el experimento propio de TiendaTech sobre el banco construido
 en `experiments/paso7`: confirmacion en dos fases (`2pc`) frente a saga con
 compensacion (`saga`), bajo fallos de pasarela.
 
-## Matriz corregida por ejecutar
+## Matriz local histórica
 
 - Estrategias: `2pc`, `saga`.
 - Concurrencia: `50`, `100`, `200`, `400` compradores simultaneos.
@@ -54,9 +64,9 @@ py experiments/paso8/run_paso8.py `
 - `resultados/amenazas_validez.md`: cuatro categorias de amenazas.
 - `resultados/db/*.db`: base SQLite auditable por corrida.
 
-## Validación complementaria contra microservicios reales
+## Validación principal contra microservicios reales
 
-`run_microservices.py` ejecuta compradores sintéticos contra
+`run_real_experiment.py` ejecuta compradores sintéticos contra
 `Gateway -> Pedidos -> Ventas/Inventario -> CockroachDB`. Antes de medir comprueba
 que los seis componentes estén disponibles y realiza 60 segundos de calentamiento
 de conectividad descartado. El banco JSON no se versiona porque contiene JWT efímeros; cada
@@ -75,10 +85,10 @@ Para habilitar los fallos controlados, el stack experimental se levanta con
 segundos; `omission` excede el timeout de siete segundos del cliente y no devuelve
 una respuesta útil. El mecanismo permanece desactivado por defecto.
 
-La salida conserva `trace_id`, estado HTTP, éxito, latencia y error por compra.
-Para comparar estrategias hay que reiniciar el stack con cada valor de `COORD` y
-verificar en los metadatos cuál quedó activo. El ejecutor no afirma que esa variable
-altere el flujo productivo: esa conmutación debe existir en el coordinador real.
+La campaña oficial ya conservada comprende 120 corridas y valida que todas las
+condiciones y concurrencias se ejecutaron. Registró saturación extrema y solo
+tres checkouts confirmados; por ello demuestra ejecución distribuida real, pero
+no permite afirmar superioridad de 2PC o Saga ni invariantes con potencia suficiente.
 
 ## Resultados de la corrida inicial invalidada
 

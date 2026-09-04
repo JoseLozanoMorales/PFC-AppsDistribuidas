@@ -1,0 +1,12 @@
+{
+  "name": "tiendatech-contract-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.pact.test.js"
+  },
+  "devDependencies": {
+    "@pact-foundation/pact": "^15.0.1"
+  }
+}

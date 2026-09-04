@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tiendatech.pedidos.domain.ReservationCommand;
 import com.tiendatech.pedidos.domain.ReservationPort;
 import com.tiendatech.pedidos.domain.ReservationResult;
+import com.tiendatech.pedidos.infrastructure.observability.TraceContext;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import io.micrometer.tracing.propagation.Propagator;
@@ -82,7 +83,8 @@ public class LengthPrefixedTcpReservationClient implements ReservationPort {
         ensureConnected();
         Map<String, String> carrier = new HashMap<>();
         propagator.inject(span.context(), carrier, Map::put);
-        byte[] payload = mapper.writeValueAsBytes(new WireEnvelope(command, carrier.get("traceparent")));
+        byte[] payload = mapper.writeValueAsBytes(
+                new WireEnvelope(command, carrier.get("traceparent"), TraceContext.traceId()));
         output.writeInt(payload.length);
         output.write(payload);
         output.flush();
@@ -109,6 +111,14 @@ public class LengthPrefixedTcpReservationClient implements ReservationPort {
         socket = null; input = null; output = null;
     }
 
-    /** Sobre de transporte: agrega el traceparent sin tocar el record de dominio ReservationCommand. */
-    private record WireEnvelope(ReservationCommand command, String traceparent) {}
+    /**
+     * Sobre de transporte: agrega el traceparent (contexto OTel del span
+     * reservation.tcp.reconcile) y el businessTraceId (X-Trace-Id de negocio,
+     * leido de TraceContext -- el mismo publicado por CarritoController para
+     * este request) sin tocar el record de dominio ReservationCommand. El
+     * traceparent ya viajaba; businessTraceId es lo que faltaba para que los
+     * logs de inventario-service puedan correlacionarse con los de pedidos
+     * por el mismo identificador manual, no solo por el trace ID de OTel.
+     */
+    private record WireEnvelope(ReservationCommand command, String traceparent, String businessTraceId) {}
 }

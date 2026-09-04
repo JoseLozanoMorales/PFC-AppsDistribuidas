@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: TiendaTech - API consolidada (Gateway)
+  version: "1.0.0"
+  description: >-
+    Punto de entrada único que consolida los siete contratos por servicio ya
+    existentes en este mismo directorio (armado-ia.yaml, inventario.yaml,
+    ordenes-proveedores.yaml, pedidos.yaml, productos.yaml, usuarios.yaml,
+    ventas.yaml). No redefine ninguna operación: cada ruta de abajo es una
+    referencia ($ref) directa a la definición real dentro del archivo del
+    servicio correspondiente, que sigue siendo la fuente de verdad de su
+    propio contrato. Todo el tráfico externo entra por el API Gateway.
+servers:
+  - url: http://localhost:8180
+    description: Gateway local (docker-compose.yml)
+tags:
+  - name: armado-ia
+  - name: inventario
+  - name: ordenes-proveedores
+  - name: pedidos
+  - name: productos
+  - name: usuarios
+  - name: ventas
+paths:
+  /api/armado/analizar:
+    $ref: './armado-ia.yaml#/paths/~1api~1armado~1analizar'
+
+  /api/inventario:
+    $ref: './inventario.yaml#/paths/~1api~1inventario'
+  /api/inventario/{productoId}:
+    $ref: './inventario.yaml#/paths/~1api~1inventario~1{productoId}'
+  /api/sp/movimiento-inventario:
+    $ref: './inventario.yaml#/paths/~1api~1sp~1movimiento-inventario'
+
+  /api/proveedores:
+    $ref: './ordenes-proveedores.yaml#/paths/~1api~1proveedores'
+  /api/proveedores/{id}:
+    $ref: './ordenes-proveedores.yaml#/paths/~1api~1proveedores~1{id}'
+  /api/ordenes-compra:
+    $ref: './ordenes-proveedores.yaml#/paths/~1api~1ordenes-compra'
+  /api/ordenes-compra/{id}:
+    $ref: './ordenes-proveedores.yaml#/paths/~1api~1ordenes-compra~1{id}'
+
+  /api/ordenes:
+    $ref: './pedidos.yaml#/paths/~1api~1ordenes'
+  /api/ordenes/{id}:
+    $ref: './pedidos.yaml#/paths/~1api~1ordenes~1{id}'
+  /api/carrito:
+    $ref: './pedidos.yaml#/paths/~1api~1carrito'
+  /api/checkout:
+    $ref: './pedidos.yaml#/paths/~1api~1checkout'
+  /api/metodos-pago:
+    $ref: './pedidos.yaml#/paths/~1api~1metodos-pago'
+
+  /api/productos:
+    $ref: './productos.yaml#/paths/~1api~1productos'
+  /api/productos/{id}:
+    $ref: './productos.yaml#/paths/~1api~1productos~1{id}'
+  /api/productos/mas-vendidos:
+    $ref: './productos.yaml#/paths/~1api~1productos~1mas-vendidos'
+  /api/categorias:
+    $ref: './productos.yaml#/paths/~1api~1categorias'
+  /api/marcas:
+    $ref: './productos.yaml#/paths/~1api~1marcas'
+  /api/gamas:
+    $ref: './productos.yaml#/paths/~1api~1gamas'
+
+  /api/login:
+    $ref: './usuarios.yaml#/paths/~1api~1login'
+  /api/usuarios:
+    $ref: './usuarios.yaml#/paths/~1api~1usuarios'
+  /api/usuarios/{id}:
+    $ref: './usuarios.yaml#/paths/~1api~1usuarios~1{id}'
+  /auth/refresh:
+    $ref: './usuarios.yaml#/paths/~1auth~1refresh'
+  /api/provincias:
+    $ref: './usuarios.yaml#/paths/~1api~1provincias'
+  /api/ciudades:
+    $ref: './usuarios.yaml#/paths/~1api~1ciudades'
+
+  /api/facturas:
+    $ref: './ventas.yaml#/paths/~1api~1facturas'
+  /api/facturas/{id}:
+    $ref: './ventas.yaml#/paths/~1api~1facturas~1{id}'
+  /api/facturas/{id}/detalle:
+    $ref: './ventas.yaml#/paths/~1api~1facturas~1{id}~1detalle'

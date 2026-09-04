@@ -157,11 +157,15 @@ afectadas, está en `docs/entrega4/PFC4.tex`, sección "Declaraciones".
 
 El paquete experimental está formado por:
 
-- `experiments/paso7/coordination_lab.py`: generador determinista, carga concurrente,
-  inyector de fallos y oráculo de consistencia.
+- `experiments/paso8/run_real_experiment.py`: experimento principal contra
+  `Gateway -> microservicios -> CockroachDB`, con calentamiento, fallos y carga Locust.
+- `experiments/paso8/resultados-reales/oficial-v4-20260904/`: campaña principal
+  auditada de 120 corridas y su validación estructural.
+- `experiments/paso7/coordination_lab.py`: piloto local didáctico en SQLite; no
+  constituye evidencia de concurrencia distribuida ni sustenta C2, C3 o C6.
 - `experiments/paso7/evidence/`: bancos de casos y salidas auditables del piloto.
-- `experiments/paso8/run_paso8.py`: ejecución de la matriz, análisis estadístico y
-  generación de figuras SVG.
+- `experiments/paso8/run_paso8.py`: ejecución del piloto local y generación de
+  figuras SVG históricas.
 - `experiments/paso8/resultados/experimento_crudo.csv`: 120 corridas crudas, junto
   con resúmenes, bases SQLite y metadatos.
 - `experiments/paso8/analisis.ipynb`: cuaderno de inspección independiente.

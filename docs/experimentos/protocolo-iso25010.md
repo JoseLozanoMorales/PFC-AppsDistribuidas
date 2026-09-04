@@ -2,7 +2,7 @@
 
 ## Alcance y reglas
 
-Responsable: **Jeremy**. Se evalúan disponibilidad, eficiencia de desempeño,
+Responsable: **Andy Paul Sánchez Pilaloa**. Se evalúan disponibilidad, eficiencia de desempeño,
 fiabilidad, mantenibilidad y seguridad. Un valor se publica únicamente si existe
 un artefacto reproducible; la ausencia de medición se registra como `PENDIENTE`,
 nunca como una estimación.
@@ -85,10 +85,20 @@ nunca como una estimación.
 - `CUMPLE` solo si existe medición y satisface estrictamente el operador del
   objetivo; `NO CUMPLE` si existe y lo viola; `PENDIENTE` si falta la medición.
 
-## Estado de esta corrida
+## Estado de la corrida oficial del 2026-09-04
 
-El entorno de ejecución del 2026-08-28 no tenía daemon Docker disponible, por
-lo que no produjo uptime, carga ni captura. Esos campos permanecen pendientes.
-PMD 7.17.0 sí se ejecutó sobre los siete módulos Java y midió un máximo por
-método de 20; el reporte consolidado está en
-`resultados/iso25010/complejidad/summary.csv`.
+La ejecución congeló entorno y topología en `2026-09-04T08-44-12/environment.txt`.
+La disponibilidad se observó durante 3600.409 s, con 3588/3588 sondeos exitosos
+(100 %; IC95 % Wilson 99.8931--100 %). La carga alcanzó 50 usuarios durante 60 s:
+2112 solicitudes, cero fallos y P95 agregado de 610 ms. Por tanto, disponibilidad
+y fiabilidad cumplen, mientras rendimiento no cumple el umbral estricto de 500 ms.
+
+PMD 7.17.0 registra complejidad máxima 9. La cobertura consolidada de las clases
+instrumentadas es 935/1136 líneas (82.31 %), pero conserva filtros estrechos en
+varios módulos; se informa como cumplimiento acotado, no como cobertura integral
+del producto. Seguridad cubre las ocho familias protegidas y las ocho responden
+401 sin JWT. El CSV y la tabla LaTeX consolidados no contienen métricas pendientes.
+
+No se calcula un intervalo para el P95 porque existe una sola corrida oficial;
+hacerlo requeriría muestras por solicitud o repeticiones independientes. Esta
+limitación se mantiene explícita y no cambia la decisión de `NO CUMPLE` (610 ms).

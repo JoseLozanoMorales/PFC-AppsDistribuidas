@@ -2,28 +2,23 @@ name: Publicar imágenes Docker
 
 on:
   workflow_dispatch:
-  push:
+  workflow_run:
+    workflows: ["CI-CD quality gate"]
+    types: [completed]
     branches: [main]
-    paths:
-      - "Apps/web/frontend/**"
-      - "services/armado-ia/**"
-      - "services/inventario-service/**"
-      - "services/ordenes-proveedores-service/**"
-      - "services/pedidos-service/**"
-      - "services/productos-service/**"
-      - "services/usuarios/**"
-      - "services/ventas-service/**"
-      - ".github/workflows/publish-images.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: docker-images-${{ github.ref }}
+  group: docker-images-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
   publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     name: ${{ matrix.image }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -60,11 +55,13 @@ jobs:
     steps:
       - name: Descargar código
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Calcular versión
         id: version
         shell: bash
-        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+        run: echo "short_sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Habilitar emulación ARM64
         uses: docker/setup-qemu-action@v4
