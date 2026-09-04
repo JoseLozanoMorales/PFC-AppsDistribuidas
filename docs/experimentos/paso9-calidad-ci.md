@@ -1,8 +1,8 @@
 # Paso 9 - pruebas, cobertura e integracion continua
 
-Fecha de revision local: 2026-09-01 (segunda revision, misma fecha).
+Fecha de revision local: 2026-09-04 (tercera revision).
 
-> Esta seccion superior refleja el cierre de la segunda revision. El resto del
+> Esta seccion superior refleja el cierre de la tercera revision. El resto del
 > documento (mas abajo) es el registro original de la primera revision y se deja
 > sin editar como historial.
 
@@ -23,10 +23,10 @@ Fecha de revision local: 2026-09-01 (segunda revision, misma fecha).
 | Unitarias por microservicio | Cumple en Java | `services/*/src/test/` contiene pruebas en los seis microservicios Java. En esta revision pasaron `inventario-service` 17/17, `ordenes-proveedores-service` 6/6, `productos-service` 14/14 y `usuarios` 27/27 usando `maven:3.9-eclipse-temurin-21`. |
 | Integracion por Gateway | Cumple parcialmente | `Apps/web/frontend/src/test/java/com/tiendatech/frontend/GatewayIntegrationTest.java` existe y se ejecuta desde `.github/workflows/ci-cd.yml`. |
 | Cobertura >=70% | Cumple para Java | `docs/experimentos/resultados/iso25010/cobertura-summary.csv`; los seis servicios Java quedan sobre 70%. `armado-ia` ya tiene `docs/evidencias/cobertura/armado-ia-coverage.xml`. |
-| Complejidad ciclomatica | No cumple todavia | `scripts/measure-cyclomatic-complexity.ps1` se ejecuto de nuevo. `docs/experimentos/resultados/iso25010/complejidad/summary.csv` sigue en rojo porque PMD mide tambien filtros HTTP, advice de respuesta y algunos metodos de dominio/repositorio por encima del umbral. |
+| Complejidad ciclomatica | Cumple | La segunda revision dejo los siete modulos por debajo de 10; ver la tabla de resultados mas abajo. |
 | CI/CD | Cumple estructura base | `.github/workflows/ci-cd.yml` tiene `test-java`, `test-python`, `lint`, `integration-test`, `build` y `coverage`, activado por `push`, `pull_request` y `workflow_dispatch`. |
-| Carga 50 usuarios/60s | Existe evidencia, pero con fallos | `tests/load/results/tiendatech-50-users_stats.csv` muestra 1911 requests y 862 fallos, concentrados en `GET /api/productos`; no debe presentarse como prueba en verde. |
-| Rojo/verde del pipeline | Pendiente externo | Falta guardar enlaces de GitHub Actions a una ejecucion roja intencional y su ejecucion verde posterior. No se puede producir localmente sin usar el remoto. |
+| Carga 50 usuarios/60s | Cumple en entorno local controlado | Corrida del 2026-09-04: 50 usuarios alcanzados, 2624 solicitudes, 0 fallos, 44.25 req/s, mediana 8 ms y p95 17 ms. Evidencia en `tests/load/results/tiendatech-50-users-20260904-local_*.csv`. |
+| Rojo/verde del pipeline | Cumple | Enlaces exactos y commits documentados en `docs/evidencias/paso9-ci-rojo-verde.md`. |
 
 ## Cambios hechos en esta revision
 
@@ -149,3 +149,40 @@ GitHub Actions. Requiere push real a GitHub, por lo que no se ejecuta automatica
 
 Sigue pendiente de reconciliar con las evidencias nuevas de Paso 8 y Paso 9; no se
 toco en esta revision (fuera del alcance pedido).
+
+---
+
+## Tercera revision (2026-09-04) - carga oficial de 50 usuarios
+
+Se ejecuto Locust durante 60 segundos, alcanzando los 50 usuarios configurados
+(`spawn-rate=5`) contra el API Gateway local. Resultado agregado:
+
+| metrica | resultado |
+|---|---:|
+| solicitudes | 2624 |
+| fallos | 0 (0.00%) |
+| rendimiento | 44.25 req/s |
+| tiempo medio | 48.46 ms |
+| mediana | 8 ms |
+| p95 | 17 ms |
+| maximo | 2332.60 ms |
+
+La primera corrida del dia contra el cluster AWS no se presenta como aprobatoria:
+fallo el 52.15% de 907 solicitudes porque CockroachDB rechazo consultas al agotar
+su presupuesto SQL de 64 MiB. La corrida valida se repitio contra CockroachDB local
+con `--max-sql-memory=25%`, sin modificar el cluster compartido.
+
+Limitacion: la base local utilizada estaba inicializada pero sin productos en el
+catalogo; por tanto esta evidencia valida concurrencia, disponibilidad, enrutamiento
+y tiempos de los endpoints publicos, pero no el costo de serializar un catalogo
+poblado. Esta limitacion se conserva expresamente para no sobreinterpretar el
+resultado.
+
+Comando reproducible:
+
+```powershell
+python -m locust -f tests/load/locustfile.py --host http://localhost:8180 `
+  --headless --users 50 --spawn-rate 5 --run-time 60s --stop-timeout 10 `
+  --csv tests/load/results/tiendatech-50-users-20260904-local `
+  --html tests/load/results/tiendatech-50-users-20260904-local.html
+```

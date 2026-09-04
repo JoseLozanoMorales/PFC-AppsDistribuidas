@@ -1,12 +1,12 @@
 % Copiar dentro de un entorno table. Requiere booktabs y tabularx.
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.2cm} X >{\raggedright\arraybackslash}p{2cm} >{\raggedright\arraybackslash}p{2.1cm} X}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.8cm} X >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{1.5cm} >{\raggedright\arraybackslash}p{1.5cm} X}
 \toprule
-Caracterís\-tica & Valor medido & Objetivo & Estado & Plan técnico \\
+Caracterís\-tica & Valor medido & IC 95\,\% & Objetivo & Estado & Plan técnico \\
 \midrule
-Disponibi\-lidad & Pendiente & Uptime $\geq 99{,}5$ por ciento en 1 h & Pendiente & Ejecutar 3600 s con stack y targets verificados. \\
-Rendimiento & Pendiente & P95 $<500$ ms; 50 usuarios & Pendiente & Ejecutar Locust 60 s y optimizar el endpoint dominante. \\
-Fiabilidad & Pendiente & 5xx $<1$ por ciento & Pendiente & Calcular 5xx sobre la misma carga y corregir la causa dominante. \\
-Manteni\-bilidad & Todos $>70$ por ciento; mínimo Java $75{,}80$ por ciento; complejidad máxima 20 & Cobertura $\geq70$ por ciento; complejidad $<10$ & No cumple & Extraer decisiones de los cinco métodos señalados por PMD y repetir el análisis. \\
-Seguridad & 8/8 familias; 11 casos; 0 fallos & 100 por ciento retorna 401 sin JWT & Cumple & Mantener la prueba parametrizada en CI. \\
+Disponibi\-lidad & 3588/3588; 100\,\% en 3600 s & 99{,}8931--100\,\% (Wilson) & $\geq99{,}5$\,\% & Cumple & Repetir la ventana en cada entrega. \\
+Rendimiento & P95 610 ms; 50 usuarios/60 s & No estimable con una corrida & $<500$ ms & No cumple & Repetir diez veces y optimizar productos/CRDB. \\
+Fiabilidad & 0/2112 respuestas 5xx & 0--0{,}1816\,\% (Wilson) & $<1$\,\% & Cumple & Conservar códigos HTTP por corrida. \\
+Manteni\-bilidad & Cobertura 82{,}31\,\%; complejidad máxima 9 & Cobertura 79{,}9794--84{,}4155\,\% (descriptivo) & $\geq70$\,\%; $<10$ & Cumple acotado & Quitar filtros estrechos de JaCoCo. \\
+Seguridad & 8/8 familias retornan 401 & 67{,}5592--100\,\% (descriptivo) & 100\,\% & Cumple & Ampliar al agregar rutas protegidas. \\
 \bottomrule
 \end{tabularx}

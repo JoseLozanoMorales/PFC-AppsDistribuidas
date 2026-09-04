@@ -8,7 +8,10 @@
 - Rendimiento: P95 de 610 ms, por lo que no cumple el umbral estricto menor a 500 ms.
 - Dashboard: `dashboard.png`, capturado desde Grafana con la ventana de la sesión completa.
 - Trazado no destructivo: `trace/gateway-read-traces.json`, exportación de Jaeger con 20 trazas del Gateway.
-- Disponibilidad: en ejecución durante 3600 s continuos; el resultado se incorporará al terminar el recolector oficial.
+- Disponibilidad: corrida oficial terminada durante 3600.409 s; 3588/3588
+  sondeos exitosos, uptime 100 % e IC95 % Wilson 99.8931--100 %; cumple el
+  objetivo de 99.5 %. Evidencia en
+  `availability/2026-09-04T14-02-34/uptime-summary.csv`.
 - Compra real: orden creada correctamente con HTTP 201 usando una dirección y
   un método de pago ficticios, ambos identificados con el ID 740. La respuesta
   está en `trace/checkout-success.json`.
