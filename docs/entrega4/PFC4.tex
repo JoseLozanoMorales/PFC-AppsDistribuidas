@@ -88,6 +88,51 @@ La memoria acumula E1 (propuesta y decisiones), E2 (modelo y distribución de da
 El corte de código publicado es \texttt{6cfe0e8}, identificado por su hash completo en los enlaces de evidencia. La carpeta local conserva modificaciones no integradas y no se considera idéntica a esa revisión. Los resultados presentados proceden de artefactos existentes: durante el cierre documental no se ejecutaron nuevas pruebas de carga ni se modificó producción. El cierre de esta memoria no equivale a declarar aprobados todos los pasos técnicos.
 
 El texto avanza desde el estado del arte y el diseño hasta la implementación; define después el estudio, presenta resultados separados de su discusión y examina amenazas, calidad y revisión cruzada. Las conclusiones responden las preguntas experimentales; las reflexiones individuales, ética y declaraciones explicitan la responsabilidad del equipo. La bibliografía sigue estilo IEEE con Biber. Los identificadores de evidencias permiten localizar el dato original y diferenciarlo de su interpretación.
+\subsection{Registro de cambios explícito frente a E1}
+La tabla \ref{tab:cambios-e1} responde al ítem 2.1 del Paso 2: qué cambió respecto de la propuesta de E1 (\emph{TiendaTech: Propuesta y Análisis del Sistema Distribuido}, 27 de mayo de 2026) y por qué. No se trata de una lista de novedades técnicas sueltas, sino de la evolución de cada uno de los ocho compromisos de E1 hasta el corte de código \texttt{6cfe0e8}. Dos ítems se marcan explícitamente como parciales o pendientes: no se declara cumplido lo que todavía no tiene evidencia cerrada.
+
+\begin{longtable}{p{3.1cm}p{5.6cm}p{6.3cm}}
+\caption{Registro de cambios frente a E1, ítems 2.1--2.8.}\label{tab:cambios-e1}\\
+\toprule \textbf{Ítem} & \textbf{En E1} & \textbf{Qué cambió en E4 y por qué}\\\midrule
+\endfirsthead
+\toprule \textbf{Ítem} & \textbf{En E1} & \textbf{Qué cambió en E4 y por qué}\\\midrule
+\endhead
+\bottomrule
+\endfoot
+
+2.1 Problema cuantificado &
+Cuantificación de mercado: facturación de e-commerce nacional (CECE, \textgreater 4\,000 M USD), hardware entre los tres sectores de mayor volumen. Motivación de negocio, no medida por el equipo. &
+La Introducción sustituye la cifra de mercado por la cuantificación del propio entorno experimental: 600\,000 pedidos y detalles, 10\,000 usuarios, 570\,000 filas tras filtrado, 24 condiciones $\times$ 5 repeticiones del ensayo de coordinación. Se abandona una cita externa no verificable por el equipo y se sostiene el problema con datos que el propio proyecto puede respaldar: ``la ausencia de esos datos no se reemplaza por cifras supuestas''.\\
+
+2.2 Justificación de arquitectura &
+ADR-01 (E1): microservicios justificados por separación de responsabilidades y ``reducir el impacto de fallos'', consecuencias enunciadas como expectativa. &
+``Despliegue y decisiones'' agrega la distinción explícita entre decisión y medición: ``no todas las consecuencias previstas en E1 se convirtieron en resultados medidos [...] demostrar que mejora latencia o disponibilidad requiere un experimento''. Cambio de una justificación cualitativa a una que declara qué de lo prometido en E1 sigue sin comprobarse.\\
+
+2.3 Estado del arte $\geq$15 fuentes &
+Matriz de 7 referencias (Cuadro 1 de E1), organizada en torno al problema de negocio (recomendación de catálogo, colisiones de compatibilidad, NLP/LLM). &
+Cuatro subsecciones nuevas (consistencia y datos distribuidos, procesamiento paralelo, microservicios y clientes, pruebas y CI/CD) que citan 15 fuentes con DOI. El estado del arte se reorienta de la motivación de negocio de E1 a la literatura que sostiene las decisiones técnicas realmente evaluadas en E2--E4 (CAP, relojes lógicos, Amdahl/Gustafson, CI/CD).\\
+
+2.4 Diagramas C4 &
+Figuras 1 (C4-L1) y 2 (C4-L2) insertadas como imagen, sin nivel de componentes (L3). &
+``Contexto y contenedores'' y ``Componentes y capas'' reconstruyen L1 y L2 y agregan L3, con TikZ embebido y versionado como código fuente en vez de imagen suelta. La reconstrucción es necesaria porque la arquitectura real cambió (seis servicios Java, armado-ia en Python, gateway), no una actualización estética.\\
+
+2.5 ADR &
+Tres ADR fundacionales: 01 (microservicios), 02 (API Gateway), 03 (motor de compatibilidad). &
+El corte referencia \texttt{docs/adr} con ADR-003 a ADR-012 (fragmentación temporal de pedidos, Raft, patrones de diseño, JWT, capas Python, recuperación de las tres decisiones de E1, fragmentación del catálogo) más dos registros móviles. De 3 decisiones fundacionales a un registro vivo de 12+ decisiones que cubre persistencia distribuida, seguridad y despliegue.\\
+
+2.6 Posición CAP por agregado (datos del Paso 8) &
+No existe tabla CAP; el ADR-01 solo menciona ``alta disponibilidad'' en abstracto, sin diferenciar por agregado. &
+La tabla \ref{tab:cap} (``Consistencia por agregado'') formula una política CAP distinta para inventario, pedido/pago, usuarios, catálogo y analítica, cada una con su límite de evidencia declarado. \textbf{Pendiente honesto:} sostener esta posición con los datos del Paso 8 requiere que \texttt{experiments/paso8} se reejecute con las correcciones de concurrencia ya integradas en \texttt{main} (commits \texttt{5905639} y \texttt{5cef707}); el \texttt{experimento\_crudo.csv} vigente sigue fechado antes de esas correcciones, así que este ítem no se cierra todavía con datos definitivos.\\
+
+2.7 Modelo de fallos de Cristian &
+No existe modelo de fallos ni de sincronización de reloj en E1. &
+``Modelo de fallos y orden'' cubre omisión, demora, caída de proceso y reintentos, y formaliza el \emph{orden} causal con relojes lógicos de Lamport (ecuación \ref{eq:lamport}). \textbf{Brecha real, no resuelta:} el ítem pide el algoritmo de Cristian (sincronización de reloj físico mediante intercambio de mensajes con un servidor de tiempo); el documento no lo menciona ni lo implementa. Lamport resuelve un problema relacionado pero distinto (orden lógico, no sincronización de reloj físico); no debe declararse cumplido este punto sin trabajo adicional.\\
+
+2.8 Métricas y plan de validación &
+Cuadro 2 de E1: 6 métricas ISO/IEC 25010 con umbral objetivo, sin plan de medición (sin repeticiones, descartes ni tratamiento estadístico). &
+``Diseño del estudio'' agrega 5 preguntas operativas, la tabla \ref{tab:protocolo} que compara explícitamente lo pedido por la guía frente a lo realmente ejecutado (declarando discrepancias, p.\,ej.\ retardo de 0,05\,s frente a 5\,s pedidos), variables con oráculo de invariantes y análisis estadístico con bootstrap, Wilson, Mann--Whitney y tamaño de efecto $\widehat A_{12}$. De un cuadro de métricas objetivo sin plan, a un protocolo ejecutado y confrontado honestamente contra lo prometido.\\
+
+\end{longtable}
 
 \seccion{Estado del arte}
 \subsection{Consistencia, orden y datos distribuidos}
@@ -244,12 +289,12 @@ La reserva TCP utiliza longitud de cuatro bytes en orden de red seguida por el J
 La disponibilidad de ambas rutas no demuestra que una sea más rápida. Los ficheros del experimento TCP/gRPC deben contener observaciones y no solo cabeceras antes de usar sus percentiles. El banco de coordinación es un experimento distinto y no completa esa comparación de transportes.
 
 \subsection{Acceso a datos y control de transacciones}
-El extracto \ref{lst:lab} procede del laboratorio, no del servicio productivo. Hace visible la serialización local que condiciona los resultados. Saga también conserva el mismo bloqueo global durante su recorrido; las diferencias incluyen cantidad de operaciones SQL y commits locales.
+El extracto \ref{lst:lab} procede del laboratorio, no del servicio productivo. Corrige una versión anterior de este documento, que describía un bloqueo compartido de Python (\texttt{threading.Lock}) serializando todas las compras del proceso, incluso las que no conflictuaban entre sí. Esa serialización artificial fue eliminada del corte vigente (commit \texttt{5905639}, ``corregir concurrencia tiempos y repeticiones''): el control de escritura recae únicamente en SQLite, mediante \texttt{BEGIN IMMEDIATE} (que reserva el archivo de base de datos para el conector que lo emite) y \texttt{PRAGMA busy\_timeout=30000} (que hace esperar a un conector en conflicto en vez de fallar de inmediato). La diferencia no es cosmética: el bloqueo de Python medía tiempos de un sistema efectivamente secuencial en todo el proceso, mientras que el bloqueo de SQLite permite que operaciones sobre productos distintos progresen en paralelo.
 
 \begin{minipage}{\linewidth}
-\begin{lstlisting}[language=Python,caption={Extracto de E-2PC local: bloqueo compartido y transacción SQLite.},label={lst:lab}]
+\begin{lstlisting}[language=Python,caption={Extracto de E-2PC local: control de escritura delegado en SQLite, sin bloqueo de Python.},label={lst:lab}]
 def two_phase_commit(self, tx, case, started):
-    with self.db_lock, closing(self.connect()) as db:
+    with closing(self.connect()) as db:
         db.execute("BEGIN IMMEDIATE")
         try:
             # Lineas omitidas: stock, votos e inyector.
@@ -260,7 +305,9 @@ def two_phase_commit(self, tx, case, started):
             raise
 \end{lstlisting}
 \end{minipage}
-Los puntos suspensivos identifican líneas omitidas; el código completo está en \evidencia{experiments/paso7/coordination_lab.py}{coordination\_lab.py}. No existen en este recorrido tres gestores transaccionales independientes ni recuperación durable del coordinador comparable a un protocolo 2PC distribuido.
+Saga no conserva un bloqueo global durante todo su recorrido, a diferencia de lo que afirmaba la versión previa de este texto. Reserva el stock dentro de una única transacción SQLite y la confirma de inmediato; solo después intenta capturar el pago. Si el pago falla, compensa mediante una secuencia de escrituras independientes en modo autocommit, no dentro de una segunda transacción atómica: esa asimetría es intencional en el patrón Saga, donde cada paso se confirma por separado y la recuperación ocurre por acciones compensatorias explícitas, no por el rollback de una transacción larga como en 2PC.
+
+Los puntos suspensivos identifican líneas omitidas; el código completo está en \evidencia{experiments/paso7/coordination_lab.py}{coordination\_lab.py}. La misma corrección añadió un invariante al oráculo, \texttt{stock\_cuadra\_con\_movimientos}, que compara el stock vigente contra el stock inicial más la suma de movimientos registrados; el oráculo anterior no ejecutaba esta comprobación de consistencia global. No existen en este recorrido tres gestores transaccionales independientes ni recuperación durable del coordinador comparable a un protocolo 2PC distribuido.
 
 \subsection{Procesamiento distribuido}
 El pipeline analítico calcula transformaciones equivalentes con Pandas y PySpark. La comparación conserva tarea, tamaño y resultado lógico. La lectura JDBC sin particiones limita el paralelismo de entrada; añadir ejecutores no garantiza aprovecharlos. Una variante particionada se conserva como ensayo diferente, con tres repeticiones, y no se mezcla con las cinco del escenario inicial.
