@@ -3,14 +3,14 @@
 > **Estado: secuencia ya ejecutada.** Por el historial de git (`git log`), la secuencia
 > de este documento ya corrió: PR #81 (rama `ci/demo-rojo-verde`, commit `f58869b`,
 > merge `d183382`) contiene el fallo intencional; PR #82 (misma rama reabierta,
-> commit `e494b1a`, merge `21db029`) contiene la reversión a verde.
+> commit `e494b1a`, merge `21db029`) revierte la aserción, y PR #83 contiene
+> la corrección final que devuelve el pipeline a verde.
 > - PR rojo: https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33554959074
-> - PR verde: https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557136678
+> - PR verde: https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557738789
 >
-> Esos son los links a los Pull Request, verificados desde `git log` + `git remote -v`
-> de este repo — no son un enlace a la ejecución de Actions en sí (ese ID numérico de
-> run no se puede derivar desde git local). Entrá a cada PR, pestaña de checks, y copiá
-> el link al run concreto de `ci-cd.yml` para reemplazar los dos placeholders de abajo.
+> Ambos enlaces apuntan a ejecuciones concretas de `CI-CD quality gate` disparadas
+> por `pull_request`, verificadas mediante la API de GitHub: la primera concluyó
+> `failure` sobre `f58869b` y la segunda `success` sobre `bd027f0`.
 >
 > **Efecto colateral encontrado y corregido:** el comando de PowerShell de reversión
 > (`Set-Content -Encoding utf8`) dejó un BOM UTF-8 al inicio de `PaginacionTest.java`,
@@ -84,7 +84,8 @@ Los demás jobs de la matriz (`inventario-service`, `productos-service`, etc.) y
 demás trabajos (`test-python`, `lint`, `integration-test`, `build`) no se ven afectados
 por este cambio: solo falla la celda `test-java (pedidos-service)`.
 
-**Enlace a la ejecución en rojo:** _pegar aquí el link al run de GitHub Actions_
+**Enlace a la ejecución en rojo:**
+https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33554959074
 
 ## Paso 2: corregir y volver a verde
 
@@ -103,7 +104,8 @@ git push
 El mismo PR debe volver a mostrar el job `test-java` en verde para todos los servicios
 de la matriz.
 
-**Enlace a la ejecución en verde:** _pegar aquí el link al run de GitHub Actions_
+**Enlace a la ejecución en verde:**
+https://github.com/JoseLozanoMorales/TiendaTech/actions/runs/33557738789
 
 Con ambos enlaces pegados, cerrar/mergear el PR (o descartar la rama `ci/demo-rojo-verde`
 si no se quiere mergear) y este punto del Paso 9 queda cerrado.
