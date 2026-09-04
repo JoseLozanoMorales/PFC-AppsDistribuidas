@@ -1,5 +1,5 @@
 {
-  "pass": true,
+  "pass": false,
   "checks": [
     {
       "check": "pago_exacto",
@@ -15,6 +15,11 @@
       "check": "stock_nunca_negativo",
       "pass": true,
       "violations": 0
+    },
+    {
+      "check": "stock_cuadra_con_movimientos",
+      "pass": false,
+      "violations": 1
     },
     {
       "check": "compensacion_completa",

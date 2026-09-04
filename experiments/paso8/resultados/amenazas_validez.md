@@ -5,6 +5,7 @@
 - El banco se ejecuta en una sola maquina y comparte CPU con el sistema operativo.
 - La ejecucion local usa `warmup_seconds=0.0` y `delay_seconds=0.05`. La configuracion de rubrica queda parametrizada, pero la evidencia local puede acelerar el retardo para caber en la ventana disponible.
 - SQLite modela los datos aislados de Inventario, Pagos y Ordenes; no sustituye una medicion de red real entre microservicios.
+- La corrida inicial de este directorio es anterior a la eliminación del candado global de Python y no sirve para concluir sobre inconsistencias. El piloto corregido de `experiments/paso7/evidence/` conserva únicamente los bloqueos transaccionales de SQLite y ya detecta una actualización perdida en Saga mediante el invariante `stock_cuadra_con_movimientos`.
 
 ## Externa
 
@@ -19,4 +20,5 @@
 ## De Conclusion
 
 - Se usan cinco repeticiones por condicion; los intervalos son informativos, pero siguen siendo sensibles al ruido local.
+- Cinco repeticiones no proporcionan potencia para superar el umbral Bonferroni de `0.05/12`: la corrida final debe usar 12 repeticiones por condición, como está parametrizado actualmente en `run_paso8.py`.
 - Mann-Whitney U y A12 comparan tendencia de latencias entre 2PC y Saga; no prueban causalidad fuera del banco definido.

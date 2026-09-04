@@ -228,7 +228,7 @@ def run(args: argparse.Namespace) -> int:
         report = oracle(lab.db_path)
         (args.output / f"oracle-{coord}.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     with (args.output / "pilot.csv").open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(all_rows[0]))
+        writer = csv.DictWriter(stream, fieldnames=list(all_rows[0]), lineterminator="\n")
         writer.writeheader(); writer.writerows(all_rows)
     transaction_bank = [asdict(case) | {"expected_without_fault": "CONFIRMED"}
                         for case in make_cases(120, args.seed, args.fault_probability)]

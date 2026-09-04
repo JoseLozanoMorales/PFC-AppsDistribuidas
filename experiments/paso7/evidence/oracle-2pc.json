@@ -17,6 +17,11 @@
       "violations": 0
     },
     {
+      "check": "stock_cuadra_con_movimientos",
+      "pass": true,
+      "violations": 0
+    },
+    {
       "check": "compensacion_completa",
       "pass": true,
       "violations": 0
