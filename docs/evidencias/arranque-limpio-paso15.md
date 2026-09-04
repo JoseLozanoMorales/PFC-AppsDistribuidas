@@ -151,16 +151,13 @@ hallazgos.
 
 ## Pendiente
 
-1. **El fix vive solo en el `docker-compose.yml` local, sin commitear.**
-   Está en el mismo archivo que las adiciones aún no terminadas del Paso 10
-   (servicio `tiendatech-jaeger` y sus `depends_on`), que el equipo decidió no
-   commitear todavía. Mientras no se resuelva esa mezcla, nadie más en el
-   equipo — ni el docente — puede reproducir este arranque limpio desde
-   `main`. Alternativas: (a) separar por líneas solo el cambio de
-   `--max-offset=5s` en un commit propio, dejando el resto de Paso 10 sin
-   commitear; o (b) esperar a cerrar Paso 10 y commitear ambos cambios juntos.
-   Decisión pendiente del equipo, no técnica.
-2. `tiendatech-productos`, `tiendatech-inventario` y `tiendatech-gateway` no
-   tienen bloque `healthcheck:` en `docker-compose.yml`, a diferencia de los
-   otros 6 servicios con lógica propia. No bloquea el arranque, pero deja a
-   Docker sin poder reportar su salud igual que al resto.
+1. ~~El fix vive solo en el `docker-compose.yml` local, sin commitear.~~ --
+   resuelto: el `--max-offset=5s` y el resto de las adiciones de Paso 10
+   (Jaeger, Grafana y sus `depends_on`) quedaron commiteados y pusheados a
+   `main` el 2026-09-04 (commit `b690470`, fusionado con el trabajo paralelo
+   de Jeremy). El arranque limpio ya es reproducible por cualquiera del
+   equipo desde `main`, no solo desde este árbol local.
+2. ~~`tiendatech-productos`, `tiendatech-inventario` y `tiendatech-gateway`
+   no tienen bloque `healthcheck:` en `docker-compose.yml`.~~ -- resuelto:
+   verificado el 2026-09-04 que los 8 microservicios (incluidos esos tres)
+   tienen `healthcheck:` en el `docker-compose.yml` vigente en `main`.

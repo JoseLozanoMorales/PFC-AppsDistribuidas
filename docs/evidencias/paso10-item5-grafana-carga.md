@@ -121,10 +121,27 @@ métricas crudas conservadas en esta misma carpeta.
 
 ## Pendiente
 
-1. **El servicio `tiendatech-grafana` y su provisioning viven sin commitear**
-   en el mismo `docker-compose.yml`/`.env.example` que las adiciones del
-   Paso 10 aún no cerradas (Jaeger) — misma decisión de equipo pendiente que
-   ya se documentó en `arranque-limpio-paso15.md`.
+1. ~~El servicio `tiendatech-grafana` y su provisioning viven sin commitear~~
+   -- resuelto: quedaron commiteados y pusheados a `main` el 2026-09-04
+   (commit `b690470`, junto con el resto de Paso 10 y el trabajo de Jeremy).
 2. El rate limiter por IP del Gateway es de un solo proceso (sin estado
    compartido entre réplicas). No bloquea el cierre del Paso 10, pero es
    relevante si el equipo llega a escalar el Gateway a más de una instancia.
+3. ~~La captura de este documento no es de la misma sesión de carga que la
+   traza distribuida del ítem 6~~ -- resuelto: se repitió la corrida el
+   2026-09-04 entre 14:09:00 y 14:10:03 (hora local), con
+   `tests/load/run-load-test.ps1` corriendo en paralelo a tres invocaciones
+   de `capturar-trace-agregar.ps1` (con `GATEWAY_RATE_LIMIT_REQUESTS` subido
+   temporalmente para esta corrida puntual; no reemplaza la prueba de
+   rate-limit ya documentada más arriba, que se mantiene con sus propios
+   resultados). El panel capturado con rango absoluto 14:09:00-14:12:00
+   (`dashboard-carga-conjunta.png`, esta misma carpeta) y las tres trazas
+   exportadas en la misma ventana
+   (`../paso10-item6-trace-distribuida/4-agregar-sesion-conjunta-con-carga.json`,
+   las tres con `tiendatech-inventario` presente) quedan, ahora sí, de la
+   misma sesión. Métricas crudas de esta corrida en `stats-conjunta.csv`.
+4. Esta misma corrida registró 6 fallos `503 Server Error` (4 en
+   `GET /api/categorias`, 2 en `GET /api/marcas`; ver `stats-conjunta.csv`),
+   distintos del rate-limit ya documentado -- con el límite elevado, esta
+   corrida tuvo 0 fallos `429`. No se investigó la causa de los `503`; queda
+   registrado como hallazgo nuevo, no bloquea el cierre de este punto.

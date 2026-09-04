@@ -137,3 +137,12 @@ que ya viajaba desde antes -- ambos coexisten sin pisarse.)
    estos dos archivos de instrumentación TCP (ítem 6) siguen sin commitear~~
    -- resuelto: todo quedó commiteado y pusheado a `main` (commit `b690470`,
    fusionado con el trabajo paralelo de Jeremy) el mismo 2026-09-04.
+3. ~~La traza de este documento no compartía sesión con el panel de Grafana
+   del ítem 5~~ -- resuelto el 2026-09-04: se agregó
+   `4-agregar-sesion-conjunta-con-carga.json` (carpeta
+   `paso10-item6-trace-distribuida/`), tres trazas nuevas de
+   `/api/carrito/{carritoId}/agregar`, las tres con `tiendatech-inventario`
+   presente, capturadas entre 14:09:00 y 14:12:00 mientras corría la prueba
+   de carga oficial en paralelo. El panel de la misma ventana queda en
+   `paso10-item5-grafana-carga/dashboard-carga-conjunta.png`. Detalle
+   completo en el punto 3 (ahora resuelto) de `paso10-item5-grafana-carga.md`.
