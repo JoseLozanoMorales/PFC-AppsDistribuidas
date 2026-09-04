@@ -350,6 +350,10 @@ services:
   # versionado en el repo, este contenedor solo lo hace visible con datos
   # reales durante una prueba de carga. No sustituye al perfil opcional
   # grafana-cloud (remote write a un stack externo); este es 100% local.
+  # tiendatech-grafana-renderer (imagen oficial grafana/grafana-image-renderer,
+  # aportada por Jeremy) automatiza la captura de pantalla del panel via
+  # GF_RENDERING_SERVER_URL/GF_RENDERING_CALLBACK_URL, en vez de exportar la
+  # captura a mano; no cambia el datasource ni el dashboard versionado.
   tiendatech-grafana:
     image: grafana/grafana:11.3.1
     container_name: tiendatech-grafana
@@ -359,6 +363,8 @@ services:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_RENDERING_SERVER_URL: http://tiendatech-grafana-renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://tiendatech-grafana:3000/
     volumes:
       - ./ops/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./ops/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
@@ -366,6 +372,8 @@ services:
     depends_on:
       tiendatech-prometheus:
         condition: service_healthy
+      tiendatech-grafana-renderer:
+        condition: service_started
     networks:
       - tiendatech-net
     healthcheck:
@@ -373,6 +381,12 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+
+  tiendatech-grafana-renderer:
+    image: grafana/grafana-image-renderer:3.12.9
+    container_name: tiendatech-grafana-renderer
+    networks:
+      - tiendatech-net
 
   # tiendatech-jaeger: colector y UI de trazado distribuido para el Paso 10.
   # jaegertracing/all-in-one (v1) quedo descontinuado por el proyecto Jaeger

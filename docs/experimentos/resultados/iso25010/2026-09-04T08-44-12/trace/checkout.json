@@ -1,0 +1,1 @@
+{"status":400,"data":{"timestamp":"2026-09-04T14:16:42.063957782Z","status":400,"error":"Bad Request","message":"La direccion 8 no pertenece al usuario 2 o está deshabilitada","path":"/api/ordenes/checkout"},"message":"Error","timestamp":"2026-09-04T14:16:42.065603034Z"}
