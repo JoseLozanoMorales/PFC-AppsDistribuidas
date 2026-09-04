@@ -1,0 +1,23 @@
+{
+  "fecha": "2026-09-04",
+  "commit_fuente": "d2624feac6452b64fed3ad133d0efdb4c6586a01",
+  "pdf_paginas": 54,
+  "referencias_compiladas": 23,
+  "trazabilidad_rangos": 27,
+  "campana_filas": 120,
+  "campana_condiciones": 24,
+  "totales_campana": {
+    "requests_total": 76022,
+    "requests_fail": 56353,
+    "checkout_total": 401,
+    "checkout_fail": 398,
+    "checkout_confirmadas": 3
+  },
+  "iso_filas": 6,
+  "latex_errores_referencias_indefinidas_o_desbordamientos": 0,
+  "piloto_verificado": true,
+  "ci_integracion_commit": "b3d69ba223bb9c1a8bce9f64a4a726d9d501a397",
+  "ci_estado": "success",
+  "quality_gate_estado": "success",
+  "publicacion_imagenes_estado": "in_progress"
+}

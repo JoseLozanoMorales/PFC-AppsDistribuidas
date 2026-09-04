@@ -39,3 +39,5 @@ Estado vigente al 4 de septiembre de 2026. Este registro diferencia el cierre ac
 7. Compilar desde un clon limpio del commit final, revisar todas las páginas y comprobar rutas, cifras, bibliografía y archivos requeridos.
 
 Cada afirmación final debe corresponder a un archivo versionado y a la misma unidad experimental. Implementación, ejecución y conclusión se registran por separado. El documentalista puede cerrar la integración y la reproducción del PDF; las firmas, la similitud institucional y cualquier repetición técnica adicional requieren la intervención indicada.
+
+La comprobación previa al commit final queda registrada en `cierre/verificacion-final-20260904.json`: 54 páginas, 23 referencias, 27 rangos históricos válidos, 120 filas de campaña y cero errores LaTeX, referencias indefinidas o desbordamientos. CI y quality gate del commit de integración finalizaron correctamente; la publicación de imágenes seguía en ejecución al cerrar ese registro.
