@@ -612,12 +612,12 @@ La tabla \ref{tab:iso} distingue evidencia favorable, parcial y ausente. No se d
 \begin{tabularx}{\textwidth}{lX}
 \toprule Característica & Evidencia y límite\\\midrule
 Adecuación funcional & Flujos y pruebas implementados; no aceptación completa de todos los recorridos.\\
-Eficiencia & Mediciones de laboratorio y Spark; sin p95 oficial de producción.\\
+Eficiencia & Carga oficial de 50 usuarios/60 s: P95 agregado 610 ms; no cumple el umbral de 500 ms. Una sola corrida no permite estimar un IC95 del P95.\\
 Compatibilidad & Contratos HTTP/gRPC; Pact y ensayo completo entre consumidores no acreditados.\\
 Capacidad de interacción & Interfaces web/Android; sin estudio formal de usuarios.\\
-Fiabilidad & Ensayo de caída y comprobaciones de salud; falta hora de disponibilidad.\\
+Fiabilidad & Ventana oficial de 3600 s: 3588/3588 sondeos, 100\,\% (IC95\,\% Wilson 99{,}8931--100\,\%); en carga, 0/2112 respuestas 5xx (límite superior 0{,}1816\,\%).\\
 Seguridad & JWT, restricciones de exposición y pruebas negativas; no auditoría integral.\\
-Mantenibilidad & Cobertura acotada y PMD menor que diez; persisten DTO y acoplamientos.\\
+Mantenibilidad & Cobertura instrumentada 82{,}31\,\% y PMD máximo 9; cumplimiento acotado porque varios módulos conservan filtros estrechos de JaCoCo.\\
 Flexibilidad & Contenedores y configuración; no ensayo multientorno exhaustivo.\\
 Seguridad operacional & Riesgos de stock/pago identificados; no análisis completo de daño operacional.\\\bottomrule
 \end{tabularx}
