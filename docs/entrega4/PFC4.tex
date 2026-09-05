@@ -21,7 +21,7 @@
 \setcounter{tocdepth}{2}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible,keepspaces=true,showstringspaces=false,captionpos=b}
 \newcommand{\repo}{https://github.com/JoseLozanoMorales/TiendaTech}
-\newcommand{\evidencia}[2]{\href{https://github.com/JoseLozanoMorales/TiendaTech/blob/6cfe0e8bac8d142b7986a4a3265721f404e84156/#1}{#2}}
+\newcommand{\evidencia}[2]{\href{https://github.com/JoseLozanoMorales/TiendaTech/blob/e6680b0290d2c6921ea47116c2df60bd7b055de0/#1}{#2}}
 \newcommand{\seccion}[1]{\section{#1}}
 \begin{document}
 \begin{titlepage}
@@ -70,7 +70,7 @@ Corte documental: 1 de septiembre de 2026\par
 \clearpage
 \section*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
-\textbf{Objective:} to consolidate TiendaTech's evolution and determine which distributed-system properties are supported by evidence. \textbf{Method:} repository review, CockroachDB and Spark measurements, and 120 runs through the API Gateway, microservices and CockroachDB, covering two strategies, four concurrency levels and three fault conditions. \textbf{Results:} the real matrix contains 76,022 requests and reached its target concurrency in all 24 conditions; 398 of 401 checkout attempts failed and only three were confirmed. This establishes real execution and saturation, but is insufficient for a robust 2PC versus Saga comparison or invariant claim. The SQLite laboratory is retained only as a local pilot. \textbf{Contribution:} a traceable report separating implementation, measurement and inference limits. One-hour availability and a rules-versus-RAG comparison are not established.
+\textbf{Objective:} to consolidate TiendaTech's evolution and determine which distributed-system properties are supported by evidence. \textbf{Method:} repository review, CockroachDB and Spark measurements, and 120 runs through the API Gateway, microservices and CockroachDB, covering two strategies, four concurrency levels and three fault conditions. \textbf{Results:} the real matrix contains 76,022 requests and reached its target concurrency in all 24 conditions; 398 of 401 checkout attempts failed and only three were confirmed. This establishes real execution and saturation, but is insufficient for a robust 2PC versus Saga comparison or invariant claim. The ISO assessment observed 3,588 successful probes out of 3,588 during one hour and a p95 of 610 ms with 50 users, above the 500 ms target. The SQLite laboratory is retained only as a local pilot. \textbf{Contribution:} a traceable report separating implementation, measurement and inference limits. A rules-versus-RAG comparison is not established.
 
 \textbf{Keywords:} distributed systems, coordination, CockroachDB, Spark, quality, reproducibility.
 \clearpage\pagenumbering{arabic}
@@ -85,11 +85,11 @@ El objetivo general es documentar y evaluar una implementación distribuida repr
 La memoria acumula E1 (propuesta y decisiones), E2 (modelo y distribución de datos), E3 (integración y análisis) y E4 (refactor, seguridad, pruebas y evaluación). El nombre anterior del repositorio fue \texttt{PFC-AppsDistribuidas}; la denominación adoptada es TiendaTech. Esta aclaración conserva la interpretación de rutas y mensajes históricos. Las tres capturas de búsqueda del nombre se conservan en \path{docs/nombre/} desde el commit \texttt{ea0b4eb} del 26 de agosto. El buscador general y GitHub muestran coincidencias; SourceForge muestra cero resultados con el filtro Windows activo. Se documenta la búsqueda realizada, sin inferir exclusividad de la denominación. Su inventario y alcance están enlazados desde el README.
 
 \subsection{Corte de evidencia y organización}
-El corte de código publicado es \texttt{6cfe0e8}, identificado por su hash completo en los enlaces de evidencia. La carpeta local conserva modificaciones no integradas y no se considera idéntica a esa revisión. Los resultados presentados proceden de artefactos existentes: durante el cierre documental no se ejecutaron nuevas pruebas de carga ni se modificó producción. El cierre de esta memoria no equivale a declarar aprobados todos los pasos técnicos.
+El corte documental integra las evidencias publicadas hasta el commit \texttt{e6680b0}, cuyo hash completo fijan los enlaces de evidencia. Incluye la campaña distribuida, la evaluación ISO, las pruebas de CI, el panel Grafana y las trazas incorporadas hasta el 4 de septiembre de 2026. Cada resultado conserva su procedencia y unidad experimental; el cierre de esta memoria no equivale a declarar aprobados los pasos técnicos que permanecen como deuda.
 
 El texto avanza desde el estado del arte y el diseño hasta la implementación; define después el estudio, presenta resultados separados de su discusión y examina amenazas, calidad y revisión cruzada. Las conclusiones responden las preguntas experimentales; las reflexiones individuales, ética y declaraciones explicitan la responsabilidad del equipo. La bibliografía sigue estilo IEEE con Biber. Los identificadores de evidencias permiten localizar el dato original y diferenciarlo de su interpretación.
 \subsection{Registro de cambios explícito frente a E1}
-La tabla \ref{tab:cambios-e1} responde al ítem 2.1 del Paso 2: qué cambió respecto de la propuesta de E1 (\emph{TiendaTech: Propuesta y Análisis del Sistema Distribuido}, 27 de mayo de 2026) y por qué. No se trata de una lista de novedades técnicas sueltas, sino de la evolución de cada uno de los ocho compromisos de E1 hasta el corte de código \texttt{6cfe0e8}. Dos ítems se marcan explícitamente como parciales o pendientes: no se declara cumplido lo que todavía no tiene evidencia cerrada.
+La tabla \ref{tab:cambios-e1} responde al ítem 2.1 del Paso 2: qué cambió respecto de la propuesta de E1 (\emph{TiendaTech: Propuesta y Análisis del Sistema Distribuido}, 27 de mayo de 2026) y por qué. No se trata de una lista de novedades técnicas sueltas, sino de la evolución de cada uno de los ocho compromisos de E1 hasta el corte documental integrado. Dos ítems se marcan explícitamente como parciales o pendientes: no se declara cumplido lo que todavía no tiene evidencia cerrada.
 
 \begin{longtable}{>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{5.5cm}>{\raggedright\arraybackslash}p{6.2cm}}
 \caption{Registro de cambios frente a E1, ítems 2.1--2.8.}\label{tab:cambios-e1}\\
