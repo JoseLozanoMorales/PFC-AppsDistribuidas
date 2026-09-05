@@ -4,20 +4,18 @@ El estado de las correcciones y los paquetes pendientes por recibir se detalla e
 [Cierre documental de las observaciones](CIERRE-DOCUMENTAL-OBSERVACIONES.md),
 actualizado el 4 de septiembre de 2026. `CIERRE-PASO13.md` conserva el corte histórico.
 
-La actualización remota inspeccionada en `dbe0d772fe36b9a4a836dc9101eeb0c6cb6c25d9`
-se incorpora mediante `actualizacion-evidencias.tex` (dependencia adicional).
-El piloto y su procedencia se conservan en `cierre/actualizacion-20260903/`.
-Esta adición no sustituye los resultados históricos ni incorpora código remoto al árbol local.
-
-La versión de cierre es `PFC4.tex` y su salida `PFC4.pdf`. El contenido de cierre se integró en los nombres originales. El informe usa evidencia del commit `6cfe0e8bac8d142b7986a4a3265721f404e84156`, consultado el 1 de septiembre de 2026; no supone que el árbol local coincida con él.
+La versión de cierre es `PFC4.tex` y su salida `PFC4.pdf`. El contenido de cierre se
+integró en los nombres originales. Las localizaciones de código y evidencia se
+revalidaron en `d7a00ccf6d8ac5def08ff52f7d2880f869667b0b`; las incorporaciones documentales
+posteriores se identifican en el registro de cambios del propio informe.
 
 La revisión documental de Observaciones 2 (2 de septiembre de 2026) incorpora
 `registro-cambios.tex` y `trazabilidad-temas.tex` mediante `\input`; ambos archivos
 deben acompañar a la fuente principal. La tabla de temas fija sus 27 localizaciones
-al commit evaluado `96a350b12377b537f979910324ba2fb6c6ee9ba2` y conserva el inventario
+al commit evaluado `d7a00ccf6d8ac5def08ff52f7d2880f869667b0b` y conserva el inventario
 en `cierre/trazabilidad-temas.csv`. La tabla de deuda distingue esfuerzo de
-resolución, coste de arrastre y evidencia pendiente. La fuente vigente compila en 54
-páginas; no sustituye datos experimentales ni estados de issues. Las consultas
+resolución, coste de arrastre y evidencia pendiente. La fuente vigente no sustituye
+datos experimentales ni estados de issues. Las consultas
 preparadas para ampliar la bibliografía están en `busquedas-2pc-saga.md` y no
 constituyen por sí mismas referencias. La ampliación del 3 de septiembre incorpora
 cinco fuentes sobre 2PC y Saga mediante `estado-arte-2pc-saga.tex`, que también debe
@@ -36,7 +34,7 @@ pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 pdflatex -interaction=nonstopmode -halt-on-error PFC4.tex
 ```
 
-No usar BibTeX para esta versión. La bibliografía es `../entrega3/referenciasPFC.bib`, compartida con las entregas anteriores; se conservaron las entradas históricas no sustituidas. Se requieren `UteqLogo.png`, las imágenes relativas en `img/` y las figuras de `cierre/`.
+No usar BibTeX para esta versión. La bibliografía es `../entrega3/referenciasPFC.bib`, compartida con las entregas anteriores; se conservaron las entradas históricas no sustituidas. Se requieren `UteqLogo.png`, las imágenes relativas en `img/`, las evidencias visuales de `../../release/screenshots/` y las figuras de `cierre/`.
 
 Alternativa con la imagen TeX Live ya disponible, desde la raíz del repositorio en PowerShell:
 
@@ -129,7 +127,7 @@ Las conclusiones individuales proceden de los textos anteriores y se actualizaro
 
 ## Estado de publicación
 
-El logo, las imágenes, `cierre/`, los datos crudos, el banco experimental, el
+El logo, las imágenes de `img/` y `release/screenshots/`, `cierre/`, los datos crudos, el banco experimental, el
 cuaderno y `CITATION.cff` forman el paquete que debe quedar rastreado por Git.
 Los archivos `PFC4v2.*` son respaldos locales y no son dependencias del documento
 oficial.
