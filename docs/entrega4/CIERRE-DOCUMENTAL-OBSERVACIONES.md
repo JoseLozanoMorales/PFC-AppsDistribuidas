@@ -12,7 +12,7 @@ Estado vigente al 4 de septiembre de 2026. Este registro diferencia el cierre ac
 | Preguntas de investigación | Cinco preguntas y respuestas actualizadas con la campaña desplegada; admiten resultados negativos e insuficiencia de evidencia. |
 | Amenazas | Cuatro categorías con mitigaciones y separación entre piloto SQLite y campaña desplegada. |
 | Bibliografía, C9 | Veinte fuentes académicas y tres normativas o éticas; cinco fuentes específicas de 2PC/Saga con metadatos en `cierre/bibliografia-2pc-saga.json`. |
-| Duplicados y deuda, C8 | Los issues 40, 46 y 48 enlazan a 41, 47 y 49. `tab:deuda` distingue estado, coste de arrastre y condición de cierre. |
+| Duplicados y deuda, C8 | Los issues 40, 46 y 48 fueron respondidos y cerrados como duplicados de 41, 47 y 49. `tab:deuda` conserva únicamente deuda técnica vigente. |
 | Residuo `commits.txt` | Eliminado y publicado en Git. |
 | Observabilidad | Panel bajo carga, trazas OpenTelemetry y propagación por TCP documentados en `docs/evidencias/paso10-*`. |
 | Calidad | Carga, disponibilidad de una hora, cobertura, complejidad y seguridad consolidadas en `docs/experimentos/resultados/iso25010.csv`. |
@@ -30,12 +30,11 @@ Estado vigente al 4 de septiembre de 2026. Este registro diferencia el cierre ac
 
 ## Pendientes reales del cierre documental
 
-1. Revisar y publicar en GitHub las respuestas preparadas para los issues 40, 46 y 48; después registrar los enlaces permanentes y actualizar el corte de incidencias.
-2. Obtener la lectura y aprobación de cada autor para sus conclusiones individuales y declaraciones de IA.
-3. Ejecutar la comprobación institucional de similitud; no declarar un porcentaje antes de recibirla.
-4. Verificar acceso al repositorio, comprobar el PDF exacto y cargarlo en el SGA conservando el comprobante.
+1. Obtener la lectura y aprobación de cada autor para sus conclusiones individuales y declaraciones de IA.
+2. Ejecutar la comprobación institucional de similitud; no declarar un porcentaje antes de recibirla.
+3. Verificar acceso al repositorio, comprobar el PDF exacto y cargarlo en el SGA conservando el comprobante.
 
-Los textos de incidencias están en `cierre/respuestas-issues-duplicados.md`. Los controles que dependen de integrantes o de sistemas externos están en `cierre/lista-cierre-externo.md`. La regeneración del PDF, la revisión de deuda, la trazabilidad vigente, la publicación de imágenes y la compilación final ya disponen de evidencia; no permanecen como tareas abiertas.
+Los enlaces permanentes de las respuestas a duplicados están en `cierre/respuestas-issues-duplicados.md`. Los controles que dependen de integrantes o de sistemas externos están en `cierre/lista-cierre-externo.md`. La revisión de deuda, la trazabilidad vigente y la publicación de imágenes ya disponen de evidencia; el PDF debe regenerarse una vez después de integrar las últimas revisiones personales.
 Cada afirmación final debe corresponder a un archivo versionado y a la misma unidad experimental. Implementación, ejecución y conclusión se registran por separado. El documentalista puede cerrar la integración y la reproducción del PDF; las firmas, la similitud institucional y cualquier repetición técnica adicional requieren la intervención indicada.
 
 La comprobación previa al commit final queda registrada en `cierre/verificacion-final-20260904.json`: 54 páginas, 23 referencias, 27 rangos históricos válidos, 120 filas de campaña y cero errores LaTeX, referencias indefinidas o desbordamientos. CI y quality gate del commit de integración finalizaron correctamente; la publicación de imágenes seguía en ejecución al cerrar ese registro.

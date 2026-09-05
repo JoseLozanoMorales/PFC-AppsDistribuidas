@@ -4,15 +4,15 @@ Estado al 4 de septiembre de 2026. Esta lista reúne comprobaciones que no puede
 
 | Control | Estado | Evidencia o acción de cierre |
 |---|---|---|
-| PDF regenerado desde la fuente final | Completo | `docs/entrega4/PFC4.pdf`; 54 páginas y 23 referencias según `verificacion-final-20260904.json`. |
-| Compilación desde un árbol limpio | Completo | Cero errores LaTeX, referencias indefinidas y desbordamientos en la verificación final. |
+| PDF regenerado desde la fuente final | Pendiente del último corte | La verificación anterior registró 54 páginas y 23 referencias; debe repetirse una sola vez después de integrar las últimas revisiones personales. |
+| Compilación desde un árbol limpio | Pendiente de repetir sobre el corte final | La comprobación anterior tuvo cero errores LaTeX, referencias indefinidas y desbordamientos. |
 | URL del repositorio en la carátula | Completo en fuente | `PFC4.tex` presenta la URL en una línea. Comprobar visualmente la copia exacta que se cargará al SGA. |
 | Repositorio accesible para evaluación | Requiere comprobación externa | Abrir la URL con la cuenta o mecanismo que utilizará el docente y confirmar permisos antes de cargar la entrega. |
 | Lectura de conclusiones individuales | Pendiente de cada autor | Cada integrante debe revisar que su conclusión represente su aporte y comunicar aprobación. Registrar fecha y medio de aprobación. |
 | Declaración individual de IA | Completa en el manuscrito; aprobación pendiente | La sección 15.2 identifica herramienta, propósito y secciones por integrante. Cada autor debe confirmar su entrada. |
 | Firmas o conformidad de autoría | Pendiente | Obtener la forma de conformidad exigida por el SGA o por el docente; no insertar firmas en nombre de terceros. |
 | Similitud institucional menor al 15 % | Pendiente externo | Ejecutar la herramienta institucional sobre el PDF definitivo y conservar el comprobante. No declarar porcentaje antes de recibirlo. |
-| Issues 40, 46 y 48 respondidos | Textos preparados; publicación pendiente | Revisar `respuestas-issues-duplicados.md`, publicar cada respuesta y guardar enlaces permanentes. |
+| Issues 40, 46 y 48 respondidos | Completo | Comentarios permanentes registrados en `respuestas-issues-duplicados.md`; los tres issues quedaron cerrados como duplicados el 4 de septiembre de 2026. |
 | Carga en el SGA | Pendiente externo | Cargar exactamente el PDF verificado y confirmar nombre, tamaño, fecha y estado de envío. |
 
 ## Registro de aprobaciones individuales

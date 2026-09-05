@@ -691,11 +691,11 @@ Las figuras \ref{fig:grafana-carga} y \ref{fig:jaeger-compra} hacen visible la e
 
 \seccion{Gestión de la revisión cruzada}
 \subsection{Criterio de respuesta}
-La tabla \ref{tab:issues} recoge las incidencias 16--78 recuperadas en el corte: 63 registros, de los cuales 50 figuran cerrados y 13 abiertos. Diez abiertos corresponden al trabajo pendiente identificado en el proyecto actual; otros tres, 40, 46 y 48, tienen títulos duplicados de 41, 47 y 49 y carecen de respuesta en el registro consultado. No se cierran automáticamente ni se ocultan en esta memoria.
+La tabla \ref{tab:issues} recoge las incidencias 16--78 recuperadas en el corte: 63 registros, de los cuales 53 figuran cerrados y 10 abiertos. Los issues 40, 46 y 48 fueron contrastados con 41, 47 y 49, recibieron una respuesta con evidencia y se cerraron administrativamente como duplicados el 4 de septiembre de 2026. Los diez abiertos restantes corresponden al trabajo pendiente identificado en el proyecto actual.
 
 AC significa aceptar y corregir según la respuesta publicada; AD significa aceptar y diferir en este cierre documental; R significa rebatir con justificación. El estado de GitHub y la acción documental son columnas distintas. Las respuestas enlazadas contienen la justificación y, cuando existen, referencias a commits. Un cierre administrativo no constituye por sí solo prueba de ejecución ni invalida los límites de las secciones de calidad y método.
 
-Los abiertos con corrección parcial o pendiente se incorporan como deuda explícita; AD no significa que se haya publicado una nueva respuesta o alterado el proyecto. El registro de tres duplicados se conserva para evitar contar dos veces una misma corrección y para permitir una consolidación administrativa posterior.
+Los abiertos con corrección parcial o pendiente se incorporan como deuda explícita; AD no significa que se haya alterado el proyecto. El registro de los tres duplicados se conserva para evitar contar dos veces una misma corrección, aunque su consolidación administrativa ya quedó realizada.
 
 
 {\small\begin{longtable}{p{0.6cm}p{6.8cm}p{1.7cm}p{1.1cm}p{2.8cm}}
@@ -726,15 +726,15 @@ Los abiertos con corrección parcial o pendiente se incorporan como deuda explí
 37 & Configurar timeouts explícitos en InventarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/37#issuecomment-5499542065}{Respuesta 37} \\
 38 & Implementar el patrón outbox al generar una factura & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/38#issuecomment-5499545660}{Respuesta 38} \\
 39 & Guardar la factura y el evento outbox dentro de la misma transacción de base de datos & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/39#issuecomment-5499547112}{Respuesta 39} \\
-40 & Crear el proceso que reintente eventos pendientes y marque un evento como procesado solo después de la confirmación de inventario & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/41}{Véase 41} \\
+40 & Crear el proceso que reintente eventos pendientes y marque un evento como procesado solo después de la confirmación de inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/40\#issuecomment-5548128749}{Respuesta 40} \\
 41 & Crear el proceso que reintente eventos pendientes y marque un evento como procesado solo después de la confirmación de inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/41#issuecomment-5499549164}{Respuesta 41} \\
 42 & Añadir Circuit Breaker y reintentos seguros alrededor de la comunicación con inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/42#issuecomment-5499562481}{Respuesta 42} \\
 43 & Coordinar con José la idempotencia del descuento de existencias & Abierto & AD & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/43#issuecomment-5499955308}{Respuesta 43} \\
 44 & Reemplazar Map String,Integer  por GenerarFacturaRequest y aplicar @Valid. & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/44#issuecomment-5499551129}{Respuesta 44} \\
 45 & Crear DTO de salida para facturas y dejar de exponer directamente la entidad JPA & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/45#issuecomment-5499553220}{Respuesta 45} \\
-46 & Incorporar validación JWT en ordenes-proveedores-service. y añadir healthcheck & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/47}{Véase 47} \\
+46 & Incorporar validación JWT en ordenes-proveedores-service. y añadir healthcheck & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/46\#issuecomment-5548128977}{Respuesta 46} \\
 47 & Incorporar validación JWT en ordenes-proveedores-service y añadir healthcheck & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/47#issuecomment-5499564428}{Respuesta 47} \\
-48 & Configurar timeouts explícitos en InventarioClient & Abierto & Dup. & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/49}{Véase 49} \\
+48 & Configurar timeouts explícitos en InventarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/48\#issuecomment-5548129164}{Respuesta 48} \\
 49 & Configurar timeouts explícitos en InventarioClient & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/49#issuecomment-5499565384}{Respuesta 49} \\
 50 & Añadir Circuit Breaker y reintentos seguros para la comunicación con inventario & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/50#issuecomment-5499566316}{Respuesta 50} \\
 51 & Crear OrdenCompraResponseDTO y ProveedorResponseDTO & Cerrado & AC & \href{https://github.com/JoseLozanoMorales/TiendaTech/issues/51#issuecomment-5499567221}{Respuesta 51} \\
@@ -769,7 +769,7 @@ Los abiertos con corrección parcial o pendiente se incorporan como deuda explí
 \subsection{Justificación y coste de la deuda}
 La idempotencia del receptor no garantiza que ventas y proveedores propaguen una misma clave en cada reintento. Por eso el issue 43 permanece abierto aunque 69 y 70 estén cerrados. Las reservas gRPC tampoco implementan el canal de alertas solicitado por 53 y 73--75. Estos alcances distintos justifican no colapsar observaciones relacionadas como si fueran equivalentes.
 
-La tabla \ref{tab:deuda} cubre los trece abiertos del registro \path{cierre/issues-corte.json} y los pendientes de Observaciones 2. Se separan esfuerzo de resolución y coste de arrastre: el primero estima trabajo para cerrar; el segundo describe el perjuicio mientras se posterga. No hay mediciones para monetizar ese perjuicio ni convertirlo en horas semanales. Los rangos son orientativos documentales, salvo las 8--12 h de UDP, declaradas en la respuesta al issue 78. No son horas ejecutadas ni compromisos aceptados por integrantes. Las áreas indicadas son responsables funcionales propuestos; la asignación personal corresponde al equipo.
+La tabla \ref{tab:deuda} cubre los diez abiertos del registro \path{cierre/issues-corte.json} y los pendientes de Observaciones 2. Se separan esfuerzo de resolución y coste de arrastre: el primero estima trabajo para cerrar; el segundo describe el perjuicio mientras se posterga. No hay mediciones para monetizar ese perjuicio ni convertirlo en horas semanales. Los rangos son orientativos documentales, salvo las 8--12 h de UDP, declaradas en la respuesta al issue 78. No son horas ejecutadas ni compromisos aceptados por integrantes. Las áreas indicadas son responsables funcionales propuestos; la asignación personal corresponde al equipo.
 
 {\footnotesize\setlength{\tabcolsep}{4pt}
 \begin{longtable}{>{\raggedright\arraybackslash}p{1.7cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}p{4.8cm}>{\raggedright\arraybackslash}p{4.3cm}}
@@ -781,7 +781,6 @@ La tabla \ref{tab:deuda} cubre los trece abiertos del registro \path{cierre/issu
 64, 76 & DTO de entrada y salida aún parciales. 8--12 h para el grupo. & Validación dispersa, contratos ambiguos y más retrabajo al modificar clientes o servicios. & Backend y pruebas: sustituir mapas/JSON crudo por DTO validados y probar entradas inválidas.\\
 77 & Rutas heredadas de productos. 3--5 h. & Documentación divergente y riesgo de romper consumidores al retirar rutas sin migración. & Backend y documentación: inventario de rutas, decisión de compatibilidad y OpenAPI concordante.\\
 78 & Telemetría UDP diferida por no ser prioritaria. 8--12 h, según respuesta publicada. & Se mantiene ausente ese canal; no se ha demostrado perjuicio operacional adicional con la instrumentación HTTP actual. Reactivarlo requiere revisar contrato, red, pérdida de datagramas y operación. & Arquitectura/operaciones: la decisión y su coste quedan documentados aquí. El cierre administrativo sigue pendiente; no se afirma implementación UDP.\\
-40, 46, 48 & Tres duplicados aparentes sin respuesta. Revisión administrativa por estimar. & Deuda no gestionada: ambigüedad de alcance, revisiones repetidas y observaciones sin trazabilidad de resolución. & Responsables de issues: contrastar con 41, 47 y 49 y responder cada caso con evidencia; no se cierran automáticamente.\\
 C2, C3, C6 & Medición distribuida ejecutada: 120 corridas reales, 24 condiciones y cinco repeticiones. Análisis interpretativo pendiente por baja cantidad de compras confirmadas. & La campaña usa participantes reales y CockroachDB, pero la saturación (3 confirmaciones de 401 intentos de checkout) impide comparar estrategias con potencia suficiente. & Evidencia en \path{experiments/paso8/resultados-reales/oficial-v4-20260904/}; repetir con carga inicial menor y escalado progresivo antes de afirmar invariantes o superioridad.\\
 \bottomrule\end{longtable}}
 

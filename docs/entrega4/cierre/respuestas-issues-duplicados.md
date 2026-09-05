@@ -1,6 +1,6 @@
 # Respuestas preparadas para incidencias duplicadas
 
-Estado al 4 de septiembre de 2026. Estos textos están listos para revisión y publicación manual. Su presencia en el repositorio no equivale a haber respondido en GitHub; después de publicarlos se debe registrar el enlace permanente del comentario y actualizar `issues-corte.json`.
+Estado al 4 de septiembre de 2026. Los tres textos fueron publicados en GitHub y los issues se cerraron administrativamente como duplicados. Los límites técnicos indicados siguen vigentes donde corresponda.
 
 ## Issue 40
 
@@ -13,7 +13,9 @@ La observación coincide con el alcance del issue 41. Se implementó `Inventario
 - Implementación: https://github.com/JoseLozanoMorales/TiendaTech/commit/2fc3dd1
 - Respuesta documentada: https://github.com/JoseLozanoMorales/TiendaTech/issues/41#issuecomment-5499549164
 
-Se propone cerrar este issue como duplicado del 41. La idempotencia de extremo a extremo permanece registrada por separado como deuda técnica y no se considera resuelta por este cierre administrativo.
+Publicado y cerrado como duplicado del 41: https://github.com/JoseLozanoMorales/TiendaTech/issues/40#issuecomment-5548128749
+
+La idempotencia de extremo a extremo permanece registrada por separado como deuda técnica y no se considera resuelta por este cierre administrativo.
 
 ## Issue 46
 
@@ -26,7 +28,9 @@ La observación coincide con el alcance del issue 47. `ordenes-proveedores-servi
 - Implementación: https://github.com/JoseLozanoMorales/TiendaTech/commit/bb486ff
 - Respuesta documentada: https://github.com/JoseLozanoMorales/TiendaTech/issues/47#issuecomment-5499564428
 
-Se propone cerrar este issue como duplicado del 47. La respuesta se limita a JWT y salud del servicio y no acredita seguridad integral del sistema.
+Publicado y cerrado como duplicado del 47: https://github.com/JoseLozanoMorales/TiendaTech/issues/46#issuecomment-5548128977
+
+La respuesta se limita a JWT y salud del servicio y no acredita seguridad integral del sistema.
 
 ## Issue 48
 
@@ -39,12 +43,13 @@ La observación coincide con el alcance del issue 49. El `InventarioClient` de `
 - Implementación: https://github.com/JoseLozanoMorales/TiendaTech/commit/27c3c70
 - Respuesta documentada: https://github.com/JoseLozanoMorales/TiendaTech/issues/49#issuecomment-5499565384
 
-Se propone cerrar este issue como duplicado del 49. Los timeouts no sustituyen las políticas de reintento seguro, circuit breaker o idempotencia, que se gestionan en incidencias distintas.
+Publicado y cerrado como duplicado del 49: https://github.com/JoseLozanoMorales/TiendaTech/issues/48#issuecomment-5548129164
 
-## Comprobación posterior a la publicación
+Los timeouts no sustituyen las políticas de reintento seguro, circuit breaker o idempotencia, que se gestionan en incidencias distintas.
 
-- Confirmar que cada issue contiene su respuesta.
-- Guardar el enlace permanente de cada comentario.
-- Cerrar 40, 46 y 48 como duplicados si la persona responsable dispone de permisos.
-- Actualizar `cierre/issues-corte.json` y la tabla de revisión cruzada del manuscrito.
-- Mantener en deuda únicamente los límites técnicos que no quedan resueltos por los issues principales.
+## Comprobación posterior a la publicación — completada
+
+- Cada issue contiene su respuesta y enlace permanente.
+- Los issues 40, 46 y 48 están cerrados como duplicados.
+- `cierre/issues-corte.json` y la tabla de revisión cruzada reflejan el estado actualizado.
+- La deuda conserva únicamente los límites técnicos no resueltos por los issues principales.
