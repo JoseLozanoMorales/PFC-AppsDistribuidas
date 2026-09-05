@@ -30,11 +30,11 @@ Estado vigente al 4 de septiembre de 2026. Este registro diferencia el cierre ac
 
 ## Pendientes reales del cierre documental
 
-1. Obtener la lectura y aprobación de cada autor para sus conclusiones individuales y declaraciones de IA.
+1. Obtener la lectura y aprobación de los autores restantes para sus conclusiones individuales y declaraciones de IA; Andy actualizó ambas entradas en los commits `8b0093d` y `161bf2c`.
 2. Ejecutar la comprobación institucional de similitud; no declarar un porcentaje antes de recibirla.
 3. Verificar acceso al repositorio, comprobar el PDF exacto y cargarlo en el SGA conservando el comprobante.
 
 Los enlaces permanentes de las respuestas a duplicados están en `cierre/respuestas-issues-duplicados.md`. Los controles que dependen de integrantes o de sistemas externos están en `cierre/lista-cierre-externo.md`. La revisión de deuda, la trazabilidad vigente y la publicación de imágenes ya disponen de evidencia; el PDF debe regenerarse una vez después de integrar las últimas revisiones personales.
 Cada afirmación final debe corresponder a un archivo versionado y a la misma unidad experimental. Implementación, ejecución y conclusión se registran por separado. El documentalista puede cerrar la integración y la reproducción del PDF; las firmas, la similitud institucional y cualquier repetición técnica adicional requieren la intervención indicada.
 
-La comprobación previa al commit final queda registrada en `cierre/verificacion-final-20260904.json`: 54 páginas, 23 referencias, 27 rangos históricos válidos, 120 filas de campaña y cero errores LaTeX, referencias indefinidas o desbordamientos. CI y quality gate del commit de integración finalizaron correctamente; la publicación de imágenes seguía en ejecución al cerrar ese registro.
+La comprobación final queda registrada en `cierre/verificacion-final-20260904.json`: 55 páginas, 23 referencias, 27 rangos históricos válidos, 120 filas de campaña y cero errores LaTeX, referencias indefinidas o desbordamientos. El PDF tiene SHA-256 `5FE9676C9773964809B1EFBC6288C8FC522F2B5AB85BEB6135F3704FD76F19C9`.
