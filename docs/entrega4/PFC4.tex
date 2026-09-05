@@ -54,7 +54,7 @@ Período académico 2026\par
 Corte documental: 1 de septiembre de 2026\par
 \vspace{0.4cm}
 {\large\textbf{FECHA PERMITIDO DE ÚLTIMO COMMIT:}\par}
-{\large Martes 1 de septiembre del 2026 hasta Hora: 18h00\par}
+{\large Viernes 4 de septiembre del 2026 hasta Hora: 20h00\par}
 \url{https://github.com/JoseLozanoMorales/TiendaTech}\par
 \end{titlepage}
 \pagenumbering{roman}
@@ -319,20 +319,43 @@ El pipeline analítico calcula transformaciones equivalentes con Pandas y PySpar
 La fragmentación de CockroachDB organiza rangos del motor; la partición JDBC determina cómo Spark solicita datos en paralelo. Los tiempos incluyen planificación, comunicación y materialización. Para reproducir se deben conservar consulta, recursos, número de ejecutores y criterio de finalización.
 
 \subsection{Interfaces y capas}
-Las figuras \ref{fig:web} y \ref{fig:movil} conservan evidencia visual de E4. No son pruebas de aceptación nuevas ni mediciones de disponibilidad. La SPA permite consultar catálogo y armado; el panel administrativo organiza usuarios, productos y operaciones comerciales. Android ofrece otro punto de entrada a los servicios.
+Las figuras \ref{fig:web-publica}, \ref{fig:web-admin-uno} y \ref{fig:web-admin-dos} documentan rutas públicas y administrativas de la SPA. Las figuras \ref{fig:movil-flujo} y \ref{fig:movil-catalogo} muestran el recorrido Android y la capacidad de cámara. Estas capturas acreditan presencia y presentación de las funciones observadas; no sustituyen pruebas de aceptación ni demuestran disponibilidad.
 
 \begin{figure}[H]\centering
-\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{img/catalogo_web.jpeg}\caption{Catálogo.}\end{subfigure}\hfill
-\begin{subfigure}{0.48\textwidth}\includegraphics[width=\linewidth]{img/armado_ia_web.jpeg}\caption{Armado asistido.}\end{subfigure}
-\caption{Interfaces web conservadas de la entrega anterior.}\label{fig:web}
-\end{figure}
-\begin{figure}[H]\centering
-\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{img/interfaz_movil_1.jpeg}\caption{Vista inicial.}\end{subfigure}\hspace{1cm}
-\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{img/interfaz_movil_2.jpeg}\caption{Navegación.}\end{subfigure}
-\caption{Interfaces Android conservadas como evidencia de implementación.}\label{fig:movil}
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/principal_web.jpeg}\caption{Página principal.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/catalogo_web.jpeg}\caption{Catálogo.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/armado_ia_web.jpeg}\caption{Armado asistido.}\end{subfigure}
+\caption{Rutas públicas de la aplicación web TiendaTech. Evidencia propia del equipo.}\label{fig:web-publica}
 \end{figure}
 
-La separación de capas permite probar reglas sin desplegar la interfaz ni el motor de datos. Sin embargo, excluir adaptadores del informe de cobertura cambia el denominador y debe declararse. Persisten observaciones sobre DTO y reutilización de lógica de órdenes; el refactor no ha eliminado todo acoplamiento.
+\begin{figure}[H]\centering
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/admin_resumen_web.jpeg}\caption{Resumen administrativo.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/usuarios_admin_web.jpeg}\caption{Usuarios.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/productos_admin_web.jpeg}\caption{Productos.}\end{subfigure}
+\caption{Gestión administrativa de resumen, usuarios y productos. Evidencia propia del equipo.}\label{fig:web-admin-uno}
+\end{figure}
+
+\begin{figure}[H]\centering
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/proveedores_admin_web.jpeg}\caption{Proveedores.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/ordenes_proveedores_admin_web.jpeg}\caption{Órdenes a proveedores.}\end{subfigure}\hfill
+\begin{subfigure}{0.31\textwidth}\includegraphics[width=\linewidth]{../../release/screenshots/facturacion_admin_web.jpeg}\caption{Facturación.}\end{subfigure}
+\caption{Gestión administrativa de proveedores, órdenes y facturación. Evidencia propia del equipo.}\label{fig:web-admin-dos}
+\end{figure}
+
+\begin{figure}[H]\centering
+\begin{subfigure}{0.22\textwidth}\includegraphics[width=\linewidth,height=6.4cm,keepaspectratio]{../../release/screenshots/interfaz_movil_1.jpeg}\caption{Inicio de sesión.}\end{subfigure}\hfill
+\begin{subfigure}{0.22\textwidth}\includegraphics[width=\linewidth,height=6.4cm,keepaspectratio]{../../release/screenshots/interfaz_movil_2.jpeg}\caption{Escaneo de código.}\end{subfigure}\hfill
+\begin{subfigure}{0.22\textwidth}\includegraphics[width=\linewidth,height=6.4cm,keepaspectratio]{../../release/screenshots/interfaz_movil_3.jpeg}\caption{Detalle resuelto.}\end{subfigure}
+\caption{Autenticación y cámara en la aplicación Android. Evidencia propia del equipo.}\label{fig:movil-flujo}
+\end{figure}
+
+\begin{figure}[H]\centering
+\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{../../release/screenshots/interfaz_movil_4.jpeg}\caption{Catálogo y búsqueda.}\end{subfigure}\hspace{1cm}
+\begin{subfigure}{0.27\textwidth}\includegraphics[width=\linewidth,height=7cm,keepaspectratio]{../../release/screenshots/interfaz_movil_5.jpeg}\caption{Navegación del catálogo.}\end{subfigure}
+\caption{Consulta del catálogo desde la aplicación Android. Evidencia propia del equipo.}\label{fig:movil-catalogo}
+\end{figure}
+
+La cámara se observa en la figura \ref{fig:movil-flujo}; la segunda capacidad, las notificaciones nativas, se sustenta con su implementación y prueba instrumentada, sin exponer datos personales en una captura. La separación de capas permite probar reglas sin desplegar la interfaz ni el motor de datos. Persisten observaciones sobre DTO y reutilización de lógica de órdenes; el refactor no ha eliminado todo acoplamiento.
 
 \subsection{Instrumentación}
 El extracto \ref{lst:medicion} identifica las unidades medidas. La memoria no es el consumo residente del contenedor, y los segundos de CPU no son un porcentaje.
@@ -652,6 +675,19 @@ La prueba de carga previa registró 1911 solicitudes y 862 fallos. El diagnósti
 El repositorio contiene métricas Prometheus, logs JSON, recolección Alloy y configuración de Grafana. La actualización del 4 de septiembre aporta evidencia operativa puntual: se agregó un Grafana local (\texttt{docker-compose.yml}) cuyo datasource y dashboard se cargan por provisioning como código (\texttt{ops/observability/grafana/provisioning/}), no por importación manual, y se capturó con datos reales de la repetición de carga anterior (\href{https://github.com/JoseLozanoMorales/TiendaTech/blob/b690470163513c757dd51cb8d47677d09955fda8/docs/evidencias/paso10-item5-grafana-carga.md}{captura del panel}). Se aportan además trazas OpenTelemetry separadas de checkout y de incorporación al carrito, con un identificador por operación, incluyendo el canal TCP crudo entre \texttt{pedidos-service} e \texttt{inventario-service}, que por transportar JSON sobre un \texttt{Socket} plano en vez de HTTP quedaba fuera del alcance de la auto-instrumentación y no aparecía en ninguna traza; se instrumentó manualmente con spans \texttt{reservation.tcp.reconcile} y propagación del \texttt{traceparent} dentro del propio mensaje (\href{https://github.com/JoseLozanoMorales/TiendaTech/blob/b690470163513c757dd51cb8d47677d09955fda8/docs/evidencias/paso10-item6-trace-distribuida.md}{traza distribuida completa}). La disponibilidad de una hora y la tasa de errores 5xx de la corrida oficial ya se midieron (100\,\% de disponibilidad sobre 3600\,s continuos frente al objetivo de 99,5\,\%, y 0\,\% de respuestas 5xx sobre 2112 solicitudes): ambas cumplen. Permanece sin medir el p95 productivo bajo múltiples orígenes de carga simultáneos; tampoco se infiere cobertura E2E o de la SPA a partir de pruebas unitarias Java.
 
 La sesión posterior del 4 de septiembre conserva una repetición estable en \href{https://github.com/JoseLozanoMorales/TiendaTech/blob/b690470163513c757dd51cb8d47677d09955fda8/docs/experimentos/resultados/iso25010/2026-09-04T08-44-12/ejecucion.md}{el registro de ejecución ISO}: 2112 solicitudes, cero fallos, 36,45 solicitudes/s y p95 agregado de 610 ms, contrastados con el CSV de \texttt{load-final/}. Esta repetición sigue a un intento inicial del mismo escenario oficial, ejecutado por otro integrante del equipo, que había fallado con 1469 de 1621 solicitudes por la combinación de ese mismo límite de tasa del Gateway y una consulta correlacionada de galería de productos que agotaba el presupuesto de memoria de CockroachDB bajo carga; se corrigió sustituyendo esa subconsulta ordenada por una agregación \texttt{MIN(galeria\_id)} en \texttt{JdbcProductoRepository.java} y ajustando el límite operativo del Gateway para el escenario oficial. Ambos intentos son consistentes entre sí -- el primero agota el límite del Gateway sin proponérselo, el segundo opera dentro de él tras el ajuste -- y el registro declara un límite de solicitudes ajustado para esa carga. Es una sesión diferente de la anterior con respuestas 429 descrita más arriba: no deben mezclarse sus resultados. El p95 no alcanza el objetivo menor a 500 ms; cero fallos observados no garantiza fiabilidad general. La disponibilidad de una hora, iniciada durante esa misma sesión (\texttt{availability/2026-09-04T14-02-34/}), concluyó después de 3600\,s continuos con 3588 de 3588 muestras exitosas: 100\,\% de disponibilidad frente al objetivo de 99,5\,\%, por lo que cumple. Esta actualización aporta evidencia puntual y no sustituye una campaña repetida ni la comparación distribuida de protocolos.
+
+
+Las figuras \ref{fig:grafana-carga} y \ref{fig:jaeger-compra} hacen visible la evidencia operativa descrita: la primera corresponde al panel capturado durante la carga conjunta y la segunda a las trazas exportadas en esa sesión. Son fotografías de una ejecución fechada; las métricas crudas y los JSON exportados siguen siendo la fuente auditable.
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.95\textwidth]{../../release/screenshots/grafana-carga-conjunta.png}
+\caption{Dashboard Grafana con datos reales durante la sesión conjunta de carga. Fuente: evidencia propia del Paso 10.}\label{fig:grafana-carga}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.95\textwidth]{../../release/screenshots/jaeger-traza-compra.png}
+\caption{Trazas distribuidas exportadas durante la sesión conjunta; incluyen el recorrido instrumentado y el canal TCP. Fuente: evidencia propia del Paso 10.}\label{fig:jaeger-compra}
+\end{figure}
 
 \seccion{Gestión de la revisión cruzada}
 \subsection{Criterio de respuesta}
